@@ -61,3 +61,5 @@ volatilité, stress test, marge d'erreur, robustesse.
 ## Historique
 - 2026-07-05 — EXTRAITE — Gemini, preuve retrouvée sur la page PDF.
 - 2026-07-05 — NORMALISÉE — le point de pourcentage a été conservé comme exemple, pas comme seuil.
+- 2026-07-06 — NORMALISÉE — figures 6-18 et 6-19, pages imprimées 114–115 ; effet de la
+  volatilité sur la valeur contrôlé visuellement selon la moneyness.

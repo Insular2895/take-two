@@ -64,3 +64,5 @@ delta, hedge, rebalancement, gamma.
 - 2026-07-05 — NORMALISÉE — revue visuelle des figures 6-6 à 6-9, pages imprimées 104 et 107.
 - 2026-07-06 — NORMALISÉE — figures 6-10 et 6-11, page imprimée 108 ; dépendance du gamma à
   l'IV et du delta au temps confirmée qualitativement.
+- 2026-07-06 — NORMALISÉE — figures 6-12 à 6-14, pages imprimées 109–110 ; dépendance du delta
+  au temps et à l'IV confirmée pour calls et puts.
