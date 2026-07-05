@@ -27,3 +27,5 @@ connaissance propre à l'édition 2021 ne doit lui être attribuée.
 - 2026-07-05 — fiche créée — source locale inventoriée, extraction non lancée.
 - 2026-07-05 — recherche intégrale terminée — 60 blocs, 43 candidates avec preuve vérifiée,
   106 formulations `to_review`; résultats attribués uniquement à l'édition 2001.
+- 2026-07-05 — revue manuelle ciblée — `R-VALUATION-001` et contribution à
+  `R-DECISION-001` normalisées.

@@ -45,3 +45,4 @@ Règles au format officiel exclusivement.
 ## Journal de traitement
 - 2026-07-05 — recherche terminée — 44 blocs, 16 candidates avec preuve vérifiée,
   51 formulations `to_review`; contenu limité aux garde-fous de processus.
+- 2026-07-05 — revue manuelle ciblée — `R-PSY-001` normalisée comme garde-fou de traçabilité.

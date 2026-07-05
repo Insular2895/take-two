@@ -28,3 +28,4 @@ une copie réparée.
 - 2026-07-05 — fiche créée — source locale inventoriée, extraction non lancée.
 - 2026-07-05 — copie réparée et recherche ciblée terminées — 34 blocs, 20 candidates avec preuve
   vérifiée, 77 formulations `to_review`; heuristiques conservées comme checklists.
+- 2026-07-05 — revue manuelle ciblée — test de thèse fusionné dans `R-DECISION-001`.

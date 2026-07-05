@@ -27,3 +27,4 @@ d'options, de Greek ou de volatilité implicite absent de la source.
 - 2026-07-05 — fiche créée — source locale inventoriée, extraction non lancée.
 - 2026-07-05 — recherche ciblée terminée — 13 blocs, 8 candidates avec preuve vérifiée,
   29 formulations `to_review`; aucune transposition directe vers les options.
+- 2026-07-05 — revue manuelle ciblée — apport fusionné dans `R-DECISION-001`.
