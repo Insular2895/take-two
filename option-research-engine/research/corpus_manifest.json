@@ -14,7 +14,7 @@
       "source_type": "book",
       "edition": "5th",
       "extraction": "ready_text",
-      "status": "pilot_pending"
+      "status": "pilot_passed_manual_review_required"
     },
     {
       "book_id": "B-NATENBERG-1994",
@@ -27,7 +27,7 @@
       "source_type": "book",
       "edition": "to_review",
       "extraction": "needs_ocr",
-      "status": "pilot_pending"
+      "status": "pilot_passed_citation_guard_required"
     },
     {
       "book_id": "B-PASSARELLI-2012",
@@ -38,7 +38,7 @@
       "source_type": "book",
       "edition": "to_review",
       "extraction": "needs_ocr",
-      "status": "pilot_pending"
+      "status": "pilot_passed_no_rules_in_intro"
     },
     {
       "book_id": "B-DOUGLAS-2000",
