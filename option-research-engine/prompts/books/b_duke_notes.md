@@ -8,8 +8,11 @@ resulting, exprimer les probabilités et rechercher les informations contradicto
 de marché. Niveau de confiance maximal : 2. Ne présente jamais la note comme une citation validée
 du livre d'Annie Duke.
 
-Utilise les marqueurs `# Page N`. La preuve exacte comporte 8 à 20 mots. Sans règle complète :
+Utilise les marqueurs `# Page N`. La preuve exacte comporte 8 à 15 mots. Sans règle complète :
 `AUCUNE_REGLE_EXPLOITABLE`.
+
+Maximum 5 règles par bloc source. Priorise les garde-fous observables et ignore les reformulations.
+N'entoure pas la réponse d'un bloc de code Markdown.
 
 ```markdown
 # R-DECISION-TEMP-NN — Titre actif
@@ -40,7 +43,7 @@ Section visible dans les notes.
 ## Page
 `PDF_PAGE: N` ou `PDF_PAGES: N-M`.
 ## Preuve source
-Phrase exacte de 8 à 20 mots.
+Séquence exacte de 8 à 15 mots, sans guillemets, correction ou paraphrase.
 ## Niveau de confiance
 1 ou 2 uniquement ; source secondaire.
 ## Modules concernés

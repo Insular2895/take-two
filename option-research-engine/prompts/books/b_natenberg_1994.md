@@ -44,6 +44,9 @@ AUCUNE_REGLE_EXPLOITABLE
 
 Sinon, produis des blocs `R-<CAT>-TEMP-NN`, où `<CAT>` vaut `OPTIONS`, `VOL` ou `GREEKS`.
 
+Maximum 5 règles par bloc source. Priorise les seuils chiffrés, relations de Greeks, conditions de
+volatilité et exceptions. N'entoure pas la réponse d'une clôture Markdown.
+
 ```markdown
 # R-<CAT>-TEMP-NN — Titre court et actif
 
@@ -88,7 +91,7 @@ Numéro et titre visibles dans le bloc.
 `PDF_PAGE: N` ou `PDF_PAGES: N-M`, issu des marqueurs immédiatement précédant les passages.
 
 ## Preuve source
-Une phrase OCR exacte de 8 à 20 mots provenant de la page revendiquée, sans la corriger.
+Une séquence OCR exacte de 8 à 15 mots copiée sans guillemets, sans correction et sans paraphrase.
 
 ## Niveau de confiance
 1 à 5 pour la fidélité documentaire, avec mention explicite de toute incertitude OCR.

@@ -13,6 +13,9 @@ revendiquée. Aucun seuil, symbole ou coefficient ne peut être corrigé ou inve
 
 Sans règle complète, réponds `AUCUNE_REGLE_EXPLOITABLE`.
 
+Maximum 5 règles par bloc source. Priorise les formules complètes, critères de rejet et contrôles
+quantitatifs. N'entoure pas la réponse d'un bloc de code Markdown.
+
 ```markdown
 # R-PROBA-TEMP-NN — Titre actif
 ## Titre
@@ -42,7 +45,7 @@ Numéro et titre visibles.
 ## Page
 `PDF_PAGE: N` ou `PDF_PAGES: N-M`.
 ## Preuve source
-Phrase exacte de 8 à 20 mots.
+Séquence exacte de 8 à 15 mots, sans guillemets, correction ou paraphrase.
 ## Niveau de confiance
 1 à 5 pour la fidélité documentaire ; validation quantitative encore requise.
 ## Modules concernés

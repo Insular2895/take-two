@@ -40,6 +40,9 @@ AUCUNE_REGLE_EXPLOITABLE
 
 Sinon, produis des blocs `R-GREEKS-TEMP-NN` ou `R-OPTIONS-TEMP-NN`.
 
+Maximum 5 règles par bloc source. Priorise les relations entre Greeks, seuils, variables de bascule
+et décisions de gestion. N'entoure pas la réponse d'une clôture Markdown.
+
 ```markdown
 # R-<CAT>-TEMP-NN — Titre court et actif
 
@@ -84,7 +87,7 @@ Numéro et titre visibles dans le bloc.
 `PDF_PAGE: N` ou `PDF_PAGES: N-M`, issu des marqueurs immédiatement précédant les passages.
 
 ## Preuve source
-Une phrase OCR exacte de 8 à 20 mots provenant de la page revendiquée, sans la corriger.
+Une séquence OCR exacte de 8 à 15 mots copiée sans guillemets, sans correction et sans paraphrase.
 
 ## Niveau de confiance
 1 à 5 pour la fidélité documentaire, avec mention de toute incertitude OCR.

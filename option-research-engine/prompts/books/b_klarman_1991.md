@@ -7,8 +7,11 @@ Ces règles servent à filtrer un sous-jacent ou à interdire une décision insu
 N'invente aucun multiple, seuil, Greek ou critère d'options. Une opinion non transformable en
 question, condition, calcul ou garde-fou est ignorée.
 
-Utilise les marqueurs `# Page N`. La preuve source exacte comporte 8 à 20 mots et doit appartenir à
+Utilise les marqueurs `# Page N`. La preuve source exacte comporte 8 à 15 mots et doit appartenir à
 la page revendiquée. Sans règle complète : `AUCUNE_REGLE_EXPLOITABLE`.
+
+Maximum 5 règles par bloc source. Priorise les garde-fous précis et mécanismes de risque. N'entoure
+pas la réponse d'un bloc de code Markdown.
 
 ```markdown
 # R-RISK-TEMP-NN — Titre actif
@@ -39,7 +42,7 @@ Numéro et titre visibles.
 ## Page
 `PDF_PAGE: N` ou `PDF_PAGES: N-M`.
 ## Preuve source
-Phrase exacte de 8 à 20 mots.
+Séquence exacte de 8 à 15 mots, sans guillemets, correction ou paraphrase.
 ## Niveau de confiance
 1 à 5 pour la fidélité documentaire ; aucune validation de marché actuelle.
 ## Modules concernés

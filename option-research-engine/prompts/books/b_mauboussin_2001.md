@@ -7,8 +7,11 @@ Cibles : attentes implicites, reverse DCF, value drivers, scénarios, seuils de 
 catalyseurs. Chaque étape devient une règle chaînable. N'attribue rien à l'édition révisée 2021 et
 n'invente aucun horizon d'option.
 
-Utilise les marqueurs `# Page N`. La preuve source exacte comporte 8 à 20 mots et doit appartenir à
+Utilise les marqueurs `# Page N`. La preuve source exacte comporte 8 à 15 mots et doit appartenir à
 la page revendiquée. Sans règle complète : `AUCUNE_REGLE_EXPLOITABLE`.
+
+Maximum 5 règles par bloc source. Priorise les étapes de méthode, variables et déclencheurs.
+N'entoure pas la réponse d'un bloc de code Markdown.
 
 ```markdown
 # R-VALUATION-TEMP-NN — Titre actif
@@ -39,7 +42,7 @@ Numéro et titre visibles.
 ## Page
 `PDF_PAGE: N` ou `PDF_PAGES: N-M`.
 ## Preuve source
-Phrase exacte de 8 à 20 mots.
+Séquence exacte de 8 à 15 mots, sans guillemets, correction ou paraphrase.
 ## Niveau de confiance
 1 à 5 pour la fidélité documentaire ; validation quantitative encore requise.
 ## Modules concernés

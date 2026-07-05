@@ -13,6 +13,9 @@ complète jamais le texte avec tes connaissances.
 
 Sans règle complète, réponds exactement `AUCUNE_REGLE_EXPLOITABLE`.
 
+Maximum 5 règles par bloc source. Priorise les garde-fous observables et ignore les reformulations
+du même principe. N'entoure pas la réponse d'un bloc de code Markdown.
+
 Chaque règle suit exactement ce format :
 
 ```markdown
@@ -44,7 +47,7 @@ Numéro et titre visibles.
 ## Page
 `PDF_PAGE: N` ou `PDF_PAGES: N-M`.
 ## Preuve source
-Phrase exacte de 8 à 20 mots.
+Séquence exacte de 8 à 15 mots, sans guillemets, correction ou paraphrase.
 ## Niveau de confiance
 1 à 3 pour la fidélité documentaire ; aucune validation quantitative.
 ## Modules concernés
