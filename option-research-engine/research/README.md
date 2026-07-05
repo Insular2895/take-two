@@ -12,6 +12,7 @@ algorithmes éprouvés, éviter de réinventer des composants standards, compare
 
 ## Contenu
 - `benchmarks/` — un fichier par repository étudié (voir son README).
+- `documentary/` — résultats de la phase de lecture des livres, candidats et conflits ouverts.
 - Fiches d'étude complètes de repos : utiliser `templates/fiche_repository.md`.
 
 ## Format attendu

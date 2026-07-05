@@ -48,4 +48,5 @@ Markdown par chapitre, marqueurs `[p. N]`.
 Règles au format `rules/FORMAT_REGLE.md` exclusivement. Aucun résumé.
 
 ## Journal de traitement
-- (vide — livre non encore traité)
+- 2026-07-05 — OCR intégral et recherche ciblée terminés — 53 blocs, 59 candidates avec preuve
+  vérifiée, 18 formulations `to_review`; tableaux/formules à contrôler visuellement.

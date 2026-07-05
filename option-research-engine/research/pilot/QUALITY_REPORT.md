@@ -133,3 +133,30 @@ Correction :
 Le pipeline peut passer au traitement intégral des sources approuvées. Les sorties restent de la
 recherche documentaire. Elles ne sont ni des recommandations de trading, ni des règles actives, ni
 une autorisation de créer ou lancer un script IBKR.
+
+## Résultat après extension au corpus
+
+L'extension a été exécutée le 2026-07-05 avec des chunks de 2 500 tokens et
+`gemini-3.1-flash-lite` pour éviter la dérive observée sur les gros blocs.
+
+- 319 blocs documentaires traités ;
+- 131 blocs dont toutes les preuves courtes sont retrouvées sur les pages citées ;
+- 158 blocs `needs_review` ;
+- 30 blocs sans règle exploitable ;
+- 0 échec final après reprise ;
+- 216 règles candidates dans les blocs vérifiés ;
+- 365 formulations supplémentaires conservées en revue.
+
+Usage total du journal local, pilote et itérations inclus :
+
+- 368 requêtes Gemini ;
+- 339 réussies et 29 échouées avant reprise ;
+- 1 477 208 tokens d'entrée ;
+- 380 342 tokens de sortie.
+
+La revue manuelle a confirmé que le contrôle de preuve ne suffit pas à garantir la fidélité de
+`Condition` et `Action`. Plusieurs sorties transforment une observation ou un exemple en
+prescription générale. Aucune règle n'a donc été promue automatiquement dans `rules/`.
+
+La synthèse, les limites et les conflits ouverts sont versionnés dans
+`research/documentary/`.

@@ -26,3 +26,5 @@ une copie réparée.
 
 ## Journal de traitement
 - 2026-07-05 — fiche créée — source locale inventoriée, extraction non lancée.
+- 2026-07-05 — copie réparée et recherche ciblée terminées — 34 blocs, 20 candidates avec preuve
+  vérifiée, 77 formulations `to_review`; heuristiques conservées comme checklists.

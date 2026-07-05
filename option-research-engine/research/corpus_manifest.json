@@ -14,7 +14,7 @@
       "source_type": "book",
       "edition": "5th",
       "extraction": "ready_text",
-      "status": "pilot_passed_manual_review_required"
+      "status": "research_complete_to_review"
     },
     {
       "book_id": "B-NATENBERG-1994",
@@ -26,8 +26,8 @@
       "pages": 475,
       "source_type": "book",
       "edition": "to_review",
-      "extraction": "needs_ocr",
-      "status": "pilot_passed_citation_guard_required"
+      "extraction": "ocr_complete",
+      "status": "research_complete_to_review"
     },
     {
       "book_id": "B-PASSARELLI-2012",
@@ -37,8 +37,8 @@
       "pages": 357,
       "source_type": "book",
       "edition": "to_review",
-      "extraction": "needs_ocr",
-      "status": "pilot_passed_no_rules_in_intro"
+      "extraction": "ocr_complete",
+      "status": "research_complete_to_review"
     },
     {
       "book_id": "B-DOUGLAS-2000",
@@ -49,7 +49,7 @@
       "source_type": "book",
       "edition": "to_review",
       "extraction": "ready_text",
-      "status": "queued"
+      "status": "research_complete_to_review"
     },
     {
       "book_id": "B-GRINOLD-KAHN-1999",
@@ -60,7 +60,7 @@
       "source_type": "book",
       "edition": "2nd",
       "extraction": "ready_text_with_pdf_warnings",
-      "status": "queued"
+      "status": "research_complete_to_review"
     },
     {
       "book_id": "B-KLARMAN-1991",
@@ -71,7 +71,7 @@
       "source_type": "book",
       "edition": "original",
       "extraction": "ready_text",
-      "status": "queued"
+      "status": "research_complete_to_review"
     },
     {
       "book_id": "B-MAUBOUSSIN-RAPPAPORT-2001",
@@ -82,7 +82,7 @@
       "source_type": "book",
       "edition": "2001_original_not_2021_revision",
       "extraction": "ready_text_with_pdf_warnings",
-      "status": "queued"
+      "status": "research_complete_to_review"
     },
     {
       "book_id": "B-LYNCH-2000",
@@ -92,8 +92,8 @@
       "pages": 316,
       "source_type": "book",
       "edition": "millennium",
-      "extraction": "needs_repair_then_text",
-      "status": "queued"
+      "extraction": "repaired_copy_text_complete",
+      "status": "research_complete_to_review"
     },
     {
       "book_id": "B-DUKE-NOTES",
@@ -104,7 +104,7 @@
       "source_type": "secondary_notes",
       "edition": "incomplete_notes_not_book",
       "extraction": "ready_text",
-      "status": "queued_low_confidence"
+      "status": "research_complete_secondary_notes_to_review"
     }
   ]
 }

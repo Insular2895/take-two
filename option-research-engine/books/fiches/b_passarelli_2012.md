@@ -45,4 +45,5 @@ Markdown par chapitre, marqueurs `[p. N]`.
 Règles au format officiel exclusivement.
 
 ## Journal de traitement
-- (vide)
+- 2026-07-05 — OCR intégral et recherche ciblée terminés — 31 blocs, 20 candidates avec preuve
+  vérifiée, 14 formulations `to_review`; aucune règle activée.

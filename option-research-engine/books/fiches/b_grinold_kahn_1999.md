@@ -25,3 +25,5 @@ elle améliore le scoring, la calibration, le budget de risque ou la validation 
 
 ## Journal de traitement
 - 2026-07-05 — fiche créée — source locale inventoriée, extraction non lancée.
+- 2026-07-05 — recherche ciblée terminée — 50 blocs, 28 candidates avec preuve vérifiée,
+  30 formulations `to_review`; priorité à risque, IR, valorisation et coûts.

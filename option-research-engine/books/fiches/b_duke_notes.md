@@ -23,3 +23,5 @@ peut être validée depuis cette source seule.
 
 ## Journal de traitement
 - 2026-07-05 — fiche créée — source secondaire inventoriée, extraction non lancée.
+- 2026-07-05 — recherche terminée — 2 blocs, 7 formulations `to_review`, aucune candidate
+  documentaire validable depuis ces notes seules.
