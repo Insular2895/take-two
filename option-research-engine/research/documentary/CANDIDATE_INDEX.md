@@ -75,3 +75,7 @@ explicite.
 - `R-VALUATION-001` — attentes implicites du sous-jacent ;
 - `R-DECISION-001` — thèse falsifiable et analyse contradictoire ;
 - `R-PSY-001` — traçabilité des dérogations au plan.
+
+## Revues visuelles en cours
+
+- `visual_reviews/B-NATENBERG-1994.md` — figures et tableaux de Natenberg contrôlés page par page.
