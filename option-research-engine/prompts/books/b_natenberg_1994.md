@@ -27,6 +27,9 @@ l'analyse d'options sur actions.
 - Tout nombre, tableau, formule ou symbole ambigu impose `to_review` dans le niveau de confiance.
 - N'invente jamais une cellule manquante d'un tableau.
 - Une relation qualitative ne devient pas un seuil numérique.
+- N'ajoute aucun risque, exception ou mécanisme venant de tes connaissances.
+- Un comportement descriptif de trader n'est conservé que s'il devient une alerte, une
+  interdiction ou une condition de sélection testable.
 
 ## Sortie
 
@@ -60,7 +63,8 @@ Action d'analyse, de sélection, d'alerte ou d'interdiction.
 Mécanisme décrit dans le bloc.
 
 ## Risques
-Limites, hypothèses et risques d'application.
+Uniquement les limites, hypothèses et risques explicitement présents. Sinon :
+`Aucun risque explicite dans ce bloc`.
 
 ## Exceptions
 Cas explicites. Sinon : `Aucune connue dans ce bloc`.

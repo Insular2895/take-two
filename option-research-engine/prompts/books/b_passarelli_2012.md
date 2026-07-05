@@ -24,6 +24,9 @@ actuel. Tu ne transformes pas une illustration pédagogique en seuil universel.
 - Conserve les unités et conventions de signe.
 - Tout symbole, décimale, formule ou tableau ambigu doit être marqué `to_review`.
 - Ne crée pas de croisement avec IV Rank si le bloc ne fournit pas cette variable.
+- N'ajoute aucun risque, exception ou mécanisme venant de tes connaissances.
+- Un comportement descriptif n'est conservé que s'il devient une alerte, une interdiction ou une
+  condition de sélection testable.
 
 ## Sortie
 
@@ -57,7 +60,8 @@ Action d'analyse, de sélection, de surveillance, de vente, de rolling ou d'aler
 Mécanisme décrit par Passarelli.
 
 ## Risques
-Limites et risques d'interprétation.
+Uniquement les limites et risques explicitement présents. Sinon :
+`Aucun risque explicite dans ce bloc`.
 
 ## Exceptions
 Cas explicites. Sinon : `Aucune connue dans ce bloc`.

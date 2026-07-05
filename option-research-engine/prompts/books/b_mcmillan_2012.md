@@ -28,6 +28,11 @@ Ignore la vente nue d'options, sauf comparaison explicitement utile à une struc
   `AUCUNE_REGLE_EXPLOITABLE`.
 - Ne transforme pas un exemple en règle générale si l'auteur ne généralise pas le mécanisme.
 - Recopie les nombres avec leur unité. Au moindre doute OCR, marque la règle `to_review`.
+- N'ajoute aucun risque, exception ou justification générique venant de tes connaissances.
+- Un comportement d'arbitreur, de courtier ou de chambre de compensation n'est pas une action du
+  futur moteur. Conserve-le seulement s'il déclenche une alerte ou une interdiction testable.
+- Toute procédure de marché susceptible d'avoir changé depuis l'édition est marquée
+  `to_review_current_rule` dans `## Niveau de confiance`.
 
 ## Sortie
 
@@ -62,7 +67,8 @@ Action déterministe ou alerte. Aucune recommandation de marché actuelle.
 Mécanisme décrit par McMillan.
 
 ## Risques
-Limites et conséquences défavorables mentionnées ou directement nécessaires à l'application.
+Uniquement les limites et conséquences explicitement présentes. Sinon :
+`Aucun risque explicite dans ce bloc`.
 
 ## Exceptions
 Cas d'inapplication explicitement soutenus. Sinon : `Aucune connue dans ce bloc`.
