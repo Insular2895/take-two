@@ -78,4 +78,6 @@ Tous les éléments sont `conflict_open` ou `to_review`.
   comparaison avec IBKR.
 - Traitement : stocker explicitement convention, unité, horizon et fournisseur ; normaliser vers une
   convention interne unique avec tests.
-- Statut : `conflict_open`.
+- Résolution documentaire : la figure 6-26 établit les signes économiques des positions longues et
+  courtes ; la figure 6-25 doit être interprétée comme présentation de magnitudes/taux.
+- Statut : `resolved_documentary`; convention IBKR encore à vérifier.

@@ -416,12 +416,117 @@ explicitée.
   chaque Greek.
 - Renforce `R-GREEKS-001`, `R-GREEKS-002`, `R-GREEKS-003` et le besoin d'une surface d'IV.
 
+## Page imprimée 124 — Figures 6-26 et 6-27
+
+Date de revue : 2026-07-06.
+
+### Conventions de signe vérifiées
+
+| Position | Delta | Gamma | Theta | Vega |
+|---|---|---|---|---|
+| Long sous-jacent | positif | 0 | 0 | 0 |
+| Short sous-jacent | négatif | 0 | 0 | 0 |
+| Long call | positif | positif | négatif | positif |
+| Short call | négatif | négatif | positif | négatif |
+| Long put | négatif | positif | négatif | positif |
+| Short put | positif | négatif | positif | négatif |
+
+La figure 6-26 confirme que la figure 6-25 présentait certaines grandeurs comme magnitudes ou taux
+de décroissance, et non comme expositions signées prêtes à agréger.
+
+### Interprétation économique vérifiée
+
+- Delta positif : bénéficie d'une hausse du sous-jacent ; delta négatif : d'une baisse.
+- Gamma positif : bénéficie d'un mouvement rapide dans l'une ou l'autre direction.
+- Gamma négatif : préfère un mouvement lent.
+- Theta positif : le passage du temps augmente généralement la valeur de la position.
+- Theta négatif : le passage du temps diminue généralement sa valeur.
+- Vega positif : bénéficie d'une hausse de volatilité ; vega négatif : d'une baisse.
+- Rho positif : bénéficie d'une hausse des taux ; rho négatif : d'une baisse.
+
+Ces formulations décrivent des sensibilités locales, toutes choses égales par ailleurs. Elles ne
+garantissent pas le résultat total d'une position.
+
+### Élasticité
+
+La page donne la formule :
+
+`élasticité = (prix du sous-jacent / valeur théorique de l'option) × delta décimal`
+
+Exemple vérifié :
+
+`(50 / 2.50) × 0.25 = 5`
+
+L'élasticité mesure ici le levier relatif : une variation de `2 %` du sous-jacent correspond à une
+variation approximative de `10 %` de l'option dans l'exemple local.
+
+### Limite
+
+L'élasticité devient instable lorsque la valeur de l'option est très faible et reste une approximation
+locale fondée sur le delta courant.
+
+## Page imprimée 125 — Figure 6-28
+
+Date de revue : 2026-07-06.
+
+### Contenu vérifié
+
+- Tableau individuel de calls et puts aux strikes `90`, `95`, `100`, `105`, `110`.
+- Prix, valeur théorique, delta, gamma, theta et vega par option.
+- Six positions combinant options et contrats futures.
+- Calculs séparés de theoretical edge, delta, gamma, theta et vega de chaque position.
+
+### Exemple d'agrégation clairement lisible
+
+Position :
+
+- long `20` calls strike `100` ;
+- short `10` contrats futures.
+
+Résultats affichés :
+
+- theoretical edge : `+1.20` ;
+- delta : `+20` ;
+- gamma : `+98.0` ;
+- theta : `-0.520` ;
+- vega : `+3.20`.
+
+Le contrat futures contribue au delta, mais pas au gamma, theta ou vega dans ce tableau.
+
+### Observation documentaire
+
+- Une position presque delta-neutre peut conserver de fortes expositions gamma, theta et vega.
+- Une position ne peut donc pas être qualifiée par son seul delta.
+- Theoretical edge et risques sont additifs lorsqu'unités, quantités et conventions sont cohérentes.
+- Les positions complexes peuvent présenter des signes différents pour chaque dimension de risque.
+
+### Limite
+
+Les multiplicateurs et unités exactes doivent être normalisés avant reproduction. Les autres lignes
+du tableau restent des points de contrôle visuel, pas des configurations recommandées.
+
+## Page imprimée 126 — Conclusion du chapitre 6
+
+Date de revue : 2026-07-06.
+
+### Contenu vérifié
+
+- Exemple d'élasticité : `(50 / 2.50) × 0.25 = 5`.
+- Valeur théorique et Greeks changent continuellement avec le marché.
+- Les Greeks permettent d'identifier les risques ; ils ne les éliminent pas.
+- Leur rôle est d'aider à décider quels risques sont acceptables avant la transaction.
+
+### Impact projet
+
+- Le futur moteur devra distinguer mesure du risque, limite acceptée et décision.
+- Une exposition calculée ne doit jamais être présentée comme une couverture parfaite.
+- La validation utilisateur du budget de risque reste nécessaire avant activation.
+
 ## Prochaine page attendue
 
-Pages imprimées 123–124 :
+Pages imprimées 175–176 :
 
-- exemples de calcul des sensibilités agrégées de la page 123 ;
-- `Figure 6-26` et `Figure 6-27` sur les signes des Greeks et les mouvements favorables.
+- figures 9-2 et 9-3 ;
+- composition exacte des trois spreads et tableau de leurs sensibilités.
 
-Objectif : vérifier les formules d'agrégation et les conventions de signe avant leur traduction en
-contrat de données.
+Objectif : commencer la comparaison edge/risque des structures multi-jambes.

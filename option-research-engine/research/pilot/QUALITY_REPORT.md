@@ -158,7 +158,7 @@ La revue manuelle a confirmé que le contrôle de preuve ne suffit pas à garant
 `Condition` et `Action`. Plusieurs sorties transforment une observation ou un exemple en
 prescription générale. Aucune règle n'a donc été promue automatiquement dans `rules/`.
 
-Une passe manuelle ultérieure a normalisé neuf règles après lecture de leur contexte complet. Le
+Une passe manuelle ultérieure a normalisé dix règles après lecture de leur contexte complet. Le
 statut est `NORMALISÉE`, jamais `VALIDÉE` ou `ACTIVE`.
 
 La synthèse, les limites et les conflits ouverts sont versionnés dans
