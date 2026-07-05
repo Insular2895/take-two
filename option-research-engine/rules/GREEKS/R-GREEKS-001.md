@@ -62,3 +62,5 @@ greeks, agrégation, risque marginal, portefeuille.
 ## Historique
 - 2026-07-05 — EXTRAITE — Gemini, preuve retrouvée sur la page PDF.
 - 2026-07-05 — NORMALISÉE — contexte relu manuellement ; validation quantitative absente.
+- 2026-07-06 — NORMALISÉE — figures 6-20 à 6-23, pages imprimées 116–119 ; dimensions vega,
+  rho, maturité et type de sous-jacent contrôlées visuellement.

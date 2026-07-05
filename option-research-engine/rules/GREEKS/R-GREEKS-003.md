@@ -67,3 +67,5 @@ gamma, theta, delta hedge, volatilité réalisée, coûts.
   la volatilité différemment selon la moneyness.
 - 2026-07-06 — NORMALISÉE — figures 6-15 à 6-17, pages imprimées 112–113 ; accélération du
   theta ATM et comportement distinct des options non-ATM confirmés visuellement.
+- 2026-07-06 — NORMALISÉE — figures 6-20 et 6-21, pages imprimées 116–117 ; dépendance du vega
+  au temps, à l'IV et à la moneyness contrôlée visuellement.

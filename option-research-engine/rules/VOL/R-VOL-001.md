@@ -63,3 +63,5 @@ volatilité, stress test, marge d'erreur, robustesse.
 - 2026-07-05 — NORMALISÉE — le point de pourcentage a été conservé comme exemple, pas comme seuil.
 - 2026-07-06 — NORMALISÉE — figures 6-18 et 6-19, pages imprimées 114–115 ; effet de la
   volatilité sur la valeur contrôlé visuellement selon la moneyness.
+- 2026-07-06 — NORMALISÉE — figures 6-20 et 6-21, pages imprimées 116–117 ; la sensibilité vega
+  n'est pas constante hors ATM.

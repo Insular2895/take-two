@@ -245,10 +245,88 @@ lisibles, mais aucune valeur précise de cette zone ne doit être transcrite.
   initial de volatilité modifient la sensibilité.
 - Renforce `R-VOL-001` et prépare la revue du vega.
 
+## Pages imprimées 116–117 — Figures 6-20 et 6-21
+
+Date de revue : 2026-07-06.
+
+### Contenu vérifié
+
+- Figure 6-20 : `Call or Put Vega vs. Time to Expiration`.
+- Hypothèses : sous-jacent `100`, volatilité `20 %`.
+- Strikes : `90`, `100`, `110`.
+- Figure 6-21 : `Call or Put Vega vs. Volatility`.
+- Hypothèses : sous-jacent `100`, temps restant `60 jours`.
+
+### Observation documentaire
+
+- Le vega augmente avec le temps restant pour les trois strikes représentés.
+- L'option ATM de strike `100` possède le vega le plus élevé sur la figure 6-20.
+- À très courte échéance, le vega des options non-ATM tend vers zéro.
+- Pour l'option ATM, le vega reste presque constant lorsque le niveau de volatilité change sur la
+  figure 6-21.
+- Pour les options non-ATM, le vega est presque nul à faible volatilité puis augmente avec la
+  volatilité.
+- Temps, volatilité et moneyness interagissent donc : « option longue maturité = vega élevé » reste
+  incomplet sans le strike et le niveau d'IV.
+
+### Valeurs uniquement indicatives
+
+- Figure 6-20 : à `100 jours`, vegas visuellement proches de `0.22`, `0.15` et `0.12` pour les
+  strikes `100`, `110` et `90`.
+- Figure 6-21 : le vega ATM reste visuellement proche de `0.16` entre environ `5 %` et `40 %` de
+  volatilité.
+
+Ces lectures ne doivent pas servir de calibration.
+
+### Impact projet
+
+- Le moteur devra recalculer le vega à partir de la surface courante, et non utiliser une constante
+  par contrat.
+- Le risque vega devra être présenté par jambe, maturité et position agrégée.
+- Renforce `R-GREEKS-001`, `R-GREEKS-003` et `R-VOL-001`.
+
+## Pages imprimées 118–119 — Figures 6-22 et 6-23
+
+Date de revue : 2026-07-06.
+
+### Contenu vérifié
+
+- Figure 6-22 : `Futures Option Rho vs. Underlying Price`.
+- Figure 6-23 : `Stock Option Rho vs. Underlying Price`.
+- Hypothèses : strike `100`, volatilité `20 %`, taux d'intérêt `8 %`.
+- Maturités : `60` et `150 jours`.
+- Sous-jacent représenté approximativement de `80` à `120`.
+
+### Observation documentaire
+
+- Pour les options sur action, le rho des calls est positif et celui des puts négatif.
+- La valeur absolue du rho est plus importante à `150 jours` qu'à `60 jours`.
+- Sur la figure actions, le rho du call augmente avec le sous-jacent ; le rho du put se rapproche de
+  zéro lorsque le sous-jacent augmente.
+- La figure des options sur futures présente une structure de rho différente et des valeurs
+  négatives pour les calls et puts montrés.
+- Les règles de taux ne doivent donc pas être transposées entre options sur actions et options sur
+  futures.
+
+### Impact projet
+
+- Le type d'instrument sous-jacent doit être une variable obligatoire du modèle.
+- Rho peut rester secondaire pour une option courte, mais ne doit pas être ignoré sur les maturités
+  longues.
+- Une future intégration IBKR devra distinguer au minimum options sur actions, indices et futures,
+  ainsi que leur modèle de valorisation.
+
+### Limite
+
+Les graphes montrent le sens et l'ordre de grandeur dans les hypothèses du livre. Les conventions
+exactes de rho et les modèles employés devront être vérifiés avant implémentation.
+
 ## Prochaine page attendue
 
-Page imprimée 116 :
+Pages imprimées 121–122 :
 
-- `Figure 6-20: Call or Put Vega vs. Time to Expiration`.
+- tableaux/figures 6-24 et 6-25 sur les sensibilités complètes d'options ;
+- photographier les tableaux entiers avec leurs en-têtes et unités.
 
-Objectif : vérifier comment la maturité et la moneyness modifient la sensibilité à la volatilité.
+Objectif : récupérer les valeurs numériques de delta, gamma, theta, vega et rho que l'OCR a
+complètement désorganisées.
