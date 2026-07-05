@@ -62,3 +62,5 @@ coûts, contraintes, turnover, information ratio, edge net.
 ## Historique
 - 2026-07-05 — DÉDUPLIQUÉE — fusion de candidates sur information et exécution.
 - 2026-07-05 — NORMALISÉE — seuil empirique conservé comme benchmark non actif.
+- 2026-07-06 — NORMALISÉE — chapitre 8 de Natenberg ; coûts multi-jambes, liquidité et risque
+  de legging ajoutés aux exigences documentaires.

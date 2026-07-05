@@ -62,3 +62,5 @@ liquidité, spread, bid-ask, exécution, edge net.
 ## Historique
 - 2026-07-05 — EXTRAITE — Gemini, preuve retrouvée sur la page PDF.
 - 2026-07-05 — NORMALISÉE — contexte complet relu manuellement.
+- 2026-07-06 — NORMALISÉE — chapitre 8 de Natenberg contrôlé visuellement ; payoffs,
+  sensibilités et anciens champs d'ordres multi-jambes documentés.

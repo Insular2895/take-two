@@ -80,3 +80,4 @@ explicite.
 ## Revues visuelles en cours
 
 - `visual_reviews/B-NATENBERG-1994.md` — figures et tableaux de Natenberg contrôlés page par page.
+- `visual_reviews/B-NATENBERG-1994-CH08.md` — structures et sensibilités des volatility spreads.

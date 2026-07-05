@@ -71,3 +71,5 @@ gamma, theta, delta hedge, volatilité réalisée, coûts.
   au temps, à l'IV et à la moneyness contrôlée visuellement.
 - 2026-07-06 — NORMALISÉE — figure 6-25, page imprimée 122 ; baisse du gamma et hausse du vega
   avec la maturité vérifiées au strike 75.
+- 2026-07-06 — NORMALISÉE — figures 8-13, 8-14 et 8-19 ; opposition gamma/theta et cas
+  particulier des time spreads contrôlés visuellement.

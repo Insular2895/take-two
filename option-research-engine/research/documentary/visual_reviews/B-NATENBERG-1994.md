@@ -8,6 +8,9 @@ Méthode : contrôle page par page à partir d'images fournies par l'utilisateur
 ne sont pas versionnées. Seuls les identifiants de figures, hypothèses visibles, observations et
 limites sont conservés.
 
+Suite dédiée au chapitre 8 :
+`B-NATENBERG-1994-CH08.md`.
+
 ## Page imprimée 104 — Figures 6-6 et 6-7
 
 Date de revue : 2026-07-05.
