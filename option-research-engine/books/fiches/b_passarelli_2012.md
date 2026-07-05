@@ -47,3 +47,5 @@ Règles au format officiel exclusivement.
 ## Journal de traitement
 - 2026-07-05 — OCR intégral et recherche ciblée terminés — 31 blocs, 20 candidates avec preuve
   vérifiée, 14 formulations `to_review`; aucune règle activée.
+- 2026-07-05 — revue manuelle ciblée — `R-GREEKS-003` normalisée ; la règle autonome
+  `IV > RV donc vendre la volatilité` reste rejetée.

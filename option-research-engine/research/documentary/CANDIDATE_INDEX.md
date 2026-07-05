@@ -4,6 +4,9 @@ Date : 2026-07-05
 
 Statut global : `to_review`
 
+Règles normalisées après revue manuelle : 5 sur 216. Elles restent non validées quantitativement et
+non actives.
+
 ## Interprétation
 
 `Citation vérifiée` signifie uniquement que chaque preuve courte générée existe dans la page PDF
@@ -60,3 +63,11 @@ Une candidate ne peut devenir `documentary_validated` qu'après vérification ma
 
 Même après cette promotion, elle reste inactive jusqu'à validation quantitative et décision
 explicite.
+
+## Première passe normalisée
+
+- `R-GREEKS-001` — agrégation des Greeks ;
+- `R-GREEKS-002` — neutralité delta instantanée et recalcul ;
+- `R-GREEKS-003` — économie gamma/theta nette des coûts ;
+- `R-VOL-001` — marge d'erreur sur la volatilité ;
+- `R-OPTIONS-001` — edge net et exécutabilité multi-jambes.

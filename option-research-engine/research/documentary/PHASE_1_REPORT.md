@@ -22,7 +22,8 @@ revendiquée. Ce contrôle est documentaire et déterministe. Il ne prouve ni qu
 Gemini est fidèle, ni que la règle est rentable, ni qu'elle est adaptée au marché actuel.
 
 La revue manuelle a trouvé plusieurs transformations abusives d'une observation en prescription.
-En conséquence, aucune règle n'est promue dans `rules/` lors de cette phase.
+Une seconde passe ciblée a normalisé cinq règles dont le contexte complet soutient la condition et
+l'action. Elles ne sont ni `VALIDÉES` quantitativement ni `ACTIVES`.
 
 ## Corpus et couverture
 
@@ -147,7 +148,7 @@ mode lecture seule d'IBKR.
 
 Avant de coder une stratégie ou d'envoyer un ordre, il reste à :
 
-1. revoir sémantiquement les règles candidates retenues ;
+1. poursuivre la revue sémantique au-delà des cinq règles normalisées ;
 2. transformer chaque principe en hypothèse testable ;
 3. définir les métriques et seuils avec données actuelles ;
 4. valider coûts, liquidité, corporate actions et règles IBKR ;
