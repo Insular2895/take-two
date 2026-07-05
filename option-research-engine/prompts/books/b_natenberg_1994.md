@@ -23,6 +23,9 @@ l'analyse d'options sur actions.
 ## Traçabilité OCR
 
 - Utilise exclusivement les marqueurs `# Page N`.
+- Pour chaque phrase source, remonte jusqu'au marqueur `# Page N` immédiatement précédent.
+- `## Page` contient `PDF_PAGE: N` ou `PDF_PAGES: N-M`. N'utilise jamais le numéro imprimé dans le
+  pied ou l'en-tête du livre.
 - Le chapitre doit être visible ou identifiable dans le bloc.
 - Tout nombre, tableau, formule ou symbole ambigu impose `to_review` dans le niveau de confiance.
 - N'invente jamais une cellule manquante d'un tableau.
@@ -82,7 +85,7 @@ B-NATENBERG-1994 — Option Volatility and Pricing
 Numéro et titre visibles dans le bloc.
 
 ## Page
-Numéro ou plage issue des marqueurs `# Page N`.
+`PDF_PAGE: N` ou `PDF_PAGES: N-M`, issu des marqueurs immédiatement précédant les passages.
 
 ## Niveau de confiance
 1 à 5 pour la fidélité documentaire, avec mention explicite de toute incertitude OCR.
@@ -105,3 +108,6 @@ Mots-clés minuscules.
 
 Une table des matières, une définition isolée, une formule illisible ou un passage sans action
 testable produit `AUCUNE_REGLE_EXPLOITABLE`.
+
+Avant de répondre, vérifie chaque `## Page` en retrouvant le marqueur immédiatement précédent la
+phrase utilisée. Une règle dont la page n'est pas certaine doit être rejetée.

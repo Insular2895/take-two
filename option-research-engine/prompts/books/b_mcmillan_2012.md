@@ -23,7 +23,8 @@ Ignore la vente nue d'options, sauf comparaison explicitement utile à une struc
 ## Traçabilité
 
 - Utilise exclusivement les marqueurs `# Page N` présents dans le contenu.
-- `## Page` contient le numéro PDF visible dans le marqueur, jamais un numéro inventé.
+- `## Page` contient `PDF_PAGE: N`, où `N` est le marqueur `# Page N` immédiatement précédent le
+  passage utilisé. N'utilise jamais la pagination imprimée visible dans le texte.
 - Le chapitre doit être identifiable dans le bloc. Sinon, réponds
   `AUCUNE_REGLE_EXPLOITABLE`.
 - Ne transforme pas un exemple en règle générale si l'auteur ne généralise pas le mécanisme.
@@ -86,7 +87,7 @@ B-MCMILLAN-2012 — Options as a Strategic Investment, 5e édition
 Numéro et titre visibles dans le bloc.
 
 ## Page
-Numéro ou plage issue des marqueurs `# Page N`.
+`PDF_PAGE: N` ou `PDF_PAGES: N-M`, issu des marqueurs immédiatement précédant les passages.
 
 ## Niveau de confiance
 1 à 5 pour la fidélité documentaire, avec justification. Ce niveau ne valide pas la rentabilité.

@@ -20,6 +20,8 @@ actuel. Tu ne transformes pas une illustration pédagogique en seuil universel.
 ## Traçabilité OCR
 
 - Utilise exclusivement les marqueurs `# Page N`.
+- Pour chaque phrase source, remonte jusqu'au marqueur `# Page N` immédiatement précédent.
+- `## Page` contient `PDF_PAGE: N` ou `PDF_PAGES: N-M`. N'utilise jamais la pagination imprimée.
 - Le chapitre doit être identifiable dans le bloc.
 - Conserve les unités et conventions de signe.
 - Tout symbole, décimale, formule ou tableau ambigu doit être marqué `to_review`.
@@ -79,7 +81,7 @@ B-PASSARELLI-2012 — Trading Option Greeks
 Numéro et titre visibles dans le bloc.
 
 ## Page
-Numéro ou plage issue des marqueurs `# Page N`.
+`PDF_PAGE: N` ou `PDF_PAGES: N-M`, issu des marqueurs immédiatement précédant les passages.
 
 ## Niveau de confiance
 1 à 5 pour la fidélité documentaire, avec mention de toute incertitude OCR.
