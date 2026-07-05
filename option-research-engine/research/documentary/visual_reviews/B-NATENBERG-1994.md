@@ -321,12 +321,107 @@ Date de revue : 2026-07-06.
 Les graphes montrent le sens et l'ordre de grandeur dans les hypothèses du livre. Les conventions
 exactes de rho et les modèles employés devront être vérifiés avant implémentation.
 
+## Page imprimée 121 — Figure 6-24
+
+Date de revue : 2026-07-06.
+
+### Métadonnées vérifiées
+
+- Date : `22 mai 1992`.
+- Modèle : `Black Model`.
+- Sous-jacent : deutschemark à `60.71`.
+- Temps restant : `105 jours`.
+- Volatilité du modèle : `10.5 %`.
+- Taux d'intérêt : `4.55 %`.
+- Strikes : `52` à `68`.
+- Colonnes : prix, valeur théorique, delta, gamma, theta, vega et volatilité implicite.
+
+### Lignes proches de l'ATM transcrites
+
+| Type | Strike | Prix | Théorique | Delta | Gamma | Theta | Vega | IV |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Call | 59 | 2.32 | 2.34 | 70 | 10.0 | -0.0053 | 0.111 | 10.3 |
+| Call | 60 | 1.72 | 1.72 | 59 | 11.2 | -0.0060 | 0.125 | 10.5 |
+| Call | 61 | 1.20 | 1.21 | 47 | 11.5 | -0.0063 | 0.128 | 10.4 |
+| Call | 62 | 0.83 | 0.82 | 36 | 10.9 | -0.0059 | 0.121 | 10.6 |
+| Put | 59 | 0.64 | 0.65 | -29 | 10.0 | -0.0056 | 0.111 | 10.4 |
+| Put | 60 | 1.02 | 1.02 | -40 | 11.2 | -0.0061 | 0.125 | 10.5 |
+| Put | 61 | 1.49 | 1.50 | -52 | 11.5 | -0.0062 | 0.128 | 10.4 |
+| Put | 62 | 2.11 | 2.09 | -63 | 10.9 | -0.0058 | 0.121 | 10.7 |
+
+### Observation documentaire
+
+- Gamma et vega atteignent leur maximum autour du strike ATM.
+- Le gamma est identique pour le call et le put d'un même strike dans ce tableau.
+- Le vega est également identique ou quasi identique pour la paire call-put.
+- Les deltas call et put reflètent la relation attendue autour de la parité.
+- Les volatilités implicites observées varient selon le strike malgré une volatilité de modèle fixée
+  à `10.5 %`.
+
+### Limite
+
+Les unités exactes des Greeks doivent être reprises de la convention du modèle avant utilisation.
+Les lignes profondes ITM portent des ajustements de parité signalés par une note du livre.
+
+## Page imprimée 122 — Figure 6-25
+
+Date de revue : 2026-07-06.
+
+### Métadonnées vérifiées
+
+- Date : `22 mai 1992`.
+- Modèle : `Cox-Ross-Rubenstein`.
+- Sous-jacent : General Electric à `76`.
+- Volatilité du modèle : `20.5 %`.
+- Taux d'intérêt : `4.50 %`.
+- Échéances : juin `28 jours`, septembre `119 jours`, décembre `210 jours`.
+- Dividende : `0.55` le 3 juin, le 22 septembre et le 3 décembre 1992.
+- Strikes : `60`, `65`, `70`, `75`, `80`, `85`.
+
+### Comparaison au strike 75
+
+| Type | Échéance | Prix | Théorique | Delta | Gamma | Theta affiché | Vega | IV |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| Call | Juin | 2 3/8 | 2.45 | 67 | 7.9 | 0.037 | 0.073 | 19.0 |
+| Call | Septembre | 4 5/8 | 4.38 | 62 | 4.2 | 0.019 | 0.168 | 20.2 |
+| Call | Décembre | 6 | 5.58 | 61 | 3.4 | 0.018 | 0.216 | 21.9 |
+| Put | Juin | 15/16 | 1.09 | 37 | 7.7 | 0.026 | 0.079 | 18.0 |
+| Put | Septembre | 2 7/16 | 2.73 | 40 | 4.5 | 0.011 | 0.169 | 19.3 |
+| Put | Décembre | 4 | 3.70 | 41 | 3.3 | 0.006 | 0.219 | 21.4 |
+
+### Observation documentaire
+
+- À strike comparable, le gamma diminue lorsque la maturité s'allonge.
+- À l'inverse, le vega augmente fortement avec la maturité.
+- Les volatilités implicites diffèrent par strike et par échéance : une IV unique ne décrit pas la
+  chaîne complète.
+- Le modèle intègre explicitement les dividendes, ce qui rend cette variable obligatoire pour les
+  options sur actions.
+
+### Point de convention à résoudre
+
+La figure 6-24 affiche le theta des options longues avec un signe négatif, tandis que la figure 6-25
+affiche des valeurs positives. Le texte du chapitre distingue parfois la variation de valeur
+théorique et le taux de décroissance du prix. Le futur système ne devra jamais ingérer un champ
+`theta` sans enregistrer sa convention de signe et son unité.
+
+La figure 6-25 affiche également les deltas des puts comme des magnitudes positives, alors que la
+figure 6-24 utilise des deltas négatifs. La convention de signe du delta doit donc elle aussi être
+explicitée.
+
+### Impact projet
+
+- Ces tableaux fournissent des points de contrôle historiques, pas des constantes de production.
+- Le moteur devra stocker modèle, date de calcul, taux, dividendes, maturité, strike et convention de
+  chaque Greek.
+- Renforce `R-GREEKS-001`, `R-GREEKS-002`, `R-GREEKS-003` et le besoin d'une surface d'IV.
+
 ## Prochaine page attendue
 
-Pages imprimées 121–122 :
+Pages imprimées 123–124 :
 
-- tableaux/figures 6-24 et 6-25 sur les sensibilités complètes d'options ;
-- photographier les tableaux entiers avec leurs en-têtes et unités.
+- exemples de calcul des sensibilités agrégées de la page 123 ;
+- `Figure 6-26` et `Figure 6-27` sur les signes des Greeks et les mouvements favorables.
 
-Objectif : récupérer les valeurs numériques de delta, gamma, theta, vega et rho que l'OCR a
-complètement désorganisées.
+Objectif : vérifier les formules d'agrégation et les conventions de signe avant leur traduction en
+contrat de données.

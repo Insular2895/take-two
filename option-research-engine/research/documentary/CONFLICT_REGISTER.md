@@ -67,3 +67,15 @@ Tous les éléments sont `conflict_open` ou `to_review`.
 - Traitement : vérifier chaque règle opérationnelle dans la documentation actuelle OCC/IBKR et dans
   le cadre réglementaire applicable avant codage.
 - Statut : `conflict_open`.
+
+## C-009 — Convention de signe des Greeks
+
+- Source : la figure 6-24 de Natenberg affiche un theta négatif pour des options longues, alors que
+  la figure 6-25 affiche des valeurs positives présentées comme taux de décroissance. La figure
+  6-25 affiche aussi les deltas des puts comme des magnitudes positives, contrairement à la figure
+  6-24.
+- Risque : inverser le sens économique d'une exposition lors de l'import de données ou de la
+  comparaison avec IBKR.
+- Traitement : stocker explicitement convention, unité, horizon et fournisseur ; normaliser vers une
+  convention interne unique avec tests.
+- Statut : `conflict_open`.

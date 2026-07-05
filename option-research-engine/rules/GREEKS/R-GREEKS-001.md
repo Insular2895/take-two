@@ -64,3 +64,5 @@ greeks, agrégation, risque marginal, portefeuille.
 - 2026-07-05 — NORMALISÉE — contexte relu manuellement ; validation quantitative absente.
 - 2026-07-06 — NORMALISÉE — figures 6-20 à 6-23, pages imprimées 116–119 ; dimensions vega,
   rho, maturité et type de sous-jacent contrôlées visuellement.
+- 2026-07-06 — NORMALISÉE — figures 6-24 et 6-25, pages imprimées 121–122 ; tableaux
+  numériques par strike et maturité transcrits partiellement, convention theta à résoudre.

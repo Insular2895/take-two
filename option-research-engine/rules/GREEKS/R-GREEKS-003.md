@@ -69,3 +69,5 @@ gamma, theta, delta hedge, volatilité réalisée, coûts.
   theta ATM et comportement distinct des options non-ATM confirmés visuellement.
 - 2026-07-06 — NORMALISÉE — figures 6-20 et 6-21, pages imprimées 116–117 ; dépendance du vega
   au temps, à l'IV et à la moneyness contrôlée visuellement.
+- 2026-07-06 — NORMALISÉE — figure 6-25, page imprimée 122 ; baisse du gamma et hausse du vega
+  avec la maturité vérifiées au strike 75.
