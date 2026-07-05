@@ -62,3 +62,5 @@ delta, hedge, rebalancement, gamma.
 - 2026-07-05 — EXTRAITE — Gemini, preuve retrouvée sur la page PDF.
 - 2026-07-05 — NORMALISÉE — action limitée au recalcul et à la simulation.
 - 2026-07-05 — NORMALISÉE — revue visuelle des figures 6-6 à 6-9, pages imprimées 104 et 107.
+- 2026-07-06 — NORMALISÉE — figures 6-10 et 6-11, page imprimée 108 ; dépendance du gamma à
+  l'IV et du delta au temps confirmée qualitativement.

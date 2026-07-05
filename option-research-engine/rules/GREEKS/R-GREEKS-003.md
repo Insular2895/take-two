@@ -63,3 +63,5 @@ gamma, theta, delta hedge, volatilité réalisée, coûts.
 - 2026-07-05 — NORMALISÉE — contexte relu ; raccourci `IV > RV donc vendre` rejeté.
 - 2026-07-05 — NORMALISÉE — figure 6-9 de Natenberg, page imprimée 107, utilisée comme
   confirmation qualitative du risque gamma proche de l'échéance.
+- 2026-07-06 — NORMALISÉE — figure 6-10 de Natenberg, page imprimée 108 ; le gamma dépend de
+  la volatilité différemment selon la moneyness.

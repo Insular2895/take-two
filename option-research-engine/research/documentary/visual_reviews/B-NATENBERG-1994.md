@@ -80,10 +80,64 @@ Ces lectures ne doivent pas être utilisées comme seuils ou données de calibra
 - Exigence future : le moteur IBKR devra calculer gamma par strike et maturité, puis agréger le
   gamma de la position complète.
 
+## Page imprimée 108 — Figures 6-10 et 6-11
+
+Date de revue : 2026-07-06.
+
+### Contenu vérifié
+
+- Figure 6-10 : `Call or Put Gamma vs. Volatility`.
+- Hypothèses : sous-jacent `100`, temps restant `60 jours`.
+- Strikes représentés : `90`, `100`, `110`.
+- Volatilité représentée approximativement de `0 %` à `40 %`.
+- Figure 6-11 : `Call Delta vs. Time to Expiration`.
+- Hypothèses : sous-jacent `100`, volatilité `20 %`.
+- Échéances représentées approximativement de `0` à `200 jours`.
+
+### Observation documentaire — gamma et volatilité
+
+- Pour le strike ATM `100`, le gamma est extrêmement élevé lorsque la volatilité est faible, puis
+  diminue fortement lorsque la volatilité augmente.
+- Pour les strikes non-ATM `90` et `110`, le gamma est proche de zéro lorsque la volatilité est très
+  faible.
+- Le gamma non-ATM augmente ensuite avec la volatilité, atteint un maximum intermédiaire, puis
+  diminue légèrement.
+- Une même hausse de volatilité peut donc réduire le gamma ATM tout en augmentant initialement le
+  gamma d'une option éloignée du strike.
+
+### Observation documentaire — delta et temps
+
+- Le call ITM de strike `90` a un delta proche de `100` à très courte échéance ; son delta diminue
+  lorsque la maturité s'allonge.
+- Le call ATM de strike `100` reste proche d'un delta de `50`, avec une légère augmentation sur le
+  graphique.
+- Le call OTM de strike `110` a un delta proche de zéro à très courte échéance ; son delta augmente
+  lorsque davantage de temps reste avant expiration.
+- L'allongement de la maturité rapproche donc les deltas extrêmes de valeurs intermédiaires dans
+  cet exemple.
+
+### Valeurs uniquement indicatives
+
+- Figure 6-10 : gamma ATM visuellement supérieur à `20` autour de `5 %` de volatilité et proche de
+  `2.5` vers `40 %`.
+- Figure 6-11 : à `200 jours`, deltas visuellement proches de `78`, `53` et `29` pour les strikes
+  `90`, `100` et `110`.
+
+Ces lectures servent à contrôler le sens et la forme des relations, pas à calibrer des seuils.
+
+### Impact projet
+
+- Le moteur devra recalculer gamma après changement d'IV, même si le sous-jacent ne bouge pas.
+- La priorité de surveillance d'un gamma ne peut pas être déduite de la seule proximité du strike :
+  maturité et volatilité sont également nécessaires.
+- Le calcul du delta devra intégrer simultanément moneyness, temps restant et volatilité.
+- `R-GREEKS-002` et `R-GREEKS-003` sont confirmées qualitativement, sans validation quantitative.
+
 ## Prochaine page attendue
 
-Page imprimée approximative 108 :
+Page imprimée approximative 113 :
 
-- `Figure 6-10: Call or Put Gamma vs. Volatility`.
+- `Figure 6-17: Call or Put Theta vs. Time to Expiration`.
 
-Objectif : vérifier comment le gamma ATM et non-ATM évolue lorsque l'hypothèse de volatilité change.
+Objectif : vérifier la forme de l'accélération du theta selon la moneyness à l'approche de
+l'expiration.
