@@ -87,6 +87,9 @@ Numéro et titre visibles dans le bloc.
 ## Page
 `PDF_PAGE: N` ou `PDF_PAGES: N-M`, issu des marqueurs immédiatement précédant les passages.
 
+## Preuve source
+Une phrase OCR exacte de 8 à 20 mots provenant de la page revendiquée, sans la corriger.
+
 ## Niveau de confiance
 1 à 5 pour la fidélité documentaire, avec mention explicite de toute incertitude OCR.
 
@@ -111,3 +114,6 @@ testable produit `AUCUNE_REGLE_EXPLOITABLE`.
 
 Avant de répondre, vérifie chaque `## Page` en retrouvant le marqueur immédiatement précédent la
 phrase utilisée. Une règle dont la page n'est pas certaine doit être rejetée.
+
+La preuve source doit apparaître textuellement dans la page PDF revendiquée. Sinon, rejette la
+règle.

@@ -89,6 +89,9 @@ Numéro et titre visibles dans le bloc.
 ## Page
 `PDF_PAGE: N` ou `PDF_PAGES: N-M`, issu des marqueurs immédiatement précédant les passages.
 
+## Preuve source
+Une phrase exacte de 8 à 20 mots provenant de la page revendiquée, sans la corriger.
+
 ## Niveau de confiance
 1 à 5 pour la fidélité documentaire, avec justification. Ce niveau ne valide pas la rentabilité.
 
@@ -111,3 +114,6 @@ Mots-clés minuscules.
 Réponds `AUCUNE_REGLE_EXPLOITABLE` si la condition, l'action, le chapitre ou la page manque. Une
 définition, une anecdote, une table des matières ou une description générale de stratégie n'est
 pas une règle exploitable.
+
+La preuve source doit apparaître textuellement dans la page PDF revendiquée. Sinon, rejette la
+règle.

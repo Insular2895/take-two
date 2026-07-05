@@ -83,6 +83,9 @@ Numéro et titre visibles dans le bloc.
 ## Page
 `PDF_PAGE: N` ou `PDF_PAGES: N-M`, issu des marqueurs immédiatement précédant les passages.
 
+## Preuve source
+Une phrase OCR exacte de 8 à 20 mots provenant de la page revendiquée, sans la corriger.
+
 ## Niveau de confiance
 1 à 5 pour la fidélité documentaire, avec mention de toute incertitude OCR.
 
@@ -104,3 +107,6 @@ Mots-clés minuscules.
 
 Une définition isolée d'un Greek, une table des matières, un symbole illisible ou un passage sans
 condition/action exploitable produit `AUCUNE_REGLE_EXPLOITABLE`.
+
+La preuve source doit apparaître textuellement dans la page PDF revendiquée. Sinon, rejette la
+règle.
