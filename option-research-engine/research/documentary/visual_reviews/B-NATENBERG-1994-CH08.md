@@ -249,10 +249,41 @@ bid-ask cumulé, marge et risque de legging.
 - Le nom de la stratégie ne suffit pas à décrire son risque.
 - Quantités, strikes, maturités et valeurs de marché doivent être agrégés avant classification.
 
-### Manque
+## Butterflies et time spreads numériques — pages 165–166
 
-Les pages imprimées 165–166, qui poursuivent la figure 8-20 pour butterflies et time spreads, n'ont
-pas été fournies dans ce lot.
+### Agrégats contrôlés
+
+| Structure | Exemple | Delta | Gamma | Theta | Vega |
+|---|---|---:|---:|---:|---:|
+| Long butterfly | Calls mars | 0 | -27.0 | +0.1550 | -0.610 |
+| Long butterfly | Puts juin | -60 | -15.0 | +0.0750 | -0.900 |
+| Short butterfly | Puts mars | -220 | +22.0 | -0.1280 | +0.500 |
+| Short butterfly | Calls juin | -25 | +12.5 | -0.0800 | +0.950 |
+| Long time spread | Calls strike 100 | 0 | -52.0 | +0.2940 | +2.000 |
+| Long time spread | Puts strike 95 | -100 | -14.0 | +0.0810 | +1.090 |
+| Short time spread | Puts strike 100 | environ -25 | +65.0 | -0.3675 | -2.500 |
+| Diagonal agissant comme short time spread | Calls 105/110 | +10 | +21.0 | -0.1180 | -0.750 |
+
+### Enseignements
+
+- Le ratio `1 × 2 × 1` d'un butterfly ne garantit pas un delta nul lorsque les strikes sont loin du
+  sous-jacent.
+- Le long butterfly est ici gamma négatif, theta positif et vega négatif.
+- Le short butterfly inverse ces expositions, mais peut conserver un delta directionnel important.
+- Le long time spread combine gamma négatif, theta positif et vega positif.
+- Le short time spread combine gamma positif, theta négatif et vega négatif.
+- Un diagonal peut se comporter comme un time spread lorsque les deltas des jambes sont proches.
+
+### Règle de sélection présentée par l'auteur
+
+- Si l'IV de marché est globalement inférieure à l'estimation de volatilité, examiner les structures
+  à vega positif, notamment backspreads et longs time spreads.
+- Si l'IV est globalement supérieure à l'estimation, examiner les structures à vega négatif,
+  notamment ratio verticals et shorts time spreads.
+
+Cette règle n'est qu'un filtre de candidats. Le texte annonce immédiatement que les straddles et
+strangles peuvent avoir un edge théorique élevé tout en faisant partie des structures les plus
+risquées. Le chapitre 9 doit donc être appliqué avant toute conclusion.
 
 ## IV et structure par terme — page 167, figures 8-21 et 8-22
 
@@ -294,9 +325,10 @@ multi-jambes. Les règles opérationnelles devront venir de la documentation IBK
 
 ## Prochaine page attendue
 
-Pages imprimées 165–166 :
+Pages imprimées 173–176 :
 
-- suite de la figure 8-20 ;
-- exemples numériques des butterflies et time spreads.
+- début du chapitre 9 `Risk Considerations` ;
+- figure 9-1, table d'évaluation initiale ;
+- figures 9-2 et 9-3, composition, edge et sensibilités des trois spreads.
 
-Objectif : compléter la matrice quantitative du chapitre 8 avant de passer au chapitre 9.
+Objectif : comparer l'edge théorique aux risques gamma, theta, vega et à la taille nécessaire.

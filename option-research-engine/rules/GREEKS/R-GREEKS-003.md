@@ -73,3 +73,5 @@ gamma, theta, delta hedge, volatilité réalisée, coûts.
   avec la maturité vérifiées au strike 75.
 - 2026-07-06 — NORMALISÉE — figures 8-13, 8-14 et 8-19 ; opposition gamma/theta et cas
   particulier des time spreads contrôlés visuellement.
+- 2026-07-06 — NORMALISÉE — figure 8-20, pages 165–166 ; combinaisons gamma/theta/vega des
+  butterflies et time spreads transcrites.

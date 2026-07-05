@@ -64,3 +64,5 @@ liquidité, spread, bid-ask, exécution, edge net.
 - 2026-07-05 — NORMALISÉE — contexte complet relu manuellement.
 - 2026-07-06 — NORMALISÉE — chapitre 8 de Natenberg contrôlé visuellement ; payoffs,
   sensibilités et anciens champs d'ordres multi-jambes documentés.
+- 2026-07-06 — NORMALISÉE — figure 8-20 complétée, pages imprimées 165–166 ; butterflies et
+  time spreads vérifiés par leurs jambes et Greeks agrégés.
