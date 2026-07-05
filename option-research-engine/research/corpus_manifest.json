@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "created": "2026-07-05",
+  "phase": "documentary_research",
+  "sources": [
+    {
+      "book_id": "B-MCMILLAN-2012",
+      "source_filename": "options-as-a-strategic-investment-fifth-edition-5nbsped-0735204659-9780735204652_compress.pdf",
+      "aliases": [
+        "pdfcoffee.com_options-as-a-strategic-investment-by-lawrence-g-mcmillan-pdf-pdf-free.pdf"
+      ],
+      "sha256": "8ad4a357fd7f0c90a8fb0b82f119978628467608a52bddbbe82aa8b431211a67",
+      "pages": 1069,
+      "source_type": "book",
+      "edition": "5th",
+      "extraction": "ready_text",
+      "status": "pilot_pending"
+    },
+    {
+      "book_id": "B-NATENBERG-1994",
+      "source_filename": "pdfcoffee.com_option-volatility-and-pricing-sheldon-natenberg-pdf-free.pdf",
+      "aliases": [
+        "Option Volatility & Advanced Trading Strategies and Techniques"
+      ],
+      "sha256": "4c5b39195314948d805ef49a3daba5625a26b8b1493a84bc65a2713b94992ada",
+      "pages": 475,
+      "source_type": "book",
+      "edition": "to_review",
+      "extraction": "needs_ocr",
+      "status": "pilot_pending"
+    },
+    {
+      "book_id": "B-PASSARELLI-2012",
+      "source_filename": "pdfcoffee.com_dan-passarelli-trading-option-greekspdf-pdf-free.pdf",
+      "aliases": [],
+      "sha256": "e3f8ac415cb32762c1409280082d2b0c8221c37f358839dad69c5ec8edb34071",
+      "pages": 357,
+      "source_type": "book",
+      "edition": "to_review",
+      "extraction": "needs_ocr",
+      "status": "pilot_pending"
+    },
+    {
+      "book_id": "B-DOUGLAS-2000",
+      "source_filename": "Trading in the Zone - Mark Douglas (2001) A202 (1).pdf",
+      "aliases": [],
+      "sha256": "3e572e4db0a79fbdc39ad8af683ac77c9f2902bf9b0f6dc89243f81ff16a6673",
+      "pages": 143,
+      "source_type": "book",
+      "edition": "to_review",
+      "extraction": "ready_text",
+      "status": "queued"
+    },
+    {
+      "book_id": "B-GRINOLD-KAHN-1999",
+      "source_filename": "Richard Grinold, Ronald Kahn-Active Portfolio Management_ A Quantitative Approach for Producing Superior Returns and Controlling Risk-McGraw-Hill (1999).pdf",
+      "aliases": [],
+      "sha256": "b91c02e0f4ad877201a89e597e67f7c48fc6c93564b2b1774f60c12364aac46d",
+      "pages": 621,
+      "source_type": "book",
+      "edition": "2nd",
+      "extraction": "ready_text_with_pdf_warnings",
+      "status": "queued"
+    },
+    {
+      "book_id": "B-KLARMAN-1991",
+      "source_filename": "_OceanofPDF.com_Margin_of_Safety__Risk-Averse_Value_Invest_-_Seth_A_Klarman.pdf",
+      "aliases": [],
+      "sha256": "e7c1dcba5c3d86bb48c6ddea4591adf2669ec8368a64caf1ff2087beb6d553dc",
+      "pages": 297,
+      "source_type": "book",
+      "edition": "original",
+      "extraction": "ready_text",
+      "status": "queued"
+    },
+    {
+      "book_id": "B-MAUBOUSSIN-RAPPAPORT-2001",
+      "source_filename": "expectations-investing-1578512522-2001024378_compress.pdf",
+      "aliases": [],
+      "sha256": "3ba063ec0813c80509f6a21b3e9dff1c730d74a9505c98ffd2efb3ac4f20409b",
+      "pages": 216,
+      "source_type": "book",
+      "edition": "2001_original_not_2021_revision",
+      "extraction": "ready_text_with_pdf_warnings",
+      "status": "queued"
+    },
+    {
+      "book_id": "B-LYNCH-2000",
+      "source_filename": "One Up On Wall Street_ How To Use What You Already Know To Make Money In The Market.pdf",
+      "aliases": [],
+      "sha256": "6d1fdd15e14d860273da47fe012656ccfde649db3c2b7df73a031a63b0e1068b",
+      "pages": 316,
+      "source_type": "book",
+      "edition": "millennium",
+      "extraction": "needs_repair_then_text",
+      "status": "queued"
+    },
+    {
+      "book_id": "B-DUKE-NOTES",
+      "source_filename": "pdfcoffee.com_thinking-in-betspdf-pdf-free.pdf",
+      "aliases": [],
+      "sha256": "580f1bf1eef30fe9e0a28745ddf0891a1f8ed89faa09745c3ede24ccf819c0ed",
+      "pages": 15,
+      "source_type": "secondary_notes",
+      "edition": "incomplete_notes_not_book",
+      "extraction": "ready_text",
+      "status": "queued_low_confidence"
+    }
+  ]
+}
