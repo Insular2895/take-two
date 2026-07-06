@@ -81,3 +81,5 @@ explicite.
 
 - `visual_reviews/B-NATENBERG-1994.md` — figures et tableaux de Natenberg contrôlés page par page.
 - `visual_reviews/B-NATENBERG-1994-CH08.md` — structures et sensibilités des volatility spreads.
+- `visual_reviews/B-NATENBERG-1994-CH09.md` — comparaison edge théorique, sizing et risques des
+  spreads.

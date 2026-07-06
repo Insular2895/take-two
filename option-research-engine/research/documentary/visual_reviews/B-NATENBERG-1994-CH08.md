@@ -323,12 +323,11 @@ multi-jambes. Les règles opérationnelles devront venir de la documentation IBK
 6. Le score doit être calculé après bid-ask, commissions, liquidité et risque de legging.
 7. Les anciens tickets ne constituent aucune instruction d'exécution actuelle.
 
-## Prochaine page attendue
+## Suite documentaire
 
-Pages imprimées 173–176 :
+La revue du chapitre 9 est maintenant séparée dans :
 
-- début du chapitre 9 `Risk Considerations` ;
-- figure 9-1, table d'évaluation initiale ;
-- figures 9-2 et 9-3, composition, edge et sensibilités des trois spreads.
+- `visual_reviews/B-NATENBERG-1994-CH09.md`.
 
-Objectif : comparer l'edge théorique aux risques gamma, theta, vega et à la taille nécessaire.
+Le chapitre 8 sert de carte des structures ; le chapitre 9 sert à comparer leur edge théorique aux
+risques gamma, theta, vega, taille et exécution.
