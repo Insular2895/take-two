@@ -165,6 +165,287 @@ Le stress test ne doit pas être seulement un stress d'IV. Il faut aussi une gri
 - perte en cas de gap ;
 - interaction entre changement de prix et changement d'IV.
 
+## Deuxième groupe de spreads — pages 183–185, figures 9-7 à 9-10
+
+### Figure 9-7 — spreads 4, 5 et 6
+
+La figure compare trois autres structures, avec leurs edges et sensibilités agrégées :
+
+| Spread | Jambes | Edge | Delta | Gamma | Theta | Vega |
+|---|---|---:|---:|---:|---:|---:|
+| 4 | Long `20` July 50 calls ; short `30` July 52 calls | +2.70 | +20 | -72.0 | +0.0570 | -0.840 |
+| 5 | Long `50` May 48 puts ; short `50` July 48 puts | +3.00 | -50 | +180.0 | -0.1350 | -1.850 |
+| 6 | Long `10` May 48 calls ; short `20` July 52 calls | +2.90 | +20 | -56.0 | +0.0470 | -1.340 |
+
+### Figures 9-8 à 9-10
+
+Les figures comparent ces trois spreads selon :
+
+- la volatilité ;
+- le prix du sous-jacent ;
+- le temps restant jusqu'à expiration.
+
+Lecture documentaire :
+
+- si le risque principal est une hausse d'IV, le spread 4 paraît le plus défensif ;
+- si le risque principal est un grand mouvement du sous-jacent, le spread 5 est favorisé par son
+  gamma positif ;
+- si l'on accepte une protection partielle contre plusieurs risques, le spread 6 devient un
+  compromis.
+
+Le texte insiste sur le fait que le choix n'est pas une question de vrai/faux, mais de risque que le
+trader accepte de porter.
+
+## Méthode rapide `risque / edge` — pages 186–187
+
+Natenberg propose une approximation pratique pour comparer rapidement plusieurs spreads :
+
+```text
+ratio_de_risque = sensibilité pertinente / theoretical edge
+```
+
+La sensibilité placée au numérateur dépend du risque principal :
+
+- risque de volatilité : `vega / theoretical edge` ;
+- risque de grand mouvement du sous-jacent : `gamma / theoretical edge` ;
+- autres sensibilités possibles selon le contexte.
+
+### Exemple vega, spreads 4 à 6
+
+| Spread | Calcul | Ratio |
+|---|---:|---:|
+| 4 | -0.840 / 2.70 | -0.311 |
+| 5 | -1.850 / 3.00 | -0.617 |
+| 6 | -1.340 / 2.90 | -0.462 |
+
+Le spread 4 a le ratio vega/edge le plus proche de zéro : il porte donc, dans cette approximation,
+le meilleur compromis vis-à-vis de la volatilité.
+
+### Exemple gamma, spreads 4 et 6
+
+| Spread | Calcul | Ratio |
+|---|---:|---:|
+| 4 | -72.0 / 2.70 | -26.7 |
+| 6 | -56.0 / 2.90 | -19.3 |
+
+Le spread 6 est moins exposé au risque de grand mouvement que le spread 4 selon ce ratio.
+
+### Avertissement
+
+L'auteur avertit que les sensibilités ne sont bien définies que dans une plage étroite. Ce ratio
+donne une approximation de risque relatif, pas une vérité globale. Il peut alerter contre une
+structure manifestement fragile, mais ne remplace pas les stress graphs.
+
+### Exemple vega, spreads 1 à 3
+
+| Spread | Calcul | Ratio |
+|---|---:|---:|
+| 1 | -1.368 / 2.86 | -0.478 |
+| 2 | -0.435 / 3.00 | -0.145 |
+| 3 | -0.630 / 2.80 | -0.225 |
+
+Le ratio ferait préférer le spread 2 pour le risque de volatilité, mais la figure 9-4 montre que le
+spread 3 a le profil de volatilité le moins défavorable. Le ratio est donc un filtre rapide, pas un
+classement final.
+
+## Marge d'erreur et sizing — pages 187–188
+
+La section `How Much Margin for Error?` reformule le problème : il ne faut pas seulement demander
+quelle marge d'erreur est raisonnable, mais quelle taille de position est acceptable pour une marge
+d'erreur donnée.
+
+Enseignements :
+
+- une stratégie avec faible marge d'erreur doit rester petite ;
+- une stratégie avec marge d'erreur large peut supporter une taille plus grande ;
+- la taille dépend de ce qui peut mal tourner avant que la stratégie se retourne contre le trader ;
+- straddles et strangles sont signalés comme les spreads les plus risqués, qu'ils soient achetés ou
+  vendus, car ils offrent peu de marge d'erreur.
+
+### Impact projet
+
+Le futur outil devra séparer :
+
+- edge théorique ;
+- marge d'erreur par risque dominant ;
+- taille proposée ;
+- perte si l'hypothèse est fausse ;
+- capacité réelle d'exécution.
+
+Un score ne doit pas grossir automatiquement une position parce que l'edge est positif.
+
+## Dividendes et taux — pages 188–192, figures 9-11 à 9-14
+
+### Figure 9-11 — table stock options
+
+Hypothèses visibles :
+
+- stock price `98 1/2` ;
+- volatilité modèle : mars `27 %`, juin `27 %` ;
+- taux : `8 %` ;
+- dividende attendu : `1.25` ;
+- maturités : mars `56 jours`, juin `147 jours`.
+
+La table fournit prix, valeur théorique, delta, gamma, theta, vega et IV pour calls/puts de mars et
+juin.
+
+### Figure 9-12 — quatre spreads
+
+| Spread | Jambes | Edge | Delta | Gamma | Theta | Vega |
+|---|---|---:|---:|---:|---:|---:|
+| 7 | Long `25` June 95 puts ; short `25` March 95 puts | +6.75 | -75 | -32.5 | +0.3400 | +2.275 |
+| 8 | Long `15` June 100 calls ; short `15` March 100 calls | +6.45 | +75 | -21.0 | +0.2070 | +1.380 |
+| 9 | Long `15` June 95 puts ; short `10` March 100 puts | +6.50 | -35 | -3.5 | +0.0495 | +1.985 |
+| 10 | Long `18` June 105 calls ; short `10` March 95 calls | +6.14 | +44 | +5.40 | -0.0464 | +2.774 |
+
+### Figure 9-13 — intérêt
+
+La figure montre que :
+
+- spreads 7 et 9 sont pénalisés par une hausse des taux ;
+- spreads 8 et 10 sont aidés par une hausse des taux.
+
+Si la hausse des taux est le risque prioritaire, les spreads 8 et 10 deviennent les meilleurs
+candidats, indépendamment de certaines qualités vega/gamma des spreads 7 et 9.
+
+Comparaison rapide du vega :
+
+| Spread | Calcul | Ratio |
+|---|---:|---:|
+| 8 | 1.380 / 6.45 | 0.214 |
+| 10 | 2.774 / 6.14 | 0.452 |
+
+Si le risque de volatilité est la deuxième préoccupation, le spread 8 est préféré au spread 10. Si
+le risque de grand mouvement du sous-jacent domine, le spread 10 peut être préféré car son gamma est
+positif.
+
+### Figure 9-14 — dividendes
+
+La figure montre que si le dividende augmente :
+
+- spreads 7 et 9 sont aidés ;
+- spreads 8 et 10 sont pénalisés.
+
+Comparaison rapide des spreads 7 et 9 :
+
+| Spread | Vega risk | Gamma risk |
+|---|---:|---:|
+| 7 | 2.275 / 6.75 = 0.337 | -32.5 / 6.75 ≈ -4.8 |
+| 9 | 1.985 / 6.50 = 0.305 | -3.5 / 6.50 ≈ -0.5 |
+
+Le texte indique que si l'écart de vega est faible, le spread 9 peut être préféré car il porte
+beaucoup moins de gamma risk. Si la hausse de dividende est très probable, le spread 7 peut rester
+préférable car il bénéficie davantage de cette hausse.
+
+### Impact projet
+
+La comparaison de spreads sur actions doit intégrer :
+
+- taux ;
+- dividendes attendus ;
+- sensibilité des maturités aux taux/dividendes ;
+- arbitrage entre risque prioritaire et risques secondaires.
+
+## Bon spread, marge d'erreur et survie — pages 192–193
+
+Le texte définit un bon spread non pas comme celui qui gagne le plus quand tout va bien, mais comme
+celui qui perd le moins quand tout va mal.
+
+Conséquences pour Take Two :
+
+- le score doit valoriser la survie et la perte contrôlée ;
+- un trade perdant peut être un bon choix s'il évite une perte beaucoup plus grande ;
+- les winning trades se gèrent plus facilement que les losing trades ; la priorité est donc de
+  limiter les pertes qui effacent les gains.
+
+## Ajustements — pages 193–195
+
+Le chapitre distingue deux familles d'ajustements :
+
+- ajustement avec le sous-jacent : change le delta sans changer gamma, theta et vega ;
+- ajustement avec options : change le delta mais modifie aussi gamma, theta et vega.
+
+### Exemple short strangle
+
+Position initiale :
+
+```text
+short 20 strangles 95/105
+delta initial = (-20 × -36) + (-20 × +36) = 0
+```
+
+Après baisse du sous-jacent à `97.00` :
+
+```text
+delta = (-20 × -41) + (-20 × +30) = +220
+```
+
+Trois choix sont évoqués :
+
+1. vendre le sous-jacent ;
+2. vendre des calls ;
+3. acheter des puts.
+
+L'ajustement par achat de puts réduit plusieurs risques mais réduit aussi l'edge théorique si les
+puts restent chers. L'ajustement par vente de calls augmente l'edge mais grossit la position.
+
+Après rebond à `101.50`, l'exemple montre que l'ajustement répété par vente d'options peut faire
+passer la position de `20` strangles à `42 × 27`, ce qui magnifie le risque en cas de mouvement
+violent.
+
+### Règle documentaire
+
+Une amélioration d'edge ne suffit jamais à justifier un ajustement si elle augmente trop la taille
+ou le risque total. À partir d'un certain point, il faut réduire la taille ou ajuster dans le
+sous-jacent.
+
+## Style de trading et gamma — pages 195–196
+
+La section `A Question of Style` lie le signe du gamma au style de hedge :
+
+- gamma négatif : les ajustements suivent la tendance du sous-jacent ;
+- gamma positif : les ajustements vont contre la tendance du sous-jacent.
+
+Le texte précise qu'un trader qui préfère suivre la tendance ou trader contre la tendance doit
+choisir une combinaison stratégie + fréquence d'ajustement compatible avec son style. Pour un moteur
+automatisé, cela signifie que le style de couverture doit être un paramètre explicite, pas une
+hypothèse cachée.
+
+## Liquidité — pages 196–198, figure 9-15
+
+### Principes
+
+Un marché liquide rend l'entrée, la sortie et l'ajustement plus faciles. Un marché illiquide peut
+forcer le trader à garder la position jusqu'à expiration ou à sortir à un prix défavorable.
+
+Points contrôlés :
+
+- les options court terme proches de la monnaie sont généralement plus liquides ;
+- les options long terme ou profondément ITM/OTM ont souvent des spreads bid/ask plus larges ;
+- il faut aussi vérifier la liquidité du sous-jacent, surtout si les ajustements se font avec lui ;
+- le cas le plus dangereux combine options illiquides et sous-jacent illiquide.
+
+### Figure 9-15
+
+La figure donne des bid/ask/volume S&P 500 index options par maturité. Elle illustre :
+
+- volumes très différents selon échéance et strike ;
+- `no listing` sur certaines options ;
+- bid/ask beaucoup plus larges sur certaines maturités ou moneyness ;
+- nécessité de regarder chaque jambe, pas seulement la structure agrégée.
+
+### Impact projet
+
+Avant tout signal exécutable, le futur module IBKR devra appliquer un filtre de liquidité par jambe :
+
+- bid disponible ;
+- ask disponible ;
+- spread bid/ask acceptable ;
+- volume et open interest suffisants ;
+- taille disponible pour la quantité cible ;
+- possibilité de sortir ou d'ajuster ;
+- liquidité du sous-jacent si hedge prévu.
+
 ## Conclusions provisoires pour Take Two
 
 1. L'edge théorique doit être comparé après sizing équivalent ou budget de risque équivalent.
@@ -175,13 +456,17 @@ Le stress test ne doit pas être seulement un stress d'IV. Il faut aussi une gri
    strikes, maturités et hypothèses.
 6. Le rho est documenté mais ne doit pas prendre le dessus sur les risques dominants sauf contexte
    spécial.
-7. Cette revue confirme que le futur script IBKR doit d'abord être un moteur de comparaison et de
+7. Le ratio `sensibilité / edge` peut servir de filtre rapide, mais ne remplace pas les stress
+   tests.
+8. La taille doit dépendre de la marge d'erreur, pas seulement de l'edge.
+9. Un ajustement par options peut améliorer l'edge tout en grossissant dangereusement le risque.
+10. La liquidité de chaque jambe et du sous-jacent est une condition préalable.
+11. Cette revue confirme que le futur script IBKR doit d'abord être un moteur de comparaison et de
    stress, pas un moteur d'ordre automatique.
 
 ## Prochaine page attendue
 
-Pages imprimées autour de 179–181 :
+Pages imprimées après 198, si le chapitre continue :
 
-- texte complet autour de la figure 9-6 ;
-- discussion de `theta risk` et coûts de portage ;
-- passage sur l'exécution/liquidité qui mène à la règle `R-OPTIONS-001`.
+- suite ou conclusion après la figure 9-15 ;
+- tout passage final qui résume les critères d'entrée/sortie ou d'exécution.

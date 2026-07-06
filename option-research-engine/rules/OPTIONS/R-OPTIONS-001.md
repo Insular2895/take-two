@@ -68,3 +68,5 @@ liquidité, spread, bid-ask, exécution, edge net.
   time spreads vérifiés par leurs jambes et Greeks agrégés.
 - 2026-07-06 — NORMALISÉE — chapitre 9, pages imprimées 174–178 et figure 9-6 ; l'edge est comparé
   après ajustement de taille, puis stressé en volatilité et sous-jacent avant toute préférence.
+- 2026-07-06 — NORMALISÉE — chapitre 9, pages imprimées 187–198 ; marge d'erreur, sizing,
+  ajustements et liquidité par jambe ajoutés comme contraintes documentaires.

@@ -75,3 +75,5 @@ gamma, theta, delta hedge, volatilité réalisée, coûts.
   particulier des time spreads contrôlés visuellement.
 - 2026-07-06 — NORMALISÉE — figure 8-20, pages 165–166 ; combinaisons gamma/theta/vega des
   butterflies et time spreads transcrites.
+- 2026-07-06 — NORMALISÉE — chapitre 9, pages imprimées 186–187 et 195–196 ; ratios
+  sensibilité/edge et lien entre signe du gamma, style de hedge et fréquence d'ajustement ajoutés.
