@@ -70,3 +70,5 @@ liquidité, spread, bid-ask, exécution, edge net.
   après ajustement de taille, puis stressé en volatilité et sous-jacent avant toute préférence.
 - 2026-07-06 — NORMALISÉE — chapitre 9, pages imprimées 187–198 ; marge d'erreur, sizing,
   ajustements et liquidité par jambe ajoutés comme contraintes documentaires.
+- 2026-07-06 — NORMALISÉE — chapitre 5, pages imprimées 81–93 ; edge théorique relié à la
+  réplication dynamique, aux coûts, dividendes, financement et contraintes de hedge.

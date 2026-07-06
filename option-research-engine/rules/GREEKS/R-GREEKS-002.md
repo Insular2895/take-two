@@ -68,3 +68,5 @@ delta, hedge, rebalancement, gamma.
   au temps et à l'IV confirmée pour calls et puts.
 - 2026-07-06 — NORMALISÉE — chapitre 9, pages imprimées 193–195 ; ajustement delta via
   sous-jacent séparé des ajustements par options, qui modifient aussi gamma, theta et vega.
+- 2026-07-06 — NORMALISÉE — chapitre 5, pages imprimées 82–85 ; neutralité delta initiale puis
+  recalcul hebdomadaire du hedge contrôlés visuellement.

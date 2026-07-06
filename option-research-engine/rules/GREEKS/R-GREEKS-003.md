@@ -77,3 +77,5 @@ gamma, theta, delta hedge, volatilité réalisée, coûts.
   butterflies et time spreads transcrites.
 - 2026-07-06 — NORMALISÉE — chapitre 9, pages imprimées 186–187 et 195–196 ; ratios
   sensibilité/edge et lien entre signe du gamma, style de hedge et fréquence d'ajustement ajoutés.
+- 2026-07-06 — NORMALISÉE — chapitre 5, pages imprimées 85–89 ; P&L d'ajustements, coûts de
+  portage et effet de la fréquence de hedge documentés comme précurseur du gamma scalping.

@@ -66,3 +66,5 @@ greeks, agrégation, risque marginal, portefeuille.
   rho, maturité et type de sous-jacent contrôlées visuellement.
 - 2026-07-06 — NORMALISÉE — figures 6-24 et 6-25, pages imprimées 121–122 ; tableaux
   numériques par strike et maturité transcrits partiellement, convention theta à résoudre.
+- 2026-07-06 — NORMALISÉE — chapitre 5, pages imprimées 82–93 ; delta position, hedge
+  dynamique et cash flows d'ajustement documentés dans deux exemples.
