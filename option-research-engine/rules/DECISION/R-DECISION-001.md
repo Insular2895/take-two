@@ -58,6 +58,21 @@ sélection, scoring, robustesse, maintenance.
 ## Tags
 thèse, falsification, biais de confirmation, valorisation.
 
+## Revue 2026
+Statut 2026 : `valide_comme_principe`, `non_active_sans_these_validee`.
+
+Le principe reste actuel : aucune structure option ne doit être choisie sans thèse falsifiable,
+horizon, catalyseur, niveau d'invalidation et comparaison avec les alternatives. Pour TTWO/GTA VI,
+la règle impose de comparer action, option simple, vertical, calendar ou absence de trade selon la
+distribution prix/temps, IV, liquidité, coûts et timing du catalyseur.
+
+Contrôle obligatoire avant scoring : fiche thèse `draft_to_validate`, sources actuelles, scénario
+central/haussier/baissier, conditions de sortie, contradiction active, et décision humaine avant
+toute promotion en `candidate_trade`.
+
+Sources 2026 : filings SEC récents, calendrier catalyseur/earnings, données marché live, notes
+internes validées.
+
 ## Historique
 - 2026-07-05 — DÉDUPLIQUÉE — convergence de trois candidates sourcées.
 - 2026-07-05 — NORMALISÉE — contextes relus manuellement.

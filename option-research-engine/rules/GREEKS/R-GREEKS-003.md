@@ -58,6 +58,21 @@ simulation, scoring, robustesse, maintenance.
 ## Tags
 gamma, theta, delta hedge, volatilité réalisée, coûts.
 
+## Revue 2026
+Statut 2026 : `valide_comme_principe`, `non_active_sans_backtest_paper_et_couts_live`.
+
+Le principe reste actuel : long gamma cherche à convertir le mouvement réalisé en gains de
+rebalancement capables de couvrir theta et coûts ; short gamma encaisse theta contre risque de gap
+et convexité adverse. La validité opérationnelle dépend entièrement des coûts, du slippage, de la
+liquidité intraday, de la latence, du borrow, des gaps, des événements et de la discipline de hedge.
+
+Contrôle obligatoire avant scoring : backtest reproductible, paper trading, logs de chaque hedge,
+attribution P&L gamma/theta/vega/frais, règle d'événement, et blocage si la fréquence de hedge ou
+les données intraday sont insuffisantes.
+
+Sources 2026 : données intraday broker/market data ; IBKR commissions/margin ; calendrier
+earnings/events ; historique IV/RV fiable.
+
 ## Historique
 - 2026-07-05 — EXTRAITE — Gemini, preuve retrouvée sur les pages PDF.
 - 2026-07-05 — NORMALISÉE — contexte relu ; raccourci `IV > RV donc vendre` rejeté.

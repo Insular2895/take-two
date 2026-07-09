@@ -56,6 +56,21 @@ sélection, simulation, scoring, robustesse.
 ## Tags
 attentes implicites, reverse dcf, sous-jacent, scénario.
 
+## Revue 2026
+Statut 2026 : `valide_comme_principe`, `non_active_sans_donnees_fondamentales_actuelles`.
+
+Le principe reste actuel : partir du prix pour remonter aux attentes implicites est utile. Pour une
+thèse 2026, il faut utiliser filings récents, guidance, consensus si disponible, dette, dilution,
+SBC, buybacks, taxes, WACC, comparables, calendrier catalyseur et scénarios contradictoires. Les
+discussions anciennes sur stock-options/buybacks ne suffisent pas telles quelles.
+
+Contrôle obligatoire avant scoring : modèle reverse DCF horodaté, hypothèses explicites, sources
+fondamentales actuelles, probabilités justifiées, invalidation, et lien direct entre thèse
+fondamentale et structure option.
+
+Sources 2026 : SEC EDGAR/company filings ; U.S. Treasury curve ; SEC SAB Topic 14/SAB 120/ASC 718 ;
+IRS Section 4501 ; données fondamentales actuelles.
+
 ## Historique
 - 2026-07-05 — EXTRAITE — Gemini, preuve retrouvée sur la page PDF.
 - 2026-07-05 — NORMALISÉE — contexte relu ; aucune recommandation automatique.

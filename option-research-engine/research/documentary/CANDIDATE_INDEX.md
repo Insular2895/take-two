@@ -7,10 +7,22 @@ Statut global : `to_review`
 Règles normalisées après revue manuelle : 10 sur 216. Elles restent non validées quantitativement et
 non actives.
 
+Revue de validité 2026 des 10 règles normalisées :
+`RULES_2026_REVIEW_INDEX.md`.
+
+Plan de traitement du backlog 216 / 365 :
+`ATOMIC_RULE_BACKLOG_PLAN.md`.
+
+Corpus propre utilisable pour concevoir le futur moteur read-only :
+`CLEAN_USABLE_RULESET_2026.md`.
+
 ## Interprétation
 
 `Citation vérifiée` signifie uniquement que chaque preuve courte générée existe dans la page PDF
 revendiquée. Les règles restent des candidates non actives.
+
+Important : les `216` entrées ne sont pas 216 fichiers de règles prêts à coder. Ce sont des candidats
+documentaires. Les `365` blocs restent un backlog `to_review`.
 
 | Source | Règles avec citation vérifiée | Règles issues de blocs à revoir |
 |---|---:|---:|
@@ -79,6 +91,17 @@ explicite.
 
 ## Revues visuelles en cours
 
+- `visual_reviews/B-MCMILLAN-2012-CH03.md` — achat de calls, choix du strike et de l'échéance,
+  delta, horizon et critères de sélection.
+- `visual_reviews/B-MCMILLAN-2012-CH07.md` — bull spreads, agressivité, comparaison au call sec et
+  actions de suivi.
+- `visual_reviews/B-MCMILLAN-2012-CH09.md` — fin du chapitre sur les calendar spreads, revue
+  partielle.
+- `visual_reviews/B-MCMILLAN-2012-CH10.md` — butterfly spreads, sélection, coûts et suivi.
+- `visual_reviews/B-MCMILLAN-2012-CH11.md` — début des ratio call spreads et risque haussier non
+  borné, revue partielle.
+- `visual_reviews/B-MCMILLAN-2012-CH25.md` — LEAPS, sensibilités longues, substitution à l'action,
+  décroissance temporelle et rollover.
 - `visual_reviews/B-NATENBERG-1994-CH04.md` — fondations volatilité, IV, annualisation et marge
   d'erreur.
 - `visual_reviews/B-NATENBERG-1994-CH05.md` — theoretical edge, delta hedge dynamique et coûts
@@ -87,3 +110,24 @@ explicite.
 - `visual_reviews/B-NATENBERG-1994-CH08.md` — structures et sensibilités des volatility spreads.
 - `visual_reviews/B-NATENBERG-1994-CH09.md` — comparaison edge théorique, sizing et risques des
   spreads.
+- `visual_reviews/B-NATENBERG-1994-CH13.md` — hedging avec options, protective options, covered
+  writes, fences/collars et portfolio insurance.
+- `visual_reviews/B-PASSARELLI-2012-CH13.md` — gamma scalping, long/short gamma, theta et
+  politiques de hedge.
+- `visual_reviews/B-PASSARELLI-2012-VOL-CHARTS.md` — configurations IV/RV et lecture des
+  divergences/convergences de volatilité.
+- `visual_reviews/B-GRINOLD-KAHN-1999-CORE.md` — risque, information ratio, loi fondamentale,
+  covariance, contraintes, turnover et coûts.
+- `visual_reviews/B-MAUBOUSSIN-RAPPAPORT-2001.md` — attentes implicites, reverse DCF, scénarios,
+  M&A, buybacks et couche thèse du sous-jacent.
+- `CURRENTNESS_AUDIT_2026.md` — audit des concepts encore actuels et des données/règles à mettre à
+  jour avec sources officielles.
+- `STRATEGY_READINESS_MATRIX.md` — matrice de construction des familles de stratégies et données
+  manquantes avant usage réel.
+- `CLEAN_USABLE_RULESET_2026.md` — version nettoyée et utilisable du corpus : règles propres,
+  bruit exclu, veto 2026, contrat de données et frontière read-only/paper.
+- `TTWO_GTA6_OPERATIONAL_RESEARCH_2026.md` — application du corpus au cas TTWO / GTA VI, avec
+  données live nécessaires, garde-fous et comparaison action/call/spreads avant build IBKR.
+- `READING_GUIDE.md` — chemin de lecture humain pour reprendre la recherche sans relire la
+  conversation.
+- `SOURCE_GAPS.md` — sources réellement manquantes et règle de demande de nouvelles captures.

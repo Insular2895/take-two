@@ -24,3 +24,10 @@ Les sous-dossiers de catégories sont créés au premier dépôt de règle.
 ## Dépendances
 `docs/02_pipeline_extraction.md` (production), `docs/03_contradictions_et_doublons.md` (consolidation),
 `knowledge_base/` (consommation).
+
+## Revue de validité 2026
+
+Index central : `../research/documentary/RULES_2026_REVIEW_INDEX.md`.
+
+Les règles présentes ici peuvent être valides comme principes, mais ne deviennent jamais actives sans
+données live, sources actuelles, contrôles broker et validation humaine explicite.

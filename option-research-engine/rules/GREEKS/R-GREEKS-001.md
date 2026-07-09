@@ -59,6 +59,22 @@ simulation, scoring, robustesse, maintenance.
 ## Tags
 greeks, agrégation, risque marginal, portefeuille.
 
+## Revue 2026
+Statut 2026 : `valide_comme_principe`, `non_active_sans_donnees_contrat_live`.
+
+Le principe reste actuel : les Greeks doivent être agrégés au niveau position, portefeuille et
+transaction marginale. La partie à ne pas reprendre aveuglément depuis les livres est la mécanique
+contractuelle : le multiplicateur standard de nombreuses options actions US est souvent 100, mais
+il peut changer après corporate action ou contrat ajusté. Le moteur doit donc lire le
+`multiplier`, le `deliverable`, le `tradingClass`, le `localSymbol` et le `conId` depuis OCC/IBKR,
+et conserver la convention source des Greeks avant normalisation.
+
+Contrôle obligatoire avant scoring : refuser l'agrégation si une jambe n'a pas de multiplicateur,
+devise, modèle, timestamp, convention de vega/theta ou statut de contrat ajusté.
+
+Sources 2026 : OCC equity options product specifications ; OCC ODD ; IBKR contract details /
+option chain API.
+
 ## Historique
 - 2026-07-05 — EXTRAITE — Gemini, preuve retrouvée sur la page PDF.
 - 2026-07-05 — NORMALISÉE — contexte relu manuellement ; validation quantitative absente.

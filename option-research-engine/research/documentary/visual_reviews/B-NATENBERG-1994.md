@@ -8,8 +8,13 @@ Méthode : contrôle page par page à partir d'images fournies par l'utilisateur
 ne sont pas versionnées. Seuls les identifiants de figures, hypothèses visibles, observations et
 limites sont conservés.
 
-Suite dédiée au chapitre 8 :
-`B-NATENBERG-1994-CH08.md`.
+Revues dédiées :
+
+- `B-NATENBERG-1994-CH04.md` — volatilité, IV, distributions et marge d'erreur.
+- `B-NATENBERG-1994-CH05.md` — theoretical edge, hedge dynamique et coûts.
+- `B-NATENBERG-1994-CH08.md` — volatility spreads.
+- `B-NATENBERG-1994-CH09.md` — risk considerations.
+- `B-NATENBERG-1994-CH13.md` — hedging with options.
 
 ## Page imprimée 104 — Figures 6-6 et 6-7
 

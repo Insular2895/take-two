@@ -58,6 +58,21 @@ simulation, robustesse, alertes, maintenance.
 ## Tags
 delta, hedge, rebalancement, gamma.
 
+## Revue 2026
+Statut 2026 : `valide_comme_principe`, `non_active_sans_politique_hedge_et_validation_humaine`.
+
+Le principe reste actuel : une position delta neutre est locale et doit être recalculée quand le
+sous-jacent, le temps, la volatilité, les dividendes ou les jambes changent. En 2026, le moteur ne
+doit pas transformer ce principe en auto-hedging. Il faut intégrer le cycle de settlement, le style
+d'exercice, l'ex-dividend, l'assignment possible, les coûts et les règles broker.
+
+Contrôle obligatoire avant scoring : politique de hedge écrite, fréquence autorisée, seuil de delta,
+instrument de hedge, coûts, risque d'assignment/early exercise, et statut `human_validated` pour
+toute action qui modifie une position réelle.
+
+Sources 2026 : OCC ODD ; OCC equity options product specifications ; SEC T+1 ; IBKR exercise /
+assignment et margin documentation.
+
 ## Historique
 - 2026-07-05 — EXTRAITE — Gemini, preuve retrouvée sur la page PDF.
 - 2026-07-05 — NORMALISÉE — action limitée au recalcul et à la simulation.

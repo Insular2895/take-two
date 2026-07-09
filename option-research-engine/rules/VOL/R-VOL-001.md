@@ -58,6 +58,21 @@ simulation, scoring, robustesse, alertes.
 ## Tags
 volatilité, stress test, marge d'erreur, robustesse.
 
+## Revue 2026
+Statut 2026 : `valide_comme_principe`, `non_active_sans_surface_iv_live_et_scenarios`.
+
+Le principe reste actuel : une stratégie doit garder une marge d'erreur face à une mauvaise
+estimation de volatilité. Le seuil ne peut pas venir d'un livre ou d'une constante globale. Il doit
+être calibré par sous-jacent, expiration, skew, structure par terme, régime IV/RV, événements,
+liquidité et historique récent.
+
+Contrôle obligatoire avant scoring : surface IV par strike/expiry, IV rank/percentile, RV
+multi-horizons, calendrier d'événements, stress de volatilité, taux par maturité et statut de
+données non stale.
+
+Sources 2026 : IBKR market data/options chain ; historique IV/RV fiable ; U.S. Treasury daily
+yield curve ; calendrier earnings/events.
+
 ## Historique
 - 2026-07-05 — EXTRAITE — Gemini, preuve retrouvée sur la page PDF.
 - 2026-07-05 — NORMALISÉE — le point de pourcentage a été conservé comme exemple, pas comme seuil.

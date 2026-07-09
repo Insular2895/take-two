@@ -58,6 +58,19 @@ simulation, scoring, robustesse, maintenance.
 ## Tags
 greeks, signes, unités, normalisation, données.
 
+## Revue 2026
+Statut 2026 : `valide_comme_principe`, `non_active_si_convention_inconnue`.
+
+Le principe reste actuel : comparer des Greeks sans convention commune est dangereux. En 2026, les
+fournisseurs peuvent différer sur les unités de vega, theta, rho, le signe des positions short, le
+modèle, la devise, le multiplicateur et l'horodatage. Le moteur doit conserver la valeur brute,
+la convention source et la valeur normalisée.
+
+Contrôle obligatoire avant scoring : aucune somme ou comparaison de Greeks si `source_convention`,
+`unit`, `currency`, `multiplier`, `model`, `timestamp` ou `position_sign` manque.
+
+Sources 2026 : documentation du fournisseur de Greeks ; OCC contract specs ; IBKR contract details.
+
 ## Historique
 - 2026-07-06 — EXTRAITE — incohérence de présentation identifiée dans les figures 6-24 et 6-25.
 - 2026-07-06 — NORMALISÉE — convention économique confirmée par les figures 6-26 à 6-28.

@@ -133,8 +133,9 @@ Cette liste est une exigence de recherche, pas une décision d'implémentation :
 
 - Le corpus est majoritairement ancien ; règles de marché, seuils d'exercice et microstructure
   doivent être revérifiés avec des sources actuelles avant implémentation.
-- Les PDF Natenberg et Passarelli sont issus d'OCR ; les tableaux et formules nécessitent une revue
-  visuelle avant usage quantitatif.
+- Les PDF Natenberg et Passarelli sont issus d'OCR. Les tableaux et formules prioritaires des
+  chapitres documentés ont été revus visuellement ; toute section non encore revue reste impropre à
+  un usage quantitatif automatique.
 - L'édition Mauboussin traitée est celle de 2001, pas la révision 2021.
 - Le fichier Annie Duke est un résumé tiers de 15 pages. Il ne valide aucune citation du livre.
 - Une preuve courte retrouvée ne valide pas les champs `Action`, `Condition` ou `Exceptions` générés
@@ -145,6 +146,15 @@ Cette liste est une exigence de recherche, pas une décision d'implémentation :
 
 La phase documentaire est suffisamment avancée pour concevoir ensuite le contrat de données et le
 mode lecture seule d'IBKR.
+
+Un audit de fraîcheur 2026 a été ajouté dans `CURRENTNESS_AUDIT_2026.md`. Il confirme que les livres
+restent utiles pour la logique, les structures et les risques, mais que les paramètres opérationnels
+doivent venir de sources actuelles : SEC/OCC/IRS/Treasury, filings, données IBKR, surface IV, coûts,
+liquidité, marge et corporate actions.
+
+La matrice `STRATEGY_READINESS_MATRIX.md` classe les familles de stratégies. Verdict : le corpus est
+prêt pour un scanner explicatif en lecture seule ; il n'est pas prêt pour l'envoi ou la recommandation
+d'ordres réels.
 
 Avant de coder une stratégie ou d'envoyer un ordre, il reste à :
 

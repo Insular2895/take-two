@@ -59,6 +59,21 @@ sizing, simulation, scoring, robustesse.
 ## Tags
 coûts, contraintes, turnover, information ratio, edge net.
 
+## Revue 2026
+Statut 2026 : `valide_comme_principe`, `non_active_sans_contraintes_broker_et_stress`.
+
+Le principe reste actuel : l'edge net doit être évalué après contraintes et coûts. En 2026, cela
+inclut marge, permissions, borrow, locate, Regulation SHO/Rule 201, position limits, liquidité,
+taxes possibles, turnover, commissions, slippage, capacité de liquidation, assignment et corporate
+actions. Les stratégies à risque non borné doivent rester bloquées sans stress test et validation
+humaine.
+
+Contrôle obligatoire avant scoring : stress gaps/halts/IV crush/spread widening/assignment,
+`max_size`, permissions broker, marge pré-trade, disponibilité borrow, et statut
+`human_required` pour tout risque non borné ou short vol.
+
+Sources 2026 : IBKR margin/commissions/short availability ; SEC Regulation SHO Rule 201 ; OCC ODD.
+
 ## Historique
 - 2026-07-05 — DÉDUPLIQUÉE — fusion de candidates sur information et exécution.
 - 2026-07-05 — NORMALISÉE — seuil empirique conservé comme benchmark non actif.

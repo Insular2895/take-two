@@ -312,7 +312,18 @@ Le futur outil doit tester si la réplication est réalisable :
 9. Le futur script IBKR doit simuler le trade comme une trajectoire de cash flows, pas comme un
    simple écart `fair value - price`.
 
-## Prochaine source attendue
+## Prochaines sources possibles
+
+Si on reste dans Natenberg, la suite logique est :
+
+Natenberg, chapitre 13 — `Hedging with Options` :
+
+- hedging via options plutôt que uniquement via le sous-jacent ;
+- comparaison entre ajustements en options et ajustements en sous-jacent ;
+- effet des hedges sur delta, gamma, theta et vega ;
+- conditions où l'ajustement réduit un risque mais en augmente un autre.
+
+Si on croise avec un autre livre, la piste complémentaire reste :
 
 Passarelli, chapitre 13 — `Trading Realized Volatility` :
 

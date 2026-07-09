@@ -59,6 +59,19 @@ sélection, sizing, simulation, scoring, robustesse.
 ## Tags
 liquidité, spread, bid-ask, exécution, edge net.
 
+## Revue 2026
+Statut 2026 : `valide_comme_principe`, `non_active_sans_quote_executable_et_preview`.
+
+Le principe reste actuel : un edge théorique ne compte que s'il survit au prix exécutable. En 2026,
+il faut traiter le bid/ask par jambe, le net debit/credit réaliste, les tailles disponibles, les
+commissions, exchange fees, slippage, marge, assignment, early exercise et risque d'exécution
+partielle. Le midpoint seul n'est pas une preuve d'edge.
+
+Contrôle obligatoire avant scoring : calcul net bid/mid/ask, open interest/volume, NBBO ou source
+équivalente, preview marge/commission, seuil de liquidité, et warning sur short options/ex-dividend.
+
+Sources 2026 : IBKR option chain/order preview/commissions/margin ; OCC ODD ; OCC product specs.
+
 ## Historique
 - 2026-07-05 — EXTRAITE — Gemini, preuve retrouvée sur la page PDF.
 - 2026-07-05 — NORMALISÉE — contexte complet relu manuellement.

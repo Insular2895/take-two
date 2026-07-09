@@ -56,6 +56,19 @@ robustesse, alertes, maintenance.
 ## Tags
 plan, dérogation, journal, risque accepté.
 
+## Revue 2026
+Statut 2026 : `valide_comme_principe`, `non_active_sans_journal_et_controles`.
+
+Le principe reste actuel : distinguer qualité de décision, qualité d'exécution, résultat et chance
+est indispensable. En 2026, cela doit devenir un garde-fou logiciel : plan pré-trade, risque accepté,
+actions autorisées, log des écarts, justification des rolls/hedges/closures et post-mortem.
+
+Contrôle obligatoire avant scoring : aucun ordre préparé sans `plan_id`, `accepted_risk`,
+`invalidation`, `review_status`, journal d'exécution et règle d'escalade humaine si la taille, le
+risque non borné ou la structure changent.
+
+Sources 2026 : journal interne, logs broker/paper trading, checklist humaine, règles projet.
+
 ## Historique
 - 2026-07-05 — EXTRAITE — passages relus dans la source.
 - 2026-07-05 — NORMALISÉE — action limitée à l'alerte et à la traçabilité.
