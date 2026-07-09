@@ -17,9 +17,10 @@ Les sous-dossiers de catégories sont créés au premier dépôt de règle.
 - Contenu conforme à `FORMAT_REGLE.md`, tous champs obligatoires remplis.
 
 ## Conventions
-- Statuts autorisés (champ Historique) : `EXTRAITE`, `NORMALISÉE`, `DÉDUPLIQUÉE`, `PONDÉRÉE`,
-  `VALIDÉE`, `ACTIVE`, `REJETÉE`, `FUSIONNÉE`, `CONFLIT-OUVERT`.
-- Une règle n'est jamais supprimée : elle change de statut.
+- Statuts canoniques (champ `Statut`) : `DRAFT`, `EXTRACTED`, `VALIDATED`, `CONTRADICTED`, `DEPRECATED`.
+- Les anciens libellés (`EXTRAITE`, `NORMALISÉE`, etc.) peuvent rester dans l'`Historique` pour
+  expliquer l'ancien pipeline, mais ils ne pilotent pas l'activation du moteur.
+- Une règle n'est jamais supprimée : elle change de statut ou elle est remplacée par une règle reliée.
 
 ## Dépendances
 `docs/02_pipeline_extraction.md` (production), `docs/03_contradictions_et_doublons.md` (consolidation),

@@ -36,6 +36,8 @@ Corollaires non négociables :
 | Dossier | Rôle |
 |---|---|
 | `docs/` | Documentation transverse : méthodologie de recherche, pipeline d'extraction, moteur de maintenance, onboarding Codex |
+| `tool_usage.md` | Rôle exact de Gemini, Codex, IBKR, transcript/PDF tooling et repositories open source |
+| `evidence/` | Dossiers de preuve par décision : sources, règles, contradictions, simulations favorables/défavorables |
 | `research/` | Travaux de recherche en cours + `research/benchmarks/` (analyse des repos open source) |
 | `books/` | Bibliothèque officielle : une fiche par livre avec prompt Gemini spécifique |
 | `prompts/` | Prompts Gemini par catégorie de connaissance |
@@ -61,12 +63,15 @@ Corollaires non négociables :
 ## Ordre de lecture recommandé (pour Codex)
 
 1. `docs/05_onboarding_codex.md`
-2. `rules/FORMAT_REGLE.md`
-3. `docs/01_methodologie_recherche.md`
-4. `decision_engine/` (dans l'ordre des fichiers numérotés)
-5. `docs/06_moteur_maintenance.md`
-6. `knowledge_base/README.md`
-7. `research/benchmarks/`
+2. `tool_usage.md`
+3. `evidence/README.md`
+4. `rules/FORMAT_REGLE.md`
+5. `docs/04_ponderation_des_regles.md`
+6. `docs/01_methodologie_recherche.md`
+7. `decision_engine/` (dans l'ordre des fichiers numérotés)
+8. `docs/06_moteur_maintenance.md`
+9. `knowledge_base/README.md`
+10. `research/benchmarks/`
 
 ## Règles de contribution
 

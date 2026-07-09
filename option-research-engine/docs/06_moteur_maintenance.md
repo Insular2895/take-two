@@ -7,7 +7,7 @@
 Après achat, le moteur ne réanalyse pas toute la stratégie : il applique **uniquement les règles
 optimisées** retenues au moment de la décision (et enregistrées dans le journal). Aucun paramètre
 n'est codé en dur : seuils de stops, niveaux de récupération, fréquences de surveillance
-proviennent tous de l'optimisation initiale et des règles `ACTIVE` de la base.
+proviennent tous de l'optimisation initiale et des règles `VALIDATED` non bloquées de la base.
 
 ## 1. Surveillance continue
 

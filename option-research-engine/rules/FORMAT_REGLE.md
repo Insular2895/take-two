@@ -9,6 +9,13 @@ obligatoires (écrire « Aucun(e) connue » plutôt que laisser vide).
 ## Titre
 Formulation en une phrase, verbe d'action.
 
+## Statut
+Un des statuts de cycle de vie suivants : `DRAFT`, `EXTRACTED`, `VALIDATED`, `CONTRADICTED`,
+`DEPRECATED`.
+
+Une règle `VALIDATED` peut rester non active si les données live, la marge, l'exécution ou la
+validation humaine manquent. Le statut de cycle de vie ne remplace pas les blocages opérationnels.
+
 ## Description
 Ce que la règle fait et dans quel contexte elle s'applique. 3–6 phrases maximum.
 
@@ -61,8 +68,21 @@ Règles liées : convergences (`≈ R-XXX-NNN`), contradictions (`≠ R-XXX-NNN`
 Mots-clés libres en minuscules.
 
 ## Historique
-- AAAA-MM-JJ — statut — commentaire (ex. `2026-07-04 — EXTRAITE — Gemini, prompt v2`)
+- AAAA-MM-JJ — statut — commentaire (ex. `2026-07-04 — EXTRACTED — Gemini, prompt v2`)
 ```
+
+## Cycle de vie des statuts
+
+| Statut | Usage |
+|---|---|
+| `DRAFT` | règle esquissée, non sourcée ou encore ambiguë |
+| `EXTRACTED` | règle extraite avec provenance, mais non encore validée |
+| `VALIDATED` | source vérifiée, contradictions traitées et validation/simulation suffisante pour son domaine |
+| `CONTRADICTED` | règle contredite ou dangereuse telle quelle |
+| `DEPRECATED` | règle remplacée ou obsolète |
+
+Les anciens libellés d'historique (`EXTRAITE`, `NORMALISÉE`, etc.) peuvent rester dans les lignes
+d'historique, mais le champ `Statut` doit utiliser les cinq statuts canoniques ci-dessus.
 
 ## Critères de rejet automatique
 Une règle est rejetée si : condition non testable, action non exécutable, source incomplète

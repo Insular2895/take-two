@@ -44,5 +44,14 @@ Une information sans source est supprimée, jamais conservée « en attendant »
 
 ## Cycle de vie d'une connaissance
 
-`EXTRAITE` → `NORMALISÉE` (format officiel) → `DÉDUPLIQUÉE` → `PONDÉRÉE` → `VALIDÉE` (simulation) → `ACTIVE`
-ou `REJETÉE` (avec justification conservée). Les statuts sont notés dans le champ *Historique* de chaque règle.
+Statuts canoniques du champ `Statut` :
+
+`DRAFT` → `EXTRACTED` → `VALIDATED`
+
+Branches possibles :
+
+- `CONTRADICTED` si la règle est contredite, dangereuse telle quelle ou inutilisable sans arbitrage.
+- `DEPRECATED` si la règle est remplacée, obsolète ou conservée seulement pour historique.
+
+Les étapes internes comme normalisation, déduplication, pondération ou simulation sont conservées dans
+l'`Historique`, mais ne remplacent pas le statut canonique.

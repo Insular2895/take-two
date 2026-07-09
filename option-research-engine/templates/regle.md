@@ -4,6 +4,7 @@
 # R-<CAT>-<NNN> — <Titre>
 
 ## Titre
+## Statut
 ## Description
 ## Condition
 ## Variables nécessaires
@@ -21,4 +22,4 @@
 ## Références croisées
 ## Tags
 ## Historique
-- AAAA-MM-JJ — EXTRAITE — <source du passage>
+- AAAA-MM-JJ — EXTRACTED — <source du passage>

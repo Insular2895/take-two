@@ -46,4 +46,4 @@ simulations, scoring, robustesse.
 À chaque nouveau livre traité, le pipeline détecte automatiquement :
 - les **convergences** (plusieurs auteurs → confiance renforcée, cf. pondération) ;
 - les **contradictions** (conservées et arbitrées, jamais écrasées silencieusement) ;
-- les **nouvelles règles** (ajoutées avec statut `EXTRAITE`).
+- les **nouvelles règles** (ajoutées avec statut `EXTRACTED`).

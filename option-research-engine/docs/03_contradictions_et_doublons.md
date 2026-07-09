@@ -9,7 +9,8 @@ nécessaires + actions équivalentes. Procédure :
 2. Si équivalentes → **fusion** : une seule règle consolidée, qui liste **toutes** les sources
    (chaque auteur/livre/page est conservé en référence croisée).
 3. La fusion **augmente** le niveau de confiance (convergence multi-auteurs, cf. pondération).
-4. Les règles d'origine restent dans `rules/` avec statut `FUSIONNÉE → R-XXX-NNN`.
+4. Les règles d'origine restent dans `rules/` avec statut `DEPRECATED` si elles sont remplacées par
+   une règle consolidée, et le lien vers `R-XXX-NNN` est conservé dans l'historique.
 
 ## 2. Détection des contradictions
 
@@ -23,9 +24,9 @@ Procédure d'arbitrage (dans cet ordre) :
 2. **Confiance** — comparer les niveaux de confiance et le poids des auteurs.
 3. **Simulation** — si la contradiction persiste, elle est tranchée par un protocole dans
    `validation/` (Monte Carlo / backtest). Le résultat est documenté.
-4. **Conservation** — la règle « perdante » n'est pas supprimée : elle passe en statut `REJETÉE`
-   avec la justification et le lien vers la simulation. Une contradiction non tranchée est
-   marquée `CONFLIT-OUVERT` et les deux règles sont inutilisables par le moteur jusqu'à arbitrage.
+4. **Conservation** — la règle « perdante » n'est pas supprimée : elle passe en statut `CONTRADICTED`
+   avec la justification et le lien vers la simulation. Une contradiction non tranchée reste aussi
+   `CONTRADICTED`, et les deux règles sont inutilisables par le moteur jusqu'à arbitrage.
 
 ## 3. Registre
 

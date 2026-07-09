@@ -11,6 +11,7 @@ une règle ou un journal sans partir du modèle correspondant.
 | `regle.md` | Nouvelle règle (`rules/<CAT>/`) — copie du format officiel |
 | `fiche_repository.md` | Étude d'un repo open source (`research/`) |
 | `journal_decision.md` | Journal d'une opération (futur moteur, Module 11) |
+| `../evidence/templates/decision_evidence.md` | Dossier de preuve par décision avant activation |
 | `prompt_categorie.md` | Nouveau prompt de catégorie (`prompts/categories/`) |
 
 ## Conventions

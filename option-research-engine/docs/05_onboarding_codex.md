@@ -21,6 +21,8 @@ Un moteur d'optimisation d'options (Calls) — pas une IA d'opinion. Quatre pili
   ni type (ITM/ATM/OTM/spread). La structure est un **résultat** de l'optimisation.
 - Aucun ordre IBKR envoyé sans validation humaine explicite.
 - Aucune décision inexplicable : chaque recommandation cite ses règles, scores et hypothèses.
+- Aucune décision sans dossier de preuve dans `evidence/` : sources, règles, contradictions,
+  simulations favorables/défavorables et blocages live/broker.
 
 ## 3. Architecture logique attendue (spécifiée, non codée)
 
@@ -55,19 +57,24 @@ Chaque bloc est spécifié dans `decision_engine/` et `docs/06_moteur_maintenanc
 
 - Format unique des règles : `rules/FORMAT_REGLE.md`. Chaque règle est machine-exploitable :
   Condition (testable) → Variables → Action (exécutable) → Exceptions.
-- Ne jamais utiliser une règle en statut `EXTRAITE`, `CONFLIT-OUVERT` ou `REJETÉE`.
-  Seules les règles `ACTIVE` (validées ou convergentes) alimentent le moteur.
+- Ne jamais utiliser une règle en statut `DRAFT`, `EXTRACTED`, `CONTRADICTED` ou `DEPRECATED`.
+  Seules les règles `VALIDATED`, puis non bloquées par les données live/broker, alimentent le moteur.
 - La pondération (`docs/04_ponderation_des_regles.md`) fournit le poids de chaque règle dans les votes.
+- La hiérarchie des sources (`references/source_weighting.md`) indique pourquoi livres spécialistes,
+  sources officielles, repos GitHub et blogs ne pèsent pas pareil.
 
 ## 6. Ordre de lecture
 
 1. `/README.md` puis `/CONVENTIONS.md`
-2. `rules/FORMAT_REGLE.md`
-3. `decision_engine/01` → `06`
-4. `docs/06_moteur_maintenance.md`
-5. `scoring/`, `monte_carlo/`, `simulations/`, `validation/`
-6. `research/benchmarks/` (ce que l'open source fait mieux / ce qu'on réutilise)
-7. Dossiers de catégories (`greeks/`, `volatility/`, …) selon le module développé
+2. `tool_usage.md`
+3. `evidence/README.md`
+4. `rules/FORMAT_REGLE.md`
+5. `references/source_weighting.md`
+6. `decision_engine/01` → `06`
+7. `docs/06_moteur_maintenance.md`
+8. `scoring/`, `monte_carlo/`, `simulations/`, `validation/`
+9. `research/benchmarks/` (ce que l'open source fait mieux / ce qu'on réutilise)
+10. Dossiers de catégories (`greeks/`, `volatility/`, …) selon le module développé
 
 ## 7. Critère d'achèvement de la phase de recherche
 

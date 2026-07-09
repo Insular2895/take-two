@@ -6,6 +6,7 @@ documentation de repos, avec citations exactes.
 
 ## Ce qui y sera stocké
 - `bibliographie.md` — liste maîtresse (ID, titre, auteur, année, catégorie, statut de traitement).
+- `source_weighting.md` — hiérarchie de confiance des sources et arbitrage des conflits.
 - Fiches de papers (mêmes exigences de traçabilité que les livres, format allégé).
 - Liens vers les repos étudiés et leurs versions/commits de référence.
 
