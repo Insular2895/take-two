@@ -11,7 +11,16 @@ cinq questions :
 
 ## Contenu
 `awesome-quant.md`, `qlib.md`, `gs-quant.md`, `machine-learning-for-trading.md`,
-`financial-models-numerical-methods.md` — puis un fichier par nouveau repo étudié.
+`financial-models-numerical-methods.md`, `optrade.md`, `graphvega.md`, `keeks.md`
+— puis un fichier par nouveau repo étudié.
+
+## Candidats prioritaires ajoutés
+
+| Repository | Priorité | Statut | Usage envisagé |
+|---|---:|---|---|
+| OpTrade | 5/5 | `candidate_to_verify` | Recherche options, sélection de contrats, moneyness, expirations, volatilité, pipeline data, expérimentation ML. |
+| GraphVega | 4/5 | `candidate_to_verify` | Visualisation P/L, Greeks, scénarios et future UI ; pas candidat moteur. |
+| Keeks | 4/5 | `candidate_to_verify` | Kelly, bankroll, drawdown, allocation ; enrichissement du module sizing. |
 
 ## Format attendu
 Les cinq sections ci-dessus, précédées d'un en-tête d'identification (licence, maturité, techno).

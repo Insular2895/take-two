@@ -57,6 +57,8 @@ Lis dans cet ordre :
 5. Les fiches Natenberg/Passarelli pour définir Greeks, IV/RV et hedge policy
 6. Les fiches McMillan pour définir les familles de structures
 7. La fiche Mauboussin pour la couche thèse / sous-jacent
+8. `../benchmarks/optrade.md`, `../benchmarks/graphvega.md`, `../benchmarks/keeks.md` pour les
+   candidats open source à auditer avant la phase build.
 
 ## Statut réel
 
@@ -81,3 +83,6 @@ Lis dans cet ordre :
 7. `visual_reviews/B-PASSARELLI-2012-VOL-CHARTS.md`
 8. `visual_reviews/B-MCMILLAN-2012-CH03.md`
 9. `visual_reviews/B-MCMILLAN-2012-CH07.md`
+10. `../benchmarks/optrade.md`
+11. `../benchmarks/graphvega.md`
+12. `../benchmarks/keeks.md`

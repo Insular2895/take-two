@@ -18,3 +18,9 @@ Aucun composant n'est adopté « parce qu'il est populaire » : le benchmark est
 
 ## Dépendances
 `research/benchmarks/`, `validation/`, `monte_carlo/`.
+
+## Candidats de benchmark à planifier
+
+- OpTrade : benchmark pipeline de recherche options et features de sélection.
+- GraphVega : benchmark visualisation P/L, Greeks et scénarios UI.
+- Keeks : benchmark money management, Kelly, bankroll, drawdown et sizing.

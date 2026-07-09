@@ -35,6 +35,23 @@ Le corpus contient l'édition originale de `2001`, complète et exploitable. Si 
 la méthodologie révisée, fournir l'édition `2021`. Ce n'est pas une panne d'extraction : c'est une
 question de version.
 
+### Repositories open source candidats
+
+Trois repositories ont été ajoutés comme candidats de benchmark, mais ne sont pas encore validés
+comme dépendances :
+
+- OpTrade — `research/benchmarks/optrade.md`
+- GraphVega — `research/benchmarks/graphvega.md`
+- Keeks — `research/benchmarks/keeks.md`
+
+Avant usage opérationnel, vérifier pour chacun :
+
+1. URL exacte, licence et compatibilité avec le projet ;
+2. activité réelle de maintenance, tests, issues et dépendances ;
+3. conventions d'unités, définitions de Greeks / volatilité / P&L ;
+4. reproductibilité des exemples ;
+5. valeur objective par rapport à notre architecture.
+
 ## Pages déjà résolues localement
 
 - McMillan, chapitre 25 LEAPS, pages imprimées `367–389` : extraction et revue ciblée effectuées.

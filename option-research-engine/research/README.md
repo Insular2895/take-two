@@ -15,6 +15,13 @@ algorithmes éprouvés, éviter de réinventer des composants standards, compare
 - `documentary/` — résultats de la phase de lecture des livres, candidats et conflits ouverts.
 - Fiches d'étude complètes de repos : utiliser `templates/fiche_repository.md`.
 
+## Candidats repo ajoutés pour la phase outil
+
+- `benchmarks/optrade.md` — candidat prioritaire pour pipeline de recherche options, features de
+  contrats, moneyness, expirations, volatilité et expérimentation ML.
+- `benchmarks/graphvega.md` — candidat UI / visualisation : P/L, Greeks, scénarios.
+- `benchmarks/keeks.md` — candidat money management : Kelly, bankroll, drawdown, allocation.
+
 ## Format attendu
 Markdown. Toute affirmation sur un repo doit être vérifiable (lien vers le fichier/module concerné).
 
