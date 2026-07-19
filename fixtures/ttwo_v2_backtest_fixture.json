@@ -1,0 +1,81 @@
+{
+  "ticker": "TTWO",
+  "as_of": "2026-07-18T12:00:00Z",
+  "evidence_class": "illustrative_backtest",
+  "source": {
+    "id": "FIXTURE-TTWO-BACKTEST-V2",
+    "title": "Synthetic TTWO option backtest cases",
+    "source_type": "offline_fixture",
+    "uri": "fixtures/ttwo_v2_backtest_fixture.json",
+    "status": "validated",
+    "accessed_at": "2026-07-18T12:00:00Z",
+    "confidence_level": "low",
+    "notes": "Synthetic bid/ask paths for mechanics and look-ahead tests only",
+    "used_for_decision": false
+  },
+  "cases": [
+    {
+      "case_id": "train-long-call-win",
+      "split": "train",
+      "entry_timestamp": "2026-01-05T15:31:00Z",
+      "exit_timestamp": "2026-01-20T20:00:00Z",
+      "model_calibrated_through": "2026-01-02T21:00:00Z",
+      "commission_per_contract_per_side": 0.65,
+      "slippage_per_contract_per_side": 1.5,
+      "legs": [{
+        "side": "long", "quantity": 1, "multiplier": 100,
+        "entry_quote": {"timestamp": "2026-01-05T15:30:00Z", "data_available_at": "2026-01-05T15:30:05Z", "bid": 9.5, "ask": 10.0},
+        "exit_quote": {"timestamp": "2026-01-20T19:59:00Z", "data_available_at": "2026-01-20T19:59:05Z", "bid": 14.0, "ask": 14.5}
+      }]
+    },
+    {
+      "case_id": "train-long-call-loss",
+      "split": "train",
+      "entry_timestamp": "2026-02-02T15:31:00Z",
+      "exit_timestamp": "2026-02-17T20:00:00Z",
+      "model_calibrated_through": "2026-01-30T21:00:00Z",
+      "commission_per_contract_per_side": 0.65,
+      "slippage_per_contract_per_side": 1.5,
+      "legs": [{
+        "side": "long", "quantity": 1, "multiplier": 100,
+        "entry_quote": {"timestamp": "2026-02-02T15:30:00Z", "data_available_at": "2026-02-02T15:30:05Z", "bid": 11.5, "ask": 12.0},
+        "exit_quote": {"timestamp": "2026-02-17T19:59:00Z", "data_available_at": "2026-02-17T19:59:05Z", "bid": 8.0, "ask": 8.5}
+      }]
+    },
+    {
+      "case_id": "test-long-call-win",
+      "split": "test",
+      "entry_timestamp": "2026-03-02T15:31:00Z",
+      "exit_timestamp": "2026-03-17T20:00:00Z",
+      "model_calibrated_through": "2026-02-27T21:00:00Z",
+      "commission_per_contract_per_side": 0.65,
+      "slippage_per_contract_per_side": 1.5,
+      "legs": [{
+        "side": "long", "quantity": 1, "multiplier": 100,
+        "entry_quote": {"timestamp": "2026-03-02T15:30:00Z", "data_available_at": "2026-03-02T15:30:05Z", "bid": 8.5, "ask": 9.0},
+        "exit_quote": {"timestamp": "2026-03-17T19:59:00Z", "data_available_at": "2026-03-17T19:59:05Z", "bid": 13.0, "ask": 13.5}
+      }]
+    },
+    {
+      "case_id": "test-bull-call-spread-loss",
+      "split": "test",
+      "entry_timestamp": "2026-04-01T15:31:00Z",
+      "exit_timestamp": "2026-04-16T20:00:00Z",
+      "model_calibrated_through": "2026-03-31T20:00:00Z",
+      "commission_per_contract_per_side": 0.65,
+      "slippage_per_contract_per_side": 1.5,
+      "legs": [
+        {
+          "side": "long", "quantity": 1, "multiplier": 100,
+          "entry_quote": {"timestamp": "2026-04-01T15:30:00Z", "data_available_at": "2026-04-01T15:30:05Z", "bid": 14.5, "ask": 15.0},
+          "exit_quote": {"timestamp": "2026-04-16T19:59:00Z", "data_available_at": "2026-04-16T19:59:05Z", "bid": 10.0, "ask": 10.5}
+        },
+        {
+          "side": "short", "quantity": 1, "multiplier": 100,
+          "entry_quote": {"timestamp": "2026-04-01T15:30:00Z", "data_available_at": "2026-04-01T15:30:05Z", "bid": 8.0, "ask": 8.5},
+          "exit_quote": {"timestamp": "2026-04-16T19:59:00Z", "data_available_at": "2026-04-16T19:59:05Z", "bid": 3.5, "ask": 4.0}
+        }
+      ]
+    }
+  ]
+}

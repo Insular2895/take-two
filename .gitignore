@@ -1,0 +1,48 @@
+# macOS / éditeurs
+.DS_Store
+**/.DS_Store
+.vscode/
+.idea/
+
+# Secrets et configuration locale
+.env
+.env.*
+!.env.example
+
+# Exports de donnees de marche sous licence / reproductibles localement
+data/alpaca/
+reports/alpaca_*
+data/marketdata/
+reports/marketdata_*
+data/treasury/
+
+# Python / caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Sources longues et livres protégés : locaux uniquement
+*.pdf
+*.epub
+*.mobi
+sources/local-only/
+sources_cold/
+books/
+
+# Sorties lourdes ou reproductibles du pipeline PDF
+workspaces/
+transcription_runs/
+evidence_packets/
+option-research-engine/evidence/**/*.png
+option-research-engine/evidence/**/*.jpg
+option-research-engine/evidence/**/*.jpeg
+option-research-engine/evidence/**/*.tif
+option-research-engine/evidence/**/*.tiff
+option-research-engine/evidence/**/*.txt
+option-research-engine/evidence/**/*.json
+!option-research-engine/evidence/**/README.md
+!option-research-engine/evidence/**/*.example.json

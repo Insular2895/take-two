@@ -1,0 +1,41 @@
+{
+  "ticker": "TTWO",
+  "timeframe": "1Day",
+  "notes": "Example contract symbols and dates must be checked against Alpaca before use.",
+  "cases": [
+    {
+      "case_id": "train-ttwo-jan27-call",
+      "split": "train",
+      "entry_timestamp": "2026-06-02T15:30:00Z",
+      "exit_timestamp": "2026-06-16T15:30:00Z",
+      "model_calibrated_through": "2026-06-01T20:00:00Z",
+      "commission_per_contract_per_side": 0.65,
+      "slippage_per_contract_per_side": 2.0,
+      "legs": [
+        {
+          "symbol": "TTWO270115C00260000",
+          "side": "long",
+          "quantity": 1,
+          "multiplier": 100
+        }
+      ]
+    },
+    {
+      "case_id": "test-ttwo-jan27-call",
+      "split": "test",
+      "entry_timestamp": "2026-07-01T15:30:00Z",
+      "exit_timestamp": "2026-07-15T15:30:00Z",
+      "model_calibrated_through": "2026-06-30T20:00:00Z",
+      "commission_per_contract_per_side": 0.65,
+      "slippage_per_contract_per_side": 2.0,
+      "legs": [
+        {
+          "symbol": "TTWO270115C00260000",
+          "side": "long",
+          "quantity": 1,
+          "multiplier": 100
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "take-two-options"
+version = "0.9.0"
+description = "Read-only TTWO options research and scenario engine"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "alpaca-py>=0.43.5,<0.44",
+  "pydantic>=2.10,<3",
+  "QuantLib>=1.43,<1.44",
+  "typer>=0.15,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.14,<2",
+  "pytest>=8.3,<9",
+  "ruff>=0.9,<1",
+]
+
+[project.scripts]
+ttwo-options = "take_two_options.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["alpaca.*", "numpy.*", "pandas.*"]
+follow_imports = "skip"
+ignore_missing_imports = true

@@ -10,6 +10,7 @@ Aucun outil ne doit être traité comme une source de vérité universelle.
 Usage autorisé :
 
 - extraction de livres, PDF ou Markdown chapitre par chapitre ;
+- vérification visuelle ciblée à partir d'une page complète et d'un crop ;
 - transformation de passages en règles candidates ;
 - repérage de contradictions, tableaux, formules et exemples ;
 - production de brouillons `EXTRACTED`.
@@ -17,7 +18,11 @@ Usage autorisé :
 Limites :
 
 - Gemini ne valide pas une règle ;
+- Gemini n'est jamais la source documentaire unique : l'image source reste la preuve primaire ;
+- Gemini reçoit un paquet ciblé, pas le livre entier par défaut ;
 - Gemini peut mal lire une page, une formule, un tableau ou une pagination OCR ;
+- sa réponse doit respecter `schemas/gemini_visual_review.schema.json` et toute divergence critique
+  reste bloquante ;
 - toute sortie Gemini reste `EXTRACTED` tant qu'elle n'est pas vérifiée par source, revue visuelle,
   simulation ou validation humaine selon le risque.
 
@@ -29,12 +34,16 @@ Usage autorisé :
 - recherche, consolidation, déduplication et documentation ;
 - écriture de code seulement après validation de la phase de recherche ;
 - génération de tests, simulateurs, collecteurs read-only et outils d'audit ;
+- fallback visuel local lorsque Gemini échoue : lancement de l'inspection, ouverture des preuves et
+  rédaction d'un rapport de divergence séparé ;
 - préparation de propositions traçables avec règles, sources, simulations et limites.
 
 Limites :
 
 - Codex ne transforme pas une idée en décision d'exécution sans validation explicite ;
 - Codex ne doit pas coder de règle arbitraire ;
+- Codex ne corrige pas directement le Markdown à partir de son fallback visuel ;
+- si son runtime ne peut pas ouvrir les images, il doit retourner `codex_media_unavailable` ;
 - Codex ne doit pas faire de recommandation de trade live sans données broker/live et validation
   humaine.
 
@@ -75,6 +84,7 @@ Limites :
 Usage autorisé :
 
 - convertir les PDF ou sources longues en Markdown exploitable ;
+- produire un JSON sidecar canonique et des paquets de preuve locaux ;
 - conserver la provenance : livre, chapitre, page PDF, page imprimée si disponible ;
 - isoler les tableaux/formules à revoir visuellement ;
 - alimenter les prompts Gemini.
@@ -82,6 +92,10 @@ Usage autorisé :
 Limites :
 
 - les PDF originaux ne sont pas commités ;
+- les PDF restent en lecture seule et les médias de preuve lourds restent locaux ;
 - les OCR et conversions peuvent déformer chiffres, signes, colonnes ou formules ;
 - les tableaux et formules utilisés pour le quantitatif doivent avoir une revue visuelle ou une
   vérification numérique indépendante.
+- un accord OCR/Gemini/Codex ne suffit pas si un contrôle déterministe échoue.
+
+Spécification normative : `docs/07_transcription_pdf_technique_v2.md`.

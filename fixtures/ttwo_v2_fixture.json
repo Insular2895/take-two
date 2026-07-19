@@ -1,0 +1,595 @@
+{
+  "underlying": {
+    "ticker": "TTWO",
+    "name": "Take-Two Interactive Software, Inc.",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "price": 257.79,
+    "timestamp": "2026-07-18T12:00:00Z",
+    "freshness": {
+      "source": "offline_tt_nasdaq_fixture",
+      "as_of": "2026-07-18T12:00:00Z",
+      "accessed_at": "2026-07-18T12:00:00Z",
+      "status": "current",
+      "is_stale": false,
+      "max_age_seconds": 86400
+    },
+    "sources": [
+      {
+        "id": "FIXTURE-SPOT-TTWO-20260718",
+        "title": "Illustrative TTWO spot fixture",
+        "source_type": "offline_fixture",
+        "uri": "fixtures/ttwo_v1_fixture.json",
+        "status": "validated",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "confidence_level": "low",
+        "notes": "Schema-valid test value only; not a live market observation",
+        "used_for_decision": true
+      }
+    ],
+    "corporate_actions": [],
+    "events": [
+      {
+        "event_type": "product_release",
+        "name": "Illustrative GTA VI release catalyst window",
+        "start": "2026-11-19T00:00:00Z",
+        "end": "2026-11-20T23:59:00Z",
+        "source": {
+          "id": "CORPUS-TTWO-GTA6-DATE",
+          "title": "TTWO GTA VI operational research 2026",
+          "source_type": "repository_research_note",
+          "uri": "option-research-engine/research/documentary/TTWO_GTA6_OPERATIONAL_RESEARCH_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "medium",
+          "notes": "Must be reverified from company IR before human use",
+          "used_for_decision": true
+        },
+        "handled": true,
+        "critical": true
+      }
+    ]
+  },
+  "fundamental": {
+    "ticker": "TTWO",
+    "as_of": "2026-07-18T12:00:00Z",
+    "freshness": {
+      "source": "offline_fundamental_fixture",
+      "as_of": "2026-07-18T12:00:00Z",
+      "accessed_at": "2026-07-18T12:00:00Z",
+      "status": "current",
+      "is_stale": false,
+      "max_age_seconds": 86400
+    },
+    "direction": "bullish",
+    "thesis": "Illustrative bullish research thesis: release execution could lift bookings and expectations.",
+    "catalyst": "Illustrative GTA VI release window; date requires primary-source refresh.",
+    "catalyst_window_start": "2026-11-19T00:00:00Z",
+    "catalyst_window_end": "2026-11-20T23:59:00Z",
+    "invalidation": "Re-underwrite on a material release delay, guidance deterioration, or thesis-source conflict.",
+    "scenarios": [
+      {
+        "name": "downside",
+        "direction": "bearish",
+        "target_price": 210.0,
+        "probability": 0.25,
+        "drivers": ["release delay", "guidance deterioration", "multiple compression"]
+      },
+      {
+        "name": "base",
+        "direction": "neutral",
+        "target_price": 260.0,
+        "probability": 0.5,
+        "drivers": ["release remains on plan", "expectations broadly reflected"]
+      },
+      {
+        "name": "upside",
+        "direction": "bullish",
+        "target_price": 330.0,
+        "probability": 0.25,
+        "drivers": ["strong launch evidence", "bookings revisions", "durable rerating"]
+      }
+    ],
+    "sources": [
+      {
+        "id": "CORPUS-TTWO-FUNDAMENTAL-2026",
+        "title": "TTWO GTA VI operational research 2026",
+        "source_type": "repository_research_note",
+        "uri": "option-research-engine/research/documentary/TTWO_GTA6_OPERATIONAL_RESEARCH_2026.md",
+        "status": "read_only_gate",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "confidence_level": "medium",
+        "notes": "Scenario targets and probabilities are analyst assumptions in this fixture",
+        "used_for_decision": true
+      }
+    ],
+    "latest_filings": [],
+    "expectations_implied": "Not modeled; fixture target prices are explicit analyst assumptions.",
+    "valuation_method": "Illustrative three-case scenario analysis; no reverse DCF in V1 fixture.",
+    "growth_assumptions": [],
+    "margin_assumptions": [],
+    "cash_flow_assumptions": [],
+    "debt": null,
+    "dilution": null,
+    "buybacks": null,
+    "risks": [
+      "release delay",
+      "guidance deterioration",
+      "multiple compression",
+      "option IV crush and liquidity stress"
+    ]
+  },
+  "portfolio": {
+    "as_of": "2026-07-18T12:00:00Z",
+    "freshness": {
+      "source": "offline_portfolio_cost_fixture",
+      "as_of": "2026-07-18T12:00:00Z",
+      "accessed_at": "2026-07-18T12:00:00Z",
+      "status": "current",
+      "is_stale": false,
+      "max_age_seconds": 86400
+    },
+    "source": {
+      "id": "FIXTURE-PORTFOLIO-COSTS-20260718",
+      "title": "Illustrative portfolio cost and margin assumptions",
+      "source_type": "offline_fixture",
+      "uri": "fixtures/ttwo_v1_fixture.json",
+      "status": "validated",
+      "accessed_at": "2026-07-18T12:00:00Z",
+      "confidence_level": "low",
+      "notes": "Synthetic research budget, fees, slippage, permissions, and margin",
+      "used_for_decision": true
+    },
+    "currency": "USD",
+    "max_loss_budget": 5000.0,
+    "research_share_quantity": 10,
+    "commission_per_option_contract": 0.65,
+    "slippage_per_option_contract": 1.5,
+    "stock_commission": 0.0,
+    "stock_slippage_bps": 5.0,
+    "margin_available": 25000.0,
+    "margin_known": true,
+    "account_permissions": ["research_fixture_only"]
+  },
+  "option_quotes": [
+    {
+      "contract": {
+        "underlying": "TTWO",
+        "con_id": 1002501,
+        "local_symbol": "TTWO  270115C00250000",
+        "trading_class": "TTWO",
+        "exchange": "SMART",
+        "currency": "USD",
+        "expiration": "2027-01-15T21:00:00Z",
+        "strike": 250.0,
+        "option_type": "call",
+        "multiplier": 100.0,
+        "deliverable": "100 TTWO common shares",
+        "exercise_style": "american",
+        "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+        "adjusted_contract": false,
+        "adjustment_understood": true
+      },
+      "bid": 33.5,
+      "ask": 35.5,
+      "last": 34.4,
+      "bid_size": 20,
+      "ask_size": 18,
+      "volume": 145,
+      "open_interest": 1210,
+      "implied_volatility": 0.37,
+      "delta": 0.64,
+      "gamma": 0.006,
+      "theta": -0.08,
+      "vega": 0.42,
+      "rho": 0.29,
+      "timestamp": "2026-07-18T12:00:00Z",
+      "freshness": {
+        "source": "offline_option_chain_fixture",
+        "as_of": "2026-07-18T12:00:00Z",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "status": "current",
+        "is_stale": false,
+        "max_age_seconds": 86400
+      },
+      "source": {
+        "id": "FIXTURE-CHAIN-TTWO-20260718",
+        "title": "Illustrative TTWO option-chain fixture",
+        "source_type": "offline_fixture",
+        "uri": "fixtures/ttwo_v1_fixture.json",
+        "status": "validated",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "confidence_level": "low",
+        "notes": "Synthetic quote for deterministic tests; not executable",
+        "used_for_decision": true
+      }
+    },
+    {
+      "contract": {
+        "underlying": "TTWO",
+        "con_id": 1002601,
+        "local_symbol": "TTWO  270115C00260000",
+        "trading_class": "TTWO",
+        "exchange": "SMART",
+        "currency": "USD",
+        "expiration": "2027-01-15T21:00:00Z",
+        "strike": 260.0,
+        "option_type": "call",
+        "multiplier": 100.0,
+        "deliverable": "100 TTWO common shares",
+        "exercise_style": "american",
+        "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+        "adjusted_contract": false,
+        "adjustment_understood": true
+      },
+      "bid": 28.0,
+      "ask": 30.0,
+      "last": 29.1,
+      "bid_size": 24,
+      "ask_size": 22,
+      "volume": 210,
+      "open_interest": 1840,
+      "implied_volatility": 0.36,
+      "delta": 0.56,
+      "gamma": 0.0065,
+      "theta": -0.08,
+      "vega": 0.44,
+      "rho": 0.27,
+      "timestamp": "2026-07-18T12:00:00Z",
+      "freshness": {
+        "source": "offline_option_chain_fixture",
+        "as_of": "2026-07-18T12:00:00Z",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "status": "current",
+        "is_stale": false,
+        "max_age_seconds": 86400
+      },
+      "source": {
+        "id": "FIXTURE-CHAIN-TTWO-20260718",
+        "title": "Illustrative TTWO option-chain fixture",
+        "source_type": "offline_fixture",
+        "uri": "fixtures/ttwo_v1_fixture.json",
+        "status": "validated",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "confidence_level": "low",
+        "notes": "Synthetic quote for deterministic tests; not executable",
+        "used_for_decision": true
+      }
+    },
+    {
+      "contract": {
+        "underlying": "TTWO",
+        "con_id": 1002801,
+        "local_symbol": "TTWO  270115C00280000",
+        "trading_class": "TTWO",
+        "exchange": "SMART",
+        "currency": "USD",
+        "expiration": "2027-01-15T21:00:00Z",
+        "strike": 280.0,
+        "option_type": "call",
+        "multiplier": 100.0,
+        "deliverable": "100 TTWO common shares",
+        "exercise_style": "american",
+        "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+        "adjusted_contract": false,
+        "adjustment_understood": true
+      },
+      "bid": 19.0,
+      "ask": 20.5,
+      "last": 19.8,
+      "bid_size": 25,
+      "ask_size": 20,
+      "volume": 165,
+      "open_interest": 1320,
+      "implied_volatility": 0.355,
+      "delta": 0.43,
+      "gamma": 0.0062,
+      "theta": -0.075,
+      "vega": 0.43,
+      "rho": 0.23,
+      "timestamp": "2026-07-18T12:00:00Z",
+      "freshness": {
+        "source": "offline_option_chain_fixture",
+        "as_of": "2026-07-18T12:00:00Z",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "status": "current",
+        "is_stale": false,
+        "max_age_seconds": 86400
+      },
+      "source": {
+        "id": "FIXTURE-CHAIN-TTWO-20260718",
+        "title": "Illustrative TTWO option-chain fixture",
+        "source_type": "offline_fixture",
+        "uri": "fixtures/ttwo_v1_fixture.json",
+        "status": "validated",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "confidence_level": "low",
+        "notes": "Synthetic quote for deterministic tests; not executable",
+        "used_for_decision": true
+      }
+    },
+    {
+      "contract": {
+        "underlying": "TTWO",
+        "con_id": 2002301,
+        "local_symbol": "TTWO  270115P00230000",
+        "trading_class": "TTWO",
+        "exchange": "SMART",
+        "currency": "USD",
+        "expiration": "2027-01-15T21:00:00Z",
+        "strike": 230.0,
+        "option_type": "put",
+        "multiplier": 100.0,
+        "deliverable": "100 TTWO common shares",
+        "exercise_style": "american",
+        "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+        "adjusted_contract": false,
+        "adjustment_understood": true
+      },
+      "bid": 13.0,
+      "ask": 14.5,
+      "last": 13.8,
+      "bid_size": 18,
+      "ask_size": 16,
+      "volume": 90,
+      "open_interest": 870,
+      "implied_volatility": 0.39,
+      "delta": -0.31,
+      "gamma": 0.0052,
+      "theta": -0.065,
+      "vega": 0.38,
+      "rho": -0.18,
+      "timestamp": "2026-07-18T12:00:00Z",
+      "freshness": {
+        "source": "offline_option_chain_fixture",
+        "as_of": "2026-07-18T12:00:00Z",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "status": "current",
+        "is_stale": false,
+        "max_age_seconds": 86400
+      },
+      "source": {
+        "id": "FIXTURE-CHAIN-TTWO-20260718",
+        "title": "Illustrative TTWO option-chain fixture",
+        "source_type": "offline_fixture",
+        "uri": "fixtures/ttwo_v1_fixture.json",
+        "status": "validated",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "confidence_level": "low",
+        "notes": "Synthetic quote for deterministic tests; not executable",
+        "used_for_decision": true
+      }
+    },
+    {
+      "contract": {
+        "underlying": "TTWO",
+        "con_id": 2002501,
+        "local_symbol": "TTWO  270115P00250000",
+        "trading_class": "TTWO",
+        "exchange": "SMART",
+        "currency": "USD",
+        "expiration": "2027-01-15T21:00:00Z",
+        "strike": 250.0,
+        "option_type": "put",
+        "multiplier": 100.0,
+        "deliverable": "100 TTWO common shares",
+        "exercise_style": "american",
+        "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+        "adjusted_contract": false,
+        "adjustment_understood": true
+      },
+      "bid": 20.0,
+      "ask": 22.0,
+      "last": 21.1,
+      "bid_size": 22,
+      "ask_size": 20,
+      "volume": 180,
+      "open_interest": 1430,
+      "implied_volatility": 0.375,
+      "delta": -0.42,
+      "gamma": 0.0062,
+      "theta": -0.075,
+      "vega": 0.43,
+      "rho": -0.23,
+      "timestamp": "2026-07-18T12:00:00Z",
+      "freshness": {
+        "source": "offline_option_chain_fixture",
+        "as_of": "2026-07-18T12:00:00Z",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "status": "current",
+        "is_stale": false,
+        "max_age_seconds": 86400
+      },
+      "source": {
+        "id": "FIXTURE-CHAIN-TTWO-20260718",
+        "title": "Illustrative TTWO option-chain fixture",
+        "source_type": "offline_fixture",
+        "uri": "fixtures/ttwo_v1_fixture.json",
+        "status": "validated",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "confidence_level": "low",
+        "notes": "Synthetic quote for deterministic tests; not executable",
+        "used_for_decision": true
+      }
+    },
+    {
+      "contract": {
+        "underlying": "TTWO",
+        "con_id": 2002601,
+        "local_symbol": "TTWO  270115P00260000",
+        "trading_class": "TTWO",
+        "exchange": "SMART",
+        "currency": "USD",
+        "expiration": "2027-01-15T21:00:00Z",
+        "strike": 260.0,
+        "option_type": "put",
+        "multiplier": 100.0,
+        "deliverable": "100 TTWO common shares",
+        "exercise_style": "american",
+        "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+        "adjusted_contract": false,
+        "adjustment_understood": true
+      },
+      "bid": 25.0,
+      "ask": 27.0,
+      "last": 26.1,
+      "bid_size": 25,
+      "ask_size": 23,
+      "volume": 230,
+      "open_interest": 1910,
+      "implied_volatility": 0.37,
+      "delta": -0.49,
+      "gamma": 0.0065,
+      "theta": -0.08,
+      "vega": 0.44,
+      "rho": -0.27,
+      "timestamp": "2026-07-18T12:00:00Z",
+      "freshness": {
+        "source": "offline_option_chain_fixture",
+        "as_of": "2026-07-18T12:00:00Z",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "status": "current",
+        "is_stale": false,
+        "max_age_seconds": 86400
+      },
+      "source": {
+        "id": "FIXTURE-CHAIN-TTWO-20260718",
+        "title": "Illustrative TTWO option-chain fixture",
+        "source_type": "offline_fixture",
+        "uri": "fixtures/ttwo_v1_fixture.json",
+        "status": "validated",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "confidence_level": "low",
+        "notes": "Synthetic quote for deterministic tests; not executable",
+        "used_for_decision": true
+      }
+    }
+  ],
+  "risk_free_rate": 0.045,
+  "risk_free_rate_freshness": {
+    "source": "offline_rate_fixture",
+    "as_of": "2026-07-18T12:00:00Z",
+    "accessed_at": "2026-07-18T12:00:00Z",
+    "status": "current",
+    "is_stale": false,
+    "max_age_seconds": 86400
+  },
+  "risk_free_rate_source": {
+    "id": "FIXTURE-RATE-20260718",
+    "title": "Illustrative USD risk-free rate",
+    "source_type": "offline_fixture",
+    "uri": "fixtures/ttwo_v1_fixture.json",
+    "status": "validated",
+    "accessed_at": "2026-07-18T12:00:00Z",
+    "confidence_level": "low",
+    "notes": "Synthetic flat rate; replace with Treasury curve by maturity",
+    "used_for_decision": true
+  },
+  "analysis_timestamp": "2026-07-18T12:00:00Z",
+  "monte_carlo_paths": 512,
+  "monte_carlo_seed": 42,
+  "monte_carlo_horizon_days": 120,
+  "annualized_volatility": 0.35,
+  "volatility_freshness": {
+    "source": "offline_volatility_fixture",
+    "as_of": "2026-07-18T12:00:00Z",
+    "accessed_at": "2026-07-18T12:00:00Z",
+    "status": "current",
+    "is_stale": false,
+    "max_age_seconds": 86400
+  },
+  "volatility_source": {
+    "id": "FIXTURE-RV-20260718",
+    "title": "Illustrative TTWO annualized volatility",
+    "source_type": "offline_fixture",
+    "uri": "fixtures/ttwo_v1_fixture.json",
+    "status": "validated",
+    "accessed_at": "2026-07-18T12:00:00Z",
+    "confidence_level": "low",
+    "notes": "Synthetic annualized volatility; no historical calibration",
+    "used_for_decision": true
+  },
+  "continuous_dividend_yield": 0.0,
+  "dividend_yield_freshness": {
+    "source": "offline_dividend_fixture",
+    "as_of": "2026-07-18T12:00:00Z",
+    "accessed_at": "2026-07-18T12:00:00Z",
+    "status": "current",
+    "is_stale": false,
+    "max_age_seconds": 86400
+  },
+  "dividend_yield_source": {
+    "id": "FIXTURE-DIVIDEND-TTWO-20260718",
+    "title": "Illustrative zero-dividend assumption",
+    "source_type": "offline_fixture",
+    "uri": "fixtures/ttwo_v2_fixture.json",
+    "status": "validated",
+    "accessed_at": "2026-07-18T12:00:00Z",
+    "confidence_level": "low",
+    "notes": "Synthetic no-dividend assumption; refresh from company and exchange sources",
+    "used_for_decision": true
+  },
+  "dividends": [],
+  "volatility_surface": {
+    "as_of": "2026-07-18T12:00:00Z",
+    "freshness": {
+      "source": "offline_iv_surface_fixture",
+      "as_of": "2026-07-18T12:00:00Z",
+      "accessed_at": "2026-07-18T12:00:00Z",
+      "status": "current",
+      "is_stale": false,
+      "max_age_seconds": 86400
+    },
+    "source": {
+      "id": "FIXTURE-IV-SURFACE-TTWO-20260718",
+      "title": "Illustrative TTWO volatility surface",
+      "source_type": "offline_fixture",
+      "uri": "fixtures/ttwo_v2_fixture.json",
+      "status": "validated",
+      "accessed_at": "2026-07-18T12:00:00Z",
+      "confidence_level": "low",
+      "notes": "Synthetic nodes for interpolation tests; not a market surface",
+      "used_for_decision": true
+    },
+    "nodes": [
+      {"expiration": "2026-10-16T21:00:00Z", "strike": 230.0, "option_type": "call", "implied_volatility": 0.39},
+      {"expiration": "2026-10-16T21:00:00Z", "strike": 260.0, "option_type": "call", "implied_volatility": 0.36},
+      {"expiration": "2026-10-16T21:00:00Z", "strike": 290.0, "option_type": "call", "implied_volatility": 0.35},
+      {"expiration": "2026-10-16T21:00:00Z", "strike": 230.0, "option_type": "put", "implied_volatility": 0.41},
+      {"expiration": "2026-10-16T21:00:00Z", "strike": 260.0, "option_type": "put", "implied_volatility": 0.38},
+      {"expiration": "2026-10-16T21:00:00Z", "strike": 290.0, "option_type": "put", "implied_volatility": 0.37},
+      {"expiration": "2027-06-18T21:00:00Z", "strike": 230.0, "option_type": "call", "implied_volatility": 0.38},
+      {"expiration": "2027-06-18T21:00:00Z", "strike": 260.0, "option_type": "call", "implied_volatility": 0.35},
+      {"expiration": "2027-06-18T21:00:00Z", "strike": 290.0, "option_type": "call", "implied_volatility": 0.34},
+      {"expiration": "2027-06-18T21:00:00Z", "strike": 230.0, "option_type": "put", "implied_volatility": 0.40},
+      {"expiration": "2027-06-18T21:00:00Z", "strike": 260.0, "option_type": "put", "implied_volatility": 0.37},
+      {"expiration": "2027-06-18T21:00:00Z", "strike": 290.0, "option_type": "put", "implied_volatility": 0.36}
+    ]
+  },
+  "pricing": {
+    "american_model": "quantlib_fd_american",
+    "time_grid": 100,
+    "price_grid": 100
+  },
+  "simulation": {
+    "models": ["gbm", "merton_jump_diffusion", "heston_full_truncation"],
+    "steps": 120,
+    "jump": {
+      "jump_intensity": 0.8,
+      "jump_mean": -0.08,
+      "jump_volatility": 0.16,
+      "diffusion_volatility": 0.32,
+      "calibration_status": "illustrative",
+      "source": null
+    },
+    "heston": {
+      "mean_reversion": 2.0,
+      "long_run_variance": 0.1225,
+      "vol_of_variance": 0.65,
+      "correlation": -0.6,
+      "initial_variance": 0.1225,
+      "calibration_status": "illustrative",
+      "source": null
+    }
+  }
+}

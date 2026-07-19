@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.take-two/schemas/gemini_visual_review.schema.json",
+  "title": "Gemini PDF visual review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "element_id",
+    "media_readable",
+    "observed_type",
+    "structure",
+    "disagreements",
+    "ambiguous_regions",
+    "missing_context",
+    "confidence",
+    "recommended_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "element_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "media_readable": {
+      "type": "boolean"
+    },
+    "observed_type": {
+      "enum": [
+        "text",
+        "table",
+        "formula",
+        "figure",
+        "chart",
+        "payoff_diagram",
+        "page_number",
+        "artifact",
+        "unknown"
+      ]
+    },
+    "observed_rotation": {
+      "type": ["integer", "null"],
+      "enum": [0, 90, 180, 270, null]
+    },
+    "structure": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "disagreements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/disagreement"
+      }
+    },
+    "ambiguous_regions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/region"
+      }
+    },
+    "missing_context": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "confidence": {
+      "$ref": "#/$defs/confidence"
+    },
+    "recommended_status": {
+      "enum": [
+        "machine_verified_with_visual_check",
+        "needs_visual_review",
+        "human_review_required",
+        "blocked",
+        "unextractable",
+        "image_only"
+      ]
+    }
+  },
+  "$defs": {
+    "score": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "bbox": {
+      "type": ["array", "null"],
+      "prefixItems": [
+        {"type": "number"},
+        {"type": "number"},
+        {"type": "number"},
+        {"type": "number"}
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "row": {"type": ["integer", "string", "null"]},
+        "column": {"type": ["integer", "string", "null"]},
+        "token": {"type": ["string", "null"]},
+        "bbox": {"$ref": "#/$defs/bbox"}
+      }
+    },
+    "disagreement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "location",
+        "candidate_value",
+        "visual_candidates",
+        "preferred_candidate",
+        "confidence",
+        "reason"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "sign",
+            "decimal",
+            "fraction",
+            "digit",
+            "column",
+            "row",
+            "formula",
+            "unit",
+            "label",
+            "pagination",
+            "other"
+          ]
+        },
+        "location": {"$ref": "#/$defs/location"},
+        "candidate_value": {"type": ["string", "number", "null"]},
+        "visual_candidates": {
+          "type": "array",
+          "items": {"type": ["string", "number", "null"]},
+          "minItems": 1
+        },
+        "preferred_candidate": {"type": ["string", "number", "null"]},
+        "confidence": {"$ref": "#/$defs/score"},
+        "reason": {"type": "string"}
+      }
+    },
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bbox", "reason", "candidates"],
+      "properties": {
+        "bbox": {"$ref": "#/$defs/bbox"},
+        "reason": {"type": "string"},
+        "candidates": {
+          "type": "array",
+          "items": {"type": ["string", "number", "null"]}
+        }
+      }
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "visual_readability",
+        "layout",
+        "table_structure",
+        "numeric",
+        "formula",
+        "page_mapping"
+      ],
+      "properties": {
+        "visual_readability": {"$ref": "#/$defs/score"},
+        "layout": {"$ref": "#/$defs/score"},
+        "table_structure": {"$ref": "#/$defs/score"},
+        "numeric": {"$ref": "#/$defs/score"},
+        "formula": {"$ref": "#/$defs/score"},
+        "page_mapping": {"$ref": "#/$defs/score"}
+      }
+    }
+  }
+}
+

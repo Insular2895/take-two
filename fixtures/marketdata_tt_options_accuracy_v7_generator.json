@@ -1,0 +1,136 @@
+{
+  "ticker": "TTWO",
+  "start_date": "2025-07-21",
+  "end_date": "2026-07-17",
+  "split_train_ratio": 0.6,
+  "split_test_ratio": 0.25,
+  "embargo_observations": 1,
+  "profiles": [
+    {
+      "profile_id": "delta45_25",
+      "long_delta_target": 0.45,
+      "short_delta_target": 0.25
+    },
+    {
+      "profile_id": "delta55_30",
+      "long_delta_target": 0.55,
+      "short_delta_target": 0.3
+    },
+    {
+      "profile_id": "delta65_35",
+      "long_delta_target": 0.65,
+      "short_delta_target": 0.35
+    }
+  ],
+  "experiments": [
+    {
+      "experiment_id": "primary_h05_dte150",
+      "holding_sessions": 5,
+      "target_dte": 150,
+      "profile_ids": ["delta45_25", "delta55_30", "delta65_35"],
+      "maximum_observations": 50,
+      "minimum_train_observations": 20,
+      "minimum_test_observations": 8,
+      "minimum_holdout_observations": 4
+    },
+    {
+      "experiment_id": "horizon_h10_dte150",
+      "holding_sessions": 10,
+      "target_dte": 150,
+      "profile_ids": ["delta55_30"],
+      "maximum_observations": 30,
+      "minimum_train_observations": 10,
+      "minimum_test_observations": 4,
+      "minimum_holdout_observations": 2
+    },
+    {
+      "experiment_id": "horizon_h20_dte150",
+      "holding_sessions": 20,
+      "target_dte": 150,
+      "profile_ids": ["delta55_30"],
+      "maximum_observations": 16,
+      "minimum_train_observations": 5,
+      "minimum_test_observations": 2,
+      "minimum_holdout_observations": 1
+    },
+    {
+      "experiment_id": "horizon_h40_dte150",
+      "holding_sessions": 40,
+      "target_dte": 150,
+      "profile_ids": ["delta55_30"],
+      "maximum_observations": 8,
+      "minimum_train_observations": 2,
+      "minimum_test_observations": 1,
+      "minimum_holdout_observations": 1
+    },
+    {
+      "experiment_id": "expiry_h05_dte090",
+      "holding_sessions": 5,
+      "target_dte": 90,
+      "profile_ids": ["delta55_30"],
+      "maximum_observations": 50,
+      "minimum_train_observations": 20,
+      "minimum_test_observations": 8,
+      "minimum_holdout_observations": 4
+    },
+    {
+      "experiment_id": "expiry_h05_dte270",
+      "holding_sessions": 5,
+      "target_dte": 270,
+      "profile_ids": ["delta55_30"],
+      "maximum_observations": 50,
+      "minimum_train_observations": 20,
+      "minimum_test_observations": 8,
+      "minimum_holdout_observations": 4
+    }
+  ],
+  "events": [
+    {
+      "event_date": "2025-08-07",
+      "event_id": "fy2026_q1_results",
+      "category": "earnings"
+    },
+    {
+      "event_date": "2025-11-06",
+      "event_id": "fy2026_q2_results",
+      "category": "earnings"
+    },
+    {
+      "event_date": "2026-02-03",
+      "event_id": "fy2026_q3_results",
+      "category": "earnings"
+    },
+    {
+      "event_date": "2026-05-21",
+      "event_id": "fy2026_q4_results",
+      "category": "earnings"
+    },
+    {
+      "event_date": "2026-06-24",
+      "event_id": "gta_vi_preorders",
+      "category": "product"
+    }
+  ],
+  "strategies": [
+    "no_trade",
+    "long_call",
+    "bull_call_spread",
+    "long_put",
+    "bear_put_spread"
+  ],
+  "current_quote_date": "2026-07-17",
+  "min_open_interest": 20,
+  "min_volume": 0,
+  "max_bid_ask_ratio": 0.3,
+  "strike_limit": 16,
+  "multiplier": 100,
+  "commission_per_contract_per_side": 0.65,
+  "slippage_per_contract_per_side": 1.5,
+  "minimum_coverage_ratio": 0.75,
+  "minimum_test_median_return": 0.0,
+  "maximum_test_drawdown": 0.35,
+  "maximum_test_worst_loss": 0.35,
+  "maximum_stability_gap": 0.15,
+  "minimum_deflated_sharpe_probability": 0.8,
+  "bootstrap_samples": 2000
+}

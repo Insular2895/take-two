@@ -1,6 +1,9 @@
 # Investment Call Optimizer — Repository de recherche
 
-> **Statut : PHASE DE RECHERCHE — AUCUN CODE MÉTIER NE DOIT ÊTRE ÉCRIT DANS CE REPOSITORY.**
+> **Statut : PHASE DE RECHERCHE — AUCUN CODE METIER NE DOIT ETRE ECRIT DANS CE DOSSIER.**
+
+L'implementation read-only vit a la racine dans `src/take_two_options/`. La recherche de ce
+dossier alimente son registre d'architectures, mais ne vaut jamais validation de strategie.
 
 ## Mission
 
@@ -36,11 +39,13 @@ Corollaires non négociables :
 | Dossier | Rôle |
 |---|---|
 | `docs/` | Documentation transverse : méthodologie de recherche, pipeline d'extraction, moteur de maintenance, onboarding Codex |
+| `CHANGELOG.md` | Historique des évolutions documentaires et décisions encore ouvertes |
 | `tool_usage.md` | Rôle exact de Gemini, Codex, IBKR, transcript/PDF tooling et repositories open source |
 | `evidence/` | Dossiers de preuve par décision : sources, règles, contradictions, simulations favorables/défavorables |
 | `research/` | Travaux de recherche en cours + `research/benchmarks/` (analyse des repos open source) |
 | `books/` | Bibliothèque officielle : une fiche par livre avec prompt Gemini spécifique |
 | `prompts/` | Prompts Gemini par catégorie de connaissance |
+| `schemas/` | Contrats JSON canoniques pour la transcription et la revue visuelle |
 | `knowledge_base/` | Base de connaissances consolidée (règles fusionnées, pondérées, dédupliquées) |
 | `rules/` | Règles atomiques extraites, au format officiel (`rules/FORMAT_REGLE.md`) |
 | `simulations/` | Spécifications des simulations (Monte Carlo, scénarios déterministes) |
@@ -72,6 +77,13 @@ Corollaires non négociables :
 8. `docs/06_moteur_maintenance.md`
 9. `knowledge_base/README.md`
 10. `research/benchmarks/`
+
+Pour implémenter ou auditer la transcription PDF, lire également :
+
+11. `docs/07_transcription_pdf_technique_v2.md`
+12. `docs/08_plan_implementation_transcription_v2.md`
+13. `schemas/README.md`
+14. `validation/pdf_transcription_v2_tests.md`
 
 ## Règles de contribution
 

@@ -9,6 +9,29 @@ Une décision peut être une règle activée, une structure d'option retenue, un
 hypothèse de marché, un choix de sizing, une règle de roll/close ou une intégration d'outil. Rien ne
 doit passer de la recherche à l'usage opérationnel sans dossier de preuve.
 
+Ce dossier versionné contient les preuves décisionnelles légères. Les médias de transcription
+volumineux restent dans `evidence_packets/` local, ignoré par Git, et sont reliés par identifiants et
+hashes plutôt que copiés dans le repository.
+
+## Preuves de transcription PDF
+
+La transcription V2 utilise une famille de statuts distincte du cycle de vie des règles :
+
+| Statut élément | Sens |
+|---|---|
+| `machine_verified` | Extraction locale non critique et contrôles réussis |
+| `machine_verified_with_visual_check` | Vérification Gemini concordante et contrôles réussis |
+| `machine_reviewed` | Fallback Codex traçable et contrôles réussis |
+| `needs_visual_review` | Ambiguïté non résolue |
+| `human_verified` | Revue humaine documentée |
+| `human_review_required` | Machine incapable de conclure |
+| `blocked` | Désaccord ou contrôle critique en échec |
+| `unextractable` | Source insuffisamment lisible |
+| `image_only` | Figure conservée sans données numériques fiables |
+
+Un élément PDF validé peut soutenir une règle `EXTRACTED`; il ne transforme jamais directement
+cette règle en `VALIDATED`. Voir `../docs/07_transcription_pdf_technique_v2.md`.
+
 ## Statuts obligatoires
 
 Chaque règle, source ou décision référencée dans un dossier de preuve doit utiliser l'un de ces

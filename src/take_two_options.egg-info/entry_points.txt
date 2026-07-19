@@ -1,0 +1,2 @@
+[console_scripts]
+ttwo-options = take_two_options.cli:app

@@ -1,0 +1,49 @@
+{
+  "ticker": "TTWO",
+  "risk_free_rate": 0.04,
+  "continuous_dividend_yield": 0.0,
+  "dividends": [],
+  "time_grid": 100,
+  "price_grid": 100,
+  "notes": "Example only. Verify each OCC contract and replace rate/dividend assumptions with date-matched source-backed inputs.",
+  "cases": [
+    {
+      "case_id": "train-long-call-eod",
+      "split": "train",
+      "entry_quote_date": "2026-05-01",
+      "exit_quote_date": "2026-05-15",
+      "entry_timestamp": "2026-05-01T20:05:00Z",
+      "exit_timestamp": "2026-05-15T20:05:00Z",
+      "model_calibrated_through": "2026-04-30T20:00:00Z",
+      "commission_per_contract_per_side": 0.65,
+      "slippage_per_contract_per_side": 1.5,
+      "legs": [
+        {
+          "symbol": "TTWO261120C00220000",
+          "side": "long",
+          "quantity": 1,
+          "multiplier": 100
+        }
+      ]
+    },
+    {
+      "case_id": "test-long-call-eod",
+      "split": "test",
+      "entry_quote_date": "2026-06-01",
+      "exit_quote_date": "2026-06-15",
+      "entry_timestamp": "2026-06-01T20:05:00Z",
+      "exit_timestamp": "2026-06-15T20:05:00Z",
+      "model_calibrated_through": "2026-05-29T20:00:00Z",
+      "commission_per_contract_per_side": 0.65,
+      "slippage_per_contract_per_side": 1.5,
+      "legs": [
+        {
+          "symbol": "TTWO261120C00220000",
+          "side": "long",
+          "quantity": 1,
+          "multiplier": 100
+        }
+      ]
+    }
+  ]
+}

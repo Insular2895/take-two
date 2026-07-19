@@ -1,0 +1,105 @@
+{
+  "ticker": "TTWO",
+  "expiration": "2027-01-15",
+  "risk_free_rate": 0.04,
+  "continuous_dividend_yield": 0.0,
+  "dividends": [],
+  "strategies": [
+    "no_trade",
+    "long_call",
+    "bull_call_spread",
+    "long_put",
+    "bear_put_spread"
+  ],
+  "observations": [
+    {
+      "observation_id": "train-01",
+      "split": "train",
+      "signal_quote_date": "2026-04-30",
+      "entry_quote_date": "2026-05-01",
+      "exit_quote_date": "2026-05-15"
+    },
+    {
+      "observation_id": "train-02",
+      "split": "train",
+      "signal_quote_date": "2026-05-07",
+      "entry_quote_date": "2026-05-08",
+      "exit_quote_date": "2026-05-22"
+    },
+    {
+      "observation_id": "train-03",
+      "split": "train",
+      "signal_quote_date": "2026-05-14",
+      "entry_quote_date": "2026-05-15",
+      "exit_quote_date": "2026-05-29"
+    },
+    {
+      "observation_id": "train-04",
+      "split": "train",
+      "signal_quote_date": "2026-05-21",
+      "entry_quote_date": "2026-05-22",
+      "exit_quote_date": "2026-06-05"
+    },
+    {
+      "observation_id": "train-05",
+      "split": "train",
+      "signal_quote_date": "2026-05-28",
+      "entry_quote_date": "2026-05-29",
+      "exit_quote_date": "2026-06-12"
+    },
+    {
+      "observation_id": "train-06",
+      "split": "train",
+      "signal_quote_date": "2026-06-04",
+      "entry_quote_date": "2026-06-05",
+      "exit_quote_date": "2026-06-18"
+    },
+    {
+      "observation_id": "test-01",
+      "split": "test",
+      "signal_quote_date": "2026-06-11",
+      "entry_quote_date": "2026-06-12",
+      "exit_quote_date": "2026-06-26"
+    },
+    {
+      "observation_id": "test-02",
+      "split": "test",
+      "signal_quote_date": "2026-06-18",
+      "entry_quote_date": "2026-06-22",
+      "exit_quote_date": "2026-07-02"
+    },
+    {
+      "observation_id": "test-03",
+      "split": "test",
+      "signal_quote_date": "2026-06-25",
+      "entry_quote_date": "2026-06-26",
+      "exit_quote_date": "2026-07-10"
+    },
+    {
+      "observation_id": "test-04",
+      "split": "test",
+      "signal_quote_date": "2026-07-02",
+      "entry_quote_date": "2026-07-06",
+      "exit_quote_date": "2026-07-17"
+    }
+  ],
+  "long_delta_target": 0.55,
+  "short_delta_target": 0.30,
+  "strike_limit": 14,
+  "min_open_interest": 20,
+  "min_volume": 0,
+  "max_bid_ask_ratio": 0.30,
+  "multiplier": 100,
+  "commission_per_contract_per_side": 0.65,
+  "slippage_per_contract_per_side": 1.5,
+  "minimum_train_observations": 6,
+  "minimum_test_observations": 4,
+  "minimum_coverage_ratio": 0.75,
+  "minimum_test_median_return": 0.0,
+  "maximum_test_drawdown": 0.35,
+  "maximum_test_worst_loss": 0.35,
+  "maximum_stability_gap": 0.15,
+  "time_grid": 100,
+  "price_grid": 100,
+  "notes": "First TTWO source-backed panel. Rate, dividends, costs and thresholds remain assumptions to validate."
+}

@@ -1,0 +1,4545 @@
+{
+  "report_id": "TTWO-RESEARCH-20260718T120000Z",
+  "created_at": "2026-07-18T12:00:00Z",
+  "decision_posture": "read_only_research",
+  "bundle": {
+    "underlying": {
+      "ticker": "TTWO",
+      "name": "Take-Two Interactive Software, Inc.",
+      "exchange": "NASDAQ",
+      "currency": "USD",
+      "price": 257.79,
+      "timestamp": "2026-07-18T12:00:00Z",
+      "freshness": {
+        "source": "offline_tt_nasdaq_fixture",
+        "as_of": "2026-07-18T12:00:00Z",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "status": "current",
+        "is_stale": false,
+        "max_age_seconds": 86400
+      },
+      "sources": [
+        {
+          "id": "FIXTURE-SPOT-TTWO-20260718",
+          "title": "Illustrative TTWO spot fixture",
+          "source_type": "offline_fixture",
+          "uri": "fixtures/ttwo_v1_fixture.json",
+          "status": "validated",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "low",
+          "notes": "Schema-valid test value only; not a live market observation",
+          "used_for_decision": true
+        }
+      ],
+      "corporate_actions": [],
+      "events": [
+        {
+          "event_type": "product_release",
+          "name": "Illustrative GTA VI release catalyst window",
+          "start": "2026-11-19T00:00:00Z",
+          "end": "2026-11-20T23:59:00Z",
+          "source": {
+            "id": "CORPUS-TTWO-GTA6-DATE",
+            "title": "TTWO GTA VI operational research 2026",
+            "source_type": "repository_research_note",
+            "uri": "option-research-engine/research/documentary/TTWO_GTA6_OPERATIONAL_RESEARCH_2026.md",
+            "status": "read_only_gate",
+            "accessed_at": "2026-07-18T12:00:00Z",
+            "confidence_level": "medium",
+            "notes": "Must be reverified from company IR before human use",
+            "used_for_decision": true
+          },
+          "handled": true,
+          "critical": true
+        }
+      ]
+    },
+    "fundamental": {
+      "ticker": "TTWO",
+      "as_of": "2026-07-18T12:00:00Z",
+      "freshness": {
+        "source": "offline_fundamental_fixture",
+        "as_of": "2026-07-18T12:00:00Z",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "status": "current",
+        "is_stale": false,
+        "max_age_seconds": 86400
+      },
+      "direction": "bullish",
+      "thesis": "Illustrative bullish research thesis: release execution could lift bookings and expectations.",
+      "catalyst": "Illustrative GTA VI release window; date requires primary-source refresh.",
+      "catalyst_window_start": "2026-11-19T00:00:00Z",
+      "catalyst_window_end": "2026-11-20T23:59:00Z",
+      "invalidation": "Re-underwrite on a material release delay, guidance deterioration, or thesis-source conflict.",
+      "scenarios": [
+        {
+          "name": "downside",
+          "direction": "bearish",
+          "target_price": 210.0,
+          "probability": 0.25,
+          "drivers": [
+            "release delay",
+            "guidance deterioration",
+            "multiple compression"
+          ]
+        },
+        {
+          "name": "base",
+          "direction": "neutral",
+          "target_price": 260.0,
+          "probability": 0.5,
+          "drivers": [
+            "release remains on plan",
+            "expectations broadly reflected"
+          ]
+        },
+        {
+          "name": "upside",
+          "direction": "bullish",
+          "target_price": 330.0,
+          "probability": 0.25,
+          "drivers": [
+            "strong launch evidence",
+            "bookings revisions",
+            "durable rerating"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "CORPUS-TTWO-FUNDAMENTAL-2026",
+          "title": "TTWO GTA VI operational research 2026",
+          "source_type": "repository_research_note",
+          "uri": "option-research-engine/research/documentary/TTWO_GTA6_OPERATIONAL_RESEARCH_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "medium",
+          "notes": "Scenario targets and probabilities are analyst assumptions in this fixture",
+          "used_for_decision": true
+        }
+      ],
+      "latest_filings": [],
+      "expectations_implied": "Not modeled; fixture target prices are explicit analyst assumptions.",
+      "valuation_method": "Illustrative three-case scenario analysis; no reverse DCF in V1 fixture.",
+      "growth_assumptions": [],
+      "margin_assumptions": [],
+      "cash_flow_assumptions": [],
+      "debt": null,
+      "dilution": null,
+      "buybacks": null,
+      "risks": [
+        "release delay",
+        "guidance deterioration",
+        "multiple compression",
+        "option IV crush and liquidity stress"
+      ]
+    },
+    "portfolio": {
+      "as_of": "2026-07-18T12:00:00Z",
+      "freshness": {
+        "source": "offline_portfolio_cost_fixture",
+        "as_of": "2026-07-18T12:00:00Z",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "status": "current",
+        "is_stale": false,
+        "max_age_seconds": 86400
+      },
+      "source": {
+        "id": "FIXTURE-PORTFOLIO-COSTS-20260718",
+        "title": "Illustrative portfolio cost and margin assumptions",
+        "source_type": "offline_fixture",
+        "uri": "fixtures/ttwo_v1_fixture.json",
+        "status": "validated",
+        "accessed_at": "2026-07-18T12:00:00Z",
+        "confidence_level": "low",
+        "notes": "Synthetic research budget, fees, slippage, permissions, and margin",
+        "used_for_decision": true
+      },
+      "currency": "USD",
+      "max_loss_budget": 5000.0,
+      "research_share_quantity": 10,
+      "commission_per_option_contract": 0.65,
+      "slippage_per_option_contract": 1.5,
+      "stock_commission": 0.0,
+      "stock_slippage_bps": 5.0,
+      "margin_available": 25000.0,
+      "margin_known": true,
+      "account_permissions": [
+        "research_fixture_only"
+      ]
+    },
+    "option_quotes": [
+      {
+        "contract": {
+          "underlying": "TTWO",
+          "con_id": 1002501,
+          "local_symbol": "TTWO  270115C00250000",
+          "trading_class": "TTWO",
+          "exchange": "SMART",
+          "currency": "USD",
+          "expiration": "2027-01-15T21:00:00Z",
+          "strike": 250.0,
+          "option_type": "call",
+          "multiplier": 100.0,
+          "deliverable": "100 TTWO common shares",
+          "exercise_style": "american",
+          "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+          "adjusted_contract": false,
+          "adjustment_understood": true
+        },
+        "bid": 33.5,
+        "ask": 35.5,
+        "last": 34.4,
+        "bid_size": 20,
+        "ask_size": 18,
+        "volume": 145,
+        "open_interest": 1210,
+        "implied_volatility": 0.37,
+        "delta": 0.64,
+        "gamma": 0.006,
+        "theta": -0.08,
+        "vega": 0.42,
+        "rho": 0.29,
+        "timestamp": "2026-07-18T12:00:00Z",
+        "freshness": {
+          "source": "offline_option_chain_fixture",
+          "as_of": "2026-07-18T12:00:00Z",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "status": "current",
+          "is_stale": false,
+          "max_age_seconds": 86400
+        },
+        "source": {
+          "id": "FIXTURE-CHAIN-TTWO-20260718",
+          "title": "Illustrative TTWO option-chain fixture",
+          "source_type": "offline_fixture",
+          "uri": "fixtures/ttwo_v1_fixture.json",
+          "status": "validated",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "low",
+          "notes": "Synthetic quote for deterministic tests; not executable",
+          "used_for_decision": true
+        }
+      },
+      {
+        "contract": {
+          "underlying": "TTWO",
+          "con_id": 1002601,
+          "local_symbol": "TTWO  270115C00260000",
+          "trading_class": "TTWO",
+          "exchange": "SMART",
+          "currency": "USD",
+          "expiration": "2027-01-15T21:00:00Z",
+          "strike": 260.0,
+          "option_type": "call",
+          "multiplier": 100.0,
+          "deliverable": "100 TTWO common shares",
+          "exercise_style": "american",
+          "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+          "adjusted_contract": false,
+          "adjustment_understood": true
+        },
+        "bid": 28.0,
+        "ask": 30.0,
+        "last": 29.1,
+        "bid_size": 24,
+        "ask_size": 22,
+        "volume": 210,
+        "open_interest": 1840,
+        "implied_volatility": 0.36,
+        "delta": 0.56,
+        "gamma": 0.0065,
+        "theta": -0.08,
+        "vega": 0.44,
+        "rho": 0.27,
+        "timestamp": "2026-07-18T12:00:00Z",
+        "freshness": {
+          "source": "offline_option_chain_fixture",
+          "as_of": "2026-07-18T12:00:00Z",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "status": "current",
+          "is_stale": false,
+          "max_age_seconds": 86400
+        },
+        "source": {
+          "id": "FIXTURE-CHAIN-TTWO-20260718",
+          "title": "Illustrative TTWO option-chain fixture",
+          "source_type": "offline_fixture",
+          "uri": "fixtures/ttwo_v1_fixture.json",
+          "status": "validated",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "low",
+          "notes": "Synthetic quote for deterministic tests; not executable",
+          "used_for_decision": true
+        }
+      },
+      {
+        "contract": {
+          "underlying": "TTWO",
+          "con_id": 1002801,
+          "local_symbol": "TTWO  270115C00280000",
+          "trading_class": "TTWO",
+          "exchange": "SMART",
+          "currency": "USD",
+          "expiration": "2027-01-15T21:00:00Z",
+          "strike": 280.0,
+          "option_type": "call",
+          "multiplier": 100.0,
+          "deliverable": "100 TTWO common shares",
+          "exercise_style": "american",
+          "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+          "adjusted_contract": false,
+          "adjustment_understood": true
+        },
+        "bid": 19.0,
+        "ask": 20.5,
+        "last": 19.8,
+        "bid_size": 25,
+        "ask_size": 20,
+        "volume": 165,
+        "open_interest": 1320,
+        "implied_volatility": 0.355,
+        "delta": 0.43,
+        "gamma": 0.0062,
+        "theta": -0.075,
+        "vega": 0.43,
+        "rho": 0.23,
+        "timestamp": "2026-07-18T12:00:00Z",
+        "freshness": {
+          "source": "offline_option_chain_fixture",
+          "as_of": "2026-07-18T12:00:00Z",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "status": "current",
+          "is_stale": false,
+          "max_age_seconds": 86400
+        },
+        "source": {
+          "id": "FIXTURE-CHAIN-TTWO-20260718",
+          "title": "Illustrative TTWO option-chain fixture",
+          "source_type": "offline_fixture",
+          "uri": "fixtures/ttwo_v1_fixture.json",
+          "status": "validated",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "low",
+          "notes": "Synthetic quote for deterministic tests; not executable",
+          "used_for_decision": true
+        }
+      },
+      {
+        "contract": {
+          "underlying": "TTWO",
+          "con_id": 2002301,
+          "local_symbol": "TTWO  270115P00230000",
+          "trading_class": "TTWO",
+          "exchange": "SMART",
+          "currency": "USD",
+          "expiration": "2027-01-15T21:00:00Z",
+          "strike": 230.0,
+          "option_type": "put",
+          "multiplier": 100.0,
+          "deliverable": "100 TTWO common shares",
+          "exercise_style": "american",
+          "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+          "adjusted_contract": false,
+          "adjustment_understood": true
+        },
+        "bid": 13.0,
+        "ask": 14.5,
+        "last": 13.8,
+        "bid_size": 18,
+        "ask_size": 16,
+        "volume": 90,
+        "open_interest": 870,
+        "implied_volatility": 0.39,
+        "delta": -0.31,
+        "gamma": 0.0052,
+        "theta": -0.065,
+        "vega": 0.38,
+        "rho": -0.18,
+        "timestamp": "2026-07-18T12:00:00Z",
+        "freshness": {
+          "source": "offline_option_chain_fixture",
+          "as_of": "2026-07-18T12:00:00Z",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "status": "current",
+          "is_stale": false,
+          "max_age_seconds": 86400
+        },
+        "source": {
+          "id": "FIXTURE-CHAIN-TTWO-20260718",
+          "title": "Illustrative TTWO option-chain fixture",
+          "source_type": "offline_fixture",
+          "uri": "fixtures/ttwo_v1_fixture.json",
+          "status": "validated",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "low",
+          "notes": "Synthetic quote for deterministic tests; not executable",
+          "used_for_decision": true
+        }
+      },
+      {
+        "contract": {
+          "underlying": "TTWO",
+          "con_id": 2002501,
+          "local_symbol": "TTWO  270115P00250000",
+          "trading_class": "TTWO",
+          "exchange": "SMART",
+          "currency": "USD",
+          "expiration": "2027-01-15T21:00:00Z",
+          "strike": 250.0,
+          "option_type": "put",
+          "multiplier": 100.0,
+          "deliverable": "100 TTWO common shares",
+          "exercise_style": "american",
+          "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+          "adjusted_contract": false,
+          "adjustment_understood": true
+        },
+        "bid": 20.0,
+        "ask": 22.0,
+        "last": 21.1,
+        "bid_size": 22,
+        "ask_size": 20,
+        "volume": 180,
+        "open_interest": 1430,
+        "implied_volatility": 0.375,
+        "delta": -0.42,
+        "gamma": 0.0062,
+        "theta": -0.075,
+        "vega": 0.43,
+        "rho": -0.23,
+        "timestamp": "2026-07-18T12:00:00Z",
+        "freshness": {
+          "source": "offline_option_chain_fixture",
+          "as_of": "2026-07-18T12:00:00Z",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "status": "current",
+          "is_stale": false,
+          "max_age_seconds": 86400
+        },
+        "source": {
+          "id": "FIXTURE-CHAIN-TTWO-20260718",
+          "title": "Illustrative TTWO option-chain fixture",
+          "source_type": "offline_fixture",
+          "uri": "fixtures/ttwo_v1_fixture.json",
+          "status": "validated",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "low",
+          "notes": "Synthetic quote for deterministic tests; not executable",
+          "used_for_decision": true
+        }
+      },
+      {
+        "contract": {
+          "underlying": "TTWO",
+          "con_id": 2002601,
+          "local_symbol": "TTWO  270115P00260000",
+          "trading_class": "TTWO",
+          "exchange": "SMART",
+          "currency": "USD",
+          "expiration": "2027-01-15T21:00:00Z",
+          "strike": 260.0,
+          "option_type": "put",
+          "multiplier": 100.0,
+          "deliverable": "100 TTWO common shares",
+          "exercise_style": "american",
+          "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+          "adjusted_contract": false,
+          "adjustment_understood": true
+        },
+        "bid": 25.0,
+        "ask": 27.0,
+        "last": 26.1,
+        "bid_size": 25,
+        "ask_size": 23,
+        "volume": 230,
+        "open_interest": 1910,
+        "implied_volatility": 0.37,
+        "delta": -0.49,
+        "gamma": 0.0065,
+        "theta": -0.08,
+        "vega": 0.44,
+        "rho": -0.27,
+        "timestamp": "2026-07-18T12:00:00Z",
+        "freshness": {
+          "source": "offline_option_chain_fixture",
+          "as_of": "2026-07-18T12:00:00Z",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "status": "current",
+          "is_stale": false,
+          "max_age_seconds": 86400
+        },
+        "source": {
+          "id": "FIXTURE-CHAIN-TTWO-20260718",
+          "title": "Illustrative TTWO option-chain fixture",
+          "source_type": "offline_fixture",
+          "uri": "fixtures/ttwo_v1_fixture.json",
+          "status": "validated",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "low",
+          "notes": "Synthetic quote for deterministic tests; not executable",
+          "used_for_decision": true
+        }
+      }
+    ],
+    "risk_free_rate": 0.045,
+    "risk_free_rate_freshness": {
+      "source": "offline_rate_fixture",
+      "as_of": "2026-07-18T12:00:00Z",
+      "accessed_at": "2026-07-18T12:00:00Z",
+      "status": "current",
+      "is_stale": false,
+      "max_age_seconds": 86400
+    },
+    "risk_free_rate_source": {
+      "id": "FIXTURE-RATE-20260718",
+      "title": "Illustrative USD risk-free rate",
+      "source_type": "offline_fixture",
+      "uri": "fixtures/ttwo_v1_fixture.json",
+      "status": "validated",
+      "accessed_at": "2026-07-18T12:00:00Z",
+      "confidence_level": "low",
+      "notes": "Synthetic flat rate; replace with Treasury curve by maturity",
+      "used_for_decision": true
+    },
+    "analysis_timestamp": "2026-07-18T12:00:00Z",
+    "monte_carlo_paths": 512,
+    "monte_carlo_seed": 42,
+    "monte_carlo_horizon_days": 120,
+    "annualized_volatility": 0.35,
+    "volatility_freshness": {
+      "source": "offline_volatility_fixture",
+      "as_of": "2026-07-18T12:00:00Z",
+      "accessed_at": "2026-07-18T12:00:00Z",
+      "status": "current",
+      "is_stale": false,
+      "max_age_seconds": 86400
+    },
+    "volatility_source": {
+      "id": "FIXTURE-RV-20260718",
+      "title": "Illustrative TTWO annualized volatility",
+      "source_type": "offline_fixture",
+      "uri": "fixtures/ttwo_v1_fixture.json",
+      "status": "validated",
+      "accessed_at": "2026-07-18T12:00:00Z",
+      "confidence_level": "low",
+      "notes": "Synthetic annualized volatility; no historical calibration",
+      "used_for_decision": true
+    }
+  },
+  "candidates": [
+    {
+      "id": "ttwo-no-trade",
+      "kind": "no_trade",
+      "name": "No trade / wait for proof",
+      "description": "Reference alternative that preserves capital and waits for refreshed evidence",
+      "legs": [],
+      "status": "no_trade",
+      "evidence": [
+        {
+          "id": "CORPUS-CLEAN-RULESET-2026",
+          "title": "Clean usable ruleset 2026",
+          "source_type": "repository_rulebook",
+          "uri": "option-research-engine/research/documentary/CLEAN_USABLE_RULESET_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "high",
+          "notes": "Authorizes only conservative read-only research gates",
+          "used_for_decision": true
+        },
+        {
+          "id": "CORPUS-TTWO-OPERATIONAL-2026",
+          "title": "TTWO GTA VI operational research 2026",
+          "source_type": "repository_research_note",
+          "uri": "option-research-engine/research/documentary/TTWO_GTA6_OPERATIONAL_RESEARCH_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "medium",
+          "notes": "Facts must be refreshed before any human decision",
+          "used_for_decision": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "R-DECISION-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Compare no-trade, stock, directional option, and bounded spread alternatives",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "R-GREEKS-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Aggregate Greeks using each contract multiplier",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "R-OPTIONS-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Keep thesis, catalyst, invalidation, IV, liquidity, and max loss explicit",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-PROVENANCE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Decision inputs must have explicit provenance",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-EVIDENCE-STATUS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "All decision evidence is validated for research",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-RULE-STATUS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Candidate rules are usable as read-only gates",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-UNDERLYING-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Underlying snapshot must be current for its declared fixture window",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-FUNDAMENTALS-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "fundamentals input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-PORTFOLIO-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "portfolio input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-RISK-FREE-RATE-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "risk-free-rate input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-VOLATILITY-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "volatility input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-CORPORATE-ACTIONS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Corporate actions are explicitly handled",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-EVENT-RISK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Critical market events are explicitly handled",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-COSTS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Fees and slippage must be explicit for the instrument",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-MARGIN",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Broker margin must be known for any structure containing a short option",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-MAX-LOSS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Maximum loss must be explicitly calculated",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-UNBOUNDED-RISK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Unbounded-risk structures are disabled in V1",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-CATALYST-COVERAGE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Option expiration must cover the declared catalyst window",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-SCENARIOS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Delay, gap, IV, event, and liquidity scenarios must be visible",
+          "blocks": false,
+          "evidence_ids": []
+        }
+      ],
+      "risk_metrics": {
+        "max_gain": 0.0,
+        "max_loss": 0.0,
+        "break_even_points": [],
+        "net_delta": 0.0,
+        "net_gamma": 0.0,
+        "net_theta": 0.0,
+        "net_vega": 0.0,
+        "net_rho": 0.0,
+        "debit_credit_mid": 0.0,
+        "debit_credit_executable": 0.0,
+        "unbounded_risk": false,
+        "payoff_points": [
+          {
+            "spot": 0.0,
+            "pnl": 0.0
+          },
+          {
+            "spot": 128.895,
+            "pnl": 0.0
+          },
+          {
+            "spot": 257.79,
+            "pnl": 0.0
+          },
+          {
+            "spot": 386.68500000000006,
+            "pnl": 0.0
+          },
+          {
+            "spot": 515.58,
+            "pnl": 0.0
+          }
+        ]
+      },
+      "execution_estimate": {
+        "theoretical_mid": 0.0,
+        "executable_debit": 0.0,
+        "executable_credit": -0.0,
+        "fees": 0.0,
+        "slippage": 0.0,
+        "total_entry_cost": 0.0,
+        "margin_requirement": 0.0,
+        "liquidity_score": 1.0,
+        "notes": []
+      },
+      "scenarios": [
+        {
+          "name": "base_time_passage",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": 0.0,
+          "estimated_value": 0.0,
+          "assumptions": [
+            "Underlying unchanged",
+            "Flat risk-free rate",
+            "No dividend yield modeled"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -0.0,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "bullish_gap",
+          "spot": 296.4585,
+          "days_forward": 120,
+          "iv_shift": 0.05,
+          "pnl": 0.0,
+          "estimated_value": 0.0,
+          "assumptions": [
+            "Illustrative +15% spot gap",
+            "Absolute IV shift +5 points"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -0.0,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "bearish_gap",
+          "spot": 219.1215,
+          "days_forward": 120,
+          "iv_shift": 0.1,
+          "pnl": 0.0,
+          "estimated_value": 0.0,
+          "assumptions": [
+            "Illustrative -15% spot gap",
+            "Absolute IV shift +10 points"
+          ],
+          "attribution": {
+            "delta": -0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -0.0,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "iv_crush",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": -0.12,
+          "pnl": 0.0,
+          "estimated_value": 0.0,
+          "assumptions": [
+            "Absolute IV shift -12 points",
+            "No spot move"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": -0.0,
+            "execution_costs": -0.0,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "iv_expansion",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": 0.12,
+          "pnl": 0.0,
+          "estimated_value": 0.0,
+          "assumptions": [
+            "Absolute IV shift +12 points",
+            "No spot move"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -0.0,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "gta_delay",
+          "spot": 232.011,
+          "days_forward": 120,
+          "iv_shift": 0.08,
+          "pnl": 0.0,
+          "estimated_value": 0.0,
+          "assumptions": [
+            "Illustrative release-delay shock",
+            "Spot -10%",
+            "IV +8 points"
+          ],
+          "attribution": {
+            "delta": -0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -0.0,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "ex_dividend",
+          "spot": 255.2121,
+          "days_forward": 30,
+          "iv_shift": 0.0,
+          "pnl": 0.0,
+          "estimated_value": 0.0,
+          "assumptions": [
+            "Illustrative 1% ex-dividend spot adjustment",
+            "No dividend forecast"
+          ],
+          "attribution": {
+            "delta": -0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -0.0,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "liquidity_stress",
+          "spot": 257.79,
+          "days_forward": 30,
+          "iv_shift": 0.03,
+          "pnl": 0.0,
+          "estimated_value": 0.0,
+          "assumptions": [
+            "Wider exit costs under stressed liquidity",
+            "Exit penalty equals 10% of entry exposure times illiquidity"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -0.0,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "monte_carlo_p05",
+          "spot": 185.908966,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": 0.0,
+          "estimated_value": 0.0,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": -0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -0.0,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "monte_carlo_p50",
+          "spot": 259.5842,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": 0.0,
+          "estimated_value": 0.0,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -0.0,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "monte_carlo_p95",
+          "spot": 363.789597,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": 0.0,
+          "estimated_value": 0.0,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -0.0,
+            "residual": 0.0
+          }
+        }
+      ],
+      "score": {
+        "thesis_fit": 0.65,
+        "catalyst_coverage": 1.0,
+        "expected_payoff": 0.5,
+        "payoff_quality": 0.7,
+        "max_loss_quality": 1.0,
+        "assumption_sensitivity": 1.0,
+        "liquidity": 1.0,
+        "cost_quality": 1.0,
+        "complexity": 1.0,
+        "assignment_early_exercise": 1.0,
+        "iv_rv_context": 0.7,
+        "skew_term_structure": 0.75,
+        "margin": 1.0,
+        "carry": 1.0,
+        "adverse_robustness": 1.0,
+        "data_confidence": 0.585714,
+        "total": 0.867857
+      },
+      "veto_reasons": [],
+      "assumptions": [
+        "No position is opened"
+      ],
+      "failure_modes": [
+        "Opportunity cost if the thesis resolves before evidence is refreshed"
+      ],
+      "contradictions": [],
+      "human_validation_required": true
+    },
+    {
+      "id": "ttwo-stock-research",
+      "kind": "stock",
+      "name": "TTWO stock research proxy",
+      "description": "Illustrative long-stock comparison using a non-executable research quantity",
+      "legs": [
+        {
+          "instrument_type": "stock",
+          "side": "long",
+          "quantity": 10,
+          "option_quote": null,
+          "underlying_symbol": "TTWO",
+          "stock_price": 257.79
+        }
+      ],
+      "status": "human_review_required",
+      "evidence": [
+        {
+          "id": "CORPUS-CLEAN-RULESET-2026",
+          "title": "Clean usable ruleset 2026",
+          "source_type": "repository_rulebook",
+          "uri": "option-research-engine/research/documentary/CLEAN_USABLE_RULESET_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "high",
+          "notes": "Authorizes only conservative read-only research gates",
+          "used_for_decision": true
+        },
+        {
+          "id": "CORPUS-TTWO-OPERATIONAL-2026",
+          "title": "TTWO GTA VI operational research 2026",
+          "source_type": "repository_research_note",
+          "uri": "option-research-engine/research/documentary/TTWO_GTA6_OPERATIONAL_RESEARCH_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "medium",
+          "notes": "Facts must be refreshed before any human decision",
+          "used_for_decision": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "R-DECISION-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Compare no-trade, stock, directional option, and bounded spread alternatives",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "R-GREEKS-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Aggregate Greeks using each contract multiplier",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "R-OPTIONS-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Keep thesis, catalyst, invalidation, IV, liquidity, and max loss explicit",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-PROVENANCE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Decision inputs must have explicit provenance",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-EVIDENCE-STATUS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "All decision evidence is validated for research",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-RULE-STATUS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Candidate rules are usable as read-only gates",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-UNDERLYING-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Underlying snapshot must be current for its declared fixture window",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-FUNDAMENTALS-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "fundamentals input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-PORTFOLIO-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "portfolio input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-RISK-FREE-RATE-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "risk-free-rate input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-VOLATILITY-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "volatility input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-CORPORATE-ACTIONS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Corporate actions are explicitly handled",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-EVENT-RISK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Critical market events are explicitly handled",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-COSTS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Fees and slippage must be explicit for the instrument",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-MARGIN",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Broker margin must be known for any structure containing a short option",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-MAX-LOSS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Maximum loss must be explicitly calculated",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-UNBOUNDED-RISK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Unbounded-risk structures are disabled in V1",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-CATALYST-COVERAGE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Option expiration must cover the declared catalyst window",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-SCENARIOS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Delay, gap, IV, event, and liquidity scenarios must be visible",
+          "blocks": false,
+          "evidence_ids": []
+        }
+      ],
+      "risk_metrics": {
+        "max_gain": null,
+        "max_loss": 2579.18895,
+        "break_even_points": [
+          257.918895
+        ],
+        "net_delta": 10.0,
+        "net_gamma": 0.0,
+        "net_theta": 0.0,
+        "net_vega": 0.0,
+        "net_rho": 0.0,
+        "debit_credit_mid": 2577.9,
+        "debit_credit_executable": 2579.18895,
+        "unbounded_risk": false,
+        "payoff_points": [
+          {
+            "spot": 0.0,
+            "pnl": -2579.18895
+          },
+          {
+            "spot": 128.895,
+            "pnl": -1290.23895
+          },
+          {
+            "spot": 257.79,
+            "pnl": -1.28895
+          },
+          {
+            "spot": 257.918895,
+            "pnl": 0.0
+          },
+          {
+            "spot": 386.68500000000006,
+            "pnl": 1287.66105
+          },
+          {
+            "spot": 515.58,
+            "pnl": 2576.61105
+          }
+        ]
+      },
+      "execution_estimate": {
+        "theoretical_mid": 2577.9,
+        "executable_debit": 2579.18895,
+        "executable_credit": 0.0,
+        "fees": 0.0,
+        "slippage": 1.28895,
+        "total_entry_cost": 2579.18895,
+        "margin_requirement": 0.0,
+        "liquidity_score": 1.0,
+        "notes": []
+      },
+      "scenarios": [
+        {
+          "name": "base_time_passage",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -1.28895,
+          "estimated_value": 2577.9,
+          "assumptions": [
+            "Underlying unchanged",
+            "Flat risk-free rate",
+            "No dividend yield modeled"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -1.28895,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "bullish_gap",
+          "spot": 296.4585,
+          "days_forward": 120,
+          "iv_shift": 0.05,
+          "pnl": 385.39605,
+          "estimated_value": 2964.585,
+          "assumptions": [
+            "Illustrative +15% spot gap",
+            "Absolute IV shift +5 points"
+          ],
+          "attribution": {
+            "delta": 386.685,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -1.28895,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "bearish_gap",
+          "spot": 219.1215,
+          "days_forward": 120,
+          "iv_shift": 0.1,
+          "pnl": -387.97395,
+          "estimated_value": 2191.215,
+          "assumptions": [
+            "Illustrative -15% spot gap",
+            "Absolute IV shift +10 points"
+          ],
+          "attribution": {
+            "delta": -386.685,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -1.28895,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "iv_crush",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": -0.12,
+          "pnl": -1.28895,
+          "estimated_value": 2577.9,
+          "assumptions": [
+            "Absolute IV shift -12 points",
+            "No spot move"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": -0.0,
+            "execution_costs": -1.28895,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "iv_expansion",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": 0.12,
+          "pnl": -1.28895,
+          "estimated_value": 2577.9,
+          "assumptions": [
+            "Absolute IV shift +12 points",
+            "No spot move"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -1.28895,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "gta_delay",
+          "spot": 232.011,
+          "days_forward": 120,
+          "iv_shift": 0.08,
+          "pnl": -259.07895,
+          "estimated_value": 2320.11,
+          "assumptions": [
+            "Illustrative release-delay shock",
+            "Spot -10%",
+            "IV +8 points"
+          ],
+          "attribution": {
+            "delta": -257.79,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -1.28895,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "ex_dividend",
+          "spot": 255.2121,
+          "days_forward": 30,
+          "iv_shift": 0.0,
+          "pnl": -27.06795,
+          "estimated_value": 2552.121,
+          "assumptions": [
+            "Illustrative 1% ex-dividend spot adjustment",
+            "No dividend forecast"
+          ],
+          "attribution": {
+            "delta": -25.779,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -1.28895,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "liquidity_stress",
+          "spot": 257.79,
+          "days_forward": 30,
+          "iv_shift": 0.03,
+          "pnl": -1.28895,
+          "estimated_value": 2577.9,
+          "assumptions": [
+            "Wider exit costs under stressed liquidity",
+            "Exit penalty equals 10% of entry exposure times illiquidity"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -1.28895,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "monte_carlo_p05",
+          "spot": 185.908966,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -720.099291,
+          "estimated_value": 1859.089659,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": -718.810341,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -1.28895,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "monte_carlo_p50",
+          "spot": 259.5842,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": 16.653053,
+          "estimated_value": 2595.842003,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": 17.942003,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -1.28895,
+            "residual": 0.0
+          }
+        },
+        {
+          "name": "monte_carlo_p95",
+          "spot": 363.789597,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": 1058.707016,
+          "estimated_value": 3637.895966,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": 1059.995966,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "execution_costs": -1.28895,
+            "residual": 0.0
+          }
+        }
+      ],
+      "score": {
+        "thesis_fit": 1.0,
+        "catalyst_coverage": 1.0,
+        "expected_payoff": 0.513727,
+        "payoff_quality": 0.8,
+        "max_loss_quality": 1.0,
+        "assumption_sensitivity": 0.827581,
+        "liquidity": 1.0,
+        "cost_quality": 0.9995,
+        "complexity": 1.0,
+        "assignment_early_exercise": 1.0,
+        "iv_rv_context": 1.0,
+        "skew_term_structure": 1.0,
+        "margin": 1.0,
+        "carry": 1.0,
+        "adverse_robustness": 0.720804,
+        "data_confidence": 0.585714,
+        "total": 0.902958
+      },
+      "veto_reasons": [],
+      "assumptions": [
+        "Research quantity is not a sizing recommendation"
+      ],
+      "failure_modes": [
+        "Full equity downside",
+        "Event delay",
+        "Multiple compression"
+      ],
+      "contradictions": [],
+      "human_validation_required": true
+    },
+    {
+      "id": "ttwo-long-call",
+      "kind": "long_call",
+      "name": "Long call",
+      "description": "Defined-premium bullish exposure across the catalyst window",
+      "legs": [
+        {
+          "instrument_type": "option",
+          "side": "long",
+          "quantity": 1,
+          "option_quote": {
+            "contract": {
+              "underlying": "TTWO",
+              "con_id": 1002601,
+              "local_symbol": "TTWO  270115C00260000",
+              "trading_class": "TTWO",
+              "exchange": "SMART",
+              "currency": "USD",
+              "expiration": "2027-01-15T21:00:00Z",
+              "strike": 260.0,
+              "option_type": "call",
+              "multiplier": 100.0,
+              "deliverable": "100 TTWO common shares",
+              "exercise_style": "american",
+              "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+              "adjusted_contract": false,
+              "adjustment_understood": true
+            },
+            "bid": 28.0,
+            "ask": 30.0,
+            "last": 29.1,
+            "bid_size": 24,
+            "ask_size": 22,
+            "volume": 210,
+            "open_interest": 1840,
+            "implied_volatility": 0.36,
+            "delta": 0.56,
+            "gamma": 0.0065,
+            "theta": -0.08,
+            "vega": 0.44,
+            "rho": 0.27,
+            "timestamp": "2026-07-18T12:00:00Z",
+            "freshness": {
+              "source": "offline_option_chain_fixture",
+              "as_of": "2026-07-18T12:00:00Z",
+              "accessed_at": "2026-07-18T12:00:00Z",
+              "status": "current",
+              "is_stale": false,
+              "max_age_seconds": 86400
+            },
+            "source": {
+              "id": "FIXTURE-CHAIN-TTWO-20260718",
+              "title": "Illustrative TTWO option-chain fixture",
+              "source_type": "offline_fixture",
+              "uri": "fixtures/ttwo_v1_fixture.json",
+              "status": "validated",
+              "accessed_at": "2026-07-18T12:00:00Z",
+              "confidence_level": "low",
+              "notes": "Synthetic quote for deterministic tests; not executable",
+              "used_for_decision": true
+            }
+          },
+          "underlying_symbol": "",
+          "stock_price": null
+        }
+      ],
+      "status": "human_review_required",
+      "evidence": [
+        {
+          "id": "CORPUS-CLEAN-RULESET-2026",
+          "title": "Clean usable ruleset 2026",
+          "source_type": "repository_rulebook",
+          "uri": "option-research-engine/research/documentary/CLEAN_USABLE_RULESET_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "high",
+          "notes": "Authorizes only conservative read-only research gates",
+          "used_for_decision": true
+        },
+        {
+          "id": "CORPUS-TTWO-OPERATIONAL-2026",
+          "title": "TTWO GTA VI operational research 2026",
+          "source_type": "repository_research_note",
+          "uri": "option-research-engine/research/documentary/TTWO_GTA6_OPERATIONAL_RESEARCH_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "medium",
+          "notes": "Facts must be refreshed before any human decision",
+          "used_for_decision": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "R-DECISION-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Compare no-trade, stock, directional option, and bounded spread alternatives",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "R-GREEKS-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Aggregate Greeks using each contract multiplier",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "R-OPTIONS-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Keep thesis, catalyst, invalidation, IV, liquidity, and max loss explicit",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-PROVENANCE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Decision inputs must have explicit provenance",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-EVIDENCE-STATUS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "All decision evidence is validated for research",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-RULE-STATUS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Candidate rules are usable as read-only gates",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-UNDERLYING-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Underlying snapshot must be current for its declared fixture window",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-FUNDAMENTALS-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "fundamentals input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-PORTFOLIO-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "portfolio input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-RISK-FREE-RATE-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "risk-free-rate input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-VOLATILITY-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "volatility input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-LEG-1-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00260000 quote must be current",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-BID-ASK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00260000 requires a positive, ordered bid/ask",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-CONTRACT",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00260000 contract semantics must be complete",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-ADJUSTMENT",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00260000 adjusted deliverable must be understood",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-SOURCE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00260000 quote source must authorize research use",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-LIQUIDITY",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00260000 requires non-zero volume/OI and <=35% relative spread",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-CORPORATE-ACTIONS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Corporate actions are explicitly handled",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-EVENT-RISK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Critical market events are explicitly handled",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-COSTS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Fees and slippage must be explicit for the instrument",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-MARGIN",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Broker margin must be known for any structure containing a short option",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-MAX-LOSS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Maximum loss must be explicitly calculated",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-UNBOUNDED-RISK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Unbounded-risk structures are disabled in V1",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-CATALYST-COVERAGE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Option expiration must cover the declared catalyst window",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-SCENARIOS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Delay, gap, IV, event, and liquidity scenarios must be visible",
+          "blocks": false,
+          "evidence_ids": []
+        }
+      ],
+      "risk_metrics": {
+        "max_gain": null,
+        "max_loss": 3002.15,
+        "break_even_points": [
+          290.0215
+        ],
+        "net_delta": 57.19591,
+        "net_gamma": 0.599869,
+        "net_theta": -8.554182,
+        "net_vega": 71.314165,
+        "net_rho": 59.524399,
+        "debit_credit_mid": 2900.0,
+        "debit_credit_executable": 3002.15,
+        "unbounded_risk": false,
+        "payoff_points": [
+          {
+            "spot": 0.0,
+            "pnl": -3002.15
+          },
+          {
+            "spot": 128.895,
+            "pnl": -3002.15
+          },
+          {
+            "spot": 257.79,
+            "pnl": -3002.15
+          },
+          {
+            "spot": 260.0,
+            "pnl": -3002.15
+          },
+          {
+            "spot": 290.0215,
+            "pnl": 0.0
+          },
+          {
+            "spot": 386.68500000000006,
+            "pnl": 9666.35
+          },
+          {
+            "spot": 515.58,
+            "pnl": 22555.85
+          }
+        ]
+      },
+      "execution_estimate": {
+        "theoretical_mid": 2900.0,
+        "executable_debit": 3002.15,
+        "executable_credit": 0.0,
+        "fees": 0.65,
+        "slippage": 1.5,
+        "total_entry_cost": 3002.15,
+        "margin_requirement": 0.0,
+        "liquidity_score": 0.848276,
+        "notes": []
+      },
+      "scenarios": [
+        {
+          "name": "base_time_passage",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -1497.065765,
+          "estimated_value": 1505.084235,
+          "assumptions": [
+            "Underlying unchanged",
+            "Flat risk-free rate",
+            "No dividend yield modeled"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": -1026.50184,
+            "vega": 0.0,
+            "execution_costs": -102.15,
+            "residual": -368.413925
+          }
+        },
+        {
+          "name": "bullish_gap",
+          "spot": 296.4585,
+          "days_forward": 120,
+          "iv_shift": 0.05,
+          "pnl": 1372.827158,
+          "estimated_value": 4374.977158,
+          "assumptions": [
+            "Illustrative +15% spot gap",
+            "Absolute IV shift +5 points"
+          ],
+          "attribution": {
+            "delta": 2211.680046,
+            "gamma": 448.477929,
+            "theta": -1026.50184,
+            "vega": 356.570825,
+            "execution_costs": -102.15,
+            "residual": -515.249801
+          }
+        },
+        {
+          "name": "bearish_gap",
+          "spot": 219.1215,
+          "days_forward": 120,
+          "iv_shift": 0.1,
+          "pnl": -2524.8312,
+          "estimated_value": 477.3188,
+          "assumptions": [
+            "Illustrative -15% spot gap",
+            "Absolute IV shift +10 points"
+          ],
+          "attribution": {
+            "delta": -2211.680046,
+            "gamma": 448.477929,
+            "theta": -1026.50184,
+            "vega": 713.14165,
+            "execution_costs": -102.15,
+            "residual": -346.118893
+          }
+        },
+        {
+          "name": "iv_crush",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": -0.12,
+          "pnl": -2002.390686,
+          "estimated_value": 999.759314,
+          "assumptions": [
+            "Absolute IV shift -12 points",
+            "No spot move"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": -1026.50184,
+            "vega": -855.76998,
+            "execution_costs": -102.15,
+            "residual": -17.968866
+          }
+        },
+        {
+          "name": "iv_expansion",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": 0.12,
+          "pnl": -992.649488,
+          "estimated_value": 2009.500512,
+          "assumptions": [
+            "Absolute IV shift +12 points",
+            "No spot move"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": -1026.50184,
+            "vega": 855.76998,
+            "execution_costs": -102.15,
+            "residual": -719.767628
+          }
+        },
+        {
+          "name": "gta_delay",
+          "spot": 232.011,
+          "days_forward": 120,
+          "iv_shift": 0.08,
+          "pnl": -2246.151807,
+          "estimated_value": 755.998193,
+          "assumptions": [
+            "Illustrative release-delay shock",
+            "Spot -10%",
+            "IV +8 points"
+          ],
+          "attribution": {
+            "delta": -1474.453364,
+            "gamma": 199.323524,
+            "theta": -1026.50184,
+            "vega": 570.51332,
+            "execution_costs": -102.15,
+            "residual": -412.883447
+          }
+        },
+        {
+          "name": "ex_dividend",
+          "spot": 255.2121,
+          "days_forward": 30,
+          "iv_shift": 0.0,
+          "pnl": -646.096986,
+          "estimated_value": 2356.053014,
+          "assumptions": [
+            "Illustrative 1% ex-dividend spot adjustment",
+            "No dividend forecast"
+          ],
+          "attribution": {
+            "delta": -147.445336,
+            "gamma": 1.993235,
+            "theta": -256.62546,
+            "vega": 0.0,
+            "execution_costs": -102.15,
+            "residual": -141.869425
+          }
+        },
+        {
+          "name": "liquidity_stress",
+          "spot": 257.79,
+          "days_forward": 30,
+          "iv_shift": 0.03,
+          "pnl": -352.531651,
+          "estimated_value": 2695.168169,
+          "assumptions": [
+            "Wider exit costs under stressed liquidity",
+            "Exit penalty equals 10% of entry exposure times illiquidity"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": -256.62546,
+            "vega": 213.942495,
+            "execution_costs": -102.15,
+            "residual": -207.698686
+          }
+        },
+        {
+          "name": "monte_carlo_p05",
+          "spot": 185.908966,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -2987.297458,
+          "estimated_value": 14.852542,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": -4111.301159,
+            "gamma": 1549.72649,
+            "theta": -1026.50184,
+            "vega": 0.0,
+            "execution_costs": -102.15,
+            "residual": 702.929051
+          }
+        },
+        {
+          "name": "monte_carlo_p50",
+          "spot": 259.5842,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -1400.868649,
+          "estimated_value": 1601.281351,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": 102.620919,
+            "gamma": 0.965536,
+            "theta": -1026.50184,
+            "vega": 0.0,
+            "execution_costs": -102.15,
+            "residual": -375.803263
+          }
+        },
+        {
+          "name": "monte_carlo_p95",
+          "spot": 363.789597,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": 7588.083857,
+          "estimated_value": 10590.233857,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": 6062.743388,
+            "gamma": 3370.038392,
+            "theta": -1026.50184,
+            "vega": 0.0,
+            "execution_costs": -102.15,
+            "residual": -716.046083
+          }
+        }
+      ],
+      "score": {
+        "thesis_fit": 1.0,
+        "catalyst_coverage": 1.0,
+        "expected_payoff": 0.291458,
+        "payoff_quality": 0.8,
+        "max_loss_quality": 1.0,
+        "assumption_sensitivity": 0.119349,
+        "liquidity": 0.848276,
+        "cost_quality": 0.999259,
+        "complexity": 0.9,
+        "assignment_early_exercise": 1.0,
+        "iv_rv_context": 0.972222,
+        "skew_term_structure": 0.35,
+        "margin": 1.0,
+        "carry": 0.914519,
+        "adverse_robustness": 0.004947,
+        "data_confidence": 0.585714,
+        "total": 0.736609
+      },
+      "veto_reasons": [],
+      "assumptions": [
+        "Black-Scholes is indicative for an American equity option"
+      ],
+      "failure_modes": [
+        "IV crush",
+        "Theta decay",
+        "Catalyst delay beyond expiration"
+      ],
+      "contradictions": [],
+      "human_validation_required": true
+    },
+    {
+      "id": "ttwo-bull-call-spread",
+      "kind": "bull_call_spread",
+      "name": "Bull call spread",
+      "description": "Bounded-risk bullish vertical with capped upside",
+      "legs": [
+        {
+          "instrument_type": "option",
+          "side": "long",
+          "quantity": 1,
+          "option_quote": {
+            "contract": {
+              "underlying": "TTWO",
+              "con_id": 1002601,
+              "local_symbol": "TTWO  270115C00260000",
+              "trading_class": "TTWO",
+              "exchange": "SMART",
+              "currency": "USD",
+              "expiration": "2027-01-15T21:00:00Z",
+              "strike": 260.0,
+              "option_type": "call",
+              "multiplier": 100.0,
+              "deliverable": "100 TTWO common shares",
+              "exercise_style": "american",
+              "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+              "adjusted_contract": false,
+              "adjustment_understood": true
+            },
+            "bid": 28.0,
+            "ask": 30.0,
+            "last": 29.1,
+            "bid_size": 24,
+            "ask_size": 22,
+            "volume": 210,
+            "open_interest": 1840,
+            "implied_volatility": 0.36,
+            "delta": 0.56,
+            "gamma": 0.0065,
+            "theta": -0.08,
+            "vega": 0.44,
+            "rho": 0.27,
+            "timestamp": "2026-07-18T12:00:00Z",
+            "freshness": {
+              "source": "offline_option_chain_fixture",
+              "as_of": "2026-07-18T12:00:00Z",
+              "accessed_at": "2026-07-18T12:00:00Z",
+              "status": "current",
+              "is_stale": false,
+              "max_age_seconds": 86400
+            },
+            "source": {
+              "id": "FIXTURE-CHAIN-TTWO-20260718",
+              "title": "Illustrative TTWO option-chain fixture",
+              "source_type": "offline_fixture",
+              "uri": "fixtures/ttwo_v1_fixture.json",
+              "status": "validated",
+              "accessed_at": "2026-07-18T12:00:00Z",
+              "confidence_level": "low",
+              "notes": "Synthetic quote for deterministic tests; not executable",
+              "used_for_decision": true
+            }
+          },
+          "underlying_symbol": "",
+          "stock_price": null
+        },
+        {
+          "instrument_type": "option",
+          "side": "short",
+          "quantity": 1,
+          "option_quote": {
+            "contract": {
+              "underlying": "TTWO",
+              "con_id": 1002801,
+              "local_symbol": "TTWO  270115C00280000",
+              "trading_class": "TTWO",
+              "exchange": "SMART",
+              "currency": "USD",
+              "expiration": "2027-01-15T21:00:00Z",
+              "strike": 280.0,
+              "option_type": "call",
+              "multiplier": 100.0,
+              "deliverable": "100 TTWO common shares",
+              "exercise_style": "american",
+              "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+              "adjusted_contract": false,
+              "adjustment_understood": true
+            },
+            "bid": 19.0,
+            "ask": 20.5,
+            "last": 19.8,
+            "bid_size": 25,
+            "ask_size": 20,
+            "volume": 165,
+            "open_interest": 1320,
+            "implied_volatility": 0.355,
+            "delta": 0.43,
+            "gamma": 0.0062,
+            "theta": -0.075,
+            "vega": 0.43,
+            "rho": 0.23,
+            "timestamp": "2026-07-18T12:00:00Z",
+            "freshness": {
+              "source": "offline_option_chain_fixture",
+              "as_of": "2026-07-18T12:00:00Z",
+              "accessed_at": "2026-07-18T12:00:00Z",
+              "status": "current",
+              "is_stale": false,
+              "max_age_seconds": 86400
+            },
+            "source": {
+              "id": "FIXTURE-CHAIN-TTWO-20260718",
+              "title": "Illustrative TTWO option-chain fixture",
+              "source_type": "offline_fixture",
+              "uri": "fixtures/ttwo_v1_fixture.json",
+              "status": "validated",
+              "accessed_at": "2026-07-18T12:00:00Z",
+              "confidence_level": "low",
+              "notes": "Synthetic quote for deterministic tests; not executable",
+              "used_for_decision": true
+            }
+          },
+          "underlying_symbol": "",
+          "stock_price": null
+        }
+      ],
+      "status": "human_review_required",
+      "evidence": [
+        {
+          "id": "CORPUS-CLEAN-RULESET-2026",
+          "title": "Clean usable ruleset 2026",
+          "source_type": "repository_rulebook",
+          "uri": "option-research-engine/research/documentary/CLEAN_USABLE_RULESET_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "high",
+          "notes": "Authorizes only conservative read-only research gates",
+          "used_for_decision": true
+        },
+        {
+          "id": "CORPUS-TTWO-OPERATIONAL-2026",
+          "title": "TTWO GTA VI operational research 2026",
+          "source_type": "repository_research_note",
+          "uri": "option-research-engine/research/documentary/TTWO_GTA6_OPERATIONAL_RESEARCH_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "medium",
+          "notes": "Facts must be refreshed before any human decision",
+          "used_for_decision": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "R-DECISION-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Compare no-trade, stock, directional option, and bounded spread alternatives",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "R-GREEKS-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Aggregate Greeks using each contract multiplier",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "R-OPTIONS-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Keep thesis, catalyst, invalidation, IV, liquidity, and max loss explicit",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-PROVENANCE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Decision inputs must have explicit provenance",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-EVIDENCE-STATUS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "All decision evidence is validated for research",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-RULE-STATUS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Candidate rules are usable as read-only gates",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-UNDERLYING-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Underlying snapshot must be current for its declared fixture window",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-FUNDAMENTALS-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "fundamentals input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-PORTFOLIO-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "portfolio input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-RISK-FREE-RATE-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "risk-free-rate input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-VOLATILITY-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "volatility input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-LEG-1-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00260000 quote must be current",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-BID-ASK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00260000 requires a positive, ordered bid/ask",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-CONTRACT",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00260000 contract semantics must be complete",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-ADJUSTMENT",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00260000 adjusted deliverable must be understood",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-SOURCE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00260000 quote source must authorize research use",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-LIQUIDITY",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00260000 requires non-zero volume/OI and <=35% relative spread",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-2-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00280000 quote must be current",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-2-BID-ASK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00280000 requires a positive, ordered bid/ask",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-2-CONTRACT",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00280000 contract semantics must be complete",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-2-ADJUSTMENT",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00280000 adjusted deliverable must be understood",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-2-SOURCE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00280000 quote source must authorize research use",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-2-LIQUIDITY",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115C00280000 requires non-zero volume/OI and <=35% relative spread",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-CORPORATE-ACTIONS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Corporate actions are explicitly handled",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-EVENT-RISK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Critical market events are explicitly handled",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-COSTS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Fees and slippage must be explicit for the instrument",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-MARGIN",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Broker margin must be known for any structure containing a short option",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-MAX-LOSS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Maximum loss must be explicitly calculated",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-UNBOUNDED-RISK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Unbounded-risk structures are disabled in V1",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-CATALYST-COVERAGE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Option expiration must cover the declared catalyst window",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-SCENARIOS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Delay, gap, IV, event, and liquidity scenarios must be visible",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "GATE-ASSIGNMENT-PIN",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "warning",
+          "message": "American early assignment and expiration pin risk require human review",
+          "blocks": false,
+          "evidence_ids": []
+        }
+      ],
+      "risk_metrics": {
+        "max_gain": 895.7,
+        "max_loss": 1104.3,
+        "break_even_points": [
+          271.043
+        ],
+        "net_delta": 11.80413,
+        "net_gamma": -0.014406,
+        "net_theta": -0.301054,
+        "net_vega": -0.698371,
+        "net_rho": 10.926925,
+        "debit_credit_mid": 925.0,
+        "debit_credit_executable": 1104.3,
+        "unbounded_risk": false,
+        "payoff_points": [
+          {
+            "spot": 0.0,
+            "pnl": -1104.3
+          },
+          {
+            "spot": 128.895,
+            "pnl": -1104.3
+          },
+          {
+            "spot": 257.79,
+            "pnl": -1104.3
+          },
+          {
+            "spot": 260.0,
+            "pnl": -1104.3
+          },
+          {
+            "spot": 271.043,
+            "pnl": 0.0
+          },
+          {
+            "spot": 280.0,
+            "pnl": 895.7
+          },
+          {
+            "spot": 386.68500000000006,
+            "pnl": 895.7
+          },
+          {
+            "spot": 515.58,
+            "pnl": 895.7
+          }
+        ]
+      },
+      "execution_estimate": {
+        "theoretical_mid": 925.0,
+        "executable_debit": 1104.3,
+        "executable_credit": 0.0,
+        "fees": 1.3,
+        "slippage": 3.0,
+        "total_entry_cost": 1104.3,
+        "margin_requirement": 0.0,
+        "liquidity_score": 0.832911,
+        "notes": [
+          "Margin is fixture-provided and must be refreshed at the broker before use"
+        ]
+      },
+      "scenarios": [
+        {
+          "name": "base_time_passage",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -350.10196,
+          "estimated_value": 754.19804,
+          "assumptions": [
+            "Underlying unchanged",
+            "Flat risk-free rate",
+            "No dividend yield modeled"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": -0.0,
+            "theta": -36.12648,
+            "vega": -0.0,
+            "execution_costs": -179.3,
+            "residual": -134.67548
+          }
+        },
+        {
+          "name": "bullish_gap",
+          "spot": 296.4585,
+          "days_forward": 120,
+          "iv_shift": 0.05,
+          "pnl": 299.780809,
+          "estimated_value": 1404.080809,
+          "assumptions": [
+            "Illustrative +15% spot gap",
+            "Absolute IV shift +5 points"
+          ],
+          "attribution": {
+            "delta": 456.448001,
+            "gamma": -10.770307,
+            "theta": -36.12648,
+            "vega": -3.491855,
+            "execution_costs": -179.3,
+            "residual": 73.02145
+          }
+        },
+        {
+          "name": "bearish_gap",
+          "spot": 219.1215,
+          "days_forward": 120,
+          "iv_shift": 0.1,
+          "pnl": -848.049774,
+          "estimated_value": 256.250226,
+          "assumptions": [
+            "Illustrative -15% spot gap",
+            "Absolute IV shift +10 points"
+          ],
+          "attribution": {
+            "delta": -456.448001,
+            "gamma": -10.770307,
+            "theta": -36.12648,
+            "vega": -6.98371,
+            "execution_costs": -179.3,
+            "residual": -158.421277
+          }
+        },
+        {
+          "name": "iv_crush",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": -0.12,
+          "pnl": -425.946395,
+          "estimated_value": 678.353605,
+          "assumptions": [
+            "Absolute IV shift -12 points",
+            "No spot move"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": -0.0,
+            "theta": -36.12648,
+            "vega": 8.380452,
+            "execution_costs": -179.3,
+            "residual": -218.900367
+          }
+        },
+        {
+          "name": "iv_expansion",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": 0.12,
+          "pnl": -319.7268,
+          "estimated_value": 784.5732,
+          "assumptions": [
+            "Absolute IV shift +12 points",
+            "No spot move"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": -0.0,
+            "theta": -36.12648,
+            "vega": -8.380452,
+            "execution_costs": -179.3,
+            "residual": -95.919868
+          }
+        },
+        {
+          "name": "gta_delay",
+          "spot": 232.011,
+          "days_forward": 120,
+          "iv_shift": 0.08,
+          "pnl": -716.495964,
+          "estimated_value": 387.804036,
+          "assumptions": [
+            "Illustrative release-delay shock",
+            "Spot -10%",
+            "IV +8 points"
+          ],
+          "attribution": {
+            "delta": -304.298667,
+            "gamma": -4.786803,
+            "theta": -36.12648,
+            "vega": -5.586968,
+            "execution_costs": -179.3,
+            "residual": -186.397046
+          }
+        },
+        {
+          "name": "ex_dividend",
+          "spot": 255.2121,
+          "days_forward": 30,
+          "iv_shift": 0.0,
+          "pnl": -304.293561,
+          "estimated_value": 800.006439,
+          "assumptions": [
+            "Illustrative 1% ex-dividend spot adjustment",
+            "No dividend forecast"
+          ],
+          "attribution": {
+            "delta": -30.429867,
+            "gamma": -0.047868,
+            "theta": -9.03162,
+            "vega": -0.0,
+            "execution_costs": -179.3,
+            "residual": -85.484206
+          }
+        },
+        {
+          "name": "liquidity_stress",
+          "spot": 257.79,
+          "days_forward": 30,
+          "iv_shift": 0.03,
+          "pnl": -289.830157,
+          "estimated_value": 832.921482,
+          "assumptions": [
+            "Wider exit costs under stressed liquidity",
+            "Exit penalty equals 10% of entry exposure times illiquidity"
+          ],
+          "attribution": {
+            "delta": 0.0,
+            "gamma": -0.0,
+            "theta": -9.03162,
+            "vega": -2.095113,
+            "execution_costs": -179.3,
+            "residual": -99.403424
+          }
+        },
+        {
+          "name": "monte_carlo_p05",
+          "spot": 185.908966,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -1092.306907,
+          "estimated_value": 11.993093,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": -848.493071,
+            "gamma": -37.217059,
+            "theta": -36.12648,
+            "vega": -0.0,
+            "execution_costs": -179.3,
+            "residual": 8.829703
+          }
+        },
+        {
+          "name": "monte_carlo_p50",
+          "spot": 259.5842,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -314.474172,
+          "estimated_value": 789.825828,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": 21.178974,
+            "gamma": -0.023188,
+            "theta": -36.12648,
+            "vega": -0.0,
+            "execution_costs": -179.3,
+            "residual": -120.203478
+          }
+        },
+        {
+          "name": "monte_carlo_p95",
+          "spot": 363.789597,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": 837.865616,
+          "estimated_value": 1942.165616,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": 1251.233018,
+            "gamma": -80.932292,
+            "theta": -36.12648,
+            "vega": -0.0,
+            "execution_costs": -179.3,
+            "residual": -117.00863
+          }
+        }
+      ],
+      "score": {
+        "thesis_fit": 1.0,
+        "catalyst_coverage": 1.0,
+        "expected_payoff": 0.226388,
+        "payoff_quality": 0.405551,
+        "max_loss_quality": 1.0,
+        "assumption_sensitivity": 0.563033,
+        "liquidity": 0.832911,
+        "cost_quality": 0.995351,
+        "complexity": 0.7,
+        "assignment_early_exercise": 0.6,
+        "iv_rv_context": 0.979021,
+        "skew_term_structure": 0.35,
+        "margin": 0.8,
+        "carry": 0.991821,
+        "adverse_robustness": 0.01086,
+        "data_confidence": 0.585714,
+        "total": 0.690041
+      },
+      "veto_reasons": [],
+      "assumptions": [
+        "Both legs execute together at the modeled executable net debit"
+      ],
+      "failure_modes": [
+        "Capped upside",
+        "Assignment and pin risk",
+        "Legging risk"
+      ],
+      "contradictions": [],
+      "human_validation_required": true
+    },
+    {
+      "id": "ttwo-long-put",
+      "kind": "long_put",
+      "name": "Long put",
+      "description": "Defined-premium bearish or downside-event research exposure",
+      "legs": [
+        {
+          "instrument_type": "option",
+          "side": "long",
+          "quantity": 1,
+          "option_quote": {
+            "contract": {
+              "underlying": "TTWO",
+              "con_id": 2002601,
+              "local_symbol": "TTWO  270115P00260000",
+              "trading_class": "TTWO",
+              "exchange": "SMART",
+              "currency": "USD",
+              "expiration": "2027-01-15T21:00:00Z",
+              "strike": 260.0,
+              "option_type": "put",
+              "multiplier": 100.0,
+              "deliverable": "100 TTWO common shares",
+              "exercise_style": "american",
+              "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+              "adjusted_contract": false,
+              "adjustment_understood": true
+            },
+            "bid": 25.0,
+            "ask": 27.0,
+            "last": 26.1,
+            "bid_size": 25,
+            "ask_size": 23,
+            "volume": 230,
+            "open_interest": 1910,
+            "implied_volatility": 0.37,
+            "delta": -0.49,
+            "gamma": 0.0065,
+            "theta": -0.08,
+            "vega": 0.44,
+            "rho": -0.27,
+            "timestamp": "2026-07-18T12:00:00Z",
+            "freshness": {
+              "source": "offline_option_chain_fixture",
+              "as_of": "2026-07-18T12:00:00Z",
+              "accessed_at": "2026-07-18T12:00:00Z",
+              "status": "current",
+              "is_stale": false,
+              "max_age_seconds": 86400
+            },
+            "source": {
+              "id": "FIXTURE-CHAIN-TTWO-20260718",
+              "title": "Illustrative TTWO option-chain fixture",
+              "source_type": "offline_fixture",
+              "uri": "fixtures/ttwo_v1_fixture.json",
+              "status": "validated",
+              "accessed_at": "2026-07-18T12:00:00Z",
+              "confidence_level": "low",
+              "notes": "Synthetic quote for deterministic tests; not executable",
+              "used_for_decision": true
+            }
+          },
+          "underlying_symbol": "",
+          "stock_price": null
+        }
+      ],
+      "status": "human_review_required",
+      "evidence": [
+        {
+          "id": "CORPUS-CLEAN-RULESET-2026",
+          "title": "Clean usable ruleset 2026",
+          "source_type": "repository_rulebook",
+          "uri": "option-research-engine/research/documentary/CLEAN_USABLE_RULESET_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "high",
+          "notes": "Authorizes only conservative read-only research gates",
+          "used_for_decision": true
+        },
+        {
+          "id": "CORPUS-TTWO-OPERATIONAL-2026",
+          "title": "TTWO GTA VI operational research 2026",
+          "source_type": "repository_research_note",
+          "uri": "option-research-engine/research/documentary/TTWO_GTA6_OPERATIONAL_RESEARCH_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "medium",
+          "notes": "Facts must be refreshed before any human decision",
+          "used_for_decision": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "R-DECISION-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Compare no-trade, stock, directional option, and bounded spread alternatives",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "R-GREEKS-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Aggregate Greeks using each contract multiplier",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "R-OPTIONS-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Keep thesis, catalyst, invalidation, IV, liquidity, and max loss explicit",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-PROVENANCE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Decision inputs must have explicit provenance",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-EVIDENCE-STATUS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "All decision evidence is validated for research",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-RULE-STATUS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Candidate rules are usable as read-only gates",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-UNDERLYING-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Underlying snapshot must be current for its declared fixture window",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-FUNDAMENTALS-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "fundamentals input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-PORTFOLIO-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "portfolio input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-RISK-FREE-RATE-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "risk-free-rate input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-VOLATILITY-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "volatility input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-LEG-1-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00260000 quote must be current",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-BID-ASK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00260000 requires a positive, ordered bid/ask",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-CONTRACT",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00260000 contract semantics must be complete",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-ADJUSTMENT",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00260000 adjusted deliverable must be understood",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-SOURCE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00260000 quote source must authorize research use",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-LIQUIDITY",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00260000 requires non-zero volume/OI and <=35% relative spread",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-CORPORATE-ACTIONS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Corporate actions are explicitly handled",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-EVENT-RISK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Critical market events are explicitly handled",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-COSTS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Fees and slippage must be explicit for the instrument",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-MARGIN",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Broker margin must be known for any structure containing a short option",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-MAX-LOSS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Maximum loss must be explicitly calculated",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-UNBOUNDED-RISK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Unbounded-risk structures are disabled in V1",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-CATALYST-COVERAGE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Option expiration must cover the declared catalyst window",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-SCENARIOS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Delay, gap, IV, event, and liquidity scenarios must be visible",
+          "blocks": false,
+          "evidence_ids": []
+        }
+      ],
+      "risk_metrics": {
+        "max_gain": 23297.85,
+        "max_loss": 2702.15,
+        "break_even_points": [
+          232.9785
+        ],
+        "net_delta": -42.723568,
+        "net_gamma": 0.583438,
+        "net_theta": -5.607225,
+        "net_vega": 71.287477,
+        "net_rho": -67.068401,
+        "debit_credit_mid": 2600.0,
+        "debit_credit_executable": 2702.15,
+        "unbounded_risk": false,
+        "payoff_points": [
+          {
+            "spot": 0.0,
+            "pnl": 23297.85
+          },
+          {
+            "spot": 128.895,
+            "pnl": 10408.35
+          },
+          {
+            "spot": 232.9785,
+            "pnl": 0.0
+          },
+          {
+            "spot": 257.79,
+            "pnl": -2481.15
+          },
+          {
+            "spot": 260.0,
+            "pnl": -2702.15
+          },
+          {
+            "spot": 386.68500000000006,
+            "pnl": -2702.15
+          },
+          {
+            "spot": 515.58,
+            "pnl": -2702.15
+          }
+        ]
+      },
+      "execution_estimate": {
+        "theoretical_mid": 2600.0,
+        "executable_debit": 2702.15,
+        "executable_credit": 0.0,
+        "fees": 0.65,
+        "slippage": 1.5,
+        "total_entry_cost": 2702.15,
+        "margin_requirement": 0.0,
+        "liquidity_score": 0.830769,
+        "notes": []
+      },
+      "scenarios": [
+        {
+          "name": "base_time_passage",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -1129.985913,
+          "estimated_value": 1572.164087,
+          "assumptions": [
+            "Underlying unchanged",
+            "Flat risk-free rate",
+            "No dividend yield modeled"
+          ],
+          "attribution": {
+            "delta": -0.0,
+            "gamma": 0.0,
+            "theta": -672.867,
+            "vega": 0.0,
+            "execution_costs": -102.15,
+            "residual": -354.968913
+          }
+        },
+        {
+          "name": "bullish_gap",
+          "spot": 296.4585,
+          "days_forward": 120,
+          "iv_shift": 0.05,
+          "pnl": -2136.690448,
+          "estimated_value": 565.459552,
+          "assumptions": [
+            "Illustrative +15% spot gap",
+            "Absolute IV shift +5 points"
+          ],
+          "attribution": {
+            "delta": -1652.056289,
+            "gamma": 436.193678,
+            "theta": -672.867,
+            "vega": 356.437385,
+            "execution_costs": -102.15,
+            "residual": -502.248223
+          }
+        },
+        {
+          "name": "bearish_gap",
+          "spot": 219.1215,
+          "days_forward": 120,
+          "iv_shift": 0.1,
+          "pnl": 1693.836635,
+          "estimated_value": 4395.986635,
+          "assumptions": [
+            "Illustrative -15% spot gap",
+            "Absolute IV shift +10 points"
+          ],
+          "attribution": {
+            "delta": 1652.056289,
+            "gamma": 436.193678,
+            "theta": -672.867,
+            "vega": 712.87477,
+            "execution_costs": -102.15,
+            "residual": -332.271102
+          }
+        },
+        {
+          "name": "iv_crush",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": -0.12,
+          "pnl": -1635.247129,
+          "estimated_value": 1066.902871,
+          "assumptions": [
+            "Absolute IV shift -12 points",
+            "No spot move"
+          ],
+          "attribution": {
+            "delta": -0.0,
+            "gamma": 0.0,
+            "theta": -672.867,
+            "vega": -855.449724,
+            "execution_costs": -102.15,
+            "residual": -4.780405
+          }
+        },
+        {
+          "name": "iv_expansion",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": 0.12,
+          "pnl": -625.65936,
+          "estimated_value": 2076.49064,
+          "assumptions": [
+            "Absolute IV shift +12 points",
+            "No spot move"
+          ],
+          "attribution": {
+            "delta": -0.0,
+            "gamma": 0.0,
+            "theta": -672.867,
+            "vega": 855.449724,
+            "execution_costs": -102.15,
+            "residual": -706.092084
+          }
+        },
+        {
+          "name": "gta_delay",
+          "spot": 232.011,
+          "days_forward": 120,
+          "iv_shift": 0.08,
+          "pnl": 690.390833,
+          "estimated_value": 3392.540833,
+          "assumptions": [
+            "Illustrative release-delay shock",
+            "Spot -10%",
+            "IV +8 points"
+          ],
+          "attribution": {
+            "delta": 1101.370859,
+            "gamma": 193.863857,
+            "theta": -672.867,
+            "vega": 570.299816,
+            "execution_costs": -102.15,
+            "residual": -400.126699
+          }
+        },
+        {
+          "name": "ex_dividend",
+          "spot": 255.2121,
+          "days_forward": 30,
+          "iv_shift": 0.0,
+          "pnl": -282.92242,
+          "estimated_value": 2419.22758,
+          "assumptions": [
+            "Illustrative 1% ex-dividend spot adjustment",
+            "No dividend forecast"
+          ],
+          "attribution": {
+            "delta": 110.137086,
+            "gamma": 1.938639,
+            "theta": -168.21675,
+            "vega": 0.0,
+            "execution_costs": -102.15,
+            "residual": -124.631394
+          }
+        },
+        {
+          "name": "liquidity_stress",
+          "spot": 257.79,
+          "days_forward": 30,
+          "iv_shift": 0.03,
+          "pnl": -247.127068,
+          "estimated_value": 2500.751687,
+          "assumptions": [
+            "Wider exit costs under stressed liquidity",
+            "Exit penalty equals 10% of entry exposure times illiquidity"
+          ],
+          "attribution": {
+            "delta": -0.0,
+            "gamma": 0.0,
+            "theta": -168.21675,
+            "vega": 213.862431,
+            "execution_costs": -102.15,
+            "residual": -190.622749
+          }
+        },
+        {
+          "name": "monte_carlo_p05",
+          "spot": 363.995199,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -2683.473725,
+          "estimated_value": 18.676275,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": -4537.465022,
+            "gamma": 3290.457354,
+            "theta": -672.867,
+            "vega": 0.0,
+            "execution_costs": -102.15,
+            "residual": -661.449057
+          }
+        },
+        {
+          "name": "monte_carlo_p50",
+          "spot": 259.651977,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -1216.171066,
+          "estimated_value": 1485.978934,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": -79.550288,
+            "gamma": 1.011377,
+            "theta": -672.867,
+            "vega": 0.0,
+            "execution_costs": -102.15,
+            "residual": -362.615156
+          }
+        },
+        {
+          "name": "monte_carlo_p95",
+          "spot": 187.15361,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": 4407.027592,
+          "estimated_value": 7109.177592,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": 3017.838594,
+            "gamma": 1455.531815,
+            "theta": -672.867,
+            "vega": 0.0,
+            "execution_costs": -102.15,
+            "residual": 708.674183
+          }
+        }
+      ],
+      "score": {
+        "thesis_fit": 0.15,
+        "catalyst_coverage": 1.0,
+        "expected_payoff": 0.231297,
+        "payoff_quality": 1.0,
+        "max_loss_quality": 1.0,
+        "assumption_sensitivity": 0.343994,
+        "liquidity": 0.830769,
+        "cost_quality": 0.999173,
+        "complexity": 0.9,
+        "assignment_early_exercise": 1.0,
+        "iv_rv_context": 0.945946,
+        "skew_term_structure": 0.35,
+        "margin": 1.0,
+        "carry": 0.937747,
+        "adverse_robustness": 0.006912,
+        "data_confidence": 0.585714,
+        "total": 0.705097
+      },
+      "veto_reasons": [],
+      "assumptions": [
+        "Black-Scholes is indicative for an American equity option"
+      ],
+      "failure_modes": [
+        "IV crush",
+        "Theta decay",
+        "Bullish gap"
+      ],
+      "contradictions": [],
+      "human_validation_required": true
+    },
+    {
+      "id": "ttwo-bear-put-spread",
+      "kind": "bear_put_spread",
+      "name": "Bear put spread",
+      "description": "Bounded-risk bearish vertical with capped payoff",
+      "legs": [
+        {
+          "instrument_type": "option",
+          "side": "long",
+          "quantity": 1,
+          "option_quote": {
+            "contract": {
+              "underlying": "TTWO",
+              "con_id": 2002601,
+              "local_symbol": "TTWO  270115P00260000",
+              "trading_class": "TTWO",
+              "exchange": "SMART",
+              "currency": "USD",
+              "expiration": "2027-01-15T21:00:00Z",
+              "strike": 260.0,
+              "option_type": "put",
+              "multiplier": 100.0,
+              "deliverable": "100 TTWO common shares",
+              "exercise_style": "american",
+              "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+              "adjusted_contract": false,
+              "adjustment_understood": true
+            },
+            "bid": 25.0,
+            "ask": 27.0,
+            "last": 26.1,
+            "bid_size": 25,
+            "ask_size": 23,
+            "volume": 230,
+            "open_interest": 1910,
+            "implied_volatility": 0.37,
+            "delta": -0.49,
+            "gamma": 0.0065,
+            "theta": -0.08,
+            "vega": 0.44,
+            "rho": -0.27,
+            "timestamp": "2026-07-18T12:00:00Z",
+            "freshness": {
+              "source": "offline_option_chain_fixture",
+              "as_of": "2026-07-18T12:00:00Z",
+              "accessed_at": "2026-07-18T12:00:00Z",
+              "status": "current",
+              "is_stale": false,
+              "max_age_seconds": 86400
+            },
+            "source": {
+              "id": "FIXTURE-CHAIN-TTWO-20260718",
+              "title": "Illustrative TTWO option-chain fixture",
+              "source_type": "offline_fixture",
+              "uri": "fixtures/ttwo_v1_fixture.json",
+              "status": "validated",
+              "accessed_at": "2026-07-18T12:00:00Z",
+              "confidence_level": "low",
+              "notes": "Synthetic quote for deterministic tests; not executable",
+              "used_for_decision": true
+            }
+          },
+          "underlying_symbol": "",
+          "stock_price": null
+        },
+        {
+          "instrument_type": "option",
+          "side": "short",
+          "quantity": 1,
+          "option_quote": {
+            "contract": {
+              "underlying": "TTWO",
+              "con_id": 2002501,
+              "local_symbol": "TTWO  270115P00250000",
+              "trading_class": "TTWO",
+              "exchange": "SMART",
+              "currency": "USD",
+              "expiration": "2027-01-15T21:00:00Z",
+              "strike": 250.0,
+              "option_type": "put",
+              "multiplier": 100.0,
+              "deliverable": "100 TTWO common shares",
+              "exercise_style": "american",
+              "settlement_cycle": "T+1 equity delivery after exercise/assignment",
+              "adjusted_contract": false,
+              "adjustment_understood": true
+            },
+            "bid": 20.0,
+            "ask": 22.0,
+            "last": 21.1,
+            "bid_size": 22,
+            "ask_size": 20,
+            "volume": 180,
+            "open_interest": 1430,
+            "implied_volatility": 0.375,
+            "delta": -0.42,
+            "gamma": 0.0062,
+            "theta": -0.075,
+            "vega": 0.43,
+            "rho": -0.23,
+            "timestamp": "2026-07-18T12:00:00Z",
+            "freshness": {
+              "source": "offline_option_chain_fixture",
+              "as_of": "2026-07-18T12:00:00Z",
+              "accessed_at": "2026-07-18T12:00:00Z",
+              "status": "current",
+              "is_stale": false,
+              "max_age_seconds": 86400
+            },
+            "source": {
+              "id": "FIXTURE-CHAIN-TTWO-20260718",
+              "title": "Illustrative TTWO option-chain fixture",
+              "source_type": "offline_fixture",
+              "uri": "fixtures/ttwo_v1_fixture.json",
+              "status": "validated",
+              "accessed_at": "2026-07-18T12:00:00Z",
+              "confidence_level": "low",
+              "notes": "Synthetic quote for deterministic tests; not executable",
+              "used_for_decision": true
+            }
+          },
+          "underlying_symbol": "",
+          "stock_price": null
+        }
+      ],
+      "status": "human_review_required",
+      "evidence": [
+        {
+          "id": "CORPUS-CLEAN-RULESET-2026",
+          "title": "Clean usable ruleset 2026",
+          "source_type": "repository_rulebook",
+          "uri": "option-research-engine/research/documentary/CLEAN_USABLE_RULESET_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "high",
+          "notes": "Authorizes only conservative read-only research gates",
+          "used_for_decision": true
+        },
+        {
+          "id": "CORPUS-TTWO-OPERATIONAL-2026",
+          "title": "TTWO GTA VI operational research 2026",
+          "source_type": "repository_research_note",
+          "uri": "option-research-engine/research/documentary/TTWO_GTA6_OPERATIONAL_RESEARCH_2026.md",
+          "status": "read_only_gate",
+          "accessed_at": "2026-07-18T12:00:00Z",
+          "confidence_level": "medium",
+          "notes": "Facts must be refreshed before any human decision",
+          "used_for_decision": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "R-DECISION-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Compare no-trade, stock, directional option, and bounded spread alternatives",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "R-GREEKS-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Aggregate Greeks using each contract multiplier",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "R-OPTIONS-001",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Keep thesis, catalyst, invalidation, IV, liquidity, and max loss explicit",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-PROVENANCE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Decision inputs must have explicit provenance",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-EVIDENCE-STATUS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "All decision evidence is validated for research",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-RULE-STATUS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Candidate rules are usable as read-only gates",
+          "blocks": false,
+          "evidence_ids": [
+            "CORPUS-CLEAN-RULESET-2026",
+            "CORPUS-TTWO-OPERATIONAL-2026"
+          ]
+        },
+        {
+          "rule_id": "VETO-UNDERLYING-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Underlying snapshot must be current for its declared fixture window",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-FUNDAMENTALS-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "fundamentals input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-PORTFOLIO-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "portfolio input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-RISK-FREE-RATE-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "risk-free-rate input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-VOLATILITY-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "volatility input must be current within its declared maximum age",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-LEG-1-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00260000 quote must be current",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-BID-ASK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00260000 requires a positive, ordered bid/ask",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-CONTRACT",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00260000 contract semantics must be complete",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-ADJUSTMENT",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00260000 adjusted deliverable must be understood",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-SOURCE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00260000 quote source must authorize research use",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-1-LIQUIDITY",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00260000 requires non-zero volume/OI and <=35% relative spread",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-2-FRESHNESS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00250000 quote must be current",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-2-BID-ASK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00250000 requires a positive, ordered bid/ask",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-2-CONTRACT",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00250000 contract semantics must be complete",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-2-ADJUSTMENT",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00250000 adjusted deliverable must be understood",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-2-SOURCE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00250000 quote source must authorize research use",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-LEG-2-LIQUIDITY",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "TTWO  270115P00250000 requires non-zero volume/OI and <=35% relative spread",
+          "blocks": false,
+          "evidence_ids": [
+            "FIXTURE-CHAIN-TTWO-20260718"
+          ]
+        },
+        {
+          "rule_id": "VETO-CORPORATE-ACTIONS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Corporate actions are explicitly handled",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-EVENT-RISK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Critical market events are explicitly handled",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-COSTS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Fees and slippage must be explicit for the instrument",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-MARGIN",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Broker margin must be known for any structure containing a short option",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-MAX-LOSS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Maximum loss must be explicitly calculated",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-UNBOUNDED-RISK",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Unbounded-risk structures are disabled in V1",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-CATALYST-COVERAGE",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Option expiration must cover the declared catalyst window",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "VETO-SCENARIOS",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "info",
+          "message": "Delay, gap, IV, event, and liquidity scenarios must be visible",
+          "blocks": false,
+          "evidence_ids": []
+        },
+        {
+          "rule_id": "GATE-ASSIGNMENT-PIN",
+          "status": "read_only_gate",
+          "passed": true,
+          "severity": "warning",
+          "message": "American early assignment and expiration pin risk require human review",
+          "blocks": false,
+          "evidence_ids": []
+        }
+      ],
+      "risk_metrics": {
+        "max_gain": 295.7,
+        "max_loss": 704.3,
+        "break_even_points": [
+          252.957
+        ],
+        "net_delta": -5.760833,
+        "net_gamma": 0.02956,
+        "net_theta": 0.058702,
+        "net_vega": 2.69725,
+        "net_rho": -9.644157,
+        "debit_credit_mid": 500.0,
+        "debit_credit_executable": 704.3,
+        "unbounded_risk": false,
+        "payoff_points": [
+          {
+            "spot": 0.0,
+            "pnl": 295.7
+          },
+          {
+            "spot": 128.895,
+            "pnl": 295.7
+          },
+          {
+            "spot": 250.0,
+            "pnl": 295.7
+          },
+          {
+            "spot": 252.957,
+            "pnl": 0.0
+          },
+          {
+            "spot": 257.79,
+            "pnl": -483.3
+          },
+          {
+            "spot": 260.0,
+            "pnl": -704.3
+          },
+          {
+            "spot": 386.68500000000006,
+            "pnl": -704.3
+          },
+          {
+            "spot": 515.58,
+            "pnl": -704.3
+          }
+        ]
+      },
+      "execution_estimate": {
+        "theoretical_mid": 500.0,
+        "executable_debit": 704.3,
+        "executable_credit": 0.0,
+        "fees": 1.3,
+        "slippage": 3.0,
+        "total_entry_cost": 704.3,
+        "margin_requirement": 0.0,
+        "liquidity_score": 0.790476,
+        "notes": [
+          "Margin is fixture-provided and must be refreshed at the broker before use"
+        ]
+      },
+      "scenarios": [
+        {
+          "name": "base_time_passage",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -246.275405,
+          "estimated_value": 458.024595,
+          "assumptions": [
+            "Underlying unchanged",
+            "Flat risk-free rate",
+            "No dividend yield modeled"
+          ],
+          "attribution": {
+            "delta": -0.0,
+            "gamma": 0.0,
+            "theta": 7.04424,
+            "vega": 0.0,
+            "execution_costs": -204.3,
+            "residual": -49.019645
+          }
+        },
+        {
+          "name": "bullish_gap",
+          "spot": 296.4585,
+          "days_forward": 120,
+          "iv_shift": 0.05,
+          "pnl": -515.903477,
+          "estimated_value": 188.396523,
+          "assumptions": [
+            "Illustrative +15% spot gap",
+            "Absolute IV shift +5 points"
+          ],
+          "attribution": {
+            "delta": -222.762771,
+            "gamma": 22.099838,
+            "theta": 7.04424,
+            "vega": 13.48625,
+            "execution_costs": -204.3,
+            "residual": -131.471034
+          }
+        },
+        {
+          "name": "bearish_gap",
+          "spot": 219.1215,
+          "days_forward": 120,
+          "iv_shift": 0.1,
+          "pnl": 74.350716,
+          "estimated_value": 778.650716,
+          "assumptions": [
+            "Illustrative -15% spot gap",
+            "Absolute IV shift +10 points"
+          ],
+          "attribution": {
+            "delta": 222.762771,
+            "gamma": 22.099838,
+            "theta": 7.04424,
+            "vega": 26.9725,
+            "execution_costs": -204.3,
+            "residual": -0.228633
+          }
+        },
+        {
+          "name": "iv_crush",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": -0.12,
+          "pnl": -278.118317,
+          "estimated_value": 426.181683,
+          "assumptions": [
+            "Absolute IV shift -12 points",
+            "No spot move"
+          ],
+          "attribution": {
+            "delta": -0.0,
+            "gamma": 0.0,
+            "theta": 7.04424,
+            "vega": -32.367,
+            "execution_costs": -204.3,
+            "residual": -48.495557
+          }
+        },
+        {
+          "name": "iv_expansion",
+          "spot": 257.79,
+          "days_forward": 120,
+          "iv_shift": 0.12,
+          "pnl": -224.991371,
+          "estimated_value": 479.308629,
+          "assumptions": [
+            "Absolute IV shift +12 points",
+            "No spot move"
+          ],
+          "attribution": {
+            "delta": -0.0,
+            "gamma": 0.0,
+            "theta": 7.04424,
+            "vega": 32.367,
+            "execution_costs": -204.3,
+            "residual": -60.102611
+          }
+        },
+        {
+          "name": "gta_delay",
+          "spot": 232.011,
+          "days_forward": 120,
+          "iv_shift": 0.08,
+          "pnl": -15.084598,
+          "estimated_value": 689.215402,
+          "assumptions": [
+            "Illustrative release-delay shock",
+            "Spot -10%",
+            "IV +8 points"
+          ],
+          "attribution": {
+            "delta": 148.508514,
+            "gamma": 9.82215,
+            "theta": 7.04424,
+            "vega": 21.578,
+            "execution_costs": -204.3,
+            "residual": 2.262498
+          }
+        },
+        {
+          "name": "ex_dividend",
+          "spot": 255.2121,
+          "days_forward": 30,
+          "iv_shift": 0.0,
+          "pnl": -230.544485,
+          "estimated_value": 473.755515,
+          "assumptions": [
+            "Illustrative 1% ex-dividend spot adjustment",
+            "No dividend forecast"
+          ],
+          "attribution": {
+            "delta": 14.850851,
+            "gamma": 0.098222,
+            "theta": 1.76106,
+            "vega": 0.0,
+            "execution_costs": -204.3,
+            "residual": -42.954618
+          }
+        },
+        {
+          "name": "liquidity_stress",
+          "spot": 257.79,
+          "days_forward": 30,
+          "iv_shift": 0.03,
+          "pnl": -254.343406,
+          "estimated_value": 464.713369,
+          "assumptions": [
+            "Wider exit costs under stressed liquidity",
+            "Exit penalty equals 10% of entry exposure times illiquidity"
+          ],
+          "attribution": {
+            "delta": -0.0,
+            "gamma": 0.0,
+            "theta": 1.76106,
+            "vega": 8.09175,
+            "execution_costs": -204.3,
+            "residual": -59.896216
+          }
+        },
+        {
+          "name": "monte_carlo_p05",
+          "spot": 363.995199,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -695.0858,
+          "estimated_value": 9.2142,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": -611.830413,
+            "gamma": 166.711663,
+            "theta": 7.04424,
+            "vega": 0.0,
+            "execution_costs": -204.3,
+            "residual": -52.711291
+          }
+        },
+        {
+          "name": "monte_carlo_p50",
+          "spot": 259.651977,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": -264.77179,
+          "estimated_value": 439.52821,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": -10.726537,
+            "gamma": 0.051242,
+            "theta": 7.04424,
+            "vega": 0.0,
+            "execution_costs": -204.3,
+            "residual": -56.840735
+          }
+        },
+        {
+          "name": "monte_carlo_p95",
+          "spot": 187.15361,
+          "days_forward": 120,
+          "iv_shift": 0.0,
+          "pnl": 265.348364,
+          "estimated_value": 969.648364,
+          "assumptions": [
+            "Seeded single-step geometric Brownian motion",
+            "Risk-free drift; no dividend, jump, skew, or stochastic-volatility model",
+            "Seed=42; paths=512"
+          ],
+          "attribution": {
+            "delta": 406.924444,
+            "gamma": 73.744803,
+            "theta": 7.04424,
+            "vega": 0.0,
+            "execution_costs": -204.3,
+            "residual": -18.065123
+          }
+        }
+      ],
+      "score": {
+        "thesis_fit": 0.15,
+        "catalyst_coverage": 1.0,
+        "expected_payoff": 0.177481,
+        "payoff_quality": 0.209925,
+        "max_loss_quality": 1.0,
+        "assumption_sensitivity": 0.659082,
+        "liquidity": 0.790476,
+        "cost_quality": 0.9914,
+        "complexity": 0.7,
+        "assignment_early_exercise": 0.6,
+        "iv_rv_context": 0.939597,
+        "skew_term_structure": 0.35,
+        "margin": 0.8,
+        "carry": 1.0,
+        "adverse_robustness": 0.013083,
+        "data_confidence": 0.585714,
+        "total": 0.622922
+      },
+      "veto_reasons": [],
+      "assumptions": [
+        "Both legs execute together at the modeled executable net debit"
+      ],
+      "failure_modes": [
+        "Capped downside payoff",
+        "Assignment and pin risk",
+        "Legging risk"
+      ],
+      "contradictions": [],
+      "human_validation_required": true
+    }
+  ],
+  "ranked_candidate_ids": [
+    "ttwo-stock-research",
+    "ttwo-no-trade",
+    "ttwo-long-call",
+    "ttwo-long-put",
+    "ttwo-bull-call-spread",
+    "ttwo-bear-put-spread"
+  ],
+  "pareto_candidate_ids": [
+    "ttwo-long-put",
+    "ttwo-no-trade",
+    "ttwo-stock-research"
+  ],
+  "global_warnings": [
+    "Research output only: not an investment recommendation or order instruction.",
+    "Fixture market data is illustrative and must be replaced with timestamped live data.",
+    "Scores compare assumptions; they do not authorize execution, sizing, or risk activation.",
+    "American exercise, assignment, dividends, jumps, skew, and broker margin require human review."
+  ],
+  "data_issues": []
+}

@@ -23,6 +23,8 @@ Un moteur d'optimisation d'options (Calls) — pas une IA d'opinion. Quatre pili
 - Aucune décision inexplicable : chaque recommandation cite ses règles, scores et hypothèses.
 - Aucune décision sans dossier de preuve dans `evidence/` : sources, règles, contradictions,
   simulations favorables/défavorables et blocages live/broker.
+- Aucun chiffre provenant d'un tableau, d'une formule ou d'un graphique technique ne doit être
+  utilisé si son sidecar est `blocked`, `human_review_required`, `unextractable` ou `image_only`.
 
 ## 3. Architecture logique attendue (spécifiée, non codée)
 
@@ -75,6 +77,19 @@ Chaque bloc est spécifié dans `decision_engine/` et `docs/06_moteur_maintenanc
 8. `scoring/`, `monte_carlo/`, `simulations/`, `validation/`
 9. `research/benchmarks/` (ce que l'open source fait mieux / ce qu'on réutilise)
 10. Dossiers de catégories (`greeks/`, `volatility/`, …) selon le module développé
+
+Pour toute transcription PDF, insérer avant l'étape 6 :
+
+1. `docs/07_transcription_pdf_technique_v2.md`
+2. `docs/08_plan_implementation_transcription_v2.md`
+3. `schemas/README.md`
+4. `prompts/pdf_visual_verifier_gemini_v2.md`
+5. `validation/pdf_transcription_v2_tests.md`
+
+Le pipeline choisit seul page, crop, DPI, rotation, contexte et besoin de revue visuelle. Il ne
+demande une intervention utilisateur que si la source est absente/corrompue, la dépendance
+indispensable manque, la clé est invalide, l'API est indisponible sans alternative, ou une ambiguïté
+critique persiste après tous les fallbacks.
 
 ## 7. Critère d'achèvement de la phase de recherche
 

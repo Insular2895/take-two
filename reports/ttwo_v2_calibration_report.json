@@ -1,0 +1,51 @@
+{
+  "ticker": "TTWO",
+  "created_at": "2026-03-01T22:00:00Z",
+  "training_cutoff": "2026-02-20T22:00:00Z",
+  "evidence_class": "illustrative_calibration",
+  "model_readiness": "screen_grade",
+  "results": [
+    {
+      "model": "gbm",
+      "status": "illustrative",
+      "observations": 11,
+      "parameters": {
+        "annualized_volatility": 0.6605800007875183
+      },
+      "diagnostics": [
+        "Close-to-close log returns; 252 trading-day annualization"
+      ]
+    },
+    {
+      "model": "merton_jump_diffusion",
+      "status": "illustrative",
+      "observations": 11,
+      "parameters": {
+        "jump_intensity": 45.81818181818182,
+        "jump_mean": 0.005295215247084234,
+        "jump_volatility": 0.13003316437441592,
+        "diffusion_volatility": 0.11227376651434412
+      },
+      "diagnostics": [
+        "Heuristic jump classification at 1.5 sigma",
+        "Threshold calibration is screen-grade and sensitive to sample length"
+      ]
+    },
+    {
+      "model": "heston_full_truncation",
+      "status": "insufficient_data",
+      "observations": 11,
+      "parameters": {},
+      "diagnostics": [
+        "Close history alone does not identify a robust Heston parameter set",
+        "Timestamped option-surface history or another variance proxy is required"
+      ]
+    }
+  ],
+  "excluded_points": 2,
+  "warnings": [
+    "Calibration is not an out-of-sample validation",
+    "Heston parameters were deliberately not inferred from insufficient evidence",
+    "2 point(s) excluded by timestamp/look-ahead controls"
+  ]
+}

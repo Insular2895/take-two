@@ -1,0 +1,75 @@
+Metadata-Version: 2.4
+Name: take-two-options
+Version: 0.3.0
+Summary: Read-only TTWO options research and scenario engine
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: alpaca-py<0.44,>=0.43.5
+Requires-Dist: pydantic<3,>=2.10
+Requires-Dist: QuantLib<1.44,>=1.43
+Requires-Dist: typer<1,>=0.15
+Provides-Extra: dev
+Requires-Dist: mypy<2,>=1.14; extra == "dev"
+Requires-Dist: pytest<9,>=8.3; extra == "dev"
+Requires-Dist: ruff<1,>=0.9; extra == "dev"
+
+# take-two
+
+Base documentaire et pack de recherche pour étudier Take-Two et concevoir, dans une phase
+ultérieure, un outil d'analyse de structures optionnelles.
+
+Le point d'entrée principal est [option-research-engine/README.md](option-research-engine/README.md).
+
+Le dépôt ne contient pas les PDF originaux. Les livres restent locaux, en lecture seule, et seules
+leurs extractions traçables, règles candidates, preuves légères et métadonnées peuvent être
+versionnées.
+
+## Moteur TTWO options V2
+
+La V2 exécutable est un moteur de recherche **read-only**. Elle compare `no-trade`, action,
+achat de call, achat de put et verticals bornés, price les options américaines avec QuantLib,
+interpole une surface IV explicite et compare GBM, jump diffusion de Merton et volatilité
+stochastique de type Heston. Elle ne contient aucune capacité d'envoi, de modification ou
+d'annulation d'ordre.
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -e '.[dev]'
+.venv/bin/ttwo-options analyze \
+  --fixture fixtures/ttwo_v2_fixture.json \
+  --json-out reports/ttwo_v2_decision_report.json \
+  --markdown-out reports/ttwo_v2_decision_report.md \
+  --journal-out reports/ttwo_v2_decision_journal.md
+
+.venv/bin/ttwo-options calibrate \
+  --fixture fixtures/ttwo_v2_calibration_fixture.json \
+  --json-out reports/ttwo_v2_calibration_report.json \
+  --markdown-out reports/ttwo_v2_calibration_report.md
+
+.venv/bin/ttwo-options backtest \
+  --fixture fixtures/ttwo_v2_backtest_fixture.json \
+  --json-out reports/ttwo_v2_backtest_report.json \
+  --markdown-out reports/ttwo_v2_backtest_report.md
+```
+
+Les trois fixtures V2 sont synthétiques. Elles valident le logiciel, pas TTWO ni une stratégie.
+Les rapports restent donc `screen_grade` et interdisent toute capacité d'ordre.
+
+Contrôles de qualité :
+
+```bash
+.venv/bin/python -m pytest -q
+.venv/bin/python -m ruff check src tests
+.venv/bin/python -m mypy src
+```
+
+Documentation technique :
+
+- [architecture V2](docs/architecture/ttwo_options_research_engine_v2.md) et
+  [architecture V1](docs/architecture/ttwo_options_research_engine_v1.md) ;
+- [ADR de stack](docs/adr/0001-python-read-only-engine.md) et
+  [statut des règles](docs/rule_status_policy.md) ;
+- [contrats de données](docs/data_contracts/ttwo_options_v1.md) ;
+- [guide IBKR read-only](docs/ibkr_read_only_guide.md) ;
+- [fixtures](docs/fixtures_guide.md), [tests](docs/testing_strategy.md) et
+  [limites connues](docs/known_limits.md).
