@@ -1,10 +1,10 @@
-# V10 thesis scanner data guide
+# V10.1 thesis scanner data guide
 
 ## Accepted chain inputs
 
 `--current-chain` accepts three read-only formats:
 
-1. `thesis_chain_v1`, the strict native V10 fixture/adapter contract;
+1. `thesis_chain_v1`, the strict native V10.1 fixture/adapter contract;
 2. the active `MarketSnapshot` JSON cache;
 3. an `AlpacaOptionChainExport`.
 
@@ -15,7 +15,7 @@ multiplier confirmation, standard-contract status, price quality, and source ID.
 ## Alpaca boundary
 
 The Alpaca export does not contain underlying spot, open interest, or contract
-deliverable. V10 therefore:
+deliverable. V10.1 therefore:
 
 - requires `--spot` or finds the newest look-ahead-safe close from the sibling
   calibration dataset;
@@ -50,6 +50,42 @@ Policy inputs are explicitly dated:
 - commission and slippage per contract side.
 
 They are configuration inputs, not silently refreshed market facts.
+
+## Données nécessaires pour un calcul fiable
+
+Une chaîne fournie manuellement doit contenir, sans substitution silencieuse :
+
+- ticker, spot du sous-jacent et timestamp du spot ;
+- symbole OCC ;
+- expiration ;
+- strike ;
+- bid et ask ;
+- tailles bid/ask lorsqu’elles sont disponibles ;
+- volume ;
+- open interest ;
+- volatilité implicite ;
+- multiplicateur et deliverable contractuel ;
+- source et qualité de la donnée ;
+- taux EUR/USD, date et source ;
+- taux sans risque, date et source ;
+- commissions ;
+- slippage ;
+- budget ;
+- perte maximale autorisée ;
+- date du catalyseur ;
+- objectifs de cours ;
+- probabilités facultatives, uniquement lorsqu’elles viennent de l’utilisateur.
+
+La saisie manuelle d’une chaîne complète est possible avec le contrat
+`thesis_chain_v1`, mais elle est déconseillée : elle prend du temps et augmente
+le risque d’erreur sur les symboles OCC, timestamps, strikes, multiplicateurs,
+deliverables et cotations. Toute valeur manquante doit produire un
+avertissement ou un blocage explicite.
+
+Les cotations synthétiques, retardées, indicatives, EOD ou reconstruites jambe
+par jambe sont affichées avec l’avertissement :
+
+> Estimation de recherche — ce prix n’est pas une cotation combo exécutable.
 
 ## Synthetic example
 

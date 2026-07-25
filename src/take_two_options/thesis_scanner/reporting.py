@@ -1,4 +1,4 @@
-"""JSON, Markdown, and standalone HTML reporting for the V10 scanner."""
+"""JSON, Markdown, and standalone HTML reporting for the V10.1 scanner."""
 
 # ruff: noqa: E501
 
@@ -12,7 +12,7 @@ from take_two_options.thesis_scanner.schemas import ThesisScanReport
 def markdown_report(report: ThesisScanReport) -> str:
     candidate_by_id = {candidate.candidate_id: candidate for candidate in report.candidates}
     lines = [
-        "# V10 Bullish Thesis Scanner",
+        "# V10.1 Bullish Thesis Scanner",
         "",
         f"- Statut global : `{report.overall_status.value}`",
         f"- Ticker / direction : `{report.request.ticker}` / bullish",
@@ -28,7 +28,7 @@ def markdown_report(report: ThesisScanReport) -> str:
         "> Recherche en lecture seule. Les candidats sont des constructions "
         "synthétiques à contrôler dans IBKR, pas des recommandations.",
         "",
-        "## Trois profils",
+        f"## Meilleures stratégies — Top {report.request.top} par profil",
         "",
     ]
     for ranking in report.rankings:
@@ -38,8 +38,9 @@ def markdown_report(report: ThesisScanReport) -> str:
             continue
         lines.extend(
             [
-                "| Rang | Candidat | Structure | Score | Coût EUR | Perte max USD | Statut |",
-                "|---:|---|---|---:|---:|---:|---|",
+                "| Rang | Candidat | Structure | Score | Coût EUR | Perte max EUR | "
+                "Meilleur gain modélisé EUR | Break-even | Statut |",
+                "|---:|---|---|---:|---:|---:|---:|---|---|",
             ]
         )
         for index, score in enumerate(ranking.scores, start=1):
@@ -47,7 +48,9 @@ def markdown_report(report: ThesisScanReport) -> str:
             lines.append(
                 f"| {index} | `{score.candidate_id}` | {candidate.display_name} | "
                 f"{score.score:.2f} | €{candidate.execution.total_cost_eur:,.2f} | "
-                f"${candidate.base_candidate.risk.maximum_loss:,.2f} | "
+                f"€{candidate.maximum_loss_eur:,.2f} | "
+                f"€{candidate.decision_metrics.best_modeled_gain_eur:,.2f} | "
+                f"`{candidate.base_candidate.risk.break_even_points}` | "
                 f"`{candidate.status.value}` |"
             )
         lines.append("")
@@ -80,6 +83,7 @@ def markdown_report(report: ThesisScanReport) -> str:
     selected_ids = {score.candidate_id for ranking in report.rankings for score in ranking.scores}
     for candidate_id in sorted(selected_ids):
         candidate = candidate_by_id[candidate_id]
+        metrics = candidate.decision_metrics
         lines.extend(
             [
                 "",
@@ -103,9 +107,18 @@ def markdown_report(report: ThesisScanReport) -> str:
                 f"{candidate.execution.fx_rate_source}",
                 f"- Perte max : `${candidate.base_candidate.risk.maximum_loss:,.2f}` / "
                 f"`€{candidate.maximum_loss_eur:,.2f}` ; "
-                f"gain max contractuel : "
-                f"`{candidate.base_candidate.risk.maximum_gain if candidate.base_candidate.risk.maximum_gain is not None else 'illimité'}`",
+                f"`{metrics.loss_budget_fraction:.2%}` du budget",
+                f"- Gain maximal contractuel : "
+                f"`{metrics.contractual_max_gain_usd if metrics.contractual_max_gain_usd is not None else 'Illimité théorique'}`",
+                f"- Meilleur gain parmi les scénarios modélisés : "
+                f"`${metrics.best_modeled_gain_usd:,.2f}` / "
+                f"`€{metrics.best_modeled_gain_eur:,.2f}`",
+                f"- Ratio gain/perte contractuel : "
+                f"`{metrics.contractual_gain_loss_ratio if metrics.contractual_gain_loss_ratio is not None else 'non borné'}` ; "
+                f"ratio modélisé : `{metrics.modeled_gain_loss_ratio:.4f}`",
                 f"- Break-even : `{candidate.base_candidate.risk.break_even_points}`",
+                f"- {metrics.lose_if}",
+                f"- {metrics.win_if}",
                 f"- Greeks nets : delta `{candidate.net_greeks.delta:.3f}`, "
                 f"gamma `{candidate.net_greeks.gamma:.3f}`, "
                 f"theta `{candidate.net_greeks.theta:.3f}`, "
@@ -126,19 +139,43 @@ def markdown_report(report: ThesisScanReport) -> str:
                     for leg in candidate.base_candidate.legs
                 ],
                 "",
-                "### P&L aux objectifs, date du catalyseur, IV stable",
+                "### Seuils de performance à l'échéance",
                 "",
-                "| Spot | P&L USD |",
-                "|---:|---:|",
             ]
         )
-        for target, pnl in candidate.target_pnl_stable_at_catalyst_usd.items():
-            lines.append(f"| ${float(target):,.2f} | ${pnl:,.2f} |")
+        lines.append(
+            "> ×2 la mise = valeur finale égale à deux fois le coût total initial, "
+            "soit un bénéfice net égal à une fois la mise. Aucun nouveau frais de sortie "
+            "n'est ajouté."
+        )
+        for threshold in metrics.terminal_value_thresholds:
+            lines.append(f"- ×{threshold.multiple} : {threshold.message}")
+        lines.extend(
+            [
+                "",
+                "### P&L aux objectifs",
+                "",
+                "| Spot | Catalyseur IV down | Catalyseur IV stable | "
+                "Catalyseur IV up | Échéance |",
+                "|---:|---:|---:|---:|---:|",
+            ]
+        )
+        for row in metrics.target_pnl_rows:
+            lines.append(
+                f"| ${row.spot:,.2f} | ${row.catalyst_iv_down_usd:,.2f} / "
+                f"€{row.catalyst_iv_down_eur:,.2f} | "
+                f"${row.catalyst_iv_stable_usd:,.2f} / "
+                f"€{row.catalyst_iv_stable_eur:,.2f} | "
+                f"${row.catalyst_iv_up_usd:,.2f} / €{row.catalyst_iv_up_eur:,.2f} | "
+                f"${row.expiration_usd:,.2f} / €{row.expiration_eur:,.2f} |"
+            )
         if report.probability_status == "user_supplied":
             lines.extend(
                 [
                     "",
-                    f"P&L espéré utilisateur : `${candidate.expected_pnl_usd:,.2f}` ; "
+                    f"P&L espéré conditionnel aux probabilités utilisateur : "
+                    f"`${candidate.expected_pnl_usd:,.2f}` / "
+                    f"`€{metrics.expected_pnl_eur:,.2f}` ; "
                     f"probabilité de résultat positif : "
                     f"`{candidate.probability_success:.2%}`.",
                 ]
@@ -224,12 +261,12 @@ def html_dashboard(report: ThesisScanReport) -> str:
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>V10 Bullish Thesis Scanner · {report.request.ticker}</title>
+<title>V10.1 Bullish Thesis Scanner · {report.request.ticker}</title>
 <style>
 :root{{--bg:#071014;--panel:#101b21;--panel2:#15242b;--line:#29404a;--text:#eef7f5;
 --muted:#9ab0b3;--green:#2ee6a6;--red:#ff6b7a;--amber:#ffcb66;--blue:#68a7ff}}
-*{{box-sizing:border-box}} body{{margin:0;background:radial-gradient(circle at 80% -10%,#153a3a 0,
-var(--bg) 38%);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}}
+*{{box-sizing:border-box}} body{{margin:0;background:var(--bg);color:var(--text);
+font:14px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}}
 main{{max-width:1500px;margin:auto;padding:24px}} header{{display:flex;gap:20px;justify-content:
 space-between;align-items:flex-start;margin:12px 0 28px}} h1{{font-size:clamp(28px,4vw,52px);
 line-height:1;margin:8px 0}} h2{{font-size:20px;margin:0 0 16px}} h3{{margin:0 0 8px}}
@@ -237,8 +274,9 @@ line-height:1;margin:8px 0}} h2{{font-size:20px;margin:0 0 16px}} h3{{margin:0 0
 .muted{{color:var(--muted)}} .chips{{display:flex;gap:8px;flex-wrap:wrap}} .chip{{padding:6px 10px;
 border:1px solid var(--line);border-radius:999px;background:#0d181d}} .status{{color:var(--amber)}}
 .grid3{{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}} .card,.section{{border:1px solid
-var(--line);background:linear-gradient(145deg,rgba(21,36,43,.97),rgba(12,23,28,.97));
-border-radius:16px;padding:18px;box-shadow:0 18px 50px #0004}} .profile{{position:relative;
+var(--line);background:var(--panel);
+border-radius:16px;padding:18px;box-shadow:0 18px 50px #0004;min-width:0;
+overflow-wrap:anywhere}} .profile{{position:relative;
 overflow:hidden}} .profile:before{{content:"";position:absolute;inset:0 auto 0 0;width:4px;
 background:var(--green)}} .metric{{font-size:24px;font-weight:800}} .section{{margin-top:14px}}
 .metrics{{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}} .metricbox{{background:#0b151a;
@@ -258,22 +296,57 @@ var(--line);border-radius:8px;padding:8px;max-width:100%}} .warn{{color:var(--am
 .profiledata span,.label{{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
 letter-spacing:.04em}} .profiledata strong{{font-size:14px}} .detailgrid{{display:grid;
 grid-template-columns:1fr 1fr;gap:14px}} .list{{margin:0;padding-left:18px}} .list li{{margin:6px 0}}
+.detailgrid>*,.vizgrid>*{{min-width:0}}
 .advantage{{color:var(--green)}} .risk{{color:var(--amber)}} .smallmetric{{font-size:16px;
 font-weight:750;word-break:break-word}} .legend{{display:flex;gap:14px;flex-wrap:wrap;
 margin:6px 0;color:var(--muted)}} .swatch{{display:inline-block;width:10px;height:10px;
 border-radius:2px;margin-right:5px}}
 .ticket{{border-left:3px solid var(--amber);padding-left:14px;margin:14px 0}} footer{{margin:26px 0;
-color:var(--muted)}} @media(max-width:900px){{.grid3,.vizgrid,.metrics{{grid-template-columns:1fr}}
-header{{display:block}} main{{padding:14px}} .detailgrid,.profiledata{{grid-template-columns:1fr}}}}
+color:var(--muted)}} .profile-columns{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+gap:14px}} .profile-column{{min-width:0}} .profile-heading{{display:flex;align-items:center;
+justify-content:space-between;gap:10px;margin-bottom:10px}} .accordion-item{{border:1px solid
+var(--line);border-radius:12px;background:#0b151a;margin:8px 0;overflow:hidden}}
+.accordion-trigger{{width:100%;border:0;background:transparent;color:var(--text);padding:12px;
+text-align:left;cursor:pointer}} .accordion-trigger:hover{{background:#13242b}}
+.accordion-trigger:focus-visible,select:focus-visible,button:focus-visible{{outline:3px solid
+var(--blue);outline-offset:2px}} .accordion-trigger[aria-expanded="true"]{{background:#173038}}
+.accordion-trigger.active{{box-shadow:inset 4px 0 var(--green)}} .accordion-summary{{display:grid;
+grid-template-columns:auto 1fr auto;gap:8px;align-items:center}} .rank{{display:grid;place-items:center;
+width:28px;height:28px;border-radius:50%;background:#20343d;color:var(--green);font-weight:800}}
+.accordion-title{{font-weight:800}} .accordion-score{{font-variant-numeric:tabular-nums;
+color:var(--green);font-weight:800}} .accordion-facts{{display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 10px;margin-top:8px;color:var(--muted);
+font-size:12px}} .accordion-panel{{border-top:1px solid var(--line);padding:12px}}
+.accordion-panel[hidden]{{display:none}} .decision-sheet{{display:grid;grid-template-columns:
+repeat(2,minmax(0,1fr));gap:10px}} .decision-part{{background:#0d1a20;border:1px solid #20343d;
+border-radius:11px;padding:12px}} .decision-part h4{{margin:0 0 9px;color:var(--green);
+font-size:13px;text-transform:uppercase;letter-spacing:.06em}} .decision-part p{{margin:6px 0}}
+.active-banner{{border-left:4px solid var(--green);padding:10px 12px;background:#0d1a20;
+margin-bottom:12px}} .convention{{padding:10px;border-radius:8px;background:#17252b;
+color:var(--muted)}} .currency-control{{display:flex;align-items:center;gap:8px;flex-wrap:wrap}}
+.currency-control button{{border:1px solid var(--line);background:#0b151a;color:var(--text);
+padding:7px 12px;border-radius:8px;cursor:pointer}} .currency-control button[aria-pressed="true"]{{
+background:var(--green);color:#04100d;border-color:var(--green)}} .risk-grid{{display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}} .risk-indicator{{background:#0b151a;
+border-radius:9px;padding:9px}} .risk-indicator strong{{display:block;margin-top:3px}}
+.research-warning{{border:1px solid var(--amber);border-radius:9px;padding:10px;color:var(--amber);
+margin:10px 0;grid-column:1/-1}} @media(max-width:1050px){{.profile-columns{{grid-template-columns:1fr}}}}
+@media(max-width:900px){{.grid3,.vizgrid,.metrics{{grid-template-columns:1fr}}
+header{{display:block}} main{{padding:14px}} .detailgrid,.profiledata,.decision-sheet,
+.risk-grid{{grid-template-columns:1fr}} .accordion-facts{{grid-template-columns:1fr}}}}
 </style>
 </head>
 <body>
 <main>
-<header><div><div class="eyebrow">Read-only · V10</div><h1>Bullish Thesis Scanner</h1>
+<header><div><div class="eyebrow">Read-only · V10.1</div><h1>Bullish Thesis Scanner</h1>
 <div class="muted" id="subtitle"></div></div><div class="chips" id="headerChips"></div></header>
 <section class="section"><h2>Contexte de marché et hypothèses utilisateur</h2>
 <div class="metrics" id="marketContext"></div><div id="freshnessWarnings"></div></section>
-<section class="grid3" id="profiles" aria-label="Trois profils principaux"></section>
+<section class="section" aria-labelledby="top-title"><h2 id="top-title">
+Meilleures stratégies — <span id="topCount"></span> par profil</h2>
+<p class="muted">Classements indépendants et déterministes. Ouvrir une ligne met à jour toute
+l’analyse détaillée; une même structure peut apparaître dans plusieurs profils.</p>
+<div class="profile-columns" id="profileAccordions"></div></section>
 <section class="section"><h2>Univers et contrôles</h2><div class="metrics" id="universe"></div>
 <div class="scroll"><table><thead><tr><th>Motif explicite</th><th>Nombre</th></tr></thead>
 <tbody id="rejections"></tbody></table></div></section>
@@ -287,8 +360,12 @@ aria-label="Coût, perte maximale et gain potentiel des premiers candidats par p
 <table><thead><tr><th>Profil</th><th>Rang</th><th>Candidat</th><th>Score</th><th>Perte max</th>
 <th>Coût EUR</th><th>Gain potentiel</th><th>Statut</th></tr></thead>
 <tbody id="comparison"></tbody></table></div></section>
-<section class="section"><h2>Exploration calculée</h2><label for="candidate">Candidat </label>
+<section class="section"><h2>Tous les candidats <span class="muted">— secondaire</span></h2>
+<label for="candidate">Candidat actif </label>
 <select id="candidate"></select><div class="metrics" id="candidateMetrics"></div></section>
+<section class="section"><h2>Fiche décisionnelle active</h2>
+<div id="activeCandidateBanner" class="active-banner" aria-live="polite"></div>
+<div id="activeDecision"></div></section>
 <section class="section"><h2>1–2. Jambes exactes et cotations bid/ask</h2>
 <div class="scroll"><table><thead><tr><th>Action</th><th>Quantité</th><th>OCC</th><th>Strike</th>
 <th>Bid</th><th>Ask</th><th>Mid</th><th>OI</th><th>Volume</th><th>Multiplicateur</th></tr></thead>
@@ -308,19 +385,28 @@ aria-label="Coût, perte maximale et gain potentiel des premiers candidats par p
 <section class="section"><h2>8. Raisons de sélection</h2><div id="selectionReasons"></div>
 <div class="scroll"><table><thead><tr><th>Profil</th><th>Score</th><th>Critères normalisés</th></tr>
 </thead><tbody id="criteria"></tbody></table></div></section>
-<section class="section"><h2>9. Risques et conditions d’invalidation</h2>
+<section class="section"><h2>9. Risques de la structure</h2>
 <div id="candidateRisks"></div></section>
 </div>
+<section class="section"><div class="profile-heading"><h2>Tableau de P&amp;L aux objectifs</h2>
+<div class="currency-control" role="group" aria-label="Devise du tableau P et L">
+<span>Devise</span><button type="button" id="currencyUSD" aria-pressed="true">USD</button>
+<button type="button" id="currencyEUR" aria-pressed="false">EUR</button></div></div>
+<p class="muted">Valeurs au catalyseur sous trois hypothèses d’IV, puis payoff exact à
+l’échéance. Les scénarios viennent du moteur Python.</p>
+<div class="scroll"><table><thead><tr><th>Cours TTWO</th><th>P&amp;L catalyseur IV down</th>
+<th>P&amp;L IV stable</th><th>P&amp;L IV up</th><th>P&amp;L à expiration</th></tr></thead>
+<tbody id="targetPnl"></tbody></table></div></section>
 <div class="vizgrid">
 <section class="section chart"><h2>Payoff terminal</h2><svg id="payoff" role="img"></svg></section>
 <section class="section chart"><h2>Courbes de P&amp;L à plusieurs dates · IV stable</h2>
-<svg id="dates" role="img"></svg></section>
+<svg id="dates" role="img" aria-label="Courbes de P et L par spot pour plusieurs dates"></svg></section>
 </div>
 <section class="section"><h2>Heatmap spot × date · IV stable</h2><div class="scroll">
 <div id="heatmap" class="heat"></div></div></section>
 <div class="vizgrid">
 <section class="section"><h2>Sensibilité IV au catalyseur</h2>
-<svg id="iv" role="img"></svg></section>
+<svg id="iv" role="img" aria-label="Comparaison du P et L sous IV en baisse, stable et en hausse"></svg></section>
 <section class="section"><h2>Scénarios compacts</h2><div class="scroll"><table><thead>
 <tr><th>Objectif</th><th>IV down</th><th>IV stable</th><th>IV up</th></tr></thead>
 <tbody id="scenarios"></tbody></table></div></section>
@@ -343,13 +429,55 @@ if(cls)n.className=cls;return n}};
 const money=(v,c="$")=>c+Number(v).toLocaleString("fr-FR",{{maximumFractionDigits:2,minimumFractionDigits:2}});
 const pct=v=>(100*Number(v)).toFixed(1)+"%";
 const chip=t=>{{const n=E("span",t,"chip");$("headerChips").append(n)}};
-const modeledGainEur=c=>Math.max(0,...Object.values(c.target_pnl_stable_at_catalyst_usd))/R.policy.eur_usd_rate;
-const maxGainLabel=c=>c.base_candidate.risk.maximum_gain===null?"Illimité contractuel":
-money(c.base_candidate.risk.maximum_gain)+" / "+money(c.maximum_gain_eur,"€");
+const maxGainLabel=c=>c.decision_metrics.contractual_gain_unbounded?"Illimité théorique":
+money(c.decision_metrics.contractual_max_gain_usd)+" / "+money(c.decision_metrics.contractual_max_gain_eur,"€");
 const breakEven=c=>c.base_candidate.risk.break_even_points.length?
 c.base_candidate.risk.break_even_points.map(x=>"$"+Number(x).toFixed(2)).join(" / "):"—";
+const ratio=v=>v===null?"Non borné":Number(v).toFixed(2)+"×";
+const yesNo=v=>v?"Oui":"Non";
+const ageLabel=s=>s<3600?Math.round(s/60)+" min":s<86400?(s/3600).toFixed(1)+" h":(s/86400).toFixed(1)+" j";
 const appendList=(parent,items,cls)=>{{parent.replaceChildren();const ul=E("ul",undefined,"list");
 (items.length?items:["Aucun"]).forEach(x=>ul.append(E("li",x,cls)));parent.append(ul)}};
+document.querySelectorAll(".scroll").forEach(node=>{{node.tabIndex=0}});
+function decisionPart(title,rows){{const part=E("section",undefined,"decision-part");part.append(E("h4",title));
+rows.forEach(([label,value,cls])=>{{const p=E("p",undefined,cls);p.append(E("span",label+" · ","muted"),E("strong",value));part.append(p)}});
+return part}}
+function decisionSheet(c){{const d=c.decision_metrics,sheet=E("div",undefined,"decision-sheet");
+const riskRows=[
+["Coût total",money(c.execution.total_cost_usd)+" / "+money(c.execution.total_cost_eur,"€")],
+["Perte maximale",money(c.base_candidate.risk.maximum_loss)+" / "+money(c.maximum_loss_eur,"€")],
+["Part du budget exposée",pct(d.loss_budget_fraction)],
+["Part de la mise pouvant être perdue",pct(d.stake_loss_fraction)],
+["Expiration / DTE",c.expiration+" / "+c.dte+" j"],
+["Contrats / unités de stratégie",d.total_option_contracts+" / "+d.strategy_units],
+["Tu perds si…",d.lose_if,"risk"]];
+const gainRows=[
+["Gain maximal contractuel",maxGainLabel(c)],
+["Meilleur gain parmi les scénarios modélisés",money(d.best_modeled_gain_usd)+" / "+money(d.best_modeled_gain_eur,"€")],
+["Ratio gain/perte contractuel",ratio(d.contractual_gain_loss_ratio)],
+["Ratio gain/perte modélisé",Number(d.modeled_gain_loss_ratio).toFixed(2)+"×"]];
+if(d.expected_pnl_eur!==null)gainRows.push(["P&L espéré conditionnel",money(c.expected_pnl_usd)+" / "+money(d.expected_pnl_eur,"€")]);
+gainRows.push(["Tu gagnes si…",d.win_if,"advantage"]);
+if(d.strike_width!==null)gainRows.push(["Largeur des strikes",money(d.strike_width)]);
+if(d.capped_gain_from_spot!==null)gainRows.push(["Gain plafonné à partir de",money(d.capped_gain_from_spot)]);
+if(d.butterfly_center_strike!==null)gainRows.push(["Strike central / gain maximal",money(d.butterfly_center_strike)]);
+if(d.profit_zone.length)gainRows.push(["Zone de profit",d.profit_zone.map(x=>"$"+Number(x).toFixed(2)).join(" – ")]);
+const thresholdRows=d.terminal_value_thresholds.map(t=>["×"+t.multiple,t.message,t.attainable?"advantage":"risk"]);
+thresholdRows.unshift(["Convention","×2 la mise = valeur finale égale à deux fois le coût total initial, soit un bénéfice net égal à une fois la mise. Aucun nouveau frais de sortie n’est ajouté."]);
+const dataRows=[
+["Spot TTWO",money(R.chain.spot)],
+["Cotation",d.quote_timestamp+" · âge "+ageLabel(d.quote_age_seconds)],
+["Source",d.source_ids.join(" · ")],
+["Qualité",d.data_qualities.join(" · ")],
+["Spread relatif maximal",pct(d.maximum_leg_relative_spread)],
+["Open interest minimal",d.minimum_open_interest??"indisponible"],
+["Volume minimal",d.minimum_volume??"indisponible"],
+["Frais / slippage",money(c.execution.commissions_usd)+" / "+money(c.execution.slippage_usd)],
+["FX",c.execution.fx_rate+" USD/EUR · "+c.execution.fx_rate_date]];
+sheet.append(decisionPart("Mise et risque",riskRows),decisionPart("Gains",gainRows),
+decisionPart("Seuils de performance",thresholdRows),decisionPart("Données et qualité d’exécution",dataRows));
+if(d.research_estimate_warning){{const warning=E("p",d.research_estimate_warning,"research-warning");sheet.append(warning)}}
+return sheet}}
 $("subtitle").textContent=`${{R.request.ticker}} · spot $${{R.chain.spot.toFixed(2)}} · données ${{R.chain.as_of}} · qualité ${{R.chain.price_quality}}`;
 chip(R.overall_status);chip("source: "+R.chain.price_quality);chip("budget "+money(R.request.budget_eur,"€"));
 chip("perte max "+money(R.request.max_loss_eur,"€"));chip("order: forbidden");
@@ -370,20 +498,32 @@ const freshness=[...R.chain.warnings];
 if(R.quote_rejections.reasons.QUOTE_STALE)freshness.push(R.quote_rejections.reasons.QUOTE_STALE+" quote(s) périmée(s) rejetée(s)");
 appendList($("freshnessWarnings"),freshness,"warn");
 const profileNames={{prudent:"PRUDENT",balanced:"ÉQUILIBRÉ",aggressive:"AGRESSIF"}};
-R.rankings.forEach(rank=>{{const card=E("article",undefined,"card profile");
-card.append(E("div",profileNames[rank.profile],"eyebrow"));const top=rank.scores[0];
-if(!top){{card.append(E("h3","Aucun candidat"),E("p","Filtres non relâchés.","muted"))}}
-else{{const c=byId[top.candidate_id],data=E("div",undefined,"profiledata");
-card.append(E("p","Meilleur candidat conditionnel à la thèse et aux hypothèses","muted"),
-E("h3",c.display_name),E("div",top.score.toFixed(2)+"/100","metric"),E("p",c.status,"status"));
-[["Coût total",money(c.execution.total_cost_usd)+" / "+money(c.execution.total_cost_eur,"€")],
-["Perte maximale",money(c.base_candidate.risk.maximum_loss)+" / "+money(c.maximum_loss_eur,"€")],
-["Gain maximal",maxGainLabel(c)],["Break-even",breakEven(c)],["Échéance / DTE",c.expiration+" / "+c.dte+" j"],
-["Rendement max modélisé",c.maximum_return_on_risk===null?"—":pct(c.maximum_return_on_risk)]]
-.forEach(([k,v])=>compactField(data,k,v));card.append(data,
-E("p","Avantage · "+(top.reasons[0]||"structure bornée"),"advantage"),
-E("p","Risque · "+(c.warnings[0]||c.invalidation_conditions[0]),"risk"))}}
-$("profiles").append(card)}});
+$("topCount").textContent="Top "+R.request.top;
+function buildAccordions(){{const triggers=[];$("profileAccordions").replaceChildren();
+R.rankings.forEach(ranking=>{{const column=E("section",undefined,"profile-column card");
+const heading=E("div",undefined,"profile-heading");heading.append(E("h3",profileNames[ranking.profile]),
+E("span",ranking.scores.length+" stratégie(s)","chip"));column.append(heading);
+if(!ranking.scores.length)column.append(E("p","Aucun candidat classable; aucun filtre n’a été relâché.","muted"));
+ranking.scores.forEach((score,index)=>{{const c=byId[score.candidate_id],item=E("div",undefined,"accordion-item"),
+trigger=E("button",undefined,"accordion-trigger"),summary=E("div",undefined,"accordion-summary"),
+title=E("div"),facts=E("div",undefined,"accordion-facts"),panel=E("div",undefined,"accordion-panel"),
+triggerId=`accordion-${{ranking.profile}}-${{index+1}}`,panelId=triggerId+"-panel";
+trigger.type="button";trigger.id=triggerId;trigger.setAttribute("aria-expanded","false");
+trigger.setAttribute("aria-controls",panelId);panel.id=panelId;panel.setAttribute("role","region");
+panel.setAttribute("aria-labelledby",triggerId);panel.hidden=true;
+title.append(E("div",c.display_name,"accordion-title"),E("div",c.warnings[0]||c.invalidation_conditions[0],"risk"));
+summary.append(E("span","#"+(index+1),"rank"),title,E("span",score.score.toFixed(2),"accordion-score"));
+[["Coût",money(c.execution.total_cost_eur,"€")],["Perte max",money(c.maximum_loss_eur,"€")],
+["Meilleur gain modélisé",money(c.decision_metrics.best_modeled_gain_eur,"€")],
+["Break-even",breakEven(c)],["Échéance",c.expiration]].forEach(([k,v])=>facts.append(E("span",k+" · "+v)));
+trigger.append(summary,facts);panel.append(decisionSheet(c));item.append(trigger,panel);column.append(item);
+trigger.dataset.candidateId=c.candidate_id;trigger.dataset.profile=ranking.profile;
+trigger.addEventListener("click",()=>{{const opening=trigger.getAttribute("aria-expanded")!=="true";
+column.querySelectorAll(".accordion-trigger").forEach(other=>{{other.setAttribute("aria-expanded","false");
+other.classList.remove("active");const target=document.getElementById(other.getAttribute("aria-controls"));target.hidden=true}});
+if(opening){{trigger.setAttribute("aria-expanded","true");trigger.classList.add("active");panel.hidden=false;
+selectCandidate(c.candidate_id,trigger)}}}});triggers.push(trigger)}});$("profileAccordions").append(column)}});
+return triggers}}
 field($("universe"),"Quotes",R.quote_rejections.total_quotes);field($("universe"),"Calls utilisables",
 R.quote_rejections.usable_calls);field($("universe"),"Combinaisons",R.generated_candidates);
 field($("universe"),"Admissibles",R.technically_admissible_candidates);
@@ -391,7 +531,7 @@ const reasons={{...R.quote_rejections.reasons}};Object.entries(R.blocked_reasons
 Object.entries(reasons).sort().forEach(([k,v])=>{{const tr=E("tr");tr.append(E("td",k),E("td",v));$("rejections").append(tr)}});
 const selected=new Set();R.rankings.forEach(rank=>rank.scores.forEach((s,i)=>{{selected.add(s.candidate_id);const c=byId[s.candidate_id],
 tr=E("tr");[rank.profile,i+1,c.display_name,s.score.toFixed(2),money(c.base_candidate.risk.maximum_loss),
-money(c.execution.total_cost_eur,"€"),money(modeledGainEur(c),"€")+" modélisé",c.status]
+money(c.execution.total_cost_eur,"€"),money(c.decision_metrics.best_modeled_gain_eur,"€")+" modélisé",c.status]
 .forEach(v=>tr.append(E("td",v)));$("comparison").append(tr)}}));
 R.candidates.slice().sort((a,b)=>a.display_name.localeCompare(b.display_name)).forEach(c=>{{const ranked=selected.has(c.candidate_id)?" · classé":"";
 const o=E("option",c.display_name+ranked);o.value=c.candidate_id;$("candidate").append(o)}});
@@ -399,7 +539,7 @@ const NS="http://www.w3.org/2000/svg";
 function svg(tag,attrs={{}}){{const n=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,String(v)));return n}}
 function profileBars(){{const node=$("profileChart"),W=600,H=210;node.setAttribute("viewBox",`0 0 ${{W}} ${{H}}`);
 const rows=R.rankings.filter(r=>r.scores[0]).map(r=>{{const c=byId[r.scores[0].candidate_id];
-return {{profile:r.profile,cost:c.execution.total_cost_eur,loss:c.maximum_loss_eur,gain:modeledGainEur(c)}}}});
+return {{profile:r.profile,cost:c.execution.total_cost_eur,loss:c.maximum_loss_eur,gain:c.decision_metrics.best_modeled_gain_eur}}}});
 const max=Math.max(1,...rows.flatMap(r=>[r.cost,r.loss,r.gain])),x0=125,scale=390/max,colors=["#68a7ff","#ff6b7a","#2ee6a6"];
 rows.forEach((row,i)=>{{const y=18+i*62,label=svg("text",{{x:5,y:y+25,fill:"#eef7f5"}});
 label.textContent=profileNames[row.profile];node.append(label);[row.cost,row.loss,row.gain].forEach((v,j)=>{{
@@ -433,17 +573,26 @@ rows.forEach((row,i)=>{{const y=35+i*55,x=X(row.value),rect=svg("rect",{{x:Math.
 height:28,rx:5,fill:colors[i]}}),label=svg("text",{{x:5,y:y+19,fill:"#eef7f5","font-size":"11"}}),
 value=svg("text",{{x:Math.max(zero,x)+6,y:y+19,fill:"#eef7f5","font-size":"11"}});
 label.textContent=row.label;value.textContent=money(row.value);node.append(rect,label,value)}})}}
-function render(){{const c=byId[$("candidate").value];$("candidateMetrics").replaceChildren();
+let pnlCurrency="USD";
+function renderTargetPnl(c){{$("targetPnl").replaceChildren();c.decision_metrics.target_pnl_rows.forEach(row=>{{
+const suffix=pnlCurrency==="USD"?"_usd":"_eur",symbol=pnlCurrency==="USD"?"$":"€",tr=E("tr");
+[money(row.spot),money(row["catalyst_iv_down"+suffix],symbol),money(row["catalyst_iv_stable"+suffix],symbol),
+money(row["catalyst_iv_up"+suffix],symbol),money(row["expiration"+suffix],symbol)]
+.forEach(v=>tr.append(E("td",v)));$("targetPnl").append(tr)}})}}
+function render(){{const c=byId[$("candidate").value],d=c.decision_metrics;$("candidateMetrics").replaceChildren();
+$("activeCandidateBanner").textContent="Candidat actif · "+c.display_name+" · "+c.status;
+$("activeDecision").replaceChildren(decisionSheet(c));
 field($("candidateMetrics"),"Statut",c.status);
 field($("candidateMetrics"),"Coût USD / EUR",money(c.execution.total_cost_usd)+" / "+money(c.execution.total_cost_eur,"€"));
 field($("candidateMetrics"),"Perte maximale",money(c.base_candidate.risk.maximum_loss)+" / "+money(c.maximum_loss_eur,"€"));
 field($("candidateMetrics"),"Gain maximal",maxGainLabel(c));field($("candidateMetrics"),"Break-even",breakEven(c));
 field($("candidateMetrics"),"Échéance / DTE",c.expiration+" / "+c.dte+" j");
-field($("candidateMetrics"),"Rendement max modélisé",c.maximum_return_on_risk===null?"—":pct(c.maximum_return_on_risk));
+field($("candidateMetrics"),"Meilleur gain modélisé",money(d.best_modeled_gain_usd)+" / "+money(d.best_modeled_gain_eur,"€"));
 field($("candidateMetrics"),"Confiance historique",pct(c.historical_confidence));
-$("legs").replaceChildren();c.base_candidate.legs.forEach(l=>{{const tr=E("tr"),
+$("legs").replaceChildren();const legMetrics=Object.fromEntries(d.leg_execution.map(x=>[x.symbol,x]));
+c.base_candidate.legs.forEach(l=>{{const tr=E("tr"),q=legMetrics[l.quote.symbol],
 values=[l.side==="long"?"ACHETER":"VENDRE",l.quantity,l.quote.symbol,l.quote.strike,money(l.quote.bid),
-money(l.quote.ask),money((l.quote.bid+l.quote.ask)/2),l.quote.open_interest??"indisponible",
+money(l.quote.ask),money(q.midpoint),l.quote.open_interest??"indisponible",
 l.quote.volume??"indisponible",l.quote.multiplier];values.forEach(v=>tr.append(E("td",v)));$("legs").append(tr)}});
 $("costs").replaceChildren();
 [["Mid théorique",money(c.execution.theoretical_mid_debit_usd)+" / "+money(c.execution.theoretical_mid_debit_eur,"€")],
@@ -457,10 +606,9 @@ $("costs").replaceChildren();
 $("greeks").replaceChildren();[["Delta",c.net_greeks.delta],["Gamma",c.net_greeks.gamma],
 ["Theta/jour",c.net_greeks.theta],["Vega/point IV",c.net_greeks.vega],["Rho/point taux",c.net_greeks.rho],
 ["Modèle",c.net_greeks.model]].forEach(([k,v])=>compactField($("greeks"),k,typeof v==="number"?v.toFixed(4):v));
-$("liquidity").replaceChildren();c.base_candidate.legs.forEach(l=>{{const mid=(l.quote.bid+l.quote.ask)/2,
-spread=mid>0?(l.quote.ask-l.quote.bid)/mid:null,tr=E("tr");
-[l.quote.symbol,spread===null?"—":pct(spread),l.quote.open_interest??"indisponible",
-l.quote.volume??"indisponible",l.quote.price_quality].forEach(v=>tr.append(E("td",v)));$("liquidity").append(tr)}});
+$("liquidity").replaceChildren();d.leg_execution.forEach(q=>{{const tr=E("tr");
+[q.symbol,pct(q.relative_spread),q.open_interest??"indisponible",q.volume??"indisponible",
+q.price_quality].forEach(v=>tr.append(E("td",v)));$("liquidity").append(tr)}});
 appendList($("assumptions"),[
 `IV : baisse ×${{R.policy.iv_case_multipliers.iv_down}}, stable ×${{R.policy.iv_case_multipliers.iv_stable}}, hausse ×${{R.policy.iv_case_multipliers.iv_up}}`,
 `Taux sans risque ${{pct(R.policy.risk_free_rate)}} au ${{R.policy.risk_free_rate_date}} · ${{R.policy.risk_free_rate_source}}`,
@@ -474,7 +622,22 @@ appendList($("selectionReasons"),[...c.selection_reasons,...rankedScores.flatMap
 $("criteria").replaceChildren();rankedScores.forEach(s=>{{const tr=E("tr"),
 criteria=Object.entries(s.criteria).map(([k,v])=>k+"="+Number(v).toFixed(3)).join(" · ");
 [s.profile,s.score.toFixed(2),criteria].forEach(v=>tr.append(E("td",v)));$("criteria").append(tr)}});
-appendList($("candidateRisks"),[...c.warnings,...c.invalidation_conditions,...c.base_candidate.uncertainties],"risk");
+const riskBox=$("candidateRisks");riskBox.replaceChildren();
+if(d.research_estimate_warning)riskBox.append(E("p",d.research_estimate_warning,"research-warning"));
+const riskGrid=E("div",undefined,"risk-grid");
+[["Perte totale possible de la prime",yesNo(d.total_premium_loss_possible)],
+["Perte max / budget",money(c.maximum_loss_eur,"€")+" / "+pct(d.loss_budget_fraction)],
+["Theta quotidien / poids de mise",money(c.net_greeks.theta)+" / "+pct(d.theta_to_stake_daily)],
+["Pire impact IV down vs stable",money(d.iv_down_impact_usd)+" / "+money(d.iv_down_impact_eur,"€")],
+["Vega",c.net_greeks.vega.toFixed(4)],["Spread relatif maximal",pct(d.maximum_leg_relative_spread)],
+["Open interest minimal",d.minimum_open_interest??"indisponible"],["Volume minimal",d.minimum_volume??"indisponible"],
+["Jambes short",yesNo(d.has_short_legs)],["Risque d’assignation",yesNo(d.assignment_risk)],
+["Pin risk",yesNo(d.pin_risk)],["Risque d’IV crush",yesNo(d.iv_crush_exposure)],
+["Risque de retard du catalyseur",yesNo(d.catalyst_delay_exposure)]].forEach(([k,v])=>{{
+const box=E("div",undefined,"risk-indicator");box.append(E("span",k,"muted"),E("strong",v));riskGrid.append(box)}});
+riskBox.append(riskGrid);const invalidations=E("div");appendList(invalidations,
+[...c.warnings,...c.invalidation_conditions,...c.base_candidate.uncertainties],"risk");riskBox.append(invalidations);
+renderTargetPnl(c);
 const ticket=ticketById[c.candidate_id],ticketBox=$("selectedTicket");ticketBox.replaceChildren();
 if(ticket){{const meta=E("div",undefined,"ticket");meta.append(E("strong",`${{ticket.security_type}} · ${{ticket.order_type}} · mode=${{ticket.mode}}`),
 E("p",`transmit=${{ticket.transmit}} · what_if=${{ticket.what_if}} · confirmation humaine=${{ticket.human_confirmation_required}}`,"warn"),
@@ -496,12 +659,29 @@ n=E("div",p?money(p.pnl_usd):"—");if(p){{const strength=Math.min(Math.abs(p.pn
 n.style.background=p.pnl_usd>=0?`rgba(46,230,166,${{.12+.55*strength}})`:`rgba(255,107,122,${{.12+.55*strength}})`}}$("heatmap").append(n)}})}});
 const ivRows=["iv_down","iv_stable","iv_up"].map(k=>{{const p=c.scenario_points.find(x=>x.valuation_date===R.request.catalyst_date&&Math.abs(x.spot-target)<.001&&x.iv_case===k);
 return {{label:k,value:p?p.pnl_usd:0}}}});valueBars($("iv"),ivRows);
-$("scenarios").replaceChildren();R.request.target_prices.forEach(s=>{{const tr=E("tr");tr.append(E("td","$"+s));["iv_down","iv_stable","iv_up"].forEach(k=>{{const p=c.scenario_points.find(x=>x.valuation_date===R.request.catalyst_date&&Math.abs(x.spot-s)<.001&&x.iv_case===k);tr.append(E("td",p?money(p.pnl_usd):"—"))}});$("scenarios").append(tr)}});
+$("scenarios").replaceChildren();d.target_pnl_rows.forEach(row=>{{const tr=E("tr");
+[money(row.spot),money(row.catalyst_iv_down_usd),money(row.catalyst_iv_stable_usd),
+money(row.catalyst_iv_up_usd)].forEach(v=>tr.append(E("td",v)));$("scenarios").append(tr)}});
 const p=c.scenario_points.find(x=>x.valuation_date===R.request.catalyst_date&&Math.abs(x.spot-target)<.001&&x.iv_case==="iv_stable");
 $("attribution").replaceChildren(E("p",`Objectif $${{target}} : sous-jacent ${{money(p.underlying_effect_usd)}}, temps ${{money(p.theta_effect_usd)}}, IV ${{money(p.iv_effect_usd)}}, exécution ${{money(p.execution_cost_effect_usd)}}, résiduel ${{money(p.residual_usd)}}`),
 E("p",`Delta ${{c.net_greeks.delta.toFixed(3)}} · gamma ${{c.net_greeks.gamma.toFixed(3)}} · theta ${{c.net_greeks.theta.toFixed(3)}} · vega ${{c.net_greeks.vega.toFixed(3)}} · rho ${{c.net_greeks.rho.toFixed(3)}}`));
 }}
-$("candidate").addEventListener("change",render);if($("candidate").options.length)render();
+function selectCandidate(candidateId,sourceTrigger){{$("candidate").value=candidateId;
+document.querySelectorAll(".accordion-trigger").forEach(trigger=>trigger.classList.remove("active"));
+if(sourceTrigger)sourceTrigger.classList.add("active");render()}}
+const accordionTriggers=buildAccordions();
+$("candidate").addEventListener("change",()=>selectCandidate($("candidate").value,null));
+$("currencyUSD").addEventListener("click",()=>{{pnlCurrency="USD";$("currencyUSD").setAttribute("aria-pressed","true");
+$("currencyEUR").setAttribute("aria-pressed","false");renderTargetPnl(byId[$("candidate").value])}});
+$("currencyEUR").addEventListener("click",()=>{{pnlCurrency="EUR";$("currencyEUR").setAttribute("aria-pressed","true");
+$("currencyUSD").setAttribute("aria-pressed","false");renderTargetPnl(byId[$("candidate").value])}});
+const balanced=R.rankings.find(r=>r.profile==="balanced"&&r.scores.length);
+const firstAvailable=R.rankings.find(r=>r.scores.length);
+const initialScore=(balanced||firstAvailable)?.scores[0];
+if(initialScore){{const preferredProfile=balanced?"balanced":firstAvailable.profile,
+initialTrigger=accordionTriggers.find(trigger=>trigger.dataset.profile===preferredProfile&&
+trigger.dataset.candidateId===initialScore.candidate_id);if(initialTrigger)initialTrigger.click();
+else selectCandidate(initialScore.candidate_id,null)}}
 const history=$("history"),historyLimits=E("div");
 appendList(historyLimits,R.historical_evidence.limitations);
 history.append(E("p",R.historical_evidence.summary),

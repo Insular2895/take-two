@@ -46,7 +46,7 @@ The package contains no live-order submission, modification, cancellation, or
 exercise capability. An IBKR artifact is preview-only (`transmit=false`,
 `what_if=true`) and is created only for a candidate that passes every gate.
 
-`thesis-scan` is the V10 bullish-thesis scanner. It exhaustively constructs
+`thesis-scan` is the V10.1 bullish-thesis scanner. It exhaustively constructs
 configured long calls (including the LEAPS maturity class), bull call spreads,
 and symmetric call butterflies over listed quotes. It never invents scenario
 probabilities: omit `--scenario-probabilities` and expected P&L/probability of
@@ -54,11 +54,48 @@ success remain null. Its three rankings are independent and visible
 (`prudent`, `balanced`, `aggressive`); weak V9 evidence lowers the displayed
 confidence but does not silently veto thesis mode.
 
+The V10.1 output schema adds Python-computed decision metrics and an accessible
+Top N dashboard. `--top 3`, `--top 5`, or `--top 10` controls the maximum
+number of accordion entries shown independently in each profile. JavaScript
+only selects and formats report values; option risk, scenario P&L, ratios,
+contractual limits, and ×2/×3/×5 terminal thresholds are computed in Python.
+
 V7–V9 are isolated under `experiments/legacy/`; their inspected holdouts are
 marked contaminated under `validation/contaminated_holdouts/`.
 
 See [product contract](docs/product/PRODUCT_CONTRACT.md),
 [current architecture](docs/architecture/CURRENT_ARCHITECTURE.md),
-[V10 architecture](docs/architecture/V10_BULLISH_THESIS_SCANNER.md),
-[V10 data guide](docs/thesis_scanner_data_guide.md),
+[V10.1 architecture](docs/architecture/V10_BULLISH_THESIS_SCANNER.md),
+[V10.1 data guide](docs/thesis_scanner_data_guide.md),
 [migration](docs/MIGRATION.md), and [limitations](docs/LIMITATIONS.md).
+
+## Roadmap — dernière étape : données live IBKR/OPRA
+
+Cette étape est documentée mais n’est pas implémentée dans V10.1.
+
+- OPRA est le flux de données temps réel des options américaines ; OPRA
+  n’exécute aucun ordre.
+- Les cotations seraient récupérées en lecture seule via IBKR TWS ou IB
+  Gateway.
+- Les quotes combo IBKR devraient valider les spreads et butterflies, car une
+  construction bid/ask jambe par jambe ne prouve pas un prix combo exécutable.
+- Les droits de marché et abonnements du compte IBKR devront être vérifiés.
+- Les secrets et identifiants resteront exclusivement dans l’environnement et
+  ne devront jamais être enregistrés dans le dépôt, les fixtures ou les
+  rapports.
+- Le mode fixture/offline restera disponible pour les tests reproductibles.
+- Une donnée périmée devra bloquer la création d’un ticket exploitable.
+- L’intégration ne commencera qu’après stabilisation des calculs, du dashboard
+  et de leurs tests.
+- Une éventuelle exécution automatique constituerait un projet distinct,
+  nécessitant une validation explicite et de nouveaux garde-fous.
+- Jusqu’à cette éventuelle phase, tous les tickets restent des previews avec
+  confirmation humaine, `transmit=false`, `what_if=true` et
+  `order_capability=forbidden`.
+
+Checklist de livraison :
+
+- [x] Stabiliser les calculs contractuels et les scénarios Python.
+- [x] Stabiliser le dashboard autonome, Top N et les tests d’accessibilité.
+- [ ] Dernière étape uniquement : intégrer les données live IBKR/OPRA en
+  lecture seule et valider les quotes combo.

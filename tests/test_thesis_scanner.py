@@ -1,20 +1,29 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pytest
 
-from take_two_options.candidate_generation.factory import terminal_payoff
+from take_two_options.candidate_generation.factory import build_candidate, terminal_payoff
+from take_two_options.domain import OptionType, PositionSide
 from take_two_options.knowledge.compiler import compile_knowledge
 from take_two_options.knowledge.loader import load_knowledge
-from take_two_options.knowledge.schemas import Architecture
+from take_two_options.knowledge.schemas import (
+    Architecture,
+    CompiledStrategyCandidate,
+    QuoteSnapshot,
+)
 from take_two_options.thesis_scanner.data import load_thesis_chain
 from take_two_options.thesis_scanner.engine import (
     load_thesis_policy,
     run_thesis_scan,
 )
-from take_two_options.thesis_scanner.enumeration import enumerate_bullish_candidates
+from take_two_options.thesis_scanner.enumeration import (
+    _trade_request,
+    enumerate_bullish_candidates,
+)
+from take_two_options.thesis_scanner.pricing import terminal_value_thresholds
 from take_two_options.thesis_scanner.ranking import rank_candidates
 from take_two_options.thesis_scanner.schemas import (
     IVCase,
@@ -29,7 +38,7 @@ KNOWLEDGE = ROOT / "research" / "knowledge_items"
 SCAN_TIME = datetime(2026, 7, 25, 12, tzinfo=UTC)
 
 
-def _request(*, probabilities: bool = True) -> ThesisScanRequest:
+def _request(*, probabilities: bool = True, top: int = 3) -> ThesisScanRequest:
     return ThesisScanRequest(
         ticker="TTWO",
         direction="bullish",
@@ -39,8 +48,50 @@ def _request(*, probabilities: bool = True) -> ThesisScanRequest:
         expiration_buffer_days=45,
         target_prices=[220, 250, 280, 300, 330, 360],
         scenario_probabilities=([0.10, 0.15, 0.20, 0.20, 0.20, 0.15] if probabilities else None),
-        top=3,
+        top=top,
         current_chain=str(CHAIN),
+    )
+
+
+def _quote(strike: float, *, bid: float, ask: float) -> QuoteSnapshot:
+    return QuoteSnapshot(
+        symbol=f"TTWO270319C{int(strike * 1000):08d}",
+        expiration=date(2027, 3, 19),
+        option_type=OptionType.CALL,
+        strike=strike,
+        bid=bid,
+        ask=ask,
+        volume=100,
+        open_interest=500,
+        implied_volatility=0.35,
+        quote_timestamp=datetime(2026, 7, 24, 20, tzinfo=UTC),
+        multiplier=100,
+        price_quality="modeled",
+        source_id="unit-test",
+    )
+
+
+def _build_structure(
+    architecture: Architecture,
+    leg_specs: list[tuple[PositionSide, int, QuoteSnapshot]],
+) -> CompiledStrategyCandidate:
+    policy = load_thesis_policy(POLICY)
+    chain = load_thesis_chain(CHAIN, ticker="TTWO")
+    catalog = compile_knowledge(load_knowledge(KNOWLEDGE))
+    recipe = next(item for item in catalog.recipes if item.architecture is architecture)
+    trade_request = _trade_request(
+        _request(),
+        policy,
+        chain,
+        maximum_dte=600,
+    )
+    return build_candidate(
+        architecture=architecture,
+        recipe=recipe,
+        leg_specs=leg_specs,
+        quantity=1,
+        request=trade_request,
+        horizon_compatible=True,
     )
 
 
@@ -141,6 +192,77 @@ def test_long_call_risk_and_break_even_include_costs(
         pytest.approx(expected_break_even, abs=1e-4)
     ]
     assert candidate.base_candidate.risk.maximum_gain is None
+    assert candidate.decision_metrics.contractual_gain_unbounded is True
+    assert candidate.decision_metrics.contractual_gain_loss_ratio is None
+
+
+def test_long_call_terminal_multiples_use_total_cost() -> None:
+    candidate = _build_structure(
+        Architecture.LONG_CALL,
+        [(PositionSide.LONG, 1, _quote(100, bid=4.8, ask=5.0))],
+    )
+    thresholds = terminal_value_thresholds(
+        candidate.legs,
+        total_cost_usd=candidate.risk.total_cost,
+    )
+    assert candidate.risk.maximum_loss == pytest.approx(candidate.risk.total_cost)
+    assert candidate.risk.maximum_gain is None
+    assert candidate.risk.break_even_points == [
+        pytest.approx(100 + candidate.risk.total_cost / 100, abs=1e-4)
+    ]
+    assert thresholds[0].spot_prices == [
+        pytest.approx(100 + 2 * candidate.risk.total_cost / 100, abs=1e-4)
+    ]
+    assert all(threshold.attainable for threshold in thresholds)
+
+
+def test_bull_call_spread_contractual_math_and_capped_multiples() -> None:
+    candidate = _build_structure(
+        Architecture.BULL_CALL_SPREAD,
+        [
+            (PositionSide.LONG, 1, _quote(100, bid=4.8, ask=5.0)),
+            (PositionSide.SHORT, 1, _quote(110, bid=2.0, ask=2.2)),
+        ],
+    )
+    width_value = (110 - 100) * 100
+    expected_gain = width_value - candidate.risk.total_cost
+    thresholds = terminal_value_thresholds(
+        candidate.legs,
+        total_cost_usd=candidate.risk.total_cost,
+    )
+    assert candidate.risk.maximum_loss == pytest.approx(candidate.risk.total_cost)
+    assert candidate.risk.maximum_gain == pytest.approx(expected_gain)
+    assert candidate.risk.break_even_points == [
+        pytest.approx(100 + candidate.risk.total_cost / 100, abs=1e-4)
+    ]
+    assert thresholds[0].attainable is True
+    assert thresholds[1].attainable is True
+    assert thresholds[2].attainable is False
+    assert thresholds[2].message == "Impossible — gain plafonné par la structure."
+
+
+def test_call_butterfly_contractual_math_break_evens_and_two_sided_multiples() -> None:
+    candidate = _build_structure(
+        Architecture.CALL_BUTTERFLY,
+        [
+            (PositionSide.LONG, 1, _quote(100, bid=3.8, ask=4.0)),
+            (PositionSide.SHORT, 2, _quote(110, bid=2.5, ask=2.7)),
+            (PositionSide.LONG, 1, _quote(120, bid=1.3, ask=1.5)),
+        ],
+    )
+    expected_gain = (110 - 100) * 100 - candidate.risk.total_cost
+    thresholds = terminal_value_thresholds(
+        candidate.legs,
+        total_cost_usd=candidate.risk.total_cost,
+    )
+    assert candidate.risk.maximum_loss == pytest.approx(candidate.risk.total_cost)
+    assert candidate.risk.maximum_gain == pytest.approx(expected_gain)
+    assert candidate.risk.break_even_points == [
+        pytest.approx(100 + candidate.risk.total_cost / 100, abs=1e-4),
+        pytest.approx(120 - candidate.risk.total_cost / 100, abs=1e-4),
+    ]
+    assert all(threshold.attainable for threshold in thresholds)
+    assert all(len(threshold.spot_prices) == 2 for threshold in thresholds)
 
 
 def test_rankings_are_independent_and_deterministic(
@@ -201,7 +323,33 @@ def test_probabilities_are_never_invented(
     assert report.probability_status == "not_provided"
     assert all(candidate.expected_pnl_usd is None for candidate in report.candidates)
     assert all(candidate.probability_success is None for candidate in report.candidates)
+    assert all(
+        candidate.decision_metrics.expected_pnl_eur is None
+        for candidate in report.candidates
+    )
     assert "Aucun P&L espéré" in (tmp_path / "report.md").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("top", [3, 5, 10])
+def test_top_parameter_controls_each_profile(
+    top: int,
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / f"top-{top}"
+    report = run_thesis_scan(
+        request=_request(top=top),
+        json_out=output / "report.json",
+        markdown_out=output / "report.md",
+        html_out=output / "dashboard.html",
+        policy_path=POLICY,
+        knowledge_dir=KNOWLEDGE,
+        created_at=SCAN_TIME,
+    )
+    assert all(len(ranking.scores) == top for ranking in report.rankings)
+    assert all(
+        len({score.candidate_id for score in ranking.scores}) == top
+        for ranking in report.rankings
+    )
 
 
 def test_preview_cannot_transmit_and_fixture_builds_standalone_dashboard(
@@ -215,18 +363,47 @@ def test_preview_cannot_transmit_and_fixture_builds_standalone_dashboard(
     assert full_report.historical_evidence.eligibility_effect == "warning_only"
     html = Path(full_report.output_files[2]).read_text(encoding="utf-8")
     assert "<!doctype html>" in html
+    assert full_report.schema_version == "10.1"
     assert "Contexte de marché et hypothèses utilisateur" in html
-    assert "Meilleur candidat conditionnel à la thèse et aux hypothèses" in html
+    assert "Meilleures stratégies — <span id=\"topCount\">" in html
+    assert "R.request.top" in html
+    assert "Top 3 par profil" not in html
+    assert "accordion-trigger" in html
+    assert 'setAttribute("aria-expanded","false")' in html
+    assert 'setAttribute("aria-controls",panelId)' in html
+    assert 'panel.setAttribute("aria-labelledby",triggerId)' in html
+    assert ":focus-visible" in html
+    assert "@media(max-width:900px)" in html
+    assert "score.score.toFixed(2)" in html
+    assert '"#"+(index+1)' in html
+    assert "Fiche décisionnelle active" in html
+    assert "Gain maximal contractuel" in html
+    assert "Meilleur gain parmi les scénarios modélisés" in html
+    assert "Impossible — gain plafonné par la structure." in html
+    assert "Tableau de P&amp;L aux objectifs" in html
     assert "Coût, perte maximale et gain potentiel" in html
     assert "Payoff terminal" in html
     assert "Courbes de P&amp;L à plusieurs dates" in html
     assert "Heatmap spot × date" in html
     assert "Sensibilité IV au catalyseur" in html
     assert "3–4. Ticket IBKR et coûts" in html
-    assert "9. Risques et conditions d’invalidation" in html
+    assert "9. Risques de la structure" in html
     assert "10. Historique de backtest — séparé de la simulation actuelle" in html
     assert "Débit maximal" in html
     assert "meilleur trade garanti" not in html.lower()
     assert "fetch(" not in html
     assert "XMLHttpRequest" not in html
     assert "placeOrder" not in html
+
+
+def test_readme_ends_with_read_only_ibkr_opra_roadmap() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "## Roadmap — dernière étape : données live IBKR/OPRA" in readme
+    assert "OPRA est le flux de données temps réel des options américaines" in readme
+    assert "OPRA\n  n’exécute aucun ordre" in readme
+    assert "IBKR TWS ou IB\n  Gateway" in readme
+    assert "transmit=false" in readme
+    assert "what_if=true" in readme
+    assert readme.rstrip().endswith(
+        "lecture seule et valider les quotes combo."
+    )

@@ -1,4 +1,4 @@
-"""End-to-end read-only V10 Bullish Thesis Scanner."""
+"""End-to-end read-only V10.1 Bullish Thesis Scanner."""
 
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ def run_thesis_scan(
     knowledge_dir: Path = Path("research/knowledge_items"),
     created_at: datetime | None = None,
 ) -> ThesisScanReport:
-    """Run the V10 scanner without exposing any order-transmission operation."""
+    """Run the V10.1 scanner without exposing any order-transmission operation."""
     scan_time = created_at or datetime.now(UTC)
     if scan_time.tzinfo is None:
         scan_time = scan_time.replace(tzinfo=UTC)
@@ -66,6 +66,7 @@ def run_thesis_scan(
         chain=chain,
         request=request,
         policy=policy,
+        scan_time=scan_time,
     )
     candidates = list(evaluation.candidates)
     rankings = rank_candidates(
@@ -89,7 +90,7 @@ def run_thesis_scan(
         "chain_source": chain.source_id,
         "chain_as_of": chain.as_of,
     }
-    report_id = f"v10-{stable_hash(report_identity)[:20]}"
+    report_id = f"v10.1-{stable_hash(report_identity)[:20]}"
     report = ThesisScanReport(
         report_id=report_id,
         created_at=scan_time,

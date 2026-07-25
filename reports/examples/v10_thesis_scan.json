@@ -1,7 +1,7 @@
 {
-  "schema_version": "10.0",
-  "report_id": "v10-9f966d01f3e8f085bbb5",
-  "created_at": "2026-07-25T11:28:09.655449Z",
+  "schema_version": "10.1",
+  "report_id": "v10.1-9f966d01f3e8f085bbb5",
+  "created_at": "2026-07-25T22:01:06.165516Z",
   "request": {
     "ticker": "TTWO",
     "direction": "bullish",
@@ -5721,7 +5721,165 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.33729777,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 1,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": true,
+        "contractual_max_gain_usd": null,
+        "contractual_max_gain_eur": null,
+        "best_modeled_gain_usd": 8294.7341,
+        "best_modeled_gain_eur": 7253.8121,
+        "expected_pnl_eur": 2243.9021,
+        "contractual_gain_loss_ratio": null,
+        "modeled_gain_loss_ratio": 21.50566269,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 771.4,
+            "target_net_profit_usd": 385.7,
+            "attainable": true,
+            "spot_prices": [
+              307.714
+            ],
+            "message": "Cours TTWO à l’échéance : $307.71"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 1157.1,
+            "target_net_profit_usd": 771.4,
+            "attainable": true,
+            "spot_prices": [
+              311.571
+            ],
+            "message": "Cours TTWO à l’échéance : $311.57"
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 1928.5,
+            "target_net_profit_usd": 1542.8,
+            "attainable": true,
+            "spot_prices": [
+              319.285
+            ],
+            "message": "Cours TTWO à l’échéance : $319.29"
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -325.378,
+            "catalyst_iv_down_eur": -284.5457,
+            "catalyst_iv_stable_usd": -209.0738,
+            "catalyst_iv_stable_eur": -182.8367,
+            "catalyst_iv_up_usd": -32.1075,
+            "catalyst_iv_up_eur": -28.0783,
+            "expiration_usd": -385.7,
+            "expiration_eur": -337.2978
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": -29.1622,
+            "catalyst_iv_down_eur": -25.5026,
+            "catalyst_iv_stable_usd": 264.5428,
+            "catalyst_iv_stable_eur": 231.3448,
+            "catalyst_iv_up_usd": 601.3372,
+            "catalyst_iv_up_eur": 525.8742,
+            "expiration_usd": -385.7,
+            "expiration_eur": -337.2978
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 813.3055,
+            "catalyst_iv_down_eur": 711.2423,
+            "catalyst_iv_stable_usd": 1264.6233,
+            "catalyst_iv_stable_eur": 1105.9233,
+            "catalyst_iv_up_usd": 1721.9228,
+            "catalyst_iv_up_eur": 1505.8354,
+            "expiration_usd": -385.7,
+            "expiration_eur": -337.2978
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 1778.8738,
+            "catalyst_iv_down_eur": 1555.6395,
+            "catalyst_iv_stable_usd": 2266.706,
+            "catalyst_iv_stable_eur": 1982.2528,
+            "catalyst_iv_up_usd": 2753.9431,
+            "catalyst_iv_up_eur": 2408.3455,
+            "expiration_usd": -385.7,
+            "expiration_eur": -337.2978
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 3800.3194,
+            "catalyst_iv_down_eur": 3323.4101,
+            "catalyst_iv_stable_usd": 4232.1533,
+            "catalyst_iv_stable_eur": 3701.0523,
+            "catalyst_iv_up_usd": 4688.5342,
+            "catalyst_iv_up_eur": 4100.1611,
+            "expiration_usd": 2614.3,
+            "expiration_eur": 2286.2265
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 6322.6993,
+            "catalyst_iv_down_eur": 5529.2517,
+            "catalyst_iv_stable_usd": 6629.5432,
+            "catalyst_iv_stable_eur": 5797.5891,
+            "catalyst_iv_up_usd": 6997.9614,
+            "catalyst_iv_up_eur": 6119.7738,
+            "expiration_usd": 5614.3,
+            "expiration_eur": 4909.7508
+          }
+        ],
+        "strike_width": null,
+        "capped_gain_from_spot": null,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          303.857
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $303.86; à ou sous $300.00, la prime peut être perdue intégralement.",
+        "win_if": "Tu gagnes à l’échéance si TTWO dépasse $303.86; le gain contractuel reste théoriquement illimité.",
+        "theta_to_stake_daily": 0.01292517,
+        "iv_down_impact_usd": -487.8322,
+        "iv_down_impact_eur": -426.6132,
+        "maximum_leg_relative_spread": 0.13888889,
+        "minimum_open_interest": 510,
+        "minimum_volume": 85,
+        "total_premium_loss_possible": true,
+        "has_short_legs": false,
+        "assignment_risk": false,
+        "pin_risk": false,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO270319C00300000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 3.35,
+            "ask": 3.85,
+            "midpoint": 3.6,
+            "relative_spread": 0.13888889,
+            "open_interest": 510,
+            "volume": 85,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-119e6d7d30c47119",
@@ -10800,7 +10958,174 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.68334062,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": false,
+        "contractual_max_gain_usd": 1218.6,
+        "contractual_max_gain_eur": 1065.6756,
+        "best_modeled_gain_usd": 1218.6,
+        "best_modeled_gain_eur": 1065.6756,
+        "expected_pnl_eur": 571.4211,
+        "contractual_gain_loss_ratio": 1.55950857,
+        "modeled_gain_loss_ratio": 1.55950857,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 1562.8,
+            "target_net_profit_usd": 781.4,
+            "attainable": true,
+            "spot_prices": [
+              255.628
+            ],
+            "message": "Cours TTWO à l’échéance : $255.63"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 2344.2,
+            "target_net_profit_usd": 1562.8,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 3907.0,
+            "target_net_profit_usd": 3125.6,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -354.2755,
+            "catalyst_iv_down_eur": -309.8168,
+            "catalyst_iv_stable_usd": -282.3207,
+            "catalyst_iv_stable_eur": -246.8918,
+            "catalyst_iv_up_usd": -234.9182,
+            "catalyst_iv_up_eur": -205.4379,
+            "expiration_usd": -781.4,
+            "expiration_eur": -683.3406
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 208.7875,
+            "catalyst_iv_down_eur": 182.5864,
+            "catalyst_iv_stable_usd": 180.0659,
+            "catalyst_iv_stable_eur": 157.469,
+            "catalyst_iv_up_usd": 155.6156,
+            "catalyst_iv_up_eur": 136.0871,
+            "expiration_usd": 218.6,
+            "expiration_eur": 191.1675
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 717.1676,
+            "catalyst_iv_down_eur": 627.1688,
+            "catalyst_iv_stable_usd": 603.6916,
+            "catalyst_iv_stable_eur": 527.9332,
+            "catalyst_iv_up_usd": 516.3478,
+            "catalyst_iv_up_eur": 451.5503,
+            "expiration_usd": 1218.6,
+            "expiration_eur": 1065.6756
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 937.5633,
+            "catalyst_iv_down_eur": 819.9067,
+            "catalyst_iv_stable_usd": 814.1048,
+            "catalyst_iv_stable_eur": 711.9412,
+            "catalyst_iv_up_usd": 709.4943,
+            "catalyst_iv_up_eur": 620.4585,
+            "expiration_usd": 1218.6,
+            "expiration_eur": 1065.6756
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 1108.6749,
+            "catalyst_iv_down_eur": 969.5452,
+            "catalyst_iv_stable_usd": 1016.4428,
+            "catalyst_iv_stable_eur": 888.8874,
+            "catalyst_iv_up_usd": 918.9295,
+            "catalyst_iv_up_eur": 803.6113,
+            "expiration_usd": 1218.6,
+            "expiration_eur": 1065.6756
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 1169.8142,
+            "catalyst_iv_down_eur": 1023.012,
+            "catalyst_iv_stable_usd": 1118.6289,
+            "catalyst_iv_stable_eur": 978.2501,
+            "catalyst_iv_up_usd": 1047.0404,
+            "catalyst_iv_up_eur": 915.6453,
+            "expiration_usd": 1218.6,
+            "expiration_eur": 1065.6756
+          }
+        ],
+        "strike_width": 20.0,
+        "capped_gain_from_spot": 260.0,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          247.814
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $247.81; à ou sous $240.00, la perte maximale est atteinte.",
+        "win_if": "Tu gagnes à l’échéance au-dessus de $247.81; le gain est plafonné à partir de $260.00.",
+        "theta_to_stake_daily": 0.00037958,
+        "iv_down_impact_usd": -71.9548,
+        "iv_down_impact_eur": -62.9251,
+        "maximum_leg_relative_spread": 0.07272727,
+        "minimum_open_interest": 680,
+        "minimum_volume": 110,
+        "total_premium_loss_possible": true,
+        "has_short_legs": true,
+        "assignment_risk": true,
+        "pin_risk": true,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO270319C00240000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 17.6,
+            "ask": 18.4,
+            "midpoint": 18.0,
+            "relative_spread": 0.04444444,
+            "open_interest": 790,
+            "volume": 125,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          },
+          {
+            "symbol": "TTWO270319C00260000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 10.6,
+            "ask": 11.4,
+            "midpoint": 11.0,
+            "relative_spread": 0.07272727,
+            "open_interest": 680,
+            "volume": 110,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-13690dc64acaef11",
@@ -15858,7 +16183,165 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.90196764,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 2,
+        "contractual_gain_unbounded": true,
+        "contractual_max_gain_usd": null,
+        "contractual_max_gain_eur": null,
+        "best_modeled_gain_usd": 15536.4365,
+        "best_modeled_gain_eur": 13586.7394,
+        "expected_pnl_eur": 4511.2236,
+        "contractual_gain_loss_ratio": null,
+        "modeled_gain_loss_ratio": 15.06344435,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 2062.8,
+            "target_net_profit_usd": 1031.4,
+            "attainable": true,
+            "spot_prices": [
+              370.314
+            ],
+            "message": "Cours TTWO à l’échéance : $370.31"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 3094.2,
+            "target_net_profit_usd": 2062.8,
+            "attainable": true,
+            "spot_prices": [
+              375.471
+            ],
+            "message": "Cours TTWO à l’échéance : $375.47"
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 5157.0,
+            "target_net_profit_usd": 4125.6,
+            "attainable": true,
+            "spot_prices": [
+              385.785
+            ],
+            "message": "Cours TTWO à l’échéance : $385.79"
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -496.5291,
+            "catalyst_iv_down_eur": -434.2187,
+            "catalyst_iv_stable_usd": 213.5262,
+            "catalyst_iv_stable_eur": 186.7304,
+            "catalyst_iv_up_usd": 1147.5259,
+            "catalyst_iv_up_eur": 1003.5207,
+            "expiration_usd": -1031.4,
+            "expiration_eur": -901.9676
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 331.761,
+            "catalyst_iv_down_eur": 290.1277,
+            "catalyst_iv_stable_usd": 1476.8023,
+            "catalyst_iv_stable_eur": 1291.4755,
+            "catalyst_iv_up_usd": 2791.1184,
+            "catalyst_iv_up_eur": 2440.8556,
+            "expiration_usd": -1031.4,
+            "expiration_eur": -901.9676
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 1781.5041,
+            "catalyst_iv_down_eur": 1557.9397,
+            "catalyst_iv_stable_usd": 3343.1537,
+            "catalyst_iv_stable_eur": 2923.6149,
+            "catalyst_iv_up_usd": 4991.2308,
+            "catalyst_iv_up_eur": 4364.8717,
+            "expiration_usd": -1031.4,
+            "expiration_eur": -901.9676
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 3146.0716,
+            "catalyst_iv_down_eur": 2751.2651,
+            "catalyst_iv_stable_usd": 4935.378,
+            "catalyst_iv_stable_eur": 4316.028,
+            "catalyst_iv_up_usd": 6761.0903,
+            "catalyst_iv_up_eur": 5912.6281,
+            "expiration_usd": -1031.4,
+            "expiration_eur": -901.9676
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 5810.2532,
+            "catalyst_iv_down_eur": 5081.1134,
+            "catalyst_iv_stable_usd": 7831.3806,
+            "catalyst_iv_stable_eur": 6848.6057,
+            "catalyst_iv_up_usd": 9843.427,
+            "catalyst_iv_up_eur": 8608.1565,
+            "expiration_usd": -1031.4,
+            "expiration_eur": -901.9676
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 9179.4758,
+            "catalyst_iv_down_eur": 8027.5258,
+            "catalyst_iv_stable_usd": 11291.5253,
+            "catalyst_iv_stable_eur": 9874.5302,
+            "catalyst_iv_up_usd": 13393.875,
+            "catalyst_iv_up_eur": 11713.052,
+            "expiration_usd": -1031.4,
+            "expiration_eur": -901.9676
+          }
+        ],
+        "strike_width": null,
+        "capped_gain_from_spot": null,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          365.157
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $365.16; à ou sous $360.00, la prime peut être perdue intégralement.",
+        "win_if": "Tu gagnes à l’échéance si TTWO dépasse $365.16; le gain contractuel reste théoriquement illimité.",
+        "theta_to_stake_daily": 0.00702526,
+        "iv_down_impact_usd": -2112.0495,
+        "iv_down_impact_eur": -1847.0044,
+        "maximum_leg_relative_spread": 0.14583333,
+        "minimum_open_interest": 390,
+        "minimum_volume": 55,
+        "total_premium_loss_possible": true,
+        "has_short_legs": false,
+        "assignment_risk": false,
+        "pin_risk": false,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO271217C00360000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 4.45,
+            "ask": 5.15,
+            "midpoint": 4.8,
+            "relative_spread": 0.14583333,
+            "open_interest": 390,
+            "volume": 55,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-30f6d00893282104",
@@ -20936,7 +21419,178 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.83637954,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": false,
+        "contractual_max_gain_usd": 5043.6,
+        "contractual_max_gain_eur": 4410.669,
+        "best_modeled_gain_usd": 5043.6,
+        "best_modeled_gain_eur": 4410.669,
+        "expected_pnl_eur": 780.7765,
+        "contractual_gain_loss_ratio": 5.27352572,
+        "modeled_gain_loss_ratio": 5.27352572,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 1912.8,
+            "target_net_profit_usd": 956.4,
+            "attainable": true,
+            "spot_prices": [
+              319.128
+            ],
+            "message": "Cours TTWO à l’échéance : $319.13"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 2869.2,
+            "target_net_profit_usd": 1912.8,
+            "attainable": true,
+            "spot_prices": [
+              328.692
+            ],
+            "message": "Cours TTWO à l’échéance : $328.69"
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 4782.0,
+            "target_net_profit_usd": 3825.6,
+            "attainable": true,
+            "spot_prices": [
+              347.82
+            ],
+            "message": "Cours TTWO à l’échéance : $347.82"
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -520.0213,
+            "catalyst_iv_down_eur": -454.7628,
+            "catalyst_iv_stable_usd": -361.7194,
+            "catalyst_iv_stable_eur": -316.3265,
+            "catalyst_iv_up_usd": -258.2184,
+            "catalyst_iv_up_eur": -225.814,
+            "expiration_usd": -956.4,
+            "expiration_eur": -836.3795
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": -54.9415,
+            "catalyst_iv_down_eur": -48.0468,
+            "catalyst_iv_stable_usd": 72.0838,
+            "catalyst_iv_stable_eur": 63.0379,
+            "catalyst_iv_up_usd": 131.5558,
+            "catalyst_iv_up_eur": 115.0466,
+            "expiration_usd": -956.4,
+            "expiration_eur": -836.3795
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 560.7625,
+            "catalyst_iv_down_eur": 490.3914,
+            "catalyst_iv_stable_usd": 589.0703,
+            "catalyst_iv_stable_eur": 515.1468,
+            "catalyst_iv_up_usd": 569.8042,
+            "catalyst_iv_up_eur": 498.2984,
+            "expiration_usd": -956.4,
+            "expiration_eur": -836.3795
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 1018.8913,
+            "catalyst_iv_down_eur": 891.0287,
+            "catalyst_iv_stable_usd": 957.2043,
+            "catalyst_iv_stable_eur": 837.0829,
+            "catalyst_iv_up_usd": 874.3797,
+            "catalyst_iv_up_eur": 764.6521,
+            "expiration_usd": -956.4,
+            "expiration_eur": -836.3795
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 1718.1722,
+            "catalyst_iv_down_eur": 1502.5555,
+            "catalyst_iv_stable_usd": 1512.7395,
+            "catalyst_iv_stable_eur": 1322.9029,
+            "catalyst_iv_up_usd": 1331.1931,
+            "catalyst_iv_up_eur": 1164.1391,
+            "expiration_usd": 2043.6,
+            "expiration_eur": 1787.1447
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 2374.1876,
+            "catalyst_iv_down_eur": 2076.2463,
+            "catalyst_iv_stable_usd": 2042.4961,
+            "catalyst_iv_stable_eur": 1786.1793,
+            "catalyst_iv_up_usd": 1770.8453,
+            "catalyst_iv_up_eur": 1548.6185,
+            "expiration_usd": 5043.6,
+            "expiration_eur": 4410.669
+          }
+        ],
+        "strike_width": 60.0,
+        "capped_gain_from_spot": 360.0,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          309.564
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $309.56; à ou sous $300.00, la perte maximale est atteinte.",
+        "win_if": "Tu gagnes à l’échéance au-dessus de $309.56; le gain est plafonné à partir de $360.00.",
+        "theta_to_stake_daily": 0.00070686,
+        "iv_down_impact_usd": -158.3019,
+        "iv_down_impact_eur": -138.4363,
+        "maximum_leg_relative_spread": 0.14583333,
+        "minimum_open_interest": 390,
+        "minimum_volume": 55,
+        "total_premium_loss_possible": true,
+        "has_short_legs": true,
+        "assignment_risk": true,
+        "pin_risk": true,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO271217C00300000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 13.0,
+            "ask": 14.0,
+            "midpoint": 13.5,
+            "relative_spread": 0.07407407,
+            "open_interest": 610,
+            "volume": 80,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          },
+          {
+            "symbol": "TTWO271217C00360000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 4.45,
+            "ask": 5.15,
+            "midpoint": 4.8,
+            "relative_spread": 0.14583333,
+            "open_interest": 390,
+            "volume": 55,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-4b839cfe6b4edbe9",
@@ -26014,7 +26668,176 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.70520332,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": false,
+        "contractual_max_gain_usd": 3193.6,
+        "contractual_max_gain_eur": 2792.829,
+        "best_modeled_gain_usd": 3193.6,
+        "best_modeled_gain_eur": 2792.829,
+        "expected_pnl_eur": 1194.9693,
+        "contractual_gain_loss_ratio": 3.96031746,
+        "modeled_gain_loss_ratio": 3.96031746,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 1612.8,
+            "target_net_profit_usd": 806.4,
+            "attainable": true,
+            "spot_prices": [
+              276.128
+            ],
+            "message": "Cours TTWO à l’échéance : $276.13"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 2419.2,
+            "target_net_profit_usd": 1612.8,
+            "attainable": true,
+            "spot_prices": [
+              284.192
+            ],
+            "message": "Cours TTWO à l’échéance : $284.19"
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 4032.0,
+            "target_net_profit_usd": 3225.6,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -523.657,
+            "catalyst_iv_down_eur": -457.9423,
+            "catalyst_iv_stable_usd": -377.2395,
+            "catalyst_iv_stable_eur": -329.899,
+            "catalyst_iv_up_usd": -258.0354,
+            "catalyst_iv_up_eur": -225.654,
+            "expiration_usd": -806.4,
+            "expiration_eur": -705.2033
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 149.4463,
+            "catalyst_iv_down_eur": 130.692,
+            "catalyst_iv_stable_usd": 255.6533,
+            "catalyst_iv_stable_eur": 223.5709,
+            "catalyst_iv_up_usd": 319.3971,
+            "catalyst_iv_up_eur": 279.3153,
+            "expiration_usd": -806.4,
+            "expiration_eur": -705.2033
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 1129.6829,
+            "catalyst_iv_down_eur": 987.9168,
+            "catalyst_iv_stable_usd": 1058.5348,
+            "catalyst_iv_stable_eur": 925.6972,
+            "catalyst_iv_up_usd": 995.8753,
+            "catalyst_iv_up_eur": 870.901,
+            "expiration_usd": 1193.6,
+            "expiration_eur": 1043.8129
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 1761.3901,
+            "catalyst_iv_down_eur": 1540.3499,
+            "catalyst_iv_stable_usd": 1577.1454,
+            "catalyst_iv_stable_eur": 1379.2264,
+            "catalyst_iv_up_usd": 1433.404,
+            "catalyst_iv_up_eur": 1253.5234,
+            "expiration_usd": 3193.6,
+            "expiration_eur": 2792.829
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 2469.4262,
+            "catalyst_iv_down_eur": 2159.5332,
+            "catalyst_iv_stable_usd": 2213.1107,
+            "catalyst_iv_stable_eur": 1935.3832,
+            "catalyst_iv_up_usd": 1998.3241,
+            "catalyst_iv_up_eur": 1747.5506,
+            "expiration_usd": 3193.6,
+            "expiration_eur": 2792.829
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 2862.85,
+            "catalyst_iv_down_eur": 2503.5855,
+            "catalyst_iv_stable_usd": 2640.4343,
+            "catalyst_iv_stable_eur": 2309.0812,
+            "catalyst_iv_up_usd": 2421.3816,
+            "catalyst_iv_up_eur": 2117.5178,
+            "expiration_usd": 3193.6,
+            "expiration_eur": 2792.829
+          }
+        ],
+        "strike_width": 40.0,
+        "capped_gain_from_spot": 300.0,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          268.064
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $268.06; à ou sous $260.00, la perte maximale est atteinte.",
+        "win_if": "Tu gagnes à l’échéance au-dessus de $268.06; le gain est plafonné à partir de $300.00.",
+        "theta_to_stake_daily": 0.00153443,
+        "iv_down_impact_usd": -146.4175,
+        "iv_down_impact_eur": -128.0433,
+        "maximum_leg_relative_spread": 0.13888889,
+        "minimum_open_interest": 510,
+        "minimum_volume": 85,
+        "total_premium_loss_possible": true,
+        "has_short_legs": true,
+        "assignment_risk": true,
+        "pin_risk": true,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO270319C00260000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 10.6,
+            "ask": 11.4,
+            "midpoint": 11.0,
+            "relative_spread": 0.07272727,
+            "open_interest": 680,
+            "volume": 110,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          },
+          {
+            "symbol": "TTWO270319C00300000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 3.35,
+            "ask": 3.85,
+            "midpoint": 3.6,
+            "relative_spread": 0.13888889,
+            "open_interest": 510,
+            "volume": 85,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-4dfb14afde235e50",
@@ -31072,7 +31895,165 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.67459554,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 2,
+        "contractual_gain_unbounded": true,
+        "contractual_max_gain_usd": null,
+        "contractual_max_gain_eur": null,
+        "best_modeled_gain_usd": 16589.4682,
+        "best_modeled_gain_eur": 14507.6241,
+        "expected_pnl_eur": 4487.8042,
+        "contractual_gain_loss_ratio": null,
+        "modeled_gain_loss_ratio": 21.50566269,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 1542.8,
+            "target_net_profit_usd": 771.4,
+            "attainable": true,
+            "spot_prices": [
+              307.714
+            ],
+            "message": "Cours TTWO à l’échéance : $307.71"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 2314.2,
+            "target_net_profit_usd": 1542.8,
+            "attainable": true,
+            "spot_prices": [
+              311.571
+            ],
+            "message": "Cours TTWO à l’échéance : $311.57"
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 3857.0,
+            "target_net_profit_usd": 3085.6,
+            "attainable": true,
+            "spot_prices": [
+              319.285
+            ],
+            "message": "Cours TTWO à l’échéance : $319.29"
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -650.7559,
+            "catalyst_iv_down_eur": -569.0913,
+            "catalyst_iv_stable_usd": -418.1476,
+            "catalyst_iv_stable_eur": -365.6735,
+            "catalyst_iv_up_usd": -64.2151,
+            "catalyst_iv_up_eur": -56.1566,
+            "expiration_usd": -771.4,
+            "expiration_eur": -674.5955
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": -58.3244,
+            "catalyst_iv_down_eur": -51.0051,
+            "catalyst_iv_stable_usd": 529.0856,
+            "catalyst_iv_stable_eur": 462.6896,
+            "catalyst_iv_up_usd": 1202.6743,
+            "catalyst_iv_up_eur": 1051.7484,
+            "expiration_usd": -771.4,
+            "expiration_eur": -674.5955
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 1626.6111,
+            "catalyst_iv_down_eur": 1422.4845,
+            "catalyst_iv_stable_usd": 2529.2467,
+            "catalyst_iv_stable_eur": 2211.8467,
+            "catalyst_iv_up_usd": 3443.8457,
+            "catalyst_iv_up_eur": 3011.6709,
+            "expiration_usd": -771.4,
+            "expiration_eur": -674.5955
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 3557.7476,
+            "catalyst_iv_down_eur": 3111.279,
+            "catalyst_iv_stable_usd": 4533.4121,
+            "catalyst_iv_stable_eur": 3964.5055,
+            "catalyst_iv_up_usd": 5507.8861,
+            "catalyst_iv_up_eur": 4816.691,
+            "expiration_usd": -771.4,
+            "expiration_eur": -674.5955
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 7600.6388,
+            "catalyst_iv_down_eur": 6646.8201,
+            "catalyst_iv_stable_usd": 8464.3066,
+            "catalyst_iv_stable_eur": 7402.1046,
+            "catalyst_iv_up_usd": 9377.0684,
+            "catalyst_iv_up_eur": 8200.3222,
+            "expiration_usd": 5228.6,
+            "expiration_eur": 4572.453
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 12645.3986,
+            "catalyst_iv_down_eur": 11058.5034,
+            "catalyst_iv_stable_usd": 13259.0864,
+            "catalyst_iv_stable_eur": 11595.1783,
+            "catalyst_iv_up_usd": 13995.9227,
+            "catalyst_iv_up_eur": 12239.5477,
+            "expiration_usd": 11228.6,
+            "expiration_eur": 9819.5015
+          }
+        ],
+        "strike_width": null,
+        "capped_gain_from_spot": null,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          303.857
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $303.86; à ou sous $300.00, la prime peut être perdue intégralement.",
+        "win_if": "Tu gagnes à l’échéance si TTWO dépasse $303.86; le gain contractuel reste théoriquement illimité.",
+        "theta_to_stake_daily": 0.01292517,
+        "iv_down_impact_usd": -975.6645,
+        "iv_down_impact_eur": -853.2265,
+        "maximum_leg_relative_spread": 0.13888889,
+        "minimum_open_interest": 510,
+        "minimum_volume": 85,
+        "total_premium_loss_possible": true,
+        "has_short_legs": false,
+        "assignment_risk": false,
+        "pin_risk": false,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO270319C00300000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 3.35,
+            "ask": 3.85,
+            "midpoint": 3.6,
+            "relative_spread": 0.13888889,
+            "open_interest": 510,
+            "volume": 85,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-5159edae09c7d168",
@@ -36130,7 +37111,165 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.59527766,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 1,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": true,
+        "contractual_max_gain_usd": null,
+        "contractual_max_gain_eur": null,
+        "best_modeled_gain_usd": 9362.0698,
+        "best_modeled_gain_eur": 8187.2058,
+        "expected_pnl_eur": 2860.6112,
+        "contractual_gain_loss_ratio": null,
+        "modeled_gain_loss_ratio": 13.7535916,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 1361.4,
+            "target_net_profit_usd": 680.7,
+            "attainable": true,
+            "spot_prices": [
+              293.614
+            ],
+            "message": "Cours TTWO à l’échéance : $293.61"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 2042.1,
+            "target_net_profit_usd": 1361.4,
+            "attainable": true,
+            "spot_prices": [
+              300.421
+            ],
+            "message": "Cours TTWO à l’échéance : $300.42"
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 3403.5,
+            "target_net_profit_usd": 2722.8,
+            "attainable": true,
+            "spot_prices": [
+              314.035
+            ],
+            "message": "Cours TTWO à l’échéance : $314.04"
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -525.2625,
+            "catalyst_iv_down_eur": -459.3463,
+            "catalyst_iv_stable_usd": -335.7561,
+            "catalyst_iv_stable_eur": -293.6214,
+            "catalyst_iv_up_usd": -92.696,
+            "catalyst_iv_up_eur": -81.0634,
+            "expiration_usd": -680.7,
+            "expiration_eur": -595.2777
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 42.4619,
+            "catalyst_iv_down_eur": 37.1332,
+            "catalyst_iv_stable_usd": 414.7272,
+            "catalyst_iv_stable_eur": 362.6823,
+            "catalyst_iv_up_usd": 804.8657,
+            "catalyst_iv_up_eur": 703.8616,
+            "expiration_usd": -680.7,
+            "expiration_eur": -595.2777
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 1339.5689,
+            "catalyst_iv_down_eur": 1171.4638,
+            "catalyst_iv_stable_usd": 1794.879,
+            "catalyst_iv_stable_eur": 1569.6362,
+            "catalyst_iv_up_usd": 2249.6335,
+            "catalyst_iv_up_eur": 1967.3227,
+            "expiration_usd": -680.7,
+            "expiration_eur": -595.2777
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 2629.6926,
+            "catalyst_iv_down_eur": 2299.6874,
+            "catalyst_iv_stable_usd": 3057.7461,
+            "catalyst_iv_stable_eur": 2674.0237,
+            "catalyst_iv_up_usd": 3499.2193,
+            "catalyst_iv_up_eur": 3060.0956,
+            "expiration_usd": 1319.3,
+            "expiration_eur": 1153.7385
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 5047.8052,
+            "catalyst_iv_down_eur": 4414.3465,
+            "catalyst_iv_stable_usd": 5360.7333,
+            "catalyst_iv_stable_eur": 4688.0047,
+            "catalyst_iv_up_usd": 5724.5308,
+            "catalyst_iv_up_eur": 5006.1485,
+            "expiration_usd": 4319.3,
+            "expiration_eur": 3777.2628
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 7811.2913,
+            "catalyst_iv_down_eur": 6831.0375,
+            "catalyst_iv_stable_usd": 7998.6917,
+            "catalyst_iv_stable_eur": 6994.9206,
+            "catalyst_iv_up_usd": 8260.2657,
+            "catalyst_iv_up_eur": 7223.6691,
+            "expiration_usd": 7319.3,
+            "expiration_eur": 6400.7871
+          }
+        ],
+        "strike_width": null,
+        "capped_gain_from_spot": null,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          286.807
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $286.81; à ou sous $280.00, la prime peut être perdue intégralement.",
+        "win_if": "Tu gagnes à l’échéance si TTWO dépasse $286.81; le gain contractuel reste théoriquement illimité.",
+        "theta_to_stake_daily": 0.00849565,
+        "iv_down_impact_usd": -455.3101,
+        "iv_down_impact_eur": -398.1724,
+        "maximum_leg_relative_spread": 0.09230769,
+        "minimum_open_interest": 590,
+        "minimum_volume": 95,
+        "total_premium_loss_possible": true,
+        "has_short_legs": false,
+        "assignment_risk": false,
+        "pin_risk": false,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO270319C00280000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 6.2,
+            "ask": 6.8,
+            "midpoint": 6.5,
+            "relative_spread": 0.09230769,
+            "open_interest": 590,
+            "volume": 95,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-75984ebc6c766510",
@@ -41209,7 +42348,174 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.77079143,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": false,
+        "contractual_max_gain_usd": 1118.6,
+        "contractual_max_gain_eur": 978.2247,
+        "best_modeled_gain_usd": 1118.6,
+        "best_modeled_gain_eur": 978.2247,
+        "expected_pnl_eur": 570.2791,
+        "contractual_gain_loss_ratio": 1.26911731,
+        "modeled_gain_loss_ratio": 1.26911731,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 1762.8,
+            "target_net_profit_usd": 881.4,
+            "attainable": true,
+            "spot_prices": [
+              247.628
+            ],
+            "message": "Cours TTWO à l’échéance : $247.63"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 2644.2,
+            "target_net_profit_usd": 1762.8,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 4407.0,
+            "target_net_profit_usd": 3525.6,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -294.464,
+            "catalyst_iv_down_eur": -257.5112,
+            "catalyst_iv_stable_usd": -246.4405,
+            "catalyst_iv_stable_eur": -215.5142,
+            "catalyst_iv_up_usd": -217.9578,
+            "catalyst_iv_up_eur": -190.6059,
+            "expiration_usd": -881.4,
+            "expiration_eur": -770.7914
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 304.9018,
+            "catalyst_iv_down_eur": 266.6391,
+            "catalyst_iv_stable_usd": 238.7066,
+            "catalyst_iv_stable_eur": 208.7509,
+            "catalyst_iv_up_usd": 188.4678,
+            "catalyst_iv_up_eur": 164.8166,
+            "expiration_usd": 1118.6,
+            "expiration_eur": 978.2247
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 757.5346,
+            "catalyst_iv_down_eur": 662.4702,
+            "catalyst_iv_stable_usd": 634.0914,
+            "catalyst_iv_stable_eur": 554.5181,
+            "catalyst_iv_up_usd": 534.213,
+            "catalyst_iv_up_eur": 467.1736,
+            "expiration_usd": 1118.6,
+            "expiration_eur": 978.2247
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 927.8362,
+            "catalyst_iv_down_eur": 811.4002,
+            "catalyst_iv_stable_usd": 813.3652,
+            "catalyst_iv_stable_eur": 711.2945,
+            "catalyst_iv_up_usd": 707.9433,
+            "catalyst_iv_up_eur": 619.1022,
+            "expiration_usd": 1118.6,
+            "expiration_eur": 978.2247
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 1045.1346,
+            "catalyst_iv_down_eur": 913.9787,
+            "catalyst_iv_stable_usd": 972.6657,
+            "catalyst_iv_stable_eur": 850.604,
+            "catalyst_iv_up_usd": 886.102,
+            "catalyst_iv_up_eur": 774.9033,
+            "expiration_usd": 1118.6,
+            "expiration_eur": 978.2247
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 1081.5867,
+            "catalyst_iv_down_eur": 945.8563,
+            "catalyst_iv_stable_usd": 1046.1846,
+            "catalyst_iv_stable_eur": 914.8969,
+            "catalyst_iv_up_usd": 988.4326,
+            "catalyst_iv_up_eur": 864.3923,
+            "expiration_usd": 1118.6,
+            "expiration_eur": 978.2247
+          }
+        ],
+        "strike_width": 20.0,
+        "capped_gain_from_spot": 250.0,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          238.814
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $238.81; à ou sous $230.00, la perte maximale est atteinte.",
+        "win_if": "Tu gagnes à l’échéance au-dessus de $238.81; le gain est plafonné à partir de $250.00.",
+        "theta_to_stake_daily": 0.000079,
+        "iv_down_impact_usd": -48.0235,
+        "iv_down_impact_eur": -41.9969,
+        "maximum_leg_relative_spread": 0.05714286,
+        "minimum_open_interest": 740,
+        "minimum_volume": 115,
+        "total_premium_loss_possible": true,
+        "has_short_legs": true,
+        "assignment_risk": true,
+        "pin_risk": true,
+        "iv_crush_exposure": false,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO270319C00230000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 21.6,
+            "ask": 22.4,
+            "midpoint": 22.0,
+            "relative_spread": 0.03636364,
+            "open_interest": 810,
+            "volume": 130,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          },
+          {
+            "symbol": "TTWO270319C00250000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 13.6,
+            "ask": 14.4,
+            "midpoint": 14.0,
+            "relative_spread": 0.05714286,
+            "open_interest": 740,
+            "volume": 115,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-7e3b54820e719300",
@@ -46287,7 +47593,176 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.99816353,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": false,
+        "contractual_max_gain_usd": 3858.6,
+        "contractual_max_gain_eur": 3374.3769,
+        "best_modeled_gain_usd": 3858.6,
+        "best_modeled_gain_eur": 3374.3769,
+        "expected_pnl_eur": 644.8805,
+        "contractual_gain_loss_ratio": 3.38058525,
+        "modeled_gain_loss_ratio": 3.38058525,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 2282.8,
+            "target_net_profit_usd": 1141.4,
+            "attainable": true,
+            "spot_prices": [
+              302.828
+            ],
+            "message": "Cours TTWO à l’échéance : $302.83"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 3424.2,
+            "target_net_profit_usd": 2282.8,
+            "attainable": true,
+            "spot_prices": [
+              314.242
+            ],
+            "message": "Cours TTWO à l’échéance : $314.24"
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 5707.0,
+            "target_net_profit_usd": 4565.6,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -597.7055,
+            "catalyst_iv_down_eur": -522.6983,
+            "catalyst_iv_stable_usd": -474.3785,
+            "catalyst_iv_stable_eur": -414.8479,
+            "catalyst_iv_up_usd": -406.0289,
+            "catalyst_iv_up_eur": -355.0756,
+            "expiration_usd": -1141.4,
+            "expiration_eur": -998.1635
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": -83.9749,
+            "catalyst_iv_down_eur": -73.4368,
+            "catalyst_iv_stable_usd": -27.5434,
+            "catalyst_iv_stable_eur": -24.087,
+            "catalyst_iv_up_usd": -19.9173,
+            "catalyst_iv_up_eur": -17.4178,
+            "expiration_usd": -1141.4,
+            "expiration_eur": -998.1635
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 541.2162,
+            "catalyst_iv_down_eur": 473.298,
+            "catalyst_iv_stable_usd": 477.4808,
+            "catalyst_iv_stable_eur": 417.5608,
+            "catalyst_iv_up_usd": 399.0492,
+            "catalyst_iv_up_eur": 348.9718,
+            "expiration_usd": -1141.4,
+            "expiration_eur": -998.1635
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 975.152,
+            "catalyst_iv_down_eur": 852.7783,
+            "catalyst_iv_stable_usd": 821.6292,
+            "catalyst_iv_stable_eur": 718.5214,
+            "catalyst_iv_up_usd": 681.7132,
+            "catalyst_iv_up_eur": 596.1637,
+            "expiration_usd": 858.6,
+            "expiration_eur": 750.8526
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 1593.4886,
+            "catalyst_iv_down_eur": 1393.5187,
+            "catalyst_iv_stable_usd": 1318.8601,
+            "catalyst_iv_stable_eur": 1153.3539,
+            "catalyst_iv_up_usd": 1093.3249,
+            "catalyst_iv_up_eur": 956.1215,
+            "expiration_usd": 3858.6,
+            "expiration_eur": 3374.3769
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 2128.5078,
+            "catalyst_iv_down_eur": 1861.3973,
+            "catalyst_iv_stable_usd": 1769.3078,
+            "catalyst_iv_stable_eur": 1547.274,
+            "catalyst_iv_up_usd": 1475.8947,
+            "catalyst_iv_up_eur": 1290.6819,
+            "expiration_usd": 3858.6,
+            "expiration_eur": 3374.3769
+          }
+        ],
+        "strike_width": 50.0,
+        "capped_gain_from_spot": 330.0,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          291.414
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $291.41; à ou sous $280.00, la perte maximale est atteinte.",
+        "win_if": "Tu gagnes à l’échéance au-dessus de $291.41; le gain est plafonné à partir de $330.00.",
+        "theta_to_stake_daily": 0.00039018,
+        "iv_down_impact_usd": -123.327,
+        "iv_down_impact_eur": -107.8505,
+        "maximum_leg_relative_spread": 0.1,
+        "minimum_open_interest": 520,
+        "minimum_volume": 70,
+        "total_premium_loss_possible": true,
+        "has_short_legs": true,
+        "assignment_risk": true,
+        "pin_risk": true,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO271217C00280000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 18.0,
+            "ask": 19.0,
+            "midpoint": 18.5,
+            "relative_spread": 0.05405405,
+            "open_interest": 670,
+            "volume": 85,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          },
+          {
+            "symbol": "TTWO271217C00330000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 7.6,
+            "ask": 8.4,
+            "midpoint": 8.0,
+            "relative_spread": 0.1,
+            "open_interest": 520,
+            "volume": 70,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-8a47746a274d9ccc",
@@ -51344,7 +52819,165 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.45098382,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 1,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": true,
+        "contractual_max_gain_usd": null,
+        "contractual_max_gain_eur": null,
+        "best_modeled_gain_usd": 7768.2183,
+        "best_modeled_gain_eur": 6793.3697,
+        "expected_pnl_eur": 2255.6118,
+        "contractual_gain_loss_ratio": null,
+        "modeled_gain_loss_ratio": 15.06344444,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 1031.4,
+            "target_net_profit_usd": 515.7,
+            "attainable": true,
+            "spot_prices": [
+              370.314
+            ],
+            "message": "Cours TTWO à l’échéance : $370.31"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 1547.1,
+            "target_net_profit_usd": 1031.4,
+            "attainable": true,
+            "spot_prices": [
+              375.471
+            ],
+            "message": "Cours TTWO à l’échéance : $375.47"
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 2578.5,
+            "target_net_profit_usd": 2062.8,
+            "attainable": true,
+            "spot_prices": [
+              385.785
+            ],
+            "message": "Cours TTWO à l’échéance : $385.79"
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -248.2646,
+            "catalyst_iv_down_eur": -217.1094,
+            "catalyst_iv_stable_usd": 106.7631,
+            "catalyst_iv_stable_eur": 93.3652,
+            "catalyst_iv_up_usd": 573.763,
+            "catalyst_iv_up_eur": 501.7604,
+            "expiration_usd": -515.7,
+            "expiration_eur": -450.9838
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 165.8805,
+            "catalyst_iv_down_eur": 145.0638,
+            "catalyst_iv_stable_usd": 738.4011,
+            "catalyst_iv_stable_eur": 645.7378,
+            "catalyst_iv_up_usd": 1395.5592,
+            "catalyst_iv_up_eur": 1220.4278,
+            "expiration_usd": -515.7,
+            "expiration_eur": -450.9838
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 890.752,
+            "catalyst_iv_down_eur": 778.9699,
+            "catalyst_iv_stable_usd": 1671.5768,
+            "catalyst_iv_stable_eur": 1461.8075,
+            "catalyst_iv_up_usd": 2495.6154,
+            "catalyst_iv_up_eur": 2182.4358,
+            "expiration_usd": -515.7,
+            "expiration_eur": -450.9838
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 1573.0358,
+            "catalyst_iv_down_eur": 1375.6325,
+            "catalyst_iv_stable_usd": 2467.689,
+            "catalyst_iv_stable_eur": 2158.014,
+            "catalyst_iv_up_usd": 3380.5451,
+            "catalyst_iv_up_eur": 2956.3141,
+            "expiration_usd": -515.7,
+            "expiration_eur": -450.9838
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 2905.1266,
+            "catalyst_iv_down_eur": 2540.5567,
+            "catalyst_iv_stable_usd": 3915.6903,
+            "catalyst_iv_stable_eur": 3424.3029,
+            "catalyst_iv_up_usd": 4921.7135,
+            "catalyst_iv_up_eur": 4304.0783,
+            "expiration_usd": -515.7,
+            "expiration_eur": -450.9838
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 4589.7379,
+            "catalyst_iv_down_eur": 4013.7629,
+            "catalyst_iv_stable_usd": 5645.7627,
+            "catalyst_iv_stable_eur": 4937.2651,
+            "catalyst_iv_up_usd": 6696.9375,
+            "catalyst_iv_up_eur": 5856.526,
+            "expiration_usd": -515.7,
+            "expiration_eur": -450.9838
+          }
+        ],
+        "strike_width": null,
+        "capped_gain_from_spot": null,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          365.157
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $365.16; à ou sous $360.00, la prime peut être perdue intégralement.",
+        "win_if": "Tu gagnes à l’échéance si TTWO dépasse $365.16; le gain contractuel reste théoriquement illimité.",
+        "theta_to_stake_daily": 0.00702526,
+        "iv_down_impact_usd": -1056.0248,
+        "iv_down_impact_eur": -923.5022,
+        "maximum_leg_relative_spread": 0.14583333,
+        "minimum_open_interest": 390,
+        "minimum_volume": 55,
+        "total_premium_loss_possible": true,
+        "has_short_legs": false,
+        "assignment_risk": false,
+        "pin_risk": false,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO271217C00360000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 4.45,
+            "ask": 5.15,
+            "midpoint": 4.8,
+            "relative_spread": 0.14583333,
+            "open_interest": 390,
+            "volume": 55,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-9b44dae9cbe0cbad",
@@ -56401,7 +58034,165 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.73519895,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 1,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": true,
+        "contractual_max_gain_usd": null,
+        "contractual_max_gain_eur": null,
+        "best_modeled_gain_usd": 8602.2012,
+        "best_modeled_gain_eur": 7522.6945,
+        "expected_pnl_eur": 2672.1749,
+        "contractual_gain_loss_ratio": null,
+        "modeled_gain_loss_ratio": 10.23218889,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 1681.4,
+            "target_net_profit_usd": 840.7,
+            "attainable": true,
+            "spot_prices": [
+              346.814
+            ],
+            "message": "Cours TTWO à l’échéance : $346.81"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 2522.1,
+            "target_net_profit_usd": 1681.4,
+            "attainable": true,
+            "spot_prices": [
+              355.221
+            ],
+            "message": "Cours TTWO à l’échéance : $355.22"
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 4203.5,
+            "target_net_profit_usd": 3362.8,
+            "attainable": true,
+            "spot_prices": [
+              372.035
+            ],
+            "message": "Cours TTWO à l’échéance : $372.04"
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -412.9643,
+            "catalyst_iv_down_eur": -361.1406,
+            "catalyst_iv_stable_usd": 18.576,
+            "catalyst_iv_stable_eur": 16.2449,
+            "catalyst_iv_up_usd": 539.0342,
+            "catalyst_iv_up_eur": 471.3898,
+            "expiration_usd": -840.7,
+            "expiration_eur": -735.199
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 189.9594,
+            "catalyst_iv_down_eur": 166.121,
+            "catalyst_iv_stable_usd": 836.1827,
+            "catalyst_iv_stable_eur": 731.2485,
+            "catalyst_iv_up_usd": 1532.7312,
+            "catalyst_iv_up_eur": 1340.3858,
+            "expiration_usd": -840.7,
+            "expiration_eur": -735.199
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 1180.8758,
+            "catalyst_iv_down_eur": 1032.6854,
+            "catalyst_iv_stable_usd": 1999.9956,
+            "catalyst_iv_stable_eur": 1749.0123,
+            "catalyst_iv_up_usd": 2831.5575,
+            "catalyst_iv_up_eur": 2476.2199,
+            "expiration_usd": -840.7,
+            "expiration_eur": -735.199
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 2070.85,
+            "catalyst_iv_down_eur": 1810.9751,
+            "catalyst_iv_stable_usd": 2965.5007,
+            "catalyst_iv_stable_eur": 2593.3543,
+            "catalyst_iv_up_usd": 3857.6777,
+            "catalyst_iv_up_eur": 3373.5703,
+            "expiration_usd": -840.7,
+            "expiration_eur": -735.199
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 3734.5085,
+            "catalyst_iv_down_eur": 3265.8579,
+            "catalyst_iv_stable_usd": 4676.6881,
+            "catalyst_iv_stable_eur": 4089.8015,
+            "catalyst_iv_up_usd": 5615.0429,
+            "catalyst_iv_up_eur": 4910.4004,
+            "expiration_usd": -840.7,
+            "expiration_eur": -735.199
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 5745.9693,
+            "catalyst_iv_down_eur": 5024.8967,
+            "catalyst_iv_stable_usd": 6666.0674,
+            "catalyst_iv_stable_eur": 5829.5299,
+            "catalyst_iv_up_usd": 7603.2521,
+            "catalyst_iv_up_eur": 6649.1055,
+            "expiration_usd": 2159.3,
+            "expiration_eur": 1888.3253
+          }
+        ],
+        "strike_width": null,
+        "capped_gain_from_spot": null,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          338.407
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $338.41; à ou sous $330.00, la prime peut être perdue intégralement.",
+        "win_if": "Tu gagnes à l’échéance si TTWO dépasse $338.41; le gain contractuel reste théoriquement illimité.",
+        "theta_to_stake_daily": 0.00472959,
+        "iv_down_impact_usd": -942.1796,
+        "iv_down_impact_eur": -823.9437,
+        "maximum_leg_relative_spread": 0.1,
+        "minimum_open_interest": 520,
+        "minimum_volume": 70,
+        "total_premium_loss_possible": true,
+        "has_short_legs": false,
+        "assignment_risk": false,
+        "pin_risk": false,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO271217C00330000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 7.6,
+            "ask": 8.4,
+            "midpoint": 8.0,
+            "relative_spread": 0.1,
+            "open_interest": 520,
+            "volume": 70,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-9b948e5a60845fae",
@@ -61479,7 +63270,174 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.78828159,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": false,
+        "contractual_max_gain_usd": 1098.6,
+        "contractual_max_gain_eur": 960.7346,
+        "best_modeled_gain_usd": 1098.6,
+        "best_modeled_gain_eur": 960.7346,
+        "expected_pnl_eur": 219.2467,
+        "contractual_gain_loss_ratio": 1.2187708,
+        "modeled_gain_loss_ratio": 1.2187708,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 1802.8,
+            "target_net_profit_usd": 901.4,
+            "attainable": true,
+            "spot_prices": [
+              258.028
+            ],
+            "message": "Cours TTWO à l’échéance : $258.03"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 2704.2,
+            "target_net_profit_usd": 1802.8,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 4507.0,
+            "target_net_profit_usd": 3605.6,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -341.0256,
+            "catalyst_iv_down_eur": -298.2296,
+            "catalyst_iv_stable_usd": -342.3184,
+            "catalyst_iv_stable_eur": -299.3602,
+            "catalyst_iv_up_usd": -356.9317,
+            "catalyst_iv_up_eur": -312.1396,
+            "expiration_usd": -901.4,
+            "expiration_eur": -788.2816
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": -8.4792,
+            "catalyst_iv_down_eur": -7.4152,
+            "catalyst_iv_stable_usd": -78.55,
+            "catalyst_iv_stable_eur": -68.6926,
+            "catalyst_iv_up_usd": -140.1841,
+            "catalyst_iv_up_eur": -122.5921,
+            "expiration_usd": 98.6,
+            "expiration_eur": 86.2265
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 299.3734,
+            "catalyst_iv_down_eur": 261.8044,
+            "catalyst_iv_stable_usd": 171.1414,
+            "catalyst_iv_stable_eur": 149.6645,
+            "catalyst_iv_up_usd": 67.5792,
+            "catalyst_iv_up_eur": 59.0986,
+            "expiration_usd": 1098.6,
+            "expiration_eur": 960.7346
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 470.9367,
+            "catalyst_iv_down_eur": 411.8379,
+            "catalyst_iv_stable_usd": 318.8682,
+            "catalyst_iv_stable_eur": 278.8528,
+            "catalyst_iv_up_usd": 194.6037,
+            "catalyst_iv_up_eur": 170.1825,
+            "expiration_usd": 1098.6,
+            "expiration_eur": 960.7346
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 669.6704,
+            "catalyst_iv_down_eur": 585.6322,
+            "catalyst_iv_stable_usd": 505.6322,
+            "catalyst_iv_stable_eur": 442.1795,
+            "catalyst_iv_up_usd": 363.1295,
+            "catalyst_iv_up_eur": 317.5597,
+            "expiration_usd": 1098.6,
+            "expiration_eur": 960.7346
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 804.8216,
+            "catalyst_iv_down_eur": 703.823,
+            "catalyst_iv_stable_usd": 650.6308,
+            "catalyst_iv_stable_eur": 568.9819,
+            "catalyst_iv_up_usd": 503.8341,
+            "catalyst_iv_up_eur": 440.607,
+            "expiration_usd": 1098.6,
+            "expiration_eur": 960.7346
+          }
+        ],
+        "strike_width": 20.0,
+        "capped_gain_from_spot": 260.0,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          249.014
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $249.01; à ou sous $240.00, la perte maximale est atteinte.",
+        "win_if": "Tu gagnes à l’échéance au-dessus de $249.01; le gain est plafonné à partir de $260.00.",
+        "theta_to_stake_daily": 0.00007943,
+        "iv_down_impact_usd": 1.2928,
+        "iv_down_impact_eur": 1.1306,
+        "maximum_leg_relative_spread": 0.04,
+        "minimum_open_interest": 590,
+        "minimum_volume": 78,
+        "total_premium_loss_possible": true,
+        "has_short_legs": true,
+        "assignment_risk": true,
+        "pin_risk": true,
+        "iv_crush_exposure": false,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO271217C00240000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 32.5,
+            "ask": 33.5,
+            "midpoint": 33.0,
+            "relative_spread": 0.03030303,
+            "open_interest": 590,
+            "volume": 78,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          },
+          {
+            "symbol": "TTWO271217C00260000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 24.5,
+            "ask": 25.5,
+            "midpoint": 25.0,
+            "relative_spread": 0.04,
+            "open_interest": 640,
+            "volume": 82,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-a31726b9f88bb946",
@@ -66538,7 +68496,165 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.99755138,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 1,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": true,
+        "contractual_max_gain_usd": null,
+        "contractual_max_gain_eur": null,
+        "best_modeled_gain_usd": 10327.0017,
+        "best_modeled_gain_eur": 9031.0465,
+        "expected_pnl_eur": 3483.8211,
+        "contractual_gain_loss_ratio": null,
+        "modeled_gain_loss_ratio": 9.05321443,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 2281.4,
+            "target_net_profit_usd": 1140.7,
+            "attainable": true,
+            "spot_prices": [
+              282.814
+            ],
+            "message": "Cours TTWO à l’échéance : $282.81"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 3422.1,
+            "target_net_profit_usd": 2281.4,
+            "attainable": true,
+            "spot_prices": [
+              294.221
+            ],
+            "message": "Cours TTWO à l’échéance : $294.22"
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 5703.5,
+            "target_net_profit_usd": 4562.8,
+            "attainable": true,
+            "spot_prices": [
+              317.035
+            ],
+            "message": "Cours TTWO à l’échéance : $317.04"
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -797.6349,
+            "catalyst_iv_down_eur": -697.5382,
+            "catalyst_iv_stable_usd": -534.9134,
+            "catalyst_iv_stable_eur": -467.7861,
+            "catalyst_iv_up_usd": -238.7429,
+            "catalyst_iv_up_eur": -208.7826,
+            "expiration_usd": -1140.7,
+            "expiration_eur": -997.5514
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 171.6841,
+            "catalyst_iv_down_eur": 150.1391,
+            "catalyst_iv_stable_usd": 571.5961,
+            "catalyst_iv_stable_eur": 499.8654,
+            "catalyst_iv_up_usd": 972.1342,
+            "catalyst_iv_up_eur": 850.1392,
+            "expiration_usd": -1140.7,
+            "expiration_eur": -997.5514
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 1994.3884,
+            "catalyst_iv_down_eur": 1744.1088,
+            "catalyst_iv_stable_usd": 2374.5581,
+            "catalyst_iv_stable_eur": 2076.5702,
+            "catalyst_iv_up_usd": 2769.1981,
+            "catalyst_iv_up_eur": 2421.6862,
+            "expiration_usd": 859.3,
+            "expiration_eur": 751.4648
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 3591.6639,
+            "catalyst_iv_down_eur": 3140.9391,
+            "catalyst_iv_stable_usd": 3895.2514,
+            "catalyst_iv_stable_eur": 3406.4289,
+            "catalyst_iv_up_usd": 4238.7471,
+            "catalyst_iv_up_eur": 3706.8186,
+            "expiration_usd": 2859.3,
+            "expiration_eur": 2500.481
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 6321.1456,
+            "catalyst_iv_down_eur": 5527.893,
+            "catalyst_iv_stable_usd": 6496.664,
+            "catalyst_iv_stable_eur": 5681.3852,
+            "catalyst_iv_up_usd": 6738.2583,
+            "catalyst_iv_up_eur": 5892.6614,
+            "expiration_usd": 5859.3,
+            "expiration_eur": 5124.0052
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 9236.9493,
+            "catalyst_iv_down_eur": 8077.7869,
+            "catalyst_iv_stable_usd": 9321.3775,
+            "catalyst_iv_stable_eur": 8151.62,
+            "catalyst_iv_up_usd": 9470.743,
+            "catalyst_iv_up_eur": 8282.2413,
+            "expiration_usd": 8859.3,
+            "expiration_eur": 7747.5295
+          }
+        ],
+        "strike_width": null,
+        "capped_gain_from_spot": null,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          271.407
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $271.41; à ou sous $260.00, la prime peut être perdue intégralement.",
+        "win_if": "Tu gagnes à l’échéance si TTWO dépasse $271.41; le gain contractuel reste théoriquement illimité.",
+        "theta_to_stake_daily": 0.00545507,
+        "iv_down_impact_usd": -399.912,
+        "iv_down_impact_eur": -349.7263,
+        "maximum_leg_relative_spread": 0.07272727,
+        "minimum_open_interest": 680,
+        "minimum_volume": 110,
+        "total_premium_loss_possible": true,
+        "has_short_legs": false,
+        "assignment_risk": false,
+        "pin_risk": false,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO270319C00260000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 10.6,
+            "ask": 11.4,
+            "midpoint": 11.0,
+            "relative_spread": 0.07272727,
+            "open_interest": 680,
+            "volume": 110,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-b9aa8a0e0964eb88",
@@ -71617,7 +73733,172 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.8757324,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": false,
+        "contractual_max_gain_usd": 998.6,
+        "contractual_max_gain_eur": 873.2838,
+        "best_modeled_gain_usd": 998.6,
+        "best_modeled_gain_eur": 873.2838,
+        "expected_pnl_eur": 342.9468,
+        "contractual_gain_loss_ratio": 0.99720391,
+        "modeled_gain_loss_ratio": 0.99720391,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 2002.8,
+            "target_net_profit_usd": 1001.4,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 3004.2,
+            "target_net_profit_usd": 2002.8,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 5007.0,
+            "target_net_profit_usd": 4005.6,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -149.72,
+            "catalyst_iv_down_eur": -130.9314,
+            "catalyst_iv_stable_usd": -174.991,
+            "catalyst_iv_stable_eur": -153.0311,
+            "catalyst_iv_up_usd": -200.2779,
+            "catalyst_iv_up_eur": -175.1446,
+            "expiration_usd": -1001.4,
+            "expiration_eur": -875.7324
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 201.1508,
+            "catalyst_iv_down_eur": 175.908,
+            "catalyst_iv_stable_usd": 108.2181,
+            "catalyst_iv_stable_eur": 94.6376,
+            "catalyst_iv_up_usd": 36.0666,
+            "catalyst_iv_up_eur": 31.5406,
+            "expiration_usd": 998.6,
+            "expiration_eur": 873.2838
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 473.6239,
+            "catalyst_iv_down_eur": 414.188,
+            "catalyst_iv_stable_usd": 343.7236,
+            "catalyst_iv_stable_eur": 300.5891,
+            "catalyst_iv_up_usd": 240.1373,
+            "catalyst_iv_up_eur": 210.002,
+            "expiration_usd": 998.6,
+            "expiration_eur": 873.2838
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 605.9383,
+            "catalyst_iv_down_eur": 529.898,
+            "catalyst_iv_stable_usd": 469.7888,
+            "catalyst_iv_stable_eur": 410.8341,
+            "catalyst_iv_up_usd": 355.3294,
+            "catalyst_iv_up_eur": 310.7384,
+            "expiration_usd": 998.6,
+            "expiration_eur": 873.2838
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 741.4317,
+            "catalyst_iv_down_eur": 648.388,
+            "catalyst_iv_stable_usd": 615.4434,
+            "catalyst_iv_stable_eur": 538.2102,
+            "catalyst_iv_up_usd": 497.5696,
+            "catalyst_iv_up_eur": 435.1286,
+            "expiration_usd": 998.6,
+            "expiration_eur": 873.2838
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 821.4121,
+            "catalyst_iv_down_eur": 718.3315,
+            "catalyst_iv_stable_usd": 717.5662,
+            "catalyst_iv_stable_eur": 627.5175,
+            "catalyst_iv_up_usd": 607.1428,
+            "catalyst_iv_up_eur": 530.9513,
+            "expiration_usd": 998.6,
+            "expiration_eur": 873.2838
+          }
+        ],
+        "strike_width": 20.0,
+        "capped_gain_from_spot": 240.0,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          230.014
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $230.01; à ou sous $220.00, la perte maximale est atteinte.",
+        "win_if": "Tu gagnes à l’échéance au-dessus de $230.01; le gain est plafonné à partir de $240.00.",
+        "theta_to_stake_daily": 0.00013768,
+        "iv_down_impact_usd": 25.271,
+        "iv_down_impact_eur": 22.0997,
+        "maximum_leg_relative_spread": 0.03030303,
+        "minimum_open_interest": 520,
+        "minimum_volume": 70,
+        "total_premium_loss_possible": true,
+        "has_short_legs": true,
+        "assignment_risk": true,
+        "pin_risk": true,
+        "iv_crush_exposure": false,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO271217C00220000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 41.5,
+            "ask": 42.5,
+            "midpoint": 42.0,
+            "relative_spread": 0.02380952,
+            "open_interest": 520,
+            "volume": 70,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          },
+          {
+            "symbol": "TTWO271217C00240000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 32.5,
+            "ask": 33.5,
+            "midpoint": 33.0,
+            "relative_spread": 0.03030303,
+            "open_interest": 590,
+            "volume": 78,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-c15c8aa5445d3fe8",
@@ -76696,7 +78977,176 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.71832094,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": false,
+        "contractual_max_gain_usd": 2178.6,
+        "contractual_max_gain_eur": 1905.2033,
+        "best_modeled_gain_usd": 2178.6,
+        "best_modeled_gain_eur": 1905.2033,
+        "expected_pnl_eur": 912.2162,
+        "contractual_gain_loss_ratio": 2.65230095,
+        "modeled_gain_loss_ratio": 2.65230095,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 1642.8,
+            "target_net_profit_usd": 821.4,
+            "attainable": true,
+            "spot_prices": [
+              266.428
+            ],
+            "message": "Cours TTWO à l’échéance : $266.43"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 2464.2,
+            "target_net_profit_usd": 1642.8,
+            "attainable": true,
+            "spot_prices": [
+              274.642
+            ],
+            "message": "Cours TTWO à l’échéance : $274.64"
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 4107.0,
+            "target_net_profit_usd": 3285.6,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -456.0236,
+            "catalyst_iv_down_eur": -398.7964,
+            "catalyst_iv_stable_usd": -342.3518,
+            "catalyst_iv_stable_eur": -299.3895,
+            "catalyst_iv_up_usd": -261.5965,
+            "catalyst_iv_up_eur": -228.7683,
+            "expiration_usd": -821.4,
+            "expiration_eur": -718.3209
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 214.0683,
+            "catalyst_iv_down_eur": 187.2045,
+            "catalyst_iv_stable_usd": 237.07,
+            "catalyst_iv_stable_eur": 207.3196,
+            "catalyst_iv_up_usd": 241.7809,
+            "catalyst_iv_up_eur": 211.4393,
+            "expiration_usd": -821.4,
+            "expiration_eur": -718.3209
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 1004.635,
+            "catalyst_iv_down_eur": 878.5615,
+            "catalyst_iv_stable_usd": 876.8017,
+            "catalyst_iv_stable_eur": 766.7702,
+            "catalyst_iv_up_usd": 776.9505,
+            "catalyst_iv_up_eur": 679.4495,
+            "expiration_usd": 2178.6,
+            "expiration_eur": 1905.2033
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 1434.3669,
+            "catalyst_iv_down_eur": 1254.3654,
+            "catalyst_iv_stable_usd": 1247.1006,
+            "catalyst_iv_stable_eur": 1090.5995,
+            "catalyst_iv_up_usd": 1097.8502,
+            "catalyst_iv_up_eur": 960.0789,
+            "expiration_usd": 2178.6,
+            "expiration_eur": 1905.2033
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 1845.9439,
+            "catalyst_iv_down_eur": 1614.2929,
+            "catalyst_iv_stable_usd": 1657.6295,
+            "catalyst_iv_stable_eur": 1449.6104,
+            "catalyst_iv_up_usd": 1484.3804,
+            "catalyst_iv_up_eur": 1298.1027,
+            "expiration_usd": 2178.6,
+            "expiration_eur": 1905.2033
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 2036.1106,
+            "catalyst_iv_down_eur": 1780.5952,
+            "catalyst_iv_stable_usd": 1903.2503,
+            "catalyst_iv_stable_eur": 1664.4078,
+            "catalyst_iv_up_usd": 1751.8256,
+            "catalyst_iv_up_eur": 1531.9856,
+            "expiration_usd": 2178.6,
+            "expiration_eur": 1905.2033
+          }
+        ],
+        "strike_width": 30.0,
+        "capped_gain_from_spot": 280.0,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          258.214
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $258.21; à ou sous $250.00, la perte maximale est atteinte.",
+        "win_if": "Tu gagnes à l’échéance au-dessus de $258.21; le gain est plafonné à partir de $280.00.",
+        "theta_to_stake_daily": 0.00077979,
+        "iv_down_impact_usd": -113.6718,
+        "iv_down_impact_eur": -99.4069,
+        "maximum_leg_relative_spread": 0.09230769,
+        "minimum_open_interest": 590,
+        "minimum_volume": 95,
+        "total_premium_loss_possible": true,
+        "has_short_legs": true,
+        "assignment_risk": true,
+        "pin_risk": true,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO270319C00250000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 13.6,
+            "ask": 14.4,
+            "midpoint": 14.0,
+            "relative_spread": 0.05714286,
+            "open_interest": 740,
+            "volume": 115,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          },
+          {
+            "symbol": "TTWO270319C00280000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 6.2,
+            "ask": 6.8,
+            "midpoint": 6.5,
+            "relative_spread": 0.09230769,
+            "open_interest": 590,
+            "volume": 95,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-d35a91167de8620d",
@@ -81774,7 +84224,174 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.85824224,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": false,
+        "contractual_max_gain_usd": 1018.6,
+        "contractual_max_gain_eur": 890.7739,
+        "best_modeled_gain_usd": 1018.6,
+        "best_modeled_gain_eur": 890.7739,
+        "expected_pnl_eur": 562.2705,
+        "contractual_gain_loss_ratio": 1.03790503,
+        "modeled_gain_loss_ratio": 1.03790503,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 1962.8,
+            "target_net_profit_usd": 981.4,
+            "attainable": true,
+            "spot_prices": [
+              239.628
+            ],
+            "message": "Cours TTWO à l’échéance : $239.63"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 2944.2,
+            "target_net_profit_usd": 1962.8,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 4907.0,
+            "target_net_profit_usd": 3925.6,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -203.995,
+            "catalyst_iv_down_eur": -178.3953,
+            "catalyst_iv_stable_usd": -190.8364,
+            "catalyst_iv_stable_eur": -166.8879,
+            "catalyst_iv_up_usd": -186.9419,
+            "catalyst_iv_up_eur": -163.4822,
+            "expiration_usd": -981.4,
+            "expiration_eur": -858.2422
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 395.9742,
+            "catalyst_iv_down_eur": 346.2826,
+            "catalyst_iv_stable_usd": 298.1869,
+            "catalyst_iv_stable_eur": 260.7669,
+            "catalyst_iv_up_usd": 224.3515,
+            "catalyst_iv_up_eur": 196.1972,
+            "expiration_usd": 1018.6,
+            "expiration_eur": 890.7739
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 772.0312,
+            "catalyst_iv_down_eur": 675.1475,
+            "catalyst_iv_stable_usd": 650.9376,
+            "catalyst_iv_stable_eur": 569.2502,
+            "catalyst_iv_up_usd": 545.4494,
+            "catalyst_iv_up_eur": 477.0,
+            "expiration_usd": 1018.6,
+            "expiration_eur": 890.7739
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 893.941,
+            "catalyst_iv_down_eur": 781.7586,
+            "catalyst_iv_stable_usd": 796.2996,
+            "catalyst_iv_stable_eur": 696.3704,
+            "catalyst_iv_up_usd": 696.4247,
+            "catalyst_iv_up_eur": 609.029,
+            "expiration_usd": 1018.6,
+            "expiration_eur": 890.7739
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 968.1377,
+            "catalyst_iv_down_eur": 846.6442,
+            "catalyst_iv_stable_usd": 915.3241,
+            "catalyst_iv_stable_eur": 800.4584,
+            "catalyst_iv_up_usd": 842.5386,
+            "catalyst_iv_up_eur": 736.8068,
+            "expiration_usd": 1018.6,
+            "expiration_eur": 890.7739
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 988.0424,
+            "catalyst_iv_down_eur": 864.0511,
+            "catalyst_iv_stable_usd": 965.331,
+            "catalyst_iv_stable_eur": 844.1898,
+            "catalyst_iv_up_usd": 921.1351,
+            "catalyst_iv_up_eur": 805.5401,
+            "expiration_usd": 1018.6,
+            "expiration_eur": 890.7739
+          }
+        ],
+        "strike_width": 20.0,
+        "capped_gain_from_spot": 240.0,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          229.814
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $229.81; à ou sous $220.00, la perte maximale est atteinte.",
+        "win_if": "Tu gagnes à l’échéance au-dessus de $229.81; le gain est plafonné à partir de $240.00.",
+        "theta_to_stake_daily": 0.00018769,
+        "iv_down_impact_usd": -13.1586,
+        "iv_down_impact_eur": -11.5073,
+        "maximum_leg_relative_spread": 0.04444444,
+        "minimum_open_interest": 720,
+        "minimum_volume": 120,
+        "total_premium_loss_possible": true,
+        "has_short_legs": true,
+        "assignment_risk": true,
+        "pin_risk": true,
+        "iv_crush_exposure": false,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO270319C00220000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 26.6,
+            "ask": 27.4,
+            "midpoint": 27.0,
+            "relative_spread": 0.02962963,
+            "open_interest": 720,
+            "volume": 120,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          },
+          {
+            "symbol": "TTWO270319C00240000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 17.6,
+            "ask": 18.4,
+            "midpoint": 18.0,
+            "relative_spread": 0.04444444,
+            "open_interest": 790,
+            "volume": 125,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-f85278bd9a6e4d9d",
@@ -86852,7 +89469,174 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.832007,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": false,
+        "contractual_max_gain_usd": 1048.6,
+        "contractual_max_gain_eur": 917.0092,
+        "best_modeled_gain_usd": 1048.6,
+        "best_modeled_gain_eur": 917.0092,
+        "expected_pnl_eur": 321.4655,
+        "contractual_gain_loss_ratio": 1.10216523,
+        "modeled_gain_loss_ratio": 1.10216523,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 1902.8,
+            "target_net_profit_usd": 951.4,
+            "attainable": true,
+            "spot_prices": [
+              249.028
+            ],
+            "message": "Cours TTWO à l’échéance : $249.03"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 2854.2,
+            "target_net_profit_usd": 1902.8,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 4757.0,
+            "target_net_profit_usd": 3805.6,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -215.3386,
+            "catalyst_iv_down_eur": -188.3153,
+            "catalyst_iv_stable_usd": -217.2766,
+            "catalyst_iv_stable_eur": -190.0102,
+            "catalyst_iv_up_usd": -226.8172,
+            "catalyst_iv_up_eur": -198.3535,
+            "expiration_usd": -951.4,
+            "expiration_eur": -832.007
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 136.4252,
+            "catalyst_iv_down_eur": 119.305,
+            "catalyst_iv_stable_usd": 64.2691,
+            "catalyst_iv_stable_eur": 56.2038,
+            "catalyst_iv_up_usd": 7.0448,
+            "catalyst_iv_up_eur": 6.1607,
+            "expiration_usd": 1048.6,
+            "expiration_eur": 917.0092
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 428.4687,
+            "catalyst_iv_down_eur": 374.6993,
+            "catalyst_iv_stable_usd": 308.6985,
+            "catalyst_iv_stable_eur": 269.9594,
+            "catalyst_iv_up_usd": 215.1309,
+            "catalyst_iv_up_eur": 188.1337,
+            "expiration_usd": 1048.6,
+            "expiration_eur": 917.0092
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 577.7826,
+            "catalyst_iv_down_eur": 505.2755,
+            "catalyst_iv_stable_usd": 443.9241,
+            "catalyst_iv_stable_eur": 388.2152,
+            "catalyst_iv_up_usd": 335.3131,
+            "catalyst_iv_up_eur": 293.234,
+            "expiration_usd": 1048.6,
+            "expiration_eur": 917.0092
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 737.7232,
+            "catalyst_iv_down_eur": 645.1449,
+            "catalyst_iv_stable_usd": 604.7917,
+            "catalyst_iv_stable_eur": 528.8952,
+            "catalyst_iv_up_usd": 486.7745,
+            "catalyst_iv_up_eur": 425.6883,
+            "expiration_usd": 1048.6,
+            "expiration_eur": 917.0092
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 837.0716,
+            "catalyst_iv_down_eur": 732.0259,
+            "catalyst_iv_stable_usd": 721.3349,
+            "catalyst_iv_stable_eur": 630.8132,
+            "catalyst_iv_up_usd": 606.1363,
+            "catalyst_iv_up_eur": 530.0711,
+            "expiration_usd": 1048.6,
+            "expiration_eur": 917.0092
+          }
+        ],
+        "strike_width": 20.0,
+        "capped_gain_from_spot": 250.0,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          239.514
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $239.51; à ou sous $230.00, la perte maximale est atteinte.",
+        "win_if": "Tu gagnes à l’échéance au-dessus de $239.51; le gain est plafonné à partir de $250.00.",
+        "theta_to_stake_daily": 0.00005174,
+        "iv_down_impact_usd": 1.938,
+        "iv_down_impact_eur": 1.6948,
+        "maximum_leg_relative_spread": 0.03448276,
+        "minimum_open_interest": 560,
+        "minimum_volume": 75,
+        "total_premium_loss_possible": true,
+        "has_short_legs": true,
+        "assignment_risk": true,
+        "pin_risk": true,
+        "iv_crush_exposure": false,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO271217C00230000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 37.0,
+            "ask": 38.0,
+            "midpoint": 37.5,
+            "relative_spread": 0.02666667,
+            "open_interest": 560,
+            "volume": 75,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          },
+          {
+            "symbol": "TTWO271217C00250000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 28.5,
+            "ask": 29.5,
+            "midpoint": 29.0,
+            "relative_spread": 0.03448276,
+            "open_interest": 620,
+            "volume": 80,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     },
     {
       "candidate_id": "cand-f87faabae57cffe4",
@@ -91930,7 +94714,176 @@
         "Live maximum debit exceeds the displayed preview",
         "Contract deliverable, multiplier, or quote provenance differs in IBKR"
       ],
-      "historical_confidence": 0.35
+      "historical_confidence": 0.35,
+      "decision_metrics": {
+        "loss_budget_fraction": 0.96755575,
+        "stake_loss_fraction": 1.0,
+        "total_option_contracts": 2,
+        "strategy_units": 1,
+        "contractual_gain_unbounded": false,
+        "contractual_max_gain_usd": 3893.6,
+        "contractual_max_gain_eur": 3404.9847,
+        "best_modeled_gain_usd": 3893.6,
+        "best_modeled_gain_eur": 3404.9847,
+        "expected_pnl_eur": 1537.6704,
+        "contractual_gain_loss_ratio": 3.51916124,
+        "modeled_gain_loss_ratio": 3.51916124,
+        "terminal_value_thresholds": [
+          {
+            "multiple": 2,
+            "target_position_value_usd": 2212.8,
+            "target_net_profit_usd": 1106.4,
+            "attainable": true,
+            "spot_prices": [
+              272.128
+            ],
+            "message": "Cours TTWO à l’échéance : $272.13"
+          },
+          {
+            "multiple": 3,
+            "target_position_value_usd": 3319.2,
+            "target_net_profit_usd": 2212.8,
+            "attainable": true,
+            "spot_prices": [
+              283.192
+            ],
+            "message": "Cours TTWO à l’échéance : $283.19"
+          },
+          {
+            "multiple": 5,
+            "target_position_value_usd": 5532.0,
+            "target_net_profit_usd": 4425.6,
+            "attainable": false,
+            "spot_prices": [],
+            "message": "Impossible — gain plafonné par la structure."
+          }
+        ],
+        "target_pnl_rows": [
+          {
+            "spot": 220.0,
+            "catalyst_iv_down_usd": -645.9082,
+            "catalyst_iv_down_eur": -564.852,
+            "catalyst_iv_stable_usd": -459.0341,
+            "catalyst_iv_stable_eur": -401.429,
+            "catalyst_iv_up_usd": -312.185,
+            "catalyst_iv_up_eur": -273.0083,
+            "expiration_usd": -1106.4,
+            "expiration_eur": -967.5557
+          },
+          {
+            "spot": 250.0,
+            "catalyst_iv_down_usd": 295.6924,
+            "catalyst_iv_down_eur": 258.5854,
+            "catalyst_iv_stable_usd": 397.2544,
+            "catalyst_iv_stable_eur": 347.4022,
+            "catalyst_iv_up_usd": 455.3094,
+            "catalyst_iv_up_eur": 398.1718,
+            "expiration_usd": -1106.4,
+            "expiration_eur": -967.5557
+          },
+          {
+            "spot": 280.0,
+            "catalyst_iv_down_usd": 1540.8984,
+            "catalyst_iv_down_eur": 1347.5281,
+            "catalyst_iv_stable_usd": 1417.0574,
+            "catalyst_iv_stable_eur": 1239.2281,
+            "catalyst_iv_up_usd": 1314.6612,
+            "catalyst_iv_up_eur": 1149.6819,
+            "expiration_usd": 1893.6,
+            "expiration_eur": 1655.9685
+          },
+          {
+            "spot": 300.0,
+            "catalyst_iv_down_usd": 2295.1857,
+            "catalyst_iv_down_eur": 2007.1584,
+            "catalyst_iv_stable_usd": 2048.1406,
+            "catalyst_iv_stable_eur": 1791.1156,
+            "catalyst_iv_up_usd": 1853.1265,
+            "catalyst_iv_up_eur": 1620.5741,
+            "expiration_usd": 3893.6,
+            "expiration_eur": 3404.9847
+          },
+          {
+            "spot": 330.0,
+            "catalyst_iv_down_usd": 3103.4297,
+            "catalyst_iv_down_eur": 2713.9743,
+            "catalyst_iv_stable_usd": 2796.2096,
+            "catalyst_iv_stable_eur": 2445.3079,
+            "catalyst_iv_up_usd": 2530.377,
+            "catalyst_iv_up_eur": 2212.8351,
+            "expiration_usd": 3893.6,
+            "expiration_eur": 3404.9847
+          },
+          {
+            "spot": 360.0,
+            "catalyst_iv_down_usd": 3534.7026,
+            "catalyst_iv_down_eur": 3091.126,
+            "catalyst_iv_stable_usd": 3282.3988,
+            "catalyst_iv_stable_eur": 2870.4843,
+            "catalyst_iv_up_usd": 3024.1299,
+            "catalyst_iv_up_eur": 2644.626,
+            "expiration_usd": 3893.6,
+            "expiration_eur": 3404.9847
+          }
+        ],
+        "strike_width": 50.0,
+        "capped_gain_from_spot": 300.0,
+        "butterfly_center_strike": null,
+        "profit_zone": [
+          261.064
+        ],
+        "lose_if": "Tu perds tout ou partie de la mise si TTWO termine sous $261.06; à ou sous $250.00, la perte maximale est atteinte.",
+        "win_if": "Tu gagnes à l’échéance au-dessus de $261.06; le gain est plafonné à partir de $300.00.",
+        "theta_to_stake_daily": 0.00129996,
+        "iv_down_impact_usd": -186.8741,
+        "iv_down_impact_eur": -163.4229,
+        "maximum_leg_relative_spread": 0.13888889,
+        "minimum_open_interest": 510,
+        "minimum_volume": 85,
+        "total_premium_loss_possible": true,
+        "has_short_legs": true,
+        "assignment_risk": true,
+        "pin_risk": true,
+        "iv_crush_exposure": true,
+        "catalyst_delay_exposure": true,
+        "quote_age_seconds": 93666,
+        "quote_timestamp": "2026-07-24T20:00:00Z",
+        "source_ids": [
+          "synthetic-ttwo-chain-v10"
+        ],
+        "data_qualities": [
+          "modeled"
+        ],
+        "leg_execution": [
+          {
+            "symbol": "TTWO270319C00250000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 13.6,
+            "ask": 14.4,
+            "midpoint": 14.0,
+            "relative_spread": 0.05714286,
+            "open_interest": 740,
+            "volume": 115,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          },
+          {
+            "symbol": "TTWO270319C00300000",
+            "quote_timestamp": "2026-07-24T20:00:00Z",
+            "quote_age_seconds": 93666,
+            "bid": 3.35,
+            "ask": 3.85,
+            "midpoint": 3.6,
+            "relative_spread": 0.13888889,
+            "open_interest": 510,
+            "volume": 85,
+            "price_quality": "modeled",
+            "source_id": "synthetic-ttwo-chain-v10"
+          }
+        ],
+        "research_estimate_warning": "Estimation de recherche — ce prix n’est pas une cotation combo exécutable."
+      }
     }
   ],
   "rankings": [

@@ -1,4 +1,4 @@
-# V10 Bullish Thesis Scanner
+# V10.1 Bullish Thesis Scanner
 
 ## Purpose
 
@@ -56,7 +56,15 @@ CLI
  └─ aggressive
           |
           v
- JSON + Markdown + standalone HTML + IBKR preview-only tickets
+ V10.1 decision metrics computed in Python
+ ├─ contractual vs modeled gain kept separate
+ ├─ exact terminal ×2 / ×3 / ×5 value thresholds
+ ├─ target P&L table in USD and EUR
+ ├─ measurable execution and structure risks
+ └─ no user probability means expected values remain null
+          |
+          v
+ JSON + Markdown + accessible standalone HTML + IBKR preview-only tickets
 ```
 
 ## Enumeration boundary
@@ -101,9 +109,36 @@ V9 evidence is deliberately represented as `historical_confidence: 0.35`.
 That penalty participates in each score but does not become an automatic
 thesis-mode blocker.
 
+`request.top` is applied after each independent deterministic sort. The report
+therefore contains at most N scores per profile and the HTML renders those
+arrays directly; it does not hard-code three cards. A candidate may occur in
+more than one profile without duplicating candidate calculations.
+
+## V10.1 dashboard contract
+
+The primary navigation is three accessible accordion columns. Opening one row
+closes the other open row in that profile, selects the candidate, and refreshes
+the existing legs, ticket, costs, Greeks, liquidity, payoff, date curves,
+heatmap, IV, P&L, and risk views. Native buttons expose `aria-expanded`,
+`aria-controls`, labelled regions, keyboard activation, and visible focus.
+
+Every accordion panel uses `StructureDecisionMetrics`, calculated before report
+serialization. This keeps JavaScript presentation-only. Contractual gain and
+best modeled gain are distinct. Terminal ×2/×3/×5 thresholds solve for gross
+position value using the configured initial total cost:
+
+```text
+×2 value = 2 × initial total cost
+net profit at ×2 = 1 × initial total cost
+```
+
+No unconfigured exit fee is added. A capped structure reports an unattainable
+multiple explicitly. Butterflies can return two terminal spot solutions around
+their center strike.
+
 ## Security boundary
 
-The V10 package imports no broker trading client. Preview objects can only be
+The V10.1 package imports no broker trading client. Preview objects can only be
 `transmit=false`, `what_if=true`, and `order_capability=forbidden`. The HTML is
 self-contained, performs no network request, uses text-only DOM insertion for
 report data, and exposes no order button.

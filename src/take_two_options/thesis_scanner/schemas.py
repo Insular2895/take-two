@@ -1,4 +1,4 @@
-"""Strict contracts for the V10 Bullish Thesis Scanner."""
+"""Strict contracts for the V10.1 Bullish Thesis Scanner."""
 
 from __future__ import annotations
 
@@ -233,6 +233,82 @@ class ThesisScenarioPoint(StrictModel):
     residual_usd: float
 
 
+class TerminalValueThreshold(StrictModel):
+    multiple: Literal[2, 3, 5]
+    target_position_value_usd: float = Field(gt=0)
+    target_net_profit_usd: float = Field(gt=0)
+    attainable: bool
+    spot_prices: list[float] = Field(default_factory=list)
+    message: str
+
+
+class TargetPnlRow(StrictModel):
+    spot: float = Field(gt=0)
+    catalyst_iv_down_usd: float
+    catalyst_iv_down_eur: float
+    catalyst_iv_stable_usd: float
+    catalyst_iv_stable_eur: float
+    catalyst_iv_up_usd: float
+    catalyst_iv_up_eur: float
+    expiration_usd: float
+    expiration_eur: float
+
+
+class LegExecutionMetric(StrictModel):
+    symbol: str
+    quote_timestamp: datetime
+    quote_age_seconds: int = Field(ge=0)
+    bid: float = Field(ge=0)
+    ask: float = Field(ge=0)
+    midpoint: float = Field(ge=0)
+    relative_spread: float = Field(ge=0)
+    open_interest: int | None = Field(default=None, ge=0)
+    volume: int | None = Field(default=None, ge=0)
+    price_quality: str
+    source_id: str
+
+
+class StructureDecisionMetrics(StrictModel):
+    loss_budget_fraction: float = Field(ge=0)
+    stake_loss_fraction: float = Field(ge=0)
+    total_option_contracts: int = Field(gt=0)
+    strategy_units: int = Field(gt=0)
+    contractual_gain_unbounded: bool
+    contractual_max_gain_usd: float | None = Field(default=None, ge=0)
+    contractual_max_gain_eur: float | None = Field(default=None, ge=0)
+    best_modeled_gain_usd: float = Field(ge=0)
+    best_modeled_gain_eur: float = Field(ge=0)
+    expected_pnl_eur: float | None = None
+    contractual_gain_loss_ratio: float | None = Field(default=None, ge=0)
+    modeled_gain_loss_ratio: float
+    terminal_value_thresholds: list[TerminalValueThreshold] = Field(min_length=3)
+    target_pnl_rows: list[TargetPnlRow] = Field(min_length=1)
+    strike_width: float | None = Field(default=None, gt=0)
+    capped_gain_from_spot: float | None = Field(default=None, gt=0)
+    butterfly_center_strike: float | None = Field(default=None, gt=0)
+    profit_zone: list[float] = Field(default_factory=list)
+    lose_if: str
+    win_if: str
+    theta_to_stake_daily: float = Field(ge=0)
+    iv_down_impact_usd: float
+    iv_down_impact_eur: float
+    maximum_leg_relative_spread: float = Field(ge=0)
+    minimum_open_interest: int | None = Field(default=None, ge=0)
+    minimum_volume: int | None = Field(default=None, ge=0)
+    total_premium_loss_possible: bool
+    has_short_legs: bool
+    assignment_risk: bool
+    pin_risk: bool
+    iv_crush_exposure: bool
+    catalyst_delay_exposure: bool
+    quote_age_seconds: int = Field(ge=0)
+    quote_timestamp: datetime
+    source_ids: list[str] = Field(min_length=1)
+    data_qualities: list[str] = Field(min_length=1)
+    leg_execution: list[LegExecutionMetric] = Field(min_length=1)
+    research_estimate_warning: str | None = None
+
+
 class ThesisCandidate(StrictModel):
     candidate_id: str
     architecture: Architecture
@@ -256,6 +332,7 @@ class ThesisCandidate(StrictModel):
     selection_reasons: list[str] = Field(default_factory=list)
     invalidation_conditions: list[str] = Field(default_factory=list)
     historical_confidence: float = Field(ge=0, le=1)
+    decision_metrics: StructureDecisionMetrics
 
 
 class ProfileScore(StrictModel):
@@ -312,7 +389,7 @@ class HistoricalEvidence(StrictModel):
 
 
 class ThesisScanReport(StrictModel):
-    schema_version: Literal["10.0"] = "10.0"
+    schema_version: Literal["10.1"] = "10.1"
     report_id: str
     created_at: datetime
     request: ThesisScanRequest
