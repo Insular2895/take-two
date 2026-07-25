@@ -115,6 +115,149 @@ class HistoricalOptionAnalytics(StrictModel):
     dividend_count: int = Field(ge=0)
 
 
+def american_scenario_value(
+    *,
+    spot: float,
+    strike: float,
+    valuation_date: date,
+    expiration_date: date,
+    option_type: OptionType,
+    volatility: float,
+    rate: float,
+    dividend_yield: float = 0.0,
+    dividends: tuple[tuple[date, float], ...] = (),
+    time_grid: int = 100,
+    price_grid: int = 100,
+) -> float:
+    """Return an American scenario value from the shared cached QuantLib engine."""
+    if spot <= 0 or strike <= 0 or volatility <= 0:
+        raise ValueError("spot, strike, and volatility must be positive")
+    return _quantlib_value(
+        spot=round(spot, 10),
+        strike=round(strike, 10),
+        valuation_date=valuation_date,
+        expiration_date=expiration_date,
+        rate=round(rate, 10),
+        volatility=round(volatility, 10),
+        option_type=option_type.value,
+        dividend_yield=round(dividend_yield, 10),
+        dividends=dividends,
+        american=True,
+        time_grid=time_grid,
+        price_grid=price_grid,
+    )
+
+
+def american_scenario_analytics(
+    *,
+    contract_symbol: str,
+    spot: float,
+    strike: float,
+    valuation_date: date,
+    expiration_date: date,
+    option_type: OptionType,
+    volatility: float,
+    rate: float,
+    dividend_yield: float = 0.0,
+    dividends: tuple[tuple[date, float], ...] = (),
+    time_grid: int = 100,
+    price_grid: int = 100,
+) -> AmericanPricingResult:
+    """Price one American option scenario with the shared cached QuantLib engine."""
+    if spot <= 0 or strike <= 0 or volatility <= 0:
+        raise ValueError("spot, strike, and volatility must be positive")
+    if valuation_date >= expiration_date:
+        raise ValueError("valuation date must precede option expiration")
+
+    def value(
+        *,
+        selected_spot: float = spot,
+        selected_date: date = valuation_date,
+        selected_volatility: float = volatility,
+        selected_rate: float = rate,
+        american: bool = True,
+    ) -> float:
+        return (
+            american_scenario_value(
+                spot=selected_spot,
+                strike=strike,
+                valuation_date=selected_date,
+                expiration_date=expiration_date,
+                rate=selected_rate,
+                volatility=selected_volatility,
+                option_type=option_type,
+                dividend_yield=dividend_yield,
+                dividends=dividends,
+                time_grid=time_grid,
+                price_grid=price_grid,
+            )
+            if american
+            else _quantlib_value(
+                spot=round(selected_spot, 10),
+                strike=round(strike, 10),
+                valuation_date=selected_date,
+                expiration_date=expiration_date,
+                rate=round(selected_rate, 10),
+                volatility=round(selected_volatility, 10),
+                option_type=option_type.value,
+                dividend_yield=round(dividend_yield, 10),
+                dividends=dividends,
+                american=False,
+                time_grid=time_grid,
+                price_grid=price_grid,
+            )
+        )
+
+    base = value()
+    european = value(american=False)
+    spot_step = max(spot * 0.001, 0.01)
+    spot_up = value(selected_spot=spot + spot_step)
+    spot_down = value(selected_spot=max(spot - spot_step, 0.01))
+    delta = (spot_up - spot_down) / (2.0 * spot_step)
+    gamma = (spot_up - 2.0 * base + spot_down) / (spot_step * spot_step)
+
+    next_date = min(valuation_date + timedelta(days=1), expiration_date)
+    theta = value(selected_date=next_date) - base
+    vol_step = min(0.01, volatility * 0.25)
+    vega = (
+        (
+            value(selected_volatility=volatility + vol_step)
+            - value(selected_volatility=max(volatility - vol_step, 0.0001))
+        )
+        * 0.01
+        / (2.0 * vol_step)
+    )
+    rate_step = 0.001
+    rho = (
+        (value(selected_rate=rate + rate_step) - value(selected_rate=rate - rate_step))
+        * 0.01
+        / (2.0 * rate_step)
+    )
+    premium = base - european
+    active_dividends = [item for item in dividends if valuation_date < item[0] <= expiration_date]
+    warnings = []
+    if premium < -0.01:
+        warnings.append("American value is below European benchmark beyond numerical tolerance")
+    return AmericanPricingResult(
+        contract_symbol=contract_symbol,
+        valuation_time=datetime.combine(
+            valuation_date,
+            datetime.min.time(),
+        ),
+        model=PricingModel.QUANTLIB_FD_AMERICAN,
+        price=round(base, 8),
+        european_benchmark=round(european, 8),
+        early_exercise_premium=round(premium, 8),
+        delta=round(delta, 8),
+        gamma=round(gamma, 8),
+        theta=round(theta, 8),
+        vega=round(vega, 8),
+        rho=round(rho, 8),
+        dividend_count=len(active_dividends),
+        warnings=warnings,
+    )
+
+
 def historical_option_analytics(
     *,
     spot: float,

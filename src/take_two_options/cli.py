@@ -24,6 +24,8 @@ from take_two_options.reporting.ibkr_ticket import (
     TicketBlockedError,
     write_ibkr_preview,
 )
+from take_two_options.thesis_scanner.engine import run_thesis_scan
+from take_two_options.thesis_scanner.schemas import ThesisScanRequest
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -38,6 +40,108 @@ app.add_typer(data_app, name="data")
 app.add_typer(trade_app, name="trade")
 app.add_typer(position_app, name="position")
 app.add_typer(legacy_app, name="legacy", hidden=True)
+
+
+def _csv_floats(value: str, *, option_name: str) -> list[float]:
+    try:
+        values = [float(item.strip()) for item in value.split(",") if item.strip()]
+    except ValueError as error:
+        raise typer.BadParameter(f"{option_name} must be a comma-separated numeric list") from error
+    if not values:
+        raise typer.BadParameter(f"{option_name} cannot be empty")
+    return values
+
+
+@app.command("thesis-scan")
+def thesis_scan(
+    ticker: Annotated[str, typer.Option("--ticker")] = "TTWO",
+    direction: Annotated[str, typer.Option("--direction")] = "bullish",
+    budget_eur: Annotated[float, typer.Option("--budget-eur", min=0.01)] = 1_000,
+    catalyst_date: Annotated[
+        str,
+        typer.Option("--catalyst-date"),
+    ] = ...,  # type: ignore[assignment]
+    expiration_buffer_days: Annotated[
+        int,
+        typer.Option("--expiration-buffer-days", min=0),
+    ] = 45,
+    target_prices: Annotated[
+        str,
+        typer.Option("--target-prices"),
+    ] = ...,  # type: ignore[assignment]
+    scenario_probabilities: Annotated[
+        str | None,
+        typer.Option("--scenario-probabilities"),
+    ] = None,
+    max_loss_eur: Annotated[float, typer.Option("--max-loss-eur", min=0.01)] = 1_000,
+    top: Annotated[int, typer.Option("--top", min=1, max=20)] = 3,
+    current_chain: Annotated[
+        Path,
+        typer.Option(
+            "--current-chain",
+            exists=True,
+            dir_okay=False,
+            readable=True,
+        ),
+    ] = ...,  # type: ignore[assignment]
+    spot: Annotated[float | None, typer.Option("--spot", min=0.01)] = None,
+    json_out: Annotated[Path, typer.Option("--json-out")] = Path("reports/thesis_scan/latest.json"),
+    markdown_out: Annotated[Path, typer.Option("--markdown-out")] = Path(
+        "reports/thesis_scan/latest.md"
+    ),
+    html_out: Annotated[Path, typer.Option("--html-out")] = Path("reports/thesis_scan/latest.html"),
+    policy: Annotated[Path, typer.Option("--policy")] = Path("configs/thesis_scanner/default.yaml"),
+) -> None:
+    """Enumerate and rank bounded bullish option theses; never transmit an order."""
+    if direction != "bullish":
+        raise typer.BadParameter("V10 thesis-scan currently supports --direction bullish only")
+    try:
+        parsed_catalyst_date = date.fromisoformat(catalyst_date)
+    except ValueError as error:
+        raise typer.BadParameter("--catalyst-date must use YYYY-MM-DD") from error
+    try:
+        request = ThesisScanRequest(
+            ticker=ticker.upper(),
+            direction="bullish",
+            budget_eur=budget_eur,
+            max_loss_eur=max_loss_eur,
+            catalyst_date=parsed_catalyst_date,
+            expiration_buffer_days=expiration_buffer_days,
+            target_prices=_csv_floats(
+                target_prices,
+                option_name="--target-prices",
+            ),
+            scenario_probabilities=(
+                _csv_floats(
+                    scenario_probabilities,
+                    option_name="--scenario-probabilities",
+                )
+                if scenario_probabilities is not None
+                else None
+            ),
+            top=top,
+            current_chain=str(current_chain),
+            spot_override=spot,
+        )
+    except ValueError as error:
+        raise typer.BadParameter(str(error)) from error
+    try:
+        report = run_thesis_scan(
+            request=request,
+            json_out=json_out,
+            markdown_out=markdown_out,
+            html_out=html_out,
+            policy_path=policy,
+        )
+    except (OSError, RuntimeError, ValueError) as error:
+        typer.echo(f"Thesis scan failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(
+        f"{report.overall_status.value}: candidates="
+        f"{report.technically_admissible_candidates} "
+        f"json={json_out} markdown={markdown_out} dashboard={html_out}; "
+        "transmit=false"
+    )
 
 
 @knowledge_app.command("validate")

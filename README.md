@@ -26,15 +26,39 @@ ttwo-options position monitor \
   --position <POSITION_FILE> \
   --refresh-data \
   --report-dir reports/latest/position
+ttwo-options thesis-scan \
+  --ticker TTWO \
+  --direction bullish \
+  --budget-eur 1000 \
+  --catalyst-date 2026-11-19 \
+  --expiration-buffer-days 45 \
+  --target-prices 220,250,280,300,330,360 \
+  --scenario-probabilities 0.10,0.15,0.20,0.20,0.20,0.15 \
+  --max-loss-eur 1000 \
+  --top 3 \
+  --current-chain fixtures/thesis_scanner/ttwo_synthetic_chain.json \
+  --json-out reports/examples/v10_thesis_scan.json \
+  --markdown-out reports/examples/v10_thesis_scan.md \
+  --html-out reports/examples/v10_thesis_scan.html
 ```
 
 The package contains no live-order submission, modification, cancellation, or
 exercise capability. An IBKR artifact is preview-only (`transmit=false`,
 `what_if=true`) and is created only for a candidate that passes every gate.
 
+`thesis-scan` is the V10 bullish-thesis scanner. It exhaustively constructs
+configured long calls (including the LEAPS maturity class), bull call spreads,
+and symmetric call butterflies over listed quotes. It never invents scenario
+probabilities: omit `--scenario-probabilities` and expected P&L/probability of
+success remain null. Its three rankings are independent and visible
+(`prudent`, `balanced`, `aggressive`); weak V9 evidence lowers the displayed
+confidence but does not silently veto thesis mode.
+
 V7–V9 are isolated under `experiments/legacy/`; their inspected holdouts are
 marked contaminated under `validation/contaminated_holdouts/`.
 
 See [product contract](docs/product/PRODUCT_CONTRACT.md),
 [current architecture](docs/architecture/CURRENT_ARCHITECTURE.md),
+[V10 architecture](docs/architecture/V10_BULLISH_THESIS_SCANNER.md),
+[V10 data guide](docs/thesis_scanner_data_guide.md),
 [migration](docs/MIGRATION.md), and [limitations](docs/LIMITATIONS.md).

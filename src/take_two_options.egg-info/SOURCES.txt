@@ -14,6 +14,7 @@ src/take_two_options/domain.py
 src/take_two_options/engine.py
 src/take_two_options/exceptions.py
 src/take_two_options/fundamentals.py
+src/take_two_options/legacy_cli.py
 src/take_two_options/market_snapshot.py
 src/take_two_options/marketdata_data.py
 src/take_two_options/marketdata_panel.py
@@ -36,6 +37,11 @@ src/take_two_options/candidate_generation/factory.py
 src/take_two_options/candidate_generation/pruning.py
 src/take_two_options/candidate_generation/registry.py
 src/take_two_options/candidate_generation/search_space.py
+src/take_two_options/decision/__init__.py
+src/take_two_options/decision/pipeline.py
+src/take_two_options/decision/ranking.py
+src/take_two_options/decision/request.py
+src/take_two_options/decision/verdict.py
 src/take_two_options/forecasting/__init__.py
 src/take_two_options/forecasting/contracts.py
 src/take_two_options/forecasting/evaluation.py
@@ -46,6 +52,7 @@ src/take_two_options/forecasting/volatility.py
 src/take_two_options/knowledge/__init__.py
 src/take_two_options/knowledge/compiler.py
 src/take_two_options/knowledge/conflicts.py
+src/take_two_options/knowledge/extraction.py
 src/take_two_options/knowledge/loader.py
 src/take_two_options/knowledge/provenance.py
 src/take_two_options/knowledge/schemas.py
@@ -64,7 +71,10 @@ src/take_two_options/optimization/parameter_stability.py
 src/take_two_options/optimization/pareto.py
 src/take_two_options/optimization/trial_registry.py
 src/take_two_options/reporting/__init__.py
+src/take_two_options/reporting/decision_report.py
+src/take_two_options/reporting/ibkr_ticket.py
 src/take_two_options/reporting/legacy_reporting.py
+src/take_two_options/reporting/visualizations.py
 src/take_two_options/simulation/__init__.py
 src/take_two_options/simulation/conditional_monte_carlo.py
 src/take_two_options/simulation/convergence.py
@@ -77,6 +87,15 @@ src/take_two_options/sizing/fixed_fraction.py
 src/take_two_options/sizing/fractional_kelly.py
 src/take_two_options/sizing/integer_allocator.py
 src/take_two_options/sizing/risk_budget.py
+src/take_two_options/thesis_scanner/__init__.py
+src/take_two_options/thesis_scanner/data.py
+src/take_two_options/thesis_scanner/engine.py
+src/take_two_options/thesis_scanner/enumeration.py
+src/take_two_options/thesis_scanner/pricing.py
+src/take_two_options/thesis_scanner/ranking.py
+src/take_two_options/thesis_scanner/reporting.py
+src/take_two_options/thesis_scanner/schemas.py
+src/take_two_options/thesis_scanner/tickets.py
 src/take_two_options/validation/__init__.py
 src/take_two_options/validation/gates.py
 src/take_two_options/validation/holdout.py
@@ -95,6 +114,7 @@ tests/test_backtesting.py
 tests/test_calibration.py
 tests/test_engine.py
 tests/test_engine_v2.py
+tests/test_knowledge_optimizer.py
 tests/test_marketdata_data.py
 tests/test_marketdata_panel.py
 tests/test_pricing.py
@@ -103,6 +123,7 @@ tests/test_research_statistics.py
 tests/test_scenarios.py
 tests/test_simulation_models.py
 tests/test_strategy_architectures.py
+tests/test_thesis_scanner.py
 tests/test_treasury_data.py
 tests/test_validation.py
 tests/test_vol_surface.py

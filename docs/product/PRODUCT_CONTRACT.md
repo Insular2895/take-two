@@ -34,3 +34,8 @@ preview ticket or a blocked-ticket status. No file is an order instruction.
 There is no broker trading client in the active pipeline. Preview artifacts set
 `transmit=false`, require human confirmation, leave IBKR `con_id` unresolved,
 and cannot be generated for blocked candidates.
+
+V10 preserves the same boundary. Its ticket model hard-codes `mode=preview`,
+`transmit=false`, `what_if=true`, `human_confirmation_required=true`, and
+`order_capability=forbidden`. The scanner package contains no submit, modify,
+cancel, or exercise function.

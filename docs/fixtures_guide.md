@@ -21,6 +21,10 @@ Toutes les fixtures sont synthetiques et deterministes :
 - `experiments/legacy/v9/fixtures/marketdata_tt_options_budget_v9_generator.json`
   ajoute les plans `single_long` et
   `staged_three`, leurs poches en EUR, le taux EUR/USD date et les recettes court/moyen/long.
+- `fixtures/thesis_scanner/ttwo_synthetic_chain.json` valide V10 de bout en bout :
+  énumération des trois architectures haussières, maturité LEAPS, budget EUR,
+  scénarios américains, classements, tickets preview et dashboard autonome.
+  Le rapport associé est sous `reports/examples/v10_thesis_scan.{json,md,html}`.
 
 Leurs valeurs de spot, chaine, volatilite, scenarios, probabilites, frais et marge ne sont ni live
 ni executables.
