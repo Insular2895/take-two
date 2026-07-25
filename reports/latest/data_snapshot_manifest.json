@@ -1,5 +1,5 @@
 {
-  "snapshot_id": "snapshot-073eaf6528a0cb3d",
+  "snapshot_id": "snapshot-611d19636658e43e",
   "ticker": "TTWO",
   "as_of": "2026-07-23T20:00:00+00:00",
   "spot": 230.25,
@@ -29,5 +29,5 @@
     "Contract multiplier is normalized to 100 and must be rechecked with the broker"
   ],
   "cache_path": "data/marketdata/snapshots/TTWO_2026-07-23.json",
-  "generated_at": "2026-07-25T09:48:11.780345+00:00"
+  "generated_at": "2026-07-25T09:49:41.825566+00:00"
 }

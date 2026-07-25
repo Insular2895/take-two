@@ -1,8 +1,8 @@
 {
   "object_type": "decision_report",
   "schema_version": "1.0",
-  "report_id": "decision-ttwo-20260725T094810Z-b672ea46",
-  "created_at": "2026-07-25T09:48:11.781374Z",
+  "report_id": "decision-ttwo-20260725T094940Z-b672ea46",
+  "created_at": "2026-07-25T09:49:41.826487Z",
   "analysis": {
     "ticker": "TTWO",
     "budget": 1000.0,
@@ -132,15 +132,15 @@
   },
   "research_run": {
     "object_type": "research_run",
-    "run_id": "ttwo-20260725T094810Z-b672ea46",
-    "started_at": "2026-07-25T09:48:10.946128Z",
-    "completed_at": "2026-07-25T09:48:11.755674Z",
+    "run_id": "ttwo-20260725T094940Z-b672ea46",
+    "started_at": "2026-07-25T09:49:40.793410Z",
+    "completed_at": "2026-07-25T09:49:41.799496Z",
     "seed": 20260725,
     "config_hash": "b672ea464d1858f0b0cdddc462c6549ea07c81051786e14d6383532a38a29be0",
-    "code_version": "b04324d61037486e6c7bc962cbd84b6c85046c7d",
+    "code_version": "62a145317e14ec43ef2ea724935ce99e2bef4253",
     "request_id": "ttwo-gta6-1000eur-2026-07-25",
     "knowledge_hash": "4ffc25e7b0cab57155dd10386cd15c0a7609d2bc8933d86bd550203ddf20b9d3",
-    "data_snapshot_id": "snapshot-073eaf6528a0cb3d",
+    "data_snapshot_id": "snapshot-611d19636658e43e",
     "total_trials": 4210,
     "trials_by_stage": {
       "generation": 2105,
