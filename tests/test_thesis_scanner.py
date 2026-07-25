@@ -208,14 +208,25 @@ def test_preview_cannot_transmit_and_fixture_builds_standalone_dashboard(
     full_report: ThesisScanReport,
 ) -> None:
     assert full_report.order_capability == "forbidden"
-    assert full_report.ibkr_previews
+    assert len(full_report.ibkr_previews) == len(full_report.candidates)
     assert all(ticket.transmit is False for ticket in full_report.ibkr_previews)
     assert all(ticket.what_if is True for ticket in full_report.ibkr_previews)
+    assert full_report.historical_evidence.status == "weak_contaminated"
+    assert full_report.historical_evidence.eligibility_effect == "warning_only"
     html = Path(full_report.output_files[2]).read_text(encoding="utf-8")
     assert "<!doctype html>" in html
+    assert "Contexte de marché et hypothèses utilisateur" in html
+    assert "Meilleur candidat conditionnel à la thèse et aux hypothèses" in html
+    assert "Coût, perte maximale et gain potentiel" in html
     assert "Payoff terminal" in html
+    assert "Courbes de P&amp;L à plusieurs dates" in html
     assert "Heatmap spot × date" in html
-    assert "Previews IBKR — aucune transmission" in html
+    assert "Sensibilité IV au catalyseur" in html
+    assert "3–4. Ticket IBKR et coûts" in html
+    assert "9. Risques et conditions d’invalidation" in html
+    assert "10. Historique de backtest — séparé de la simulation actuelle" in html
+    assert "Débit maximal" in html
+    assert "meilleur trade garanti" not in html.lower()
     assert "fetch(" not in html
     assert "XMLHttpRequest" not in html
     assert "placeOrder" not in html

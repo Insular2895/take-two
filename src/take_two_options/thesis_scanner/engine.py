@@ -17,6 +17,7 @@ from take_two_options.thesis_scanner.pricing import evaluate_candidates
 from take_two_options.thesis_scanner.ranking import rank_candidates
 from take_two_options.thesis_scanner.reporting import write_reports
 from take_two_options.thesis_scanner.schemas import (
+    HistoricalEvidence,
     ThesisCandidateStatus,
     ThesisScanPolicy,
     ThesisScanReport,
@@ -73,7 +74,7 @@ def run_thesis_scan(
         policy=policy,
         spot=chain.spot,
     )
-    previews = build_ibkr_previews(candidates, rankings)
+    previews = build_ibkr_previews(candidates)
     blocked = Counter(enumeration.blocked_reasons)
     blocked.update(evaluation.blocked_reasons)
     if any(candidate.status is ThesisCandidateStatus.ELIGIBLE for candidate in candidates):
@@ -108,6 +109,24 @@ def run_thesis_scan(
             "Les résultats historiques V9 étaient faibles/contaminés et abaissent "
             f"la confiance à {policy.historical_confidence:.2f}; ils ne bloquent pas "
             "automatiquement ce mode de thèse et ne constituent pas une validation."
+        ),
+        historical_evidence=HistoricalEvidence(
+            status="weak_contaminated",
+            confidence=policy.historical_confidence,
+            eligibility_effect="warning_only",
+            summary=(
+                "V7-V9 conservent NO_TRADE ou des variantes bloquées; ces résultats "
+                "sont affichés séparément et ne sont pas réutilisés comme holdout vierge."
+            ),
+            source_artifacts=[
+                "docs/archive/v9/ttwo_options_budget_engine_v9.md",
+                "validation/contaminated_holdouts/v7_v8_v9/manifest.json",
+            ],
+            limitations=[
+                "Historique EOD jambe par jambe, pas de replay combo NBBO",
+                "Holdouts V7-V9 déjà inspectés et donc contaminés",
+                "Échantillon multi-régime insuffisant pour valider une thèse TTWO",
+            ],
         ),
         probability_status=(
             "user_supplied" if request.scenario_probabilities is not None else "not_provided"

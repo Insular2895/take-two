@@ -90,8 +90,10 @@ P&L espéré utilisateur : `$653.42` ; probabilité de résultat positif : `90.0
 
 ### Preview IBKR
 
-- `mode=preview` ; `transmit=false` ; `what_if=true`
+- Type / ordre : `BAG` / `LMT` ; `mode=preview` ; `transmit=false` ; `what_if=true`
 - Débit maximum indicatif : `$7.80` par action de combo
+- Coût indicatif par lot : `$781.40` / `€683.34`
+- Date de la quote : `2026-07-24T20:00:00+00:00`
 - Message : vérifier la cotation combo live dans IBKR avant validation
 - ACHETER `1` × `TTWO270319C00240000` CALL 240 2027-03-19 SMART
 - VENDRE `1` × `TTWO270319C00260000` CALL 260 2027-03-19 SMART
@@ -134,8 +136,10 @@ P&L espéré utilisateur : `$5,158.58` ; probabilité de résultat positif : `10
 
 ### Preview IBKR
 
-- `mode=preview` ; `transmit=false` ; `what_if=true`
+- Type / ordre : `OPT` / `LMT` ; `mode=preview` ; `transmit=false` ; `what_if=true`
 - Débit maximum indicatif : `$5.15` par action de combo
+- Coût indicatif par lot : `$515.70` / `€901.97`
+- Date de la quote : `2026-07-24T20:00:00+00:00`
 - Message : vérifier la cotation combo live dans IBKR avant validation
 - ACHETER `2` × `TTWO271217C00360000` CALL 360 2027-12-17 SMART
 
@@ -177,8 +181,10 @@ P&L espéré utilisateur : `$5,131.80` ; probabilité de résultat positif : `90
 
 ### Preview IBKR
 
-- `mode=preview` ; `transmit=false` ; `what_if=true`
+- Type / ordre : `OPT` / `LMT` ; `mode=preview` ; `transmit=false` ; `what_if=true`
 - Débit maximum indicatif : `$3.85` par action de combo
+- Coût indicatif par lot : `$385.70` / `€674.60`
+- Date de la quote : `2026-07-24T20:00:00+00:00`
 - Message : vérifier la cotation combo live dans IBKR avant validation
 - ACHETER `2` × `TTWO270319C00300000` CALL 300 2027-03-19 SMART
 
@@ -220,8 +226,10 @@ P&L espéré utilisateur : `$3,271.11` ; probabilité de résultat positif : `90
 
 ### Preview IBKR
 
-- `mode=preview` ; `transmit=false` ; `what_if=true`
+- Type / ordre : `OPT` / `LMT` ; `mode=preview` ; `transmit=false` ; `what_if=true`
 - Débit maximum indicatif : `$6.80` par action de combo
+- Coût indicatif par lot : `$680.70` / `€595.28`
+- Date de la quote : `2026-07-24T20:00:00+00:00`
 - Message : vérifier la cotation combo live dans IBKR avant validation
 - ACHETER `1` × `TTWO270319C00280000` CALL 280 2027-03-19 SMART
 
@@ -264,8 +272,10 @@ P&L espéré utilisateur : `$652.11` ; probabilité de résultat positif : `90.0
 
 ### Preview IBKR
 
-- `mode=preview` ; `transmit=false` ; `what_if=true`
+- Type / ordre : `BAG` / `LMT` ; `mode=preview` ; `transmit=false` ; `what_if=true`
 - Débit maximum indicatif : `$8.80` par action de combo
+- Coût indicatif par lot : `$881.40` / `€770.79`
+- Date de la quote : `2026-07-24T20:00:00+00:00`
 - Message : vérifier la cotation combo live dans IBKR avant validation
 - ACHETER `1` × `TTWO270319C00230000` CALL 230 2027-03-19 SMART
 - VENDRE `1` × `TTWO270319C00250000` CALL 250 2027-03-19 SMART
@@ -308,8 +318,10 @@ P&L espéré utilisateur : `$3,983.75` ; probabilité de résultat positif : `90
 
 ### Preview IBKR
 
-- `mode=preview` ; `transmit=false` ; `what_if=true`
+- Type / ordre : `OPT` / `LMT` ; `mode=preview` ; `transmit=false` ; `what_if=true`
 - Débit maximum indicatif : `$11.40` par action de combo
+- Coût indicatif par lot : `$1,140.70` / `€997.55`
+- Date de la quote : `2026-07-24T20:00:00+00:00`
 - Message : vérifier la cotation combo live dans IBKR avant validation
 - ACHETER `1` × `TTWO270319C00260000` CALL 260 2027-03-19 SMART
 
@@ -352,8 +364,10 @@ P&L espéré utilisateur : `$392.16` ; probabilité de résultat positif : `90.0
 
 ### Preview IBKR
 
-- `mode=preview` ; `transmit=false` ; `what_if=true`
+- Type / ordre : `BAG` / `LMT` ; `mode=preview` ; `transmit=false` ; `what_if=true`
 - Débit maximum indicatif : `$10.00` par action de combo
+- Coût indicatif par lot : `$1,001.40` / `€875.73`
+- Date de la quote : `2026-07-24T20:00:00+00:00`
 - Message : vérifier la cotation combo live dans IBKR avant validation
 - ACHETER `1` × `TTWO271217C00220000` CALL 220 2027-12-17 SMART
 - VENDRE `1` × `TTWO271217C00240000` CALL 240 2027-12-17 SMART
@@ -397,13 +411,27 @@ P&L espéré utilisateur : `$1,043.12` ; probabilité de résultat positif : `90
 
 ### Preview IBKR
 
-- `mode=preview` ; `transmit=false` ; `what_if=true`
+- Type / ordre : `BAG` / `LMT` ; `mode=preview` ; `transmit=false` ; `what_if=true`
 - Débit maximum indicatif : `$8.20` par action de combo
+- Coût indicatif par lot : `$821.40` / `€718.32`
+- Date de la quote : `2026-07-24T20:00:00+00:00`
 - Message : vérifier la cotation combo live dans IBKR avant validation
 - ACHETER `1` × `TTWO270319C00250000` CALL 250 2027-03-19 SMART
 - VENDRE `1` × `TTWO270319C00280000` CALL 280 2027-03-19 SMART
 
-## Limites et hypothèses
+## Historique de backtest — séparé de la simulation actuelle
+
+- Statut : `weak_contaminated`
+- Effet sur l'éligibilité : `warning_only`
+- Confiance : `0.35`
+- V7-V9 conservent NO_TRADE ou des variantes bloquées; ces résultats sont affichés séparément et ne sont pas réutilisés comme holdout vierge.
+- Limite historique : Historique EOD jambe par jambe, pas de replay combo NBBO
+- Limite historique : Holdouts V7-V9 déjà inspectés et donc contaminés
+- Limite historique : Échantillon multi-régime insuffisant pour valider une thèse TTWO
+- Artefact : `docs/archive/v9/ttwo_options_budget_engine_v9.md`
+- Artefact : `validation/contaminated_holdouts/v7_v8_v9/manifest.json`
+
+## Limites et hypothèses actuelles
 
 - Les résultats historiques V9 étaient faibles/contaminés et abaissent la confiance à 0.35; ils ne bloquent pas automatiquement ce mode de thèse et ne constituent pas une validation.
 - Une chaîne de jambes ne garantit pas une exécution combo simultanée.

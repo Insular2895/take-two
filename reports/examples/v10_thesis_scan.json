@@ -1,7 +1,7 @@
 {
   "schema_version": "10.0",
   "report_id": "v10-9f966d01f3e8f085bbb5",
-  "created_at": "2026-07-25T10:59:03.021206Z",
+  "created_at": "2026-07-25T11:28:09.655449Z",
   "request": {
     "ticker": "TTWO",
     "direction": "bullish",
@@ -92240,6 +92240,35 @@
   ],
   "ibkr_previews": [
     {
+      "candidate_id": "cand-07579d55da913378",
+      "mode": "preview",
+      "broker": "IBKR",
+      "security_type": "OPT",
+      "order_type": "LMT",
+      "transmit": false,
+      "what_if": true,
+      "human_confirmation_required": true,
+      "order_capability": "forbidden",
+      "debit_max_per_share_usd": 3.8505,
+      "indicative_cost_per_lot_usd": 385.7,
+      "indicative_cost_eur": 337.2978,
+      "quote_date": "2026-07-24T20:00:00Z",
+      "legs": [
+        {
+          "action": "ACHETER",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO270319C00300000",
+          "strike": 300.0,
+          "expiration": "2027-03-19",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        }
+      ],
+      "message": "vérifier la cotation combo live dans IBKR avant validation"
+    },
+    {
       "candidate_id": "cand-119e6d7d30c47119",
       "mode": "preview",
       "broker": "IBKR",
@@ -92301,6 +92330,86 @@
           "occ_symbol": "TTWO271217C00360000",
           "strike": 360.0,
           "expiration": "2027-12-17",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        }
+      ],
+      "message": "vérifier la cotation combo live dans IBKR avant validation"
+    },
+    {
+      "candidate_id": "cand-30f6d00893282104",
+      "mode": "preview",
+      "broker": "IBKR",
+      "security_type": "BAG",
+      "order_type": "LMT",
+      "transmit": false,
+      "what_if": true,
+      "human_confirmation_required": true,
+      "order_capability": "forbidden",
+      "debit_max_per_share_usd": 9.551,
+      "indicative_cost_per_lot_usd": 956.4,
+      "indicative_cost_eur": 836.3795,
+      "quote_date": "2026-07-24T20:00:00Z",
+      "legs": [
+        {
+          "action": "ACHETER",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO271217C00300000",
+          "strike": 300.0,
+          "expiration": "2027-12-17",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        },
+        {
+          "action": "VENDRE",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO271217C00360000",
+          "strike": 360.0,
+          "expiration": "2027-12-17",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        }
+      ],
+      "message": "vérifier la cotation combo live dans IBKR avant validation"
+    },
+    {
+      "candidate_id": "cand-4b839cfe6b4edbe9",
+      "mode": "preview",
+      "broker": "IBKR",
+      "security_type": "BAG",
+      "order_type": "LMT",
+      "transmit": false,
+      "what_if": true,
+      "human_confirmation_required": true,
+      "order_capability": "forbidden",
+      "debit_max_per_share_usd": 8.051,
+      "indicative_cost_per_lot_usd": 806.4,
+      "indicative_cost_eur": 705.2033,
+      "quote_date": "2026-07-24T20:00:00Z",
+      "legs": [
+        {
+          "action": "ACHETER",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO270319C00260000",
+          "strike": 260.0,
+          "expiration": "2027-03-19",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        },
+        {
+          "action": "VENDRE",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO270319C00300000",
+          "strike": 300.0,
+          "expiration": "2027-03-19",
           "exchange": "SMART",
           "con_id": null,
           "con_id_status": "resolve_in_tws"
@@ -92399,6 +92508,144 @@
           "occ_symbol": "TTWO270319C00250000",
           "strike": 250.0,
           "expiration": "2027-03-19",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        }
+      ],
+      "message": "vérifier la cotation combo live dans IBKR avant validation"
+    },
+    {
+      "candidate_id": "cand-7e3b54820e719300",
+      "mode": "preview",
+      "broker": "IBKR",
+      "security_type": "BAG",
+      "order_type": "LMT",
+      "transmit": false,
+      "what_if": true,
+      "human_confirmation_required": true,
+      "order_capability": "forbidden",
+      "debit_max_per_share_usd": 11.401,
+      "indicative_cost_per_lot_usd": 1141.4,
+      "indicative_cost_eur": 998.1635,
+      "quote_date": "2026-07-24T20:00:00Z",
+      "legs": [
+        {
+          "action": "ACHETER",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO271217C00280000",
+          "strike": 280.0,
+          "expiration": "2027-12-17",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        },
+        {
+          "action": "VENDRE",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO271217C00330000",
+          "strike": 330.0,
+          "expiration": "2027-12-17",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        }
+      ],
+      "message": "vérifier la cotation combo live dans IBKR avant validation"
+    },
+    {
+      "candidate_id": "cand-8a47746a274d9ccc",
+      "mode": "preview",
+      "broker": "IBKR",
+      "security_type": "OPT",
+      "order_type": "LMT",
+      "transmit": false,
+      "what_if": true,
+      "human_confirmation_required": true,
+      "order_capability": "forbidden",
+      "debit_max_per_share_usd": 5.1505,
+      "indicative_cost_per_lot_usd": 515.7,
+      "indicative_cost_eur": 450.9838,
+      "quote_date": "2026-07-24T20:00:00Z",
+      "legs": [
+        {
+          "action": "ACHETER",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO271217C00360000",
+          "strike": 360.0,
+          "expiration": "2027-12-17",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        }
+      ],
+      "message": "vérifier la cotation combo live dans IBKR avant validation"
+    },
+    {
+      "candidate_id": "cand-9b44dae9cbe0cbad",
+      "mode": "preview",
+      "broker": "IBKR",
+      "security_type": "OPT",
+      "order_type": "LMT",
+      "transmit": false,
+      "what_if": true,
+      "human_confirmation_required": true,
+      "order_capability": "forbidden",
+      "debit_max_per_share_usd": 8.4005,
+      "indicative_cost_per_lot_usd": 840.7,
+      "indicative_cost_eur": 735.199,
+      "quote_date": "2026-07-24T20:00:00Z",
+      "legs": [
+        {
+          "action": "ACHETER",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO271217C00330000",
+          "strike": 330.0,
+          "expiration": "2027-12-17",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        }
+      ],
+      "message": "vérifier la cotation combo live dans IBKR avant validation"
+    },
+    {
+      "candidate_id": "cand-9b948e5a60845fae",
+      "mode": "preview",
+      "broker": "IBKR",
+      "security_type": "BAG",
+      "order_type": "LMT",
+      "transmit": false,
+      "what_if": true,
+      "human_confirmation_required": true,
+      "order_capability": "forbidden",
+      "debit_max_per_share_usd": 9.001,
+      "indicative_cost_per_lot_usd": 901.4,
+      "indicative_cost_eur": 788.2816,
+      "quote_date": "2026-07-24T20:00:00Z",
+      "legs": [
+        {
+          "action": "ACHETER",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO271217C00240000",
+          "strike": 240.0,
+          "expiration": "2027-12-17",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        },
+        {
+          "action": "VENDRE",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO271217C00260000",
+          "strike": 260.0,
+          "expiration": "2027-12-17",
           "exchange": "SMART",
           "con_id": null,
           "con_id_status": "resolve_in_tws"
@@ -92514,6 +92761,126 @@
         }
       ],
       "message": "vérifier la cotation combo live dans IBKR avant validation"
+    },
+    {
+      "candidate_id": "cand-d35a91167de8620d",
+      "mode": "preview",
+      "broker": "IBKR",
+      "security_type": "BAG",
+      "order_type": "LMT",
+      "transmit": false,
+      "what_if": true,
+      "human_confirmation_required": true,
+      "order_capability": "forbidden",
+      "debit_max_per_share_usd": 9.801,
+      "indicative_cost_per_lot_usd": 981.4,
+      "indicative_cost_eur": 858.2422,
+      "quote_date": "2026-07-24T20:00:00Z",
+      "legs": [
+        {
+          "action": "ACHETER",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO270319C00220000",
+          "strike": 220.0,
+          "expiration": "2027-03-19",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        },
+        {
+          "action": "VENDRE",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO270319C00240000",
+          "strike": 240.0,
+          "expiration": "2027-03-19",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        }
+      ],
+      "message": "vérifier la cotation combo live dans IBKR avant validation"
+    },
+    {
+      "candidate_id": "cand-f85278bd9a6e4d9d",
+      "mode": "preview",
+      "broker": "IBKR",
+      "security_type": "BAG",
+      "order_type": "LMT",
+      "transmit": false,
+      "what_if": true,
+      "human_confirmation_required": true,
+      "order_capability": "forbidden",
+      "debit_max_per_share_usd": 9.501,
+      "indicative_cost_per_lot_usd": 951.4,
+      "indicative_cost_eur": 832.007,
+      "quote_date": "2026-07-24T20:00:00Z",
+      "legs": [
+        {
+          "action": "ACHETER",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO271217C00230000",
+          "strike": 230.0,
+          "expiration": "2027-12-17",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        },
+        {
+          "action": "VENDRE",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO271217C00250000",
+          "strike": 250.0,
+          "expiration": "2027-12-17",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        }
+      ],
+      "message": "vérifier la cotation combo live dans IBKR avant validation"
+    },
+    {
+      "candidate_id": "cand-f87faabae57cffe4",
+      "mode": "preview",
+      "broker": "IBKR",
+      "security_type": "BAG",
+      "order_type": "LMT",
+      "transmit": false,
+      "what_if": true,
+      "human_confirmation_required": true,
+      "order_capability": "forbidden",
+      "debit_max_per_share_usd": 11.051,
+      "indicative_cost_per_lot_usd": 1106.4,
+      "indicative_cost_eur": 967.5557,
+      "quote_date": "2026-07-24T20:00:00Z",
+      "legs": [
+        {
+          "action": "ACHETER",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO270319C00250000",
+          "strike": 250.0,
+          "expiration": "2027-03-19",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        },
+        {
+          "action": "VENDRE",
+          "quantity": 1,
+          "option_type": "CALL",
+          "occ_symbol": "TTWO270319C00300000",
+          "strike": 300.0,
+          "expiration": "2027-03-19",
+          "exchange": "SMART",
+          "con_id": null,
+          "con_id_status": "resolve_in_tws"
+        }
+      ],
+      "message": "vérifier la cotation combo live dans IBKR avant validation"
     }
   ],
   "blocked_reasons": {
@@ -92523,6 +92890,21 @@
     "MAXIMUM_LOSS_EXCEEDED": 188
   },
   "historical_warning": "Les résultats historiques V9 étaient faibles/contaminés et abaissent la confiance à 0.35; ils ne bloquent pas automatiquement ce mode de thèse et ne constituent pas une validation.",
+  "historical_evidence": {
+    "status": "weak_contaminated",
+    "confidence": 0.35,
+    "eligibility_effect": "warning_only",
+    "summary": "V7-V9 conservent NO_TRADE ou des variantes bloquées; ces résultats sont affichés séparément et ne sont pas réutilisés comme holdout vierge.",
+    "source_artifacts": [
+      "docs/archive/v9/ttwo_options_budget_engine_v9.md",
+      "validation/contaminated_holdouts/v7_v8_v9/manifest.json"
+    ],
+    "limitations": [
+      "Historique EOD jambe par jambe, pas de replay combo NBBO",
+      "Holdouts V7-V9 déjà inspectés et donc contaminés",
+      "Échantillon multi-régime insuffisant pour valider une thèse TTWO"
+    ]
+  },
   "probability_status": "user_supplied",
   "assumptions": [
     "LEAPS call désigne une classe de maturité de long call, jamais une architecture distincte.",

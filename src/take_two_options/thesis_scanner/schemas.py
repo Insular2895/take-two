@@ -302,6 +302,15 @@ class IBKRPreviewTicket(StrictModel):
     message: str = "vérifier la cotation combo live dans IBKR avant validation"
 
 
+class HistoricalEvidence(StrictModel):
+    status: Literal["weak_contaminated"]
+    confidence: float = Field(ge=0, le=1)
+    eligibility_effect: Literal["warning_only"]
+    summary: str
+    source_artifacts: list[str] = Field(min_length=1)
+    limitations: list[str] = Field(min_length=1)
+
+
 class ThesisScanReport(StrictModel):
     schema_version: Literal["10.0"] = "10.0"
     report_id: str
@@ -319,6 +328,7 @@ class ThesisScanReport(StrictModel):
     ibkr_previews: list[IBKRPreviewTicket]
     blocked_reasons: dict[str, int]
     historical_warning: str
+    historical_evidence: HistoricalEvidence
     probability_status: Literal["user_supplied", "not_provided"]
     assumptions: list[str]
     limitations: list[str]

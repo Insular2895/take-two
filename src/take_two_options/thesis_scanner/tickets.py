@@ -6,7 +6,6 @@ from take_two_options.domain import PositionSide
 from take_two_options.thesis_scanner.schemas import (
     IBKRPreviewLeg,
     IBKRPreviewTicket,
-    ProfileRanking,
     ThesisCandidate,
     side_label,
 )
@@ -14,10 +13,9 @@ from take_two_options.thesis_scanner.schemas import (
 
 def build_ibkr_previews(
     candidates: list[ThesisCandidate],
-    rankings: list[ProfileRanking],
 ) -> list[IBKRPreviewTicket]:
-    """Create display-only tickets; this module exposes no order submission path."""
-    selected_ids = {score.candidate_id for ranking in rankings for score in ranking.scores}
+    """Create one display-only ticket per admissible candidate."""
+    selected_ids = {candidate.candidate_id for candidate in candidates}
     by_id = {candidate.candidate_id: candidate for candidate in candidates}
     previews: list[IBKRPreviewTicket] = []
     for candidate_id in sorted(selected_ids):
