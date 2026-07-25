@@ -1,0 +1,107 @@
+book_source: &book_source
+  source_id: natenberg-options-volatility-2015
+  author: Sheldon Natenberg
+  title: Option Volatility and Pricing
+  edition_or_date: Second edition, 2015
+  chapter: Strategy chapters
+  page: null
+  accessed_at: 2026-07-25
+  source_type: book
+  uri: null
+  confidence: medium
+  excerpt_hash: null
+
+internal_source: &internal_source
+  source_id: take-two-v9-reviewed-corpus
+  author: null
+  title: Reviewed TTWO option research corpus through V9
+  edition_or_date: "2026-07-19"
+  chapter: null
+  page: null
+  accessed_at: 2026-07-25
+  source_type: internal
+  uri: validation/contaminated_holdouts/v7_v8_v9/manifest.json
+  confidence: high
+  excerpt_hash: null
+
+objects:
+  - object_type: knowledge_item
+    knowledge_id: executable-option-sides-v1
+    kind: rule
+    lifecycle: COMPILABLE
+    market_validity: CURRENT_MARKET_VALID
+    empirical_status: NOT_TESTED
+    execution_status: TTWO_TESTABLE
+    sources: [*internal_source]
+    assumptions: []
+    variables: [bid, ask, side]
+    units: {bid: USD_per_share, ask: USD_per_share}
+    conditions: [listed option quote is ordered and positive]
+    action: use ask for long entry, bid for short entry, bid for long exit, and ask for short exit
+    exceptions: [a broker combo quote supersedes leg-by-leg estimates when captured and timestamped]
+    risks: [EOD leg quotes do not prove an intraday simultaneous combo fill]
+    contradictions: []
+    parameters_provided: []
+    parameters_missing: [live combo quote]
+    parameters_to_calibrate: [slippage]
+    validation_history:
+      - checked_at: 2026-07-25
+        status: passed
+        method: deterministic side-selection unit tests
+        source_ids: [take-two-v9-reviewed-corpus]
+        notes: Mechanically valid; not evidence of fill quality.
+    statement: Executable sides, not midpoints, define conservative entry and exit estimates.
+
+  - object_type: knowledge_item
+    knowledge_id: bounded-risk-only-v1
+    kind: rule
+    lifecycle: COMPILABLE
+    market_validity: CURRENT_MARKET_VALID
+    empirical_status: NOT_TESTED
+    execution_status: TTWO_TESTABLE
+    sources: [*book_source, *internal_source]
+    assumptions: [all contract multipliers and deliverables are verified]
+    variables: [terminal_payoff, entry_cash, costs]
+    units: {terminal_payoff: USD, entry_cash: USD, costs: USD}
+    conditions: [trade request allowed_risk equals bounded_only]
+    action: reject every candidate whose maximum loss is unknown or unbounded
+    exceptions: []
+    risks: [American early assignment can create interim exposures requiring broker review]
+    contradictions: []
+    parameters_provided: []
+    parameters_missing: [broker margin preview]
+    parameters_to_calibrate: []
+    validation_history:
+      - checked_at: 2026-07-25
+        status: passed
+        method: payoff-grid and architecture-registry validation
+        source_ids: [natenberg-options-volatility-2015, take-two-v9-reviewed-corpus]
+        notes: Bounded terminal loss does not remove path, assignment, or liquidity risk.
+    statement: Unknown or unbounded maximum loss is a hard veto.
+
+  - object_type: knowledge_item
+    knowledge_id: configured-minimums-never-lowered-v1
+    kind: warning
+    lifecycle: COMPILABLE
+    market_validity: THEORETICALLY_VALID
+    empirical_status: ROBUST
+    execution_status: RESEARCH_ONLY
+    sources: [*internal_source]
+    assumptions: []
+    variables: [configured_minimum, available_observations]
+    units: {configured_minimum: observations, available_observations: observations}
+    conditions: [a validation gate declares a minimum sample size]
+    action: return INSUFFICIENT_DATA when available observations are below the configured minimum
+    exceptions: []
+    risks: [lowering the threshold after observing scarcity creates false eligibility]
+    contradictions: []
+    parameters_provided: []
+    parameters_missing: []
+    parameters_to_calibrate: []
+    validation_history:
+      - checked_at: 2026-07-25
+        status: passed
+        method: regression test against silent minimum reduction
+        source_ids: [take-two-v9-reviewed-corpus]
+        notes: The configured minimum is preserved verbatim.
+    statement: Data scarcity changes the status, never the configured evidence requirement.

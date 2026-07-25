@@ -1,4 +1,4 @@
-"""Canonical JSON, Markdown report, and decision journal rendering."""
+"""Legacy V1 report rendering kept for non-regression."""
 
 from __future__ import annotations
 

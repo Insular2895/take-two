@@ -11,6 +11,7 @@ requires-python = ">=3.11"
 dependencies = [
   "alpaca-py>=0.43.5,<0.44",
   "pydantic>=2.10,<3",
+  "PyYAML>=6.0,<7",
   "QuantLib>=1.43,<1.44",
   "typer>=0.15,<1",
 ]
@@ -20,6 +21,7 @@ dev = [
   "mypy>=1.14,<2",
   "pytest>=8.3,<9",
   "ruff>=0.9,<1",
+  "types-PyYAML>=6.0,<7",
 ]
 
 [project.scripts]

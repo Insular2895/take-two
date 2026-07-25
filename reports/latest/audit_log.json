@@ -1,0 +1,46 @@
+{
+  "run_id": "ttwo-20260725T094810Z-b672ea46",
+  "config_hash": "b672ea464d1858f0b0cdddc462c6549ea07c81051786e14d6383532a38a29be0",
+  "knowledge_hash": "4ffc25e7b0cab57155dd10386cd15c0a7609d2bc8933d86bd550203ddf20b9d3",
+  "snapshot_id": "snapshot-073eaf6528a0cb3d",
+  "enumerated": 2105,
+  "generated_by_architecture": {
+    "long_call": 68,
+    "long_put": 68,
+    "bull_call_spread": 92,
+    "bear_put_spread": 92,
+    "call_butterfly": 28,
+    "put_butterfly": 28,
+    "call_broken_wing_butterfly": 41,
+    "put_broken_wing_butterfly": 41,
+    "call_calendar": 140,
+    "put_calendar": 140,
+    "call_diagonal": 410,
+    "put_diagonal": 480,
+    "long_straddle": 28,
+    "long_strangle": 70,
+    "iron_condor": 379
+  },
+  "structurally_feasible": 0,
+  "pruning_reasons": [
+    "BUDGET_EXCEEDED",
+    "COMBO_SPREAD_FAILED",
+    "LIQUIDITY_FAILED",
+    "MAXIMUM_LOSS_EXCEEDED",
+    "THESIS_INCOMPATIBLE"
+  ],
+  "pruning_reason_counts": {
+    "BUDGET_EXCEEDED": 1952,
+    "LIQUIDITY_FAILED": 1565,
+    "MAXIMUM_LOSS_EXCEEDED": 1912,
+    "THESIS_INCOMPATIBLE": 1326,
+    "COMBO_SPREAD_FAILED": 1401
+  },
+  "trial_count": 4210,
+  "trial_counts": {
+    "generation": 2105,
+    "pruning": 2105
+  },
+  "validation_status": "NOT_REACHED_AFTER_HARD_VETOES",
+  "order_capability": "forbidden"
+}

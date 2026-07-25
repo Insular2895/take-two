@@ -5,7 +5,14 @@ from take_two_options.accuracy_dashboard import build_accuracy_dashboard_artifac
 
 
 def test_dashboard_prioritizes_opportunities_winners_and_architectures() -> None:
-    report_path = Path(__file__).parents[1] / "reports" / "ttwo_v9_budget_report.json"
+    report_path = (
+        Path(__file__).parents[1]
+        / "experiments"
+        / "legacy"
+        / "v9"
+        / "reports"
+        / "ttwo_v9_budget_report.json"
+    )
     report = MarketDataAccuracyReport.model_validate_json(report_path.read_text(encoding="utf-8"))
 
     artifact = build_accuracy_dashboard_artifact(report, report_path=str(report_path))

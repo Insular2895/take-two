@@ -1,4 +1,4 @@
-"""Explainable vetoes applied before candidate scoring."""
+"""Legacy V1 explainable vetoes kept for non-regression."""
 
 from __future__ import annotations
 

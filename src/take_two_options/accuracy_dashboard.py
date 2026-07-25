@@ -20,7 +20,7 @@ from take_two_options.strategy_architectures import (
 def build_accuracy_dashboard_artifact(
     report: MarketDataAccuracyReport,
     *,
-    report_path: str = "reports/ttwo_v9_budget_report.json",
+    report_path: str = "experiments/legacy/v9/reports/ttwo_v9_budget_report.json",
 ) -> dict[str, Any]:
     variants = _variant_rows(report)
     trades = _trade_rows(report)
@@ -65,7 +65,7 @@ def build_accuracy_dashboard_artifact(
     source = {
         "id": source_id,
         "label": f"TTWO {report.research_version} opportunity report",
-        "path": "docs/sql/ttwo_v9_budget_dashboard_source.sql",
+        "path": "experiments/legacy/v9/sql/ttwo_v9_budget_dashboard_source.sql",
     }
     manifest = {
         "version": 1,

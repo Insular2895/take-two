@@ -1,0 +1,427 @@
+{
+  "object_type": "decision_report",
+  "schema_version": "1.0",
+  "report_id": "decision-ttwo-20260725T094810Z-b672ea46",
+  "created_at": "2026-07-25T09:48:11.781374Z",
+  "analysis": {
+    "ticker": "TTWO",
+    "budget": 1000.0,
+    "currency": "EUR",
+    "thesis": "Upside thesis around the officially announced Grand Theft Auto VI release, without assuming that the catalyst guarantees a positive stock or option return.",
+    "horizon_days": [
+      365,
+      548
+    ],
+    "data_date": "2026-07-23T20:00:00Z",
+    "data_quality": "eod_bid_ask",
+    "holdout_status": "NOT_REACHED_AFTER_HARD_VETOES",
+    "total_trials": 4210
+  },
+  "verdict": "NO_TRADE",
+  "request": {
+    "object_type": "trade_request",
+    "request_id": "ttwo-gta6-1000eur-2026-07-25",
+    "ticker": "TTWO",
+    "as_of": "2026-07-25",
+    "currency": "EUR",
+    "budget": 1000.0,
+    "maximum_loss": 1000.0,
+    "directional_thesis": "bullish",
+    "thesis_summary": "Upside thesis around the officially announced Grand Theft Auto VI release, without assuming that the catalyst guarantees a positive stock or option return.",
+    "thesis_invalidation_conditions": [
+      "Official release timing moves outside the economic horizon.",
+      "Take-Two withdraws or materially reduces the relevant guidance.",
+      "No listed bounded-risk structure passes data, liquidity, and validation gates."
+    ],
+    "horizon_min_days": 365,
+    "horizon_max_days": 548,
+    "catalysts": [
+      {
+        "catalyst_id": "gta-vi-release-2026-11-19",
+        "name": "Grand Theft Auto VI announced release",
+        "start": "2026-11-19",
+        "end": "2026-11-19",
+        "source_ids": [
+          "take-two-q2-fy2026"
+        ]
+      }
+    ],
+    "allowed_risk": "bounded_only",
+    "allowed_structures": [
+      "long_call",
+      "long_put",
+      "bull_call_spread",
+      "bear_put_spread",
+      "call_butterfly",
+      "put_butterfly",
+      "call_broken_wing_butterfly",
+      "put_broken_wing_butterfly",
+      "call_calendar",
+      "put_calendar",
+      "call_diagonal",
+      "put_diagonal",
+      "long_straddle",
+      "long_strangle",
+      "iron_condor"
+    ],
+    "forbidden_structures": [
+      "uncovered_short_option",
+      "ratio_spread_with_unbounded_loss"
+    ],
+    "maximum_contracts": 4,
+    "existing_positions": [],
+    "event_constraints": [
+      "Back expiration must cover the catalyst.",
+      "Front calendar expiration must remain open beyond the selected time exit."
+    ],
+    "liquidity_policy": {
+      "policy_id": "screen-grade-eod-v1",
+      "minimum_open_interest": 20,
+      "minimum_volume": 0,
+      "maximum_relative_spread": 0.3,
+      "allow_missing_volume": true,
+      "provenance": "Legacy V7-V9 pre-registered screen policy; calibration remains required.",
+      "status": "calibration_required"
+    },
+    "execution_policy": {
+      "policy_id": "executable-sides-eod-v1",
+      "long_entry_side": "ask",
+      "short_entry_side": "bid",
+      "long_exit_side": "bid",
+      "short_exit_side": "ask",
+      "commission_per_contract_side": 0.65,
+      "slippage_per_contract_side": 0.05,
+      "quote_quality_required": "eod_bid_ask",
+      "preview_only": true,
+      "provenance": "IBKR commission/slippage assumptions require account-specific confirmation."
+    },
+    "maintenance_preferences": {
+      "allow_rolling": true,
+      "allow_capital_recovery": true,
+      "allow_scaling_out": true,
+      "review_frequency_days": 7
+    },
+    "data_refresh_policy": {
+      "policy_id": "marketdata-first-cache-fallback-v1",
+      "providers": [
+        "marketdata",
+        "alpaca",
+        "cache"
+      ],
+      "maximum_age_days": 7,
+      "allow_cache_fallback": true,
+      "marketdata_strike_limit": 40
+    },
+    "final_holdout_policy": {
+      "policy_id": "uncontaminated-holdout-required-v1",
+      "minimum_train_observations": 20,
+      "minimum_validation_observations": 8,
+      "minimum_test_observations": 8,
+      "minimum_holdout_observations": 4,
+      "contaminated_dataset_ids": [
+        "v7",
+        "v8",
+        "v9"
+      ],
+      "locked_holdout_id": null,
+      "provenance": "Pre-registered before this run; V7-V9 were already inspected."
+    },
+    "fx_rate_to_usd": 1.1435,
+    "fx_rate_as_of": "2026-07-17",
+    "safety_reserve_fraction": 0.05
+  },
+  "research_run": {
+    "object_type": "research_run",
+    "run_id": "ttwo-20260725T094810Z-b672ea46",
+    "started_at": "2026-07-25T09:48:10.946128Z",
+    "completed_at": "2026-07-25T09:48:11.755674Z",
+    "seed": 20260725,
+    "config_hash": "b672ea464d1858f0b0cdddc462c6549ea07c81051786e14d6383532a38a29be0",
+    "code_version": "b04324d61037486e6c7bc962cbd84b6c85046c7d",
+    "request_id": "ttwo-gta6-1000eur-2026-07-25",
+    "knowledge_hash": "4ffc25e7b0cab57155dd10386cd15c0a7609d2bc8933d86bd550203ddf20b9d3",
+    "data_snapshot_id": "snapshot-073eaf6528a0cb3d",
+    "total_trials": 4210,
+    "trials_by_stage": {
+      "generation": 2105,
+      "pruning": 2105
+    },
+    "status": "completed"
+  },
+  "candidates": [],
+  "pareto_candidate_ids": [],
+  "candidate_comparison": [
+    {
+      "candidate_id": "cand-bb8f287cd3b2ea82",
+      "architecture": "bull_call_spread",
+      "legs": [
+        {
+          "side": "long",
+          "quantity": 1,
+          "symbol": "TTWO280121C00280000",
+          "strike": 280.0,
+          "expiration": "2028-01-21"
+        },
+        {
+          "side": "short",
+          "quantity": 1,
+          "symbol": "TTWO280121C00290000",
+          "strike": 290.0,
+          "expiration": "2028-01-21"
+        }
+      ],
+      "maximum_loss_usd": 651.4,
+      "budget_remaining_request_currency": 430.3454,
+      "hard_vetoes": [
+        "COMBO_SPREAD_FAILED",
+        "LIQUIDITY_FAILED"
+      ],
+      "uncertainties": [
+        "synthetic_combo_relative_spread=3.200000",
+        "A timestamped broker combo quote can supersede the synthetic leg market."
+      ],
+      "status": "rejected_before_simulation"
+    },
+    {
+      "candidate_id": "cand-856f0dadd5d1abb5",
+      "architecture": "call_butterfly",
+      "legs": [
+        {
+          "side": "long",
+          "quantity": 1,
+          "symbol": "TTWO280121C00230000",
+          "strike": 230.0,
+          "expiration": "2028-01-21"
+        },
+        {
+          "side": "short",
+          "quantity": 2,
+          "symbol": "TTWO280121C00240000",
+          "strike": 240.0,
+          "expiration": "2028-01-21"
+        },
+        {
+          "side": "long",
+          "quantity": 1,
+          "symbol": "TTWO280121C00250000",
+          "strike": 250.0,
+          "expiration": "2028-01-21"
+        }
+      ],
+      "maximum_loss_usd": 732.8,
+      "budget_remaining_request_currency": 359.1605,
+      "hard_vetoes": [
+        "COMBO_SPREAD_FAILED",
+        "LIQUIDITY_FAILED"
+      ],
+      "uncertainties": [
+        "synthetic_combo_relative_spread=19.176471",
+        "A timestamped broker combo quote can supersede the synthetic leg market."
+      ],
+      "status": "rejected_before_simulation"
+    },
+    {
+      "candidate_id": "cand-399166d09dd52093",
+      "architecture": "call_broken_wing_butterfly",
+      "legs": [
+        {
+          "side": "long",
+          "quantity": 1,
+          "symbol": "TTWO280121C00250000",
+          "strike": 250.0,
+          "expiration": "2028-01-21"
+        },
+        {
+          "side": "short",
+          "quantity": 2,
+          "symbol": "TTWO280121C00270000",
+          "strike": 270.0,
+          "expiration": "2028-01-21"
+        },
+        {
+          "side": "long",
+          "quantity": 1,
+          "symbol": "TTWO280121C00280000",
+          "strike": 280.0,
+          "expiration": "2028-01-21"
+        }
+      ],
+      "maximum_loss_usd": 1072.8,
+      "budget_remaining_request_currency": 61.8277,
+      "hard_vetoes": [
+        "COMBO_SPREAD_FAILED",
+        "LIQUIDITY_FAILED"
+      ],
+      "uncertainties": [
+        "synthetic_combo_relative_spread=4.584615",
+        "A timestamped broker combo quote can supersede the synthetic leg market."
+      ],
+      "status": "rejected_before_simulation"
+    },
+    {
+      "candidate_id": "cand-68acde9e02a5c17c",
+      "architecture": "call_diagonal",
+      "legs": [
+        {
+          "side": "long",
+          "quantity": 1,
+          "symbol": "TTWO280121C00210000",
+          "strike": 210.0,
+          "expiration": "2028-01-21"
+        },
+        {
+          "side": "short",
+          "quantity": 1,
+          "symbol": "TTWO270617C00230000",
+          "strike": 230.0,
+          "expiration": "2027-06-17"
+        }
+      ],
+      "maximum_loss_usd": 2591.4,
+      "budget_remaining_request_currency": -1266.2003,
+      "hard_vetoes": [
+        "BUDGET_EXCEEDED",
+        "MAXIMUM_LOSS_EXCEEDED"
+      ],
+      "uncertainties": [
+        "synthetic_combo_relative_spread=0.292035",
+        "A timestamped broker combo quote can supersede the synthetic leg market."
+      ],
+      "status": "rejected_before_simulation"
+    },
+    {
+      "candidate_id": "cand-dca82847e69fa5fe",
+      "architecture": "call_calendar",
+      "legs": [
+        {
+          "side": "long",
+          "quantity": 1,
+          "symbol": "TTWO280121C00230000",
+          "strike": 230.0,
+          "expiration": "2028-01-21"
+        },
+        {
+          "side": "short",
+          "quantity": 1,
+          "symbol": "TTWO270115C00230000",
+          "strike": 230.0,
+          "expiration": "2027-01-15"
+        }
+      ],
+      "maximum_loss_usd": 2711.4,
+      "budget_remaining_request_currency": -1371.1412,
+      "hard_vetoes": [
+        "BUDGET_EXCEEDED",
+        "MAXIMUM_LOSS_EXCEEDED"
+      ],
+      "uncertainties": [
+        "synthetic_combo_relative_spread=0.263048",
+        "A timestamped broker combo quote can supersede the synthetic leg market."
+      ],
+      "status": "rejected_before_simulation"
+    }
+  ],
+  "no_trade_reasons": [
+    "no candidate survived structural pruning",
+    "BUDGET_EXCEEDED: 1952 of 2105 generated candidates",
+    "COMBO_SPREAD_FAILED: 1401 of 2105 generated candidates",
+    "LIQUIDITY_FAILED: 1565 of 2105 generated candidates",
+    "MAXIMUM_LOSS_EXCEEDED: 1912 of 2105 generated candidates",
+    "THESIS_INCOMPATIBLE: 1326 of 2105 generated candidates"
+  ],
+  "sources": [
+    {
+      "source_id": "natenberg-options-volatility-2015",
+      "author": "Sheldon Natenberg",
+      "title": "Option Volatility and Pricing",
+      "edition_or_date": "Second edition, 2015",
+      "chapter": "Strategy chapters",
+      "page": null,
+      "accessed_at": "2026-07-25",
+      "source_type": "book",
+      "uri": null,
+      "confidence": "medium",
+      "excerpt_hash": null
+    },
+    {
+      "source_id": "take-two-q2-fy2026",
+      "author": "Take-Two Interactive",
+      "title": "Fiscal second quarter 2026 results and GTA VI release timing",
+      "edition_or_date": "2025-11-06",
+      "chapter": null,
+      "page": null,
+      "accessed_at": "2026-07-25",
+      "source_type": "company",
+      "uri": "https://www.take2games.com/ir/news/take-two-interactive-software-inc-reports-results-fiscal-3",
+      "confidence": "high",
+      "excerpt_hash": null
+    },
+    {
+      "source_id": "ecb-eurusd-2026-07-17",
+      "author": "European Central Bank",
+      "title": "Dated EUR/USD reference rate used for budget normalization",
+      "edition_or_date": "2026-07-17",
+      "chapter": null,
+      "page": null,
+      "accessed_at": "2026-07-25",
+      "source_type": "official",
+      "uri": "https://data.ecb.europa.eu/currency-converter",
+      "confidence": "high",
+      "excerpt_hash": null
+    },
+    {
+      "source_id": "MARKETDATA-EOD-CHAIN-TTWO-20260723-20260725T093424Z",
+      "author": "MarketData.app",
+      "title": "Timestamped historical option-chain response",
+      "edition_or_date": "2026-07-23",
+      "chapter": null,
+      "page": null,
+      "accessed_at": "2026-07-25",
+      "source_type": "data_provider",
+      "uri": "https://www.marketdata.app/docs/api/options/chain/",
+      "confidence": "medium",
+      "excerpt_hash": null
+    }
+  ],
+  "assumptions": [
+    "Hard vetoes run before simulation, validation, Pareto, and scoring",
+    "The no-trade baseline is preferred to relaxing liquidity or budget"
+  ],
+  "contradictions": [],
+  "data_used": [
+    "data/alpaca/ttwo_calibration_dataset_2026-07-19.json",
+    "data/marketdata/snapshots/TTWO_2026-07-23.json"
+  ],
+  "limitations": [
+    "End-of-day bid/ask does not prove an intraday or simultaneous combo fill",
+    "Contract multiplier is normalized to 100 and must be rechecked with the broker",
+    "A live timestamped broker combo quote could differ from synthetic leg markets",
+    "Statistical validation was not reached because all structures failed earlier gates"
+  ],
+  "audit_files": [
+    "reports/latest/trial_registry.jsonl",
+    "reports/latest/data_snapshot_manifest.json",
+    "reports/latest/audit_log.json",
+    "reports/latest/ibkr_ticket_status.json"
+  ],
+  "visualization_files": [
+    "reports/latest/visualizations/payoff_at_expiration.svg",
+    "reports/latest/visualizations/pnl_distribution.svg",
+    "reports/latest/visualizations/representative_paths.svg",
+    "reports/latest/visualizations/strike_expiration_heatmap.svg",
+    "reports/latest/visualizations/cost_by_strike.svg",
+    "reports/latest/visualizations/probability_gain_by_strike.svg",
+    "reports/latest/visualizations/probability_loss_70_by_strike.svg",
+    "reports/latest/visualizations/expectation_by_profit_target.svg",
+    "reports/latest/visualizations/drawdown_by_profit_target.svg",
+    "reports/latest/visualizations/duration_by_profit_target.svg",
+    "reports/latest/visualizations/stop_sensitivity.svg",
+    "reports/latest/visualizations/dte_sensitivity.svg",
+    "reports/latest/visualizations/iv_sensitivity.svg",
+    "reports/latest/visualizations/pareto_frontier.svg",
+    "reports/latest/visualizations/local_stability.svg",
+    "reports/latest/visualizations/simulation_model_comparison.svg"
+  ],
+  "ibkr_ticket_path": null,
+  "order_capability": "forbidden"
+}

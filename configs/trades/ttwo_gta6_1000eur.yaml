@@ -1,0 +1,86 @@
+object_type: trade_request
+request_id: ttwo-gta6-1000eur-2026-07-25
+ticker: TTWO
+as_of: 2026-07-25
+currency: EUR
+budget: 1000
+maximum_loss: 1000
+directional_thesis: bullish
+thesis_summary: Upside thesis around the officially announced Grand Theft Auto VI release, without assuming that the catalyst guarantees a positive stock or option return.
+thesis_invalidation_conditions:
+  - Official release timing moves outside the economic horizon.
+  - Take-Two withdraws or materially reduces the relevant guidance.
+  - No listed bounded-risk structure passes data, liquidity, and validation gates.
+horizon_min_days: 365
+horizon_max_days: 548
+catalysts:
+  - catalyst_id: gta-vi-release-2026-11-19
+    name: Grand Theft Auto VI announced release
+    start: 2026-11-19
+    end: 2026-11-19
+    source_ids: [take-two-q2-fy2026]
+allowed_risk: bounded_only
+allowed_structures:
+  - long_call
+  - long_put
+  - bull_call_spread
+  - bear_put_spread
+  - call_butterfly
+  - put_butterfly
+  - call_broken_wing_butterfly
+  - put_broken_wing_butterfly
+  - call_calendar
+  - put_calendar
+  - call_diagonal
+  - put_diagonal
+  - long_straddle
+  - long_strangle
+  - iron_condor
+forbidden_structures: [uncovered_short_option, ratio_spread_with_unbounded_loss]
+maximum_contracts: 4
+existing_positions: []
+event_constraints:
+  - Back expiration must cover the catalyst.
+  - Front calendar expiration must remain open beyond the selected time exit.
+liquidity_policy:
+  policy_id: screen-grade-eod-v1
+  minimum_open_interest: 20
+  minimum_volume: 0
+  maximum_relative_spread: 0.30
+  allow_missing_volume: true
+  provenance: Legacy V7-V9 pre-registered screen policy; calibration remains required.
+  status: calibration_required
+execution_policy:
+  policy_id: executable-sides-eod-v1
+  long_entry_side: ask
+  short_entry_side: bid
+  long_exit_side: bid
+  short_exit_side: ask
+  commission_per_contract_side: 0.65
+  slippage_per_contract_side: 0.05
+  quote_quality_required: eod_bid_ask
+  preview_only: true
+  provenance: IBKR commission/slippage assumptions require account-specific confirmation.
+maintenance_preferences:
+  allow_rolling: true
+  allow_capital_recovery: true
+  allow_scaling_out: true
+  review_frequency_days: 7
+data_refresh_policy:
+  policy_id: marketdata-first-cache-fallback-v1
+  providers: [marketdata, alpaca, cache]
+  maximum_age_days: 7
+  allow_cache_fallback: true
+  marketdata_strike_limit: 40
+final_holdout_policy:
+  policy_id: uncontaminated-holdout-required-v1
+  minimum_train_observations: 20
+  minimum_validation_observations: 8
+  minimum_test_observations: 8
+  minimum_holdout_observations: 4
+  contaminated_dataset_ids: [v7, v8, v9]
+  locked_holdout_id: null
+  provenance: Pre-registered before this run; V7-V9 were already inspected.
+fx_rate_to_usd: 1.1435
+fx_rate_as_of: 2026-07-17
+safety_reserve_fraction: 0.05

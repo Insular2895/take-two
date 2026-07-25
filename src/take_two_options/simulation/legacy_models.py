@@ -1,4 +1,4 @@
-"""Seeded terminal-price simulations for explicit research models."""
+"""Legacy V2 seeded terminal-price models kept for non-regression."""
 
 from __future__ import annotations
 

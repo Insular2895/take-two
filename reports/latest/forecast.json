@@ -1,0 +1,33 @@
+{
+  "ticker": "TTWO",
+  "as_of": "2026-07-23T20:00:00Z",
+  "horizon_days": 180,
+  "regime": "high_volatility",
+  "models": [
+    {
+      "model_id": "gbm_historical",
+      "calibration_status": "calibrated",
+      "observations": 615,
+      "annualized_volatility": 0.29657652768631904,
+      "warnings": []
+    },
+    {
+      "model_id": "conditional_historical_bootstrap",
+      "calibration_status": "calibrated",
+      "observations": 615,
+      "annualized_volatility": 0.29657652768631904,
+      "warnings": []
+    }
+  ],
+  "source_ids": [
+    "ALPACA-STOCK-BARS-TTWO-20260719T112124Z"
+  ],
+  "assumptions": [
+    "Models are evaluated separately; no fixed ensemble weights are imposed",
+    "Only observations available by the run cutoff are used"
+  ],
+  "limitations": [
+    "Historical returns do not encode a causal GTA VI fundamental forecast",
+    "A distribution forecast does not validate an option strategy"
+  ]
+}

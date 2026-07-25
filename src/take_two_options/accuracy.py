@@ -370,18 +370,9 @@ def generate_accuracy_suite_spec(
                     multiplier=config.multiplier,
                     commission_per_contract_per_side=config.commission_per_contract_per_side,
                     slippage_per_contract_per_side=config.slippage_per_contract_per_side,
-                    minimum_train_observations=min(
-                        experiment.minimum_train_observations,
-                        sum(item.split == "train" for item in observations),
-                    ),
-                    minimum_test_observations=min(
-                        experiment.minimum_test_observations,
-                        sum(item.split == "test" for item in observations),
-                    ),
-                    minimum_holdout_observations=min(
-                        experiment.minimum_holdout_observations,
-                        sum(item.split == "holdout" for item in observations),
-                    ),
+                    minimum_train_observations=experiment.minimum_train_observations,
+                    minimum_test_observations=experiment.minimum_test_observations,
+                    minimum_holdout_observations=experiment.minimum_holdout_observations,
                     minimum_coverage_ratio=config.minimum_coverage_ratio,
                     minimum_test_median_return=config.minimum_test_median_return,
                     maximum_test_drawdown=config.maximum_test_drawdown,

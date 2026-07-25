@@ -12,11 +12,14 @@ Toutes les fixtures sont synthetiques et deterministes :
   ses symboles OCC, multiplicateurs, taux et dividendes doivent etre verifies avant ingestion.
 - `marketdata_tt_options_panel_v1.json` definit 10 observations walk-forward ; les quotes reelles
   sont telechargees depuis MarketData.app et restent hors Git.
-- `marketdata_tt_options_accuracy_v7_generator.json` reproduit la campagne de precision V7.
-- `marketdata_tt_options_opportunity_v8_generator.json` definit les familles V8, les quantites,
+- `experiments/legacy/v7/fixtures/marketdata_tt_options_accuracy_v7_generator.json`
+  reproduit la campagne de precision V7.
+- `experiments/legacy/v8/fixtures/marketdata_tt_options_opportunity_v8_generator.json`
+  definit les familles V8, les quantites,
   profils delta/moneyness, echeances avant/arriere et politiques TP/SL/time ; il genere une spec,
   pas des prix de marche.
-- `marketdata_tt_options_budget_v9_generator.json` ajoute les plans `single_long` et
+- `experiments/legacy/v9/fixtures/marketdata_tt_options_budget_v9_generator.json`
+  ajoute les plans `single_long` et
   `staged_three`, leurs poches en EUR, le taux EUR/USD date et les recettes court/moyen/long.
 
 Leurs valeurs de spot, chaine, volatilite, scenarios, probabilites, frais et marge ne sont ni live

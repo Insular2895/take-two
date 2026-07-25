@@ -1,0 +1,2660 @@
+{
+  "schema_version": "1.0",
+  "compiled_at": "2026-07-25T09:48:10.969179Z",
+  "knowledge_hash": "4ffc25e7b0cab57155dd10386cd15c0a7609d2bc8933d86bd550203ddf20b9d3",
+  "rules": [
+    {
+      "rule_id": "compiled:executable-option-sides-v1",
+      "source_knowledge_id": "executable-option-sides-v1",
+      "condition": "listed option quote is ordered and positive",
+      "action": "use ask for long entry, bid for short entry, bid for long exit, and ask for short exit",
+      "parameter_values": {},
+      "parameter_origins": {},
+      "source_ids": [
+        "take-two-v9-reviewed-corpus"
+      ],
+      "blocking_reasons": []
+    },
+    {
+      "rule_id": "compiled:bounded-risk-only-v1",
+      "source_knowledge_id": "bounded-risk-only-v1",
+      "condition": "trade request allowed_risk equals bounded_only",
+      "action": "reject every candidate whose maximum loss is unknown or unbounded",
+      "parameter_values": {},
+      "parameter_origins": {},
+      "source_ids": [
+        "natenberg-options-volatility-2015",
+        "take-two-v9-reviewed-corpus"
+      ],
+      "blocking_reasons": []
+    },
+    {
+      "rule_id": "compiled:configured-minimums-never-lowered-v1",
+      "source_knowledge_id": "configured-minimums-never-lowered-v1",
+      "condition": "a validation gate declares a minimum sample size",
+      "action": "return INSUFFICIENT_DATA when available observations are below the configured minimum",
+      "parameter_values": {},
+      "parameter_origins": {},
+      "source_ids": [
+        "take-two-v9-reviewed-corpus"
+      ],
+      "blocking_reasons": []
+    }
+  ],
+  "recipes": [
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "long-call-v1",
+      "architecture": "long_call",
+      "name": "Long call, including long-dated maturity classes",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "bullish"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_call",
+          "option_type": "call",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "any"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Standard listed equity-option contract semantics are verified before use.",
+        "Experimental search grids are not claimed to be profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "bid": "USD_per_share",
+        "ask": "USD_per_share",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Maximum loss is calculated and does not exceed the trade request.",
+        "Every leg is actually listed and passes the configured liquidity policy."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Early assignment and pin risk require human review for short American options.",
+        "Leg-by-leg quotes do not establish a simultaneous combo fill."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds",
+        "stable sizing fraction"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": null,
+      "moneyness": {
+        "minimum": 0.7,
+        "maximum": 1.3,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": null,
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "long-put-v1",
+      "architecture": "long_put",
+      "name": "Long put, including long-dated maturity classes",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "bearish"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_put",
+          "option_type": "put",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "any"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Standard listed equity-option contract semantics are verified before use.",
+        "Experimental search grids are not claimed to be profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "bid": "USD_per_share",
+        "ask": "USD_per_share",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Maximum loss is calculated and does not exceed the trade request.",
+        "Every leg is actually listed and passes the configured liquidity policy."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Early assignment and pin risk require human review for short American options.",
+        "Leg-by-leg quotes do not establish a simultaneous combo fill."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds",
+        "stable sizing fraction"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": null,
+      "moneyness": {
+        "minimum": 0.7,
+        "maximum": 1.3,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": null,
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "bull-call-spread-v1",
+      "architecture": "bull_call_spread",
+      "name": "Bull call spread",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "bullish"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_lower_call",
+          "option_type": "call",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "lower"
+        },
+        {
+          "leg_id": "short_upper_call",
+          "option_type": "call",
+          "side": "short",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "upper"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Standard listed equity-option contract semantics are verified before use.",
+        "Experimental search grids are not claimed to be profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "bid": "USD_per_share",
+        "ask": "USD_per_share",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Maximum loss is calculated and does not exceed the trade request.",
+        "Every leg is actually listed and passes the configured liquidity policy."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Early assignment and pin risk require human review for short American options.",
+        "Leg-by-leg quotes do not establish a simultaneous combo fill."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds",
+        "stable sizing fraction"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": null,
+      "moneyness": {
+        "minimum": 0.7,
+        "maximum": 1.3,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0,
+          30.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "bear-put-spread-v1",
+      "architecture": "bear_put_spread",
+      "name": "Bear put spread",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "bearish"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_upper_put",
+          "option_type": "put",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "upper"
+        },
+        {
+          "leg_id": "short_lower_put",
+          "option_type": "put",
+          "side": "short",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "lower"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Standard listed equity-option contract semantics are verified before use.",
+        "Experimental search grids are not claimed to be profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "bid": "USD_per_share",
+        "ask": "USD_per_share",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Maximum loss is calculated and does not exceed the trade request.",
+        "Every leg is actually listed and passes the configured liquidity policy."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Early assignment and pin risk require human review for short American options.",
+        "Leg-by-leg quotes do not establish a simultaneous combo fill."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds",
+        "stable sizing fraction"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": null,
+      "moneyness": {
+        "minimum": 0.7,
+        "maximum": 1.3,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0,
+          30.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "call-butterfly-v1",
+      "architecture": "call_butterfly",
+      "name": "Symmetric call butterfly",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "neutral",
+        "bullish"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_lower_call",
+          "option_type": "call",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "lower"
+        },
+        {
+          "leg_id": "short_center_calls",
+          "option_type": "call",
+          "side": "short",
+          "quantity_ratio": 2,
+          "expiration_role": "same",
+          "strike_role": "center"
+        },
+        {
+          "leg_id": "long_upper_call",
+          "option_type": "call",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "upper"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Standard listed equity-option contract semantics are verified before use.",
+        "Experimental search grids are not claimed to be profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "bid": "USD_per_share",
+        "ask": "USD_per_share",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Maximum loss is calculated and does not exceed the trade request.",
+        "Every leg is actually listed and passes the configured liquidity policy."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Early assignment and pin risk require human review for short American options.",
+        "Leg-by-leg quotes do not establish a simultaneous combo fill."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds",
+        "stable sizing fraction"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": null,
+      "moneyness": {
+        "minimum": 0.7,
+        "maximum": 1.3,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "put-butterfly-v1",
+      "architecture": "put_butterfly",
+      "name": "Symmetric put butterfly",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "neutral",
+        "bearish"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_lower_put",
+          "option_type": "put",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "lower"
+        },
+        {
+          "leg_id": "short_center_puts",
+          "option_type": "put",
+          "side": "short",
+          "quantity_ratio": 2,
+          "expiration_role": "same",
+          "strike_role": "center"
+        },
+        {
+          "leg_id": "long_upper_put",
+          "option_type": "put",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "upper"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Standard listed equity-option contract semantics are verified before use.",
+        "Experimental search grids are not claimed to be profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "bid": "USD_per_share",
+        "ask": "USD_per_share",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Maximum loss is calculated and does not exceed the trade request.",
+        "Every leg is actually listed and passes the configured liquidity policy."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Early assignment and pin risk require human review for short American options.",
+        "Leg-by-leg quotes do not establish a simultaneous combo fill."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds",
+        "stable sizing fraction"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": null,
+      "moneyness": {
+        "minimum": 0.7,
+        "maximum": 1.3,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "call-broken-wing-butterfly-v1",
+      "architecture": "call_broken_wing_butterfly",
+      "name": "Bounded-risk call broken-wing butterfly",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "neutral",
+        "bullish"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_lower_call",
+          "option_type": "call",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "lower"
+        },
+        {
+          "leg_id": "short_center_calls",
+          "option_type": "call",
+          "side": "short",
+          "quantity_ratio": 2,
+          "expiration_role": "same",
+          "strike_role": "center"
+        },
+        {
+          "leg_id": "long_upper_call",
+          "option_type": "call",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "upper"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Standard listed equity-option contract semantics are verified before use.",
+        "Experimental search grids are not claimed to be profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "bid": "USD_per_share",
+        "ask": "USD_per_share",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Maximum loss is calculated and does not exceed the trade request.",
+        "Every leg is actually listed and passes the configured liquidity policy."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Early assignment and pin risk require human review for short American options.",
+        "Leg-by-leg quotes do not establish a simultaneous combo fill."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds",
+        "stable sizing fraction"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": null,
+      "moneyness": {
+        "minimum": 0.7,
+        "maximum": 1.3,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "put-broken-wing-butterfly-v1",
+      "architecture": "put_broken_wing_butterfly",
+      "name": "Bounded-risk put broken-wing butterfly",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "neutral",
+        "bearish"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_lower_put",
+          "option_type": "put",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "lower"
+        },
+        {
+          "leg_id": "short_center_puts",
+          "option_type": "put",
+          "side": "short",
+          "quantity_ratio": 2,
+          "expiration_role": "same",
+          "strike_role": "center"
+        },
+        {
+          "leg_id": "long_upper_put",
+          "option_type": "put",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "upper"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Standard listed equity-option contract semantics are verified before use.",
+        "Experimental search grids are not claimed to be profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "bid": "USD_per_share",
+        "ask": "USD_per_share",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Maximum loss is calculated and does not exceed the trade request.",
+        "Every leg is actually listed and passes the configured liquidity policy."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Early assignment and pin risk require human review for short American options.",
+        "Leg-by-leg quotes do not establish a simultaneous combo fill."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds",
+        "stable sizing fraction"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": null,
+      "moneyness": {
+        "minimum": 0.7,
+        "maximum": 1.3,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "call-calendar-v1",
+      "architecture": "call_calendar",
+      "name": "Long call calendar",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "neutral",
+        "bullish"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_back_call",
+          "option_type": "call",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "back",
+          "strike_role": "any"
+        },
+        {
+          "leg_id": "short_front_call",
+          "option_type": "call",
+          "side": "short",
+          "quantity_ratio": 1,
+          "expiration_role": "front",
+          "strike_role": "any"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Experimental grids require calibration; they are not profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Every leg is listed and maximum loss is explicitly bounded."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Term-structure changes",
+        "early assignment",
+        "and non-simultaneous combo fills."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "width",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": {
+        "minimum": 67,
+        "maximum": 360,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "moneyness": {
+        "minimum": 0.75,
+        "maximum": 1.25,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0,
+          30.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "put-calendar-v1",
+      "architecture": "put_calendar",
+      "name": "Long put calendar",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "neutral",
+        "bearish"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_back_put",
+          "option_type": "put",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "back",
+          "strike_role": "any"
+        },
+        {
+          "leg_id": "short_front_put",
+          "option_type": "put",
+          "side": "short",
+          "quantity_ratio": 1,
+          "expiration_role": "front",
+          "strike_role": "any"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Experimental grids require calibration; they are not profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Every leg is listed and maximum loss is explicitly bounded."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Term-structure changes",
+        "early assignment",
+        "and non-simultaneous combo fills."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "width",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": {
+        "minimum": 67,
+        "maximum": 360,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "moneyness": {
+        "minimum": 0.75,
+        "maximum": 1.25,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0,
+          30.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "call-diagonal-v1",
+      "architecture": "call_diagonal",
+      "name": "Bounded-risk call diagonal",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "bullish"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_back_call",
+          "option_type": "call",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "back",
+          "strike_role": "lower"
+        },
+        {
+          "leg_id": "short_front_call",
+          "option_type": "call",
+          "side": "short",
+          "quantity_ratio": 1,
+          "expiration_role": "front",
+          "strike_role": "upper"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Experimental grids require calibration; they are not profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Every leg is listed and maximum loss is explicitly bounded."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Term-structure changes",
+        "early assignment",
+        "and non-simultaneous combo fills."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "width",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": {
+        "minimum": 67,
+        "maximum": 360,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "moneyness": {
+        "minimum": 0.75,
+        "maximum": 1.25,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0,
+          30.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "put-diagonal-v1",
+      "architecture": "put_diagonal",
+      "name": "Bounded-risk put diagonal",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "bearish"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_back_put",
+          "option_type": "put",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "back",
+          "strike_role": "upper"
+        },
+        {
+          "leg_id": "short_front_put",
+          "option_type": "put",
+          "side": "short",
+          "quantity_ratio": 1,
+          "expiration_role": "front",
+          "strike_role": "lower"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Experimental grids require calibration; they are not profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Every leg is listed and maximum loss is explicitly bounded."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Term-structure changes",
+        "early assignment",
+        "and non-simultaneous combo fills."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "width",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": {
+        "minimum": 67,
+        "maximum": 360,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "moneyness": {
+        "minimum": 0.75,
+        "maximum": 1.25,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0,
+          30.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "long-straddle-v1",
+      "architecture": "long_straddle",
+      "name": "Long straddle",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "volatile"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_call",
+          "option_type": "call",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "atm"
+        },
+        {
+          "leg_id": "long_put",
+          "option_type": "put",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "atm"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Experimental grids require calibration; they are not profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Every leg is listed and maximum loss is explicitly bounded."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Term-structure changes",
+        "early assignment",
+        "and non-simultaneous combo fills."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "width",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": null,
+      "moneyness": {
+        "minimum": 0.75,
+        "maximum": 1.25,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0,
+          30.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "long-strangle-v1",
+      "architecture": "long_strangle",
+      "name": "Long strangle",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "volatile"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_otm_call",
+          "option_type": "call",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "otm"
+        },
+        {
+          "leg_id": "long_otm_put",
+          "option_type": "put",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "otm"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Experimental grids require calibration; they are not profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Every leg is listed and maximum loss is explicitly bounded."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Term-structure changes",
+        "early assignment",
+        "and non-simultaneous combo fills."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "width",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": null,
+      "moneyness": {
+        "minimum": 0.75,
+        "maximum": 1.25,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0,
+          30.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    },
+    {
+      "object_type": "strategy_recipe",
+      "recipe_id": "iron-condor-v1",
+      "architecture": "iron_condor",
+      "name": "Defined-risk iron condor",
+      "lifecycle": "COMPILABLE",
+      "market_validity": "THEORETICALLY_VALID",
+      "empirical_status": "NOT_TESTED",
+      "execution_status": "RESEARCH_ONLY",
+      "allowed_theses": [
+        "neutral"
+      ],
+      "legs": [
+        {
+          "leg_id": "long_lower_put",
+          "option_type": "put",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "lower"
+        },
+        {
+          "leg_id": "short_upper_put",
+          "option_type": "put",
+          "side": "short",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "center"
+        },
+        {
+          "leg_id": "short_lower_call",
+          "option_type": "call",
+          "side": "short",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "center"
+        },
+        {
+          "leg_id": "long_upper_call",
+          "option_type": "call",
+          "side": "long",
+          "quantity_ratio": 1,
+          "expiration_role": "same",
+          "strike_role": "upper"
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "natenberg-options-volatility-2015",
+          "author": "Sheldon Natenberg",
+          "title": "Option Volatility and Pricing",
+          "edition_or_date": "Second edition, 2015",
+          "chapter": "Strategy chapters",
+          "page": null,
+          "accessed_at": "2026-07-25",
+          "source_type": "book",
+          "uri": null,
+          "confidence": "medium",
+          "excerpt_hash": null
+        }
+      ],
+      "assumptions": [
+        "Experimental grids require calibration; they are not profitable book rules."
+      ],
+      "variables": [
+        "strike",
+        "expiration",
+        "bid",
+        "ask",
+        "quantity",
+        "exit_policy"
+      ],
+      "units": {
+        "strike": "USD_per_share",
+        "expiration": "date",
+        "quantity": "whole_contracts"
+      },
+      "conditions": [
+        "Every leg is listed and maximum loss is explicitly bounded."
+      ],
+      "action": "enumerate all listed combinations inside the declared search ranges",
+      "exceptions": [],
+      "risks": [
+        "Term-structure changes",
+        "early assignment",
+        "and non-simultaneous combo fills."
+      ],
+      "contradictions": [],
+      "parameters_provided": [],
+      "parameters_missing": [
+        "profitable exit thresholds"
+      ],
+      "parameters_to_calibrate": [
+        "profit target",
+        "stop",
+        "holding period",
+        "width",
+        "slippage"
+      ],
+      "validation_history": [
+        {
+          "checked_at": "2026-07-25",
+          "status": "passed",
+          "method": "structural payoff and modern-contract validation",
+          "source_ids": [
+            "natenberg-options-volatility-2015"
+          ],
+          "notes": "Structural validity only; empirical edge remains NOT_TESTED."
+        }
+      ],
+      "dte": {
+        "minimum": 30,
+        "maximum": 730,
+        "values": [],
+        "unit": "calendar_days",
+        "origin": "sourced",
+        "source_id": "natenberg-options-volatility-2015"
+      },
+      "front_dte": null,
+      "moneyness": {
+        "minimum": 0.75,
+        "maximum": 1.25,
+        "values": [],
+        "unit": "strike_over_spot",
+        "origin": "experimental",
+        "source_id": null
+      },
+      "spread_width": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          5.0,
+          10.0,
+          20.0,
+          30.0
+        ],
+        "unit": "USD",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "profit_targets": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.5,
+          0.8,
+          1.0
+        ],
+        "unit": "return_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "stops": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          0.4,
+          0.55,
+          0.7
+        ],
+        "unit": "loss_on_maximum_loss",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "holding_days": {
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          60.0,
+          120.0,
+          180.0
+        ],
+        "unit": "calendar_days",
+        "origin": "calibration_required",
+        "source_id": null
+      },
+      "rolling_rules": [
+        "none",
+        "review_at_30_dte"
+      ],
+      "capital_recovery_rules": [
+        "none",
+        "close_whole_contracts_only"
+      ],
+      "bounded_risk_required": true
+    }
+  ],
+  "blocked_items": {},
+  "contradictions": []
+}

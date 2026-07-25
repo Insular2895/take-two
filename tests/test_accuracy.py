@@ -62,3 +62,39 @@ def test_accuracy_generator_builds_rolling_purged_holdout_panels() -> None:
     assert test_signal > train_exit + timedelta(days=1)
     assert panel.multiple_testing_trials == 4
     assert suite.current_scan.expirations
+
+
+def test_accuracy_generator_never_lowers_configured_sample_minimums() -> None:
+    sessions = _sessions()[:40]
+    curve = TreasuryYieldCurve(
+        [TreasuryCurveObservation(sessions[0], {91: 0.04, 182: 0.041, 365: 0.042})]
+    )
+    config = AccuracyGeneratorSpec(
+        ticker="TTWO",
+        start_date=sessions[0],
+        end_date=sessions[-1],
+        profiles=[
+            AccuracyDeltaProfile(
+                profile_id="balanced", long_delta_target=0.55, short_delta_target=0.30
+            )
+        ],
+        experiments=[
+            AccuracyExperimentTemplate(
+                experiment_id="sparse",
+                holding_sessions=5,
+                target_dte=150,
+                profile_ids=["balanced"],
+                minimum_train_observations=50,
+                minimum_test_observations=20,
+                minimum_holdout_observations=10,
+            )
+        ],
+        current_quote_date=sessions[-1],
+    )
+
+    panel = generate_accuracy_suite_spec(config, sessions, curve).panels[0]
+
+    assert panel.minimum_train_observations == 50
+    assert panel.minimum_test_observations == 20
+    assert panel.minimum_holdout_observations == 10
+    assert len(panel.observations) < 80

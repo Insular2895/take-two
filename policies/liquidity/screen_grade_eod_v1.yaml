@@ -1,0 +1,6 @@
+policy_id: screen-grade-eod-v1
+status: calibration_required
+minimum_open_interest: 20
+minimum_volume: 0
+maximum_relative_spread: 0.30
+provenance: Pre-registered V7-V9 exploratory policy; not universal.

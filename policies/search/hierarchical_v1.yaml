@@ -1,0 +1,9 @@
+policy_id: hierarchical-search-v1
+status: pre_registered
+coarse_paths: 256
+fine_paths: 512
+final_paths_initial: 1000
+final_paths_maximum: 8000
+coarse_maximum_per_architecture: 2
+fine_maximum_base_candidates: 8
+provenance: Runtime-control policy recorded before the run; not a profitability rule.
