@@ -49,3 +49,32 @@ ThesisScanRequest + dated policy + chain
 
 The detailed contract is in
 [`V10_BULLISH_THESIS_SCANNER.md`](V10_BULLISH_THESIS_SCANNER.md).
+
+V11 is a modular intelligence overlay. It consumes the immutable V10.1 report
+and does not replace structure construction:
+
+```text
+V10.1 report + V11 policy + normalized events + optional factor history
+                                |
+             provenance-aware data hub and connector status
+                                |
+      deduplicated/capped Bayesian scenarios -> four regime weights
+                                |
+  GBM / Dupire local vol / Heston / Heston+jumps path ensembles
+                                |
+ conditional option repricing + exits + multi-model robustness
+                                |
+       cost/adverse/rupture/CVaR/holdout/paper promotion gates
+                                |
+ exact integer allocation under budget/loss/contracts/liquidity
+                                |
+      cash/no-trade baseline + explainable position monitoring
+                                |
+ JSON + Markdown + HTML + blocked preview-only IBKR artifacts
+```
+
+The V11 package is `intelligence`. Its modules separate schemas, data
+connectors, Bayesian updates, covariance, stochastic paths, local-volatility
+calibration, valuation, validation, optimization, execution previews,
+monitoring, and reporting. See
+[`V11_PROBABILISTIC_STRATEGY_INTELLIGENCE.md`](V11_PROBABILISTIC_STRATEGY_INTELLIGENCE.md).

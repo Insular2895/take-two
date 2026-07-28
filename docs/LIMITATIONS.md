@@ -28,5 +28,33 @@
   unbounded/margin-unknown structure is blocked.
 - `LEAPS call` is a maturity label on `long_call`, not a fourth architecture.
   Long calls still have contractually unbounded upside but bounded premium risk.
+- V11 is a probabilistic research overlay, not a validated probability engine.
+  Its default priors, likelihoods, evidence caps, regime drifts, jump
+  parameters, and Heston parameters are explicit experimental assumptions.
+- The default V11 run inherits a synthetic V10.1 chain. Its Dupire
+  finite-difference surface is therefore `partial`; unstable nodes fall back
+  to observed IV and no global static-arbitrage calibration is claimed.
+- The V11 path repricer uses conditional Black-Scholes between V10.1 QuantLib
+  American control points. Early exercise, discrete dividends, pin risk, and
+  assignment still require the V10.1 controls and broker review.
+- Without an aligned point-in-time factor file, covariance is limited to the
+  available TTWO return series. It cannot infer missing Nasdaq, peer, rate, FX,
+  volume, IV, OI, sentiment, news, or catalyst factors.
+- Exact integer enumeration solves only the configured finite candidate pool
+  and contract cap. Gradient/Hessian diagnostics describe the smooth
+  mean-variance surrogate, not CVaR or discrete constraints.
+- Existing V7–V9 holdouts remain contaminated. V11 cannot promote a candidate
+  without a new nested walk-forward sample, untouched holdout, and paper run.
+- SEC, FRED, Take-Two RSS, Google Trends alpha, and IBKR/OPRA connectors are
+  opt-in read-only ports. The exchange-calendar port is also unconfigured by
+  default and therefore reported as a missing required series. The default run
+  does not contact external providers. Credentials, fair-access limits, data
+  entitlements, terms, and production retry policies remain deployment
+  responsibilities.
+- A leg-level quote is not an executable combo quote. Some IBKR smart combo
+  orders do not support a what-if check, so the absence of a broker what-if
+  response must block promotion rather than weaken the gate.
+- Position monitoring emits human-readable advice only. It cannot submit,
+  modify, cancel, roll, exercise, or partially close a position.
 
 See [V10 known limits](known_limits.md) for scanner-specific details.

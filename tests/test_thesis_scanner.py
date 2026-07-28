@@ -396,14 +396,15 @@ def test_preview_cannot_transmit_and_fixture_builds_standalone_dashboard(
     assert "placeOrder" not in html
 
 
-def test_readme_ends_with_read_only_ibkr_opra_roadmap() -> None:
+def test_readme_ends_with_v11_read_only_ibkr_opra_boundary() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert "## Roadmap — dernière étape : données live IBKR/OPRA" in readme
+    assert "## Données live IBKR/OPRA — frontière V11" in readme
     assert "OPRA est le flux de données temps réel des options américaines" in readme
     assert "OPRA\n  n’exécute aucun ordre" in readme
-    assert "IBKR TWS ou IB\n  Gateway" in readme
+    assert "adaptateur TWS/IB Gateway injecté" in readme
+    assert "session IBKR/OPRA autorisée" in readme
     assert "transmit=false" in readme
     assert "what_if=true" in readme
     assert readme.rstrip().endswith(
-        "lecture seule et valider les quotes combo."
+        "valider fraîcheur, droits, contrats, quotes combo, commissions et marges."
     )

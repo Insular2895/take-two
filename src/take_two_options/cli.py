@@ -10,6 +10,9 @@ from typing import Annotated
 import typer
 
 from take_two_options.decision.pipeline import analyze_trade
+from take_two_options.intelligence.monitoring import monitor_position as assess_position
+from take_two_options.intelligence.pipeline import run_intelligence
+from take_two_options.intelligence.schemas import PositionDossier, PositionMonitorInput
 from take_two_options.knowledge.compiler import compile_knowledge
 from take_two_options.knowledge.loader import KnowledgeLoadError, load_knowledge
 from take_two_options.knowledge.schemas import DecisionReport
@@ -141,6 +144,60 @@ def thesis_scan(
         f"{report.technically_admissible_candidates} "
         f"json={json_out} markdown={markdown_out} dashboard={html_out}; "
         "transmit=false"
+    )
+
+
+@app.command("intelligence-run")
+def intelligence_run(
+    base_report: Annotated[
+        Path,
+        typer.Option(
+            "--base-report",
+            exists=True,
+            dir_okay=False,
+            readable=True,
+        ),
+    ] = Path("reports/examples/v10_thesis_scan.json"),
+    policy: Annotated[
+        Path,
+        typer.Option("--policy", exists=True, dir_okay=False, readable=True),
+    ] = Path("configs/intelligence/v11.yaml"),
+    events: Annotated[
+        Path | None,
+        typer.Option("--events", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    factor_history: Annotated[
+        Path | None,
+        typer.Option("--factor-history", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    json_out: Annotated[Path, typer.Option("--json-out")] = Path(
+        "reports/v11/latest.json"
+    ),
+    markdown_out: Annotated[Path, typer.Option("--markdown-out")] = Path(
+        "reports/v11/latest.md"
+    ),
+    html_out: Annotated[Path, typer.Option("--html-out")] = Path(
+        "reports/v11/latest.html"
+    ),
+) -> None:
+    """Run V11 probabilistic intelligence over a stable V10.1 structure report."""
+    try:
+        report = run_intelligence(
+            base_report_path=base_report,
+            policy_path=policy,
+            events_path=events,
+            factor_history_path=factor_history,
+            json_out=json_out,
+            markdown_out=markdown_out,
+            html_out=html_out,
+        )
+    except (OSError, RuntimeError, ValueError) as error:
+        typer.echo(f"V11 intelligence failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(
+        f"{report.posture.value}: models={len(report.model_metrics)} "
+        f"allocations={len(report.allocations)} report={json_out}; "
+        "transmit=false; order capability forbidden"
     )
 
 
@@ -308,6 +365,38 @@ def position_monitor(
     output_path = report_dir / "position_monitor.json"
     output_path.write_text(json.dumps(output, indent=2), encoding="utf-8")
     typer.echo(f"position monitor={output_path}; order capability forbidden")
+
+
+@position_app.command("assess")
+def position_assess(
+    dossier: Annotated[
+        Path,
+        typer.Option("--dossier", exists=True, dir_okay=False, readable=True),
+    ],
+    current: Annotated[
+        Path,
+        typer.Option("--current", exists=True, dir_okay=False, readable=True),
+    ],
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/position_monitor.json"
+    ),
+) -> None:
+    """Evaluate an open-position dossier and emit an explainable advisory action."""
+    try:
+        stored = PositionDossier.model_validate_json(dossier.read_text(encoding="utf-8"))
+        snapshot = PositionMonitorInput.model_validate_json(
+            current.read_text(encoding="utf-8")
+        )
+        report = assess_position(stored, snapshot)
+    except (OSError, ValueError) as error:
+        typer.echo(f"Position assessment failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(report.model_dump_json(indent=2), encoding="utf-8")
+    typer.echo(
+        f"position action={report.action.value} report={output}; "
+        "human confirmation required; order capability forbidden"
+    )
 
 
 if __name__ == "__main__":

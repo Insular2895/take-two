@@ -39,3 +39,19 @@ V10 preserves the same boundary. Its ticket model hard-codes `mode=preview`,
 `transmit=false`, `what_if=true`, `human_confirmation_required=true`, and
 `order_capability=forbidden`. The scanner package contains no submit, modify,
 cancel, or exercise function.
+
+V11 preserves and narrows that boundary again:
+
+1. the IBKR/OPRA adapter protocol exposes market-data snapshots only;
+2. any injected object advertising order methods is rejected;
+3. previews hard-code `transmit=false`, `what_if=true`,
+   `human_confirmation_required=true`, and `order_capability=forbidden`;
+4. missing or stale combo quotes, permissions, `conId`, margin, commissions, or
+   what-if support remain blockers;
+5. integer optimization always includes cash/`NO_TRADE`, never forces full
+   deployment, and cannot override validation gates;
+6. the position monitor emits advice but performs no broker mutation.
+
+Changing this execution boundary is a distinct project decision requiring
+explicit user approval, threat modeling, broker-specific controls, and new
+tests. No probabilistic score or scenario posterior grants execution authority.
