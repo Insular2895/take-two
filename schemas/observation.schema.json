@@ -1,0 +1,193 @@
+{
+  "$defs": {
+    "DataDomain": {
+      "enum": [
+        "fundamental",
+        "macro",
+        "market",
+        "options",
+        "catalyst",
+        "attention",
+        "execution"
+      ],
+      "title": "DataDomain",
+      "type": "string"
+    },
+    "DataQuality": {
+      "enum": [
+        "live_broker",
+        "opra",
+        "official",
+        "delayed",
+        "eod",
+        "indicative",
+        "synthetic",
+        "unknown"
+      ],
+      "title": "DataQuality",
+      "type": "string"
+    },
+    "FreshnessStatus": {
+      "enum": [
+        "fresh",
+        "stale",
+        "future",
+        "unknown",
+        "blocked_missing_timestamp"
+      ],
+      "title": "FreshnessStatus",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/observation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "cutoff": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cutoff"
+    },
+    "domain": {
+      "$ref": "#/$defs/DataDomain"
+    },
+    "freshness_status": {
+      "$ref": "#/$defs/FreshnessStatus",
+      "default": "unknown"
+    },
+    "license_or_usage_notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "License Or Usage Notes"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    },
+    "observation_id": {
+      "minLength": 1,
+      "title": "Observation Id",
+      "type": "string"
+    },
+    "point_in_time_valid": {
+      "default": false,
+      "title": "Point In Time Valid",
+      "type": "boolean"
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Provider"
+    },
+    "quality": {
+      "$ref": "#/$defs/DataQuality"
+    },
+    "raw_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Raw Hash"
+    },
+    "retrieved_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Retrieved At"
+    },
+    "series": {
+      "minLength": 1,
+      "title": "Series",
+      "type": "string"
+    },
+    "source_id": {
+      "title": "Source Id",
+      "type": "string"
+    },
+    "source_uri": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Uri"
+    },
+    "timestamp": {
+      "format": "date-time",
+      "title": "Timestamp",
+      "type": "string"
+    },
+    "unit": {
+      "title": "Unit",
+      "type": "string"
+    },
+    "value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "boolean"
+        }
+      ],
+      "title": "Value"
+    }
+  },
+  "required": [
+    "observation_id",
+    "series",
+    "timestamp",
+    "value",
+    "unit",
+    "source_id",
+    "domain",
+    "quality"
+  ],
+  "title": "UnifiedObservation",
+  "type": "object"
+}

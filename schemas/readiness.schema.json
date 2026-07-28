@@ -1,0 +1,55 @@
+{
+  "$defs": {
+    "FeatureStatus": {
+      "enum": [
+        "production_ready_offline",
+        "experimental_offline",
+        "fixture_only",
+        "adapter_ready_not_connected",
+        "requires_live_market_data",
+        "requires_historical_calibration",
+        "requires_paper_trading",
+        "blocked_for_execution"
+      ],
+      "title": "FeatureStatus",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/readiness.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "evidence": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "feature": {
+      "title": "Feature",
+      "type": "string"
+    },
+    "implemented": {
+      "title": "Implemented",
+      "type": "boolean"
+    },
+    "status": {
+      "$ref": "#/$defs/FeatureStatus"
+    }
+  },
+  "required": [
+    "feature",
+    "status",
+    "implemented"
+  ],
+  "title": "FeatureReadiness",
+  "type": "object"
+}

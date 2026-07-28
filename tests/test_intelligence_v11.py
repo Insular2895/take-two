@@ -246,6 +246,13 @@ def test_exit_plan_is_created_at_candidate_selection() -> None:
     assert plan.operational_stop_loss == 0.7
     assert plan.exit_days_before_expiration == 60
     assert plan.human_review_required
+    assert {
+        "trailing_drawdown",
+        "temporal_invalidation",
+        "theta_limit",
+        "exit_before_catalyst",
+        "exit_after_catalyst",
+    }.issubset({rule.rule_id for rule in plan.rules})
 
 
 def test_v10_seed_preserves_provenance_and_required_series() -> None:
@@ -524,6 +531,43 @@ def test_monitoring_reduces_at_partial_profit_target() -> None:
     assert "partial_profit_target" in report.triggered_rules
 
 
+def test_monitoring_evaluates_theta_trailing_temporal_and_catalyst_rules() -> None:
+    opened = datetime(2026, 7, 28, tzinfo=UTC)
+    dossier = _dossier().model_copy(
+        update={
+            "opened_at": opened,
+            "catalyst_date": opened + timedelta(days=12),
+            "horizon_days": 5,
+        }
+    )
+    current = PositionMonitorInput(
+        as_of=opened + timedelta(days=10),
+        current_spot=228,
+        market_value_usd=610,
+        realized_pnl_usd=0,
+        current_iv=0.35,
+        current_rate=0.04,
+        current_greeks={"delta": 25, "theta": -250},
+        current_scenario_probabilities={"success": 0.6, "delay": 0.4},
+        days_to_expiration=150,
+        regime="neutral",
+        execution_impact_usd=0,
+        prudent_liquidation_value_usd=600,
+        peak_prudent_liquidation_value_usd=900,
+        expected_remaining_pnl_usd=10,
+        remaining_cvar_95_usd=100,
+        liquidity_score=0.8,
+    )
+    report = monitor_position(dossier, current)
+    assert report.action is MonitorAction.EXIT_REVIEW
+    assert {
+        "theta_limit",
+        "trailing_drawdown",
+        "temporal_invalidation",
+        "exit_before_catalyst",
+    }.issubset(report.triggered_rules)
+
+
 def test_full_v11_pipeline_is_reproducible_and_writes_all_reports(
     tmp_path: Path,
 ) -> None:
@@ -565,4 +609,29 @@ def test_full_v11_pipeline_is_reproducible_and_writes_all_reports(
     )
     assert (tmp_path / "report.json").is_file()
     assert "V11" in (tmp_path / "report.md").read_text(encoding="utf-8")
-    assert "transmit=false" in (tmp_path / "report.html").read_text(encoding="utf-8")
+    html = (tmp_path / "report.html").read_text(encoding="utf-8")
+    assert "transmit=false" in html
+    assert "<script" not in html
+    assert "fetch(" not in html
+    assert "19. Readiness status" in html
+    assert "20. Raisons de NO_TRADE ou blocage" in html
+    assert report.schema_version == "11.1"
+    assert report.machine_summary.promotion_eligible is False
+    assert report.machine_summary.order_capability == "forbidden"
+    assert report.offline_calibration["status"] == "BLOCKED_MISSING_CALIBRATION_DATA"
+    assert report.walk_forward_backtest["status"] == (
+        "BLOCKED_MISSING_CALIBRATION_DATA"
+    )
+    assert all(
+        item.status.value not in {"production_ready_offline"}
+        for item in report.readiness
+        if item.feature in {
+            "bayesian_scenario_engine",
+            "multi_model_simulation",
+            "historical_calibration",
+            "walk_forward_backtest",
+            "live_market_data",
+            "paper_trading_validation",
+            "order_execution",
+        }
+    )

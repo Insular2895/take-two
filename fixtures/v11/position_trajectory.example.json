@@ -1,0 +1,256 @@
+{
+  "fixture_id": "ttwo-v11-synthetic-position-trajectory",
+  "synthetic": true,
+  "dossier": {
+    "dossier_id": "dossier-fixture-1",
+    "candidate_id": "bull-call-spread-fixture",
+    "opened_at": "2026-01-02T15:00:00Z",
+    "initial_scenario_probabilities": {
+      "adverse": 0.25,
+      "central": 0.5,
+      "upside": 0.25
+    },
+    "initial_distribution_source": "synthetic_fixture_manual_probabilities",
+    "initial_decision": {
+      "status": "fixture_only"
+    },
+    "entry_quote": {
+      "quality": "synthetic",
+      "bid": 4.7,
+      "ask": 5.0
+    },
+    "assumptions": [
+      "This trajectory validates mechanics only.",
+      "No snapshot is a live or historical market observation."
+    ],
+    "models_used": [
+      "black_scholes_gbm_fixture"
+    ],
+    "catalyst_date": "2026-05-26T20:00:00Z",
+    "horizon_days": 120,
+    "contract_ids": [
+      "FIXTURE-TTWO-20260619-C185",
+      "FIXTURE-TTWO-20260619-C205"
+    ],
+    "initial_spot": 181.0,
+    "initial_iv": 0.35,
+    "initial_rate": 0.035,
+    "initial_greeks": {
+      "delta": 30.0,
+      "gamma": 1.2,
+      "vega": 15.0,
+      "theta": -1.5,
+      "rho": 2.0
+    },
+    "initial_regime": "neutral",
+    "expected_catalysts": [
+      "fixture catalyst"
+    ],
+    "invalidation_conditions": [
+      "fixture thesis invalidated"
+    ],
+    "entry_price_usd": 5.0,
+    "actual_cost_usd": 500.0,
+    "actual_slippage_usd": 3.0,
+    "exit_plan": {
+      "candidate_id": "bull-call-spread-fixture",
+      "profit_target": 0.8,
+      "partial_profit_target": 0.4,
+      "operational_stop_loss": 0.5,
+      "exit_days_before_expiration": 21,
+      "iv_crush_threshold": 0.3,
+      "trailing_drawdown": 0.2,
+      "fundamental_invalidations": [
+        "fixture thesis invalidated"
+      ],
+      "temporal_invalidation": "Review 21 days before expiration.",
+      "iv_invalidation": "Review after a 30% IV decline.",
+      "catalyst_rule": "Human review around the catalyst.",
+      "trailing_rule": "Use prudent liquidation value only.",
+      "rules": [
+        {
+          "rule_id": "fundamental_invalidation",
+          "description": "Thesis invalidated.",
+          "threshold": true,
+          "severity": "critical",
+          "suggested_action": "THESIS_INVALIDATED",
+          "required_data": ["thesis_review"]
+        },
+        {
+          "rule_id": "data_insufficient",
+          "description": "Required monitoring data missing.",
+          "threshold": true,
+          "severity": "critical",
+          "suggested_action": "BLOCKED_INSUFFICIENT_DATA",
+          "required_data": ["monitoring_snapshot"]
+        },
+        {
+          "rule_id": "data_stale",
+          "description": "Monitoring data stale.",
+          "threshold": false,
+          "severity": "critical",
+          "suggested_action": "DATA_STALE",
+          "required_data": ["freshness"]
+        },
+        {
+          "rule_id": "operational_stop_loss",
+          "description": "Prudent loss breached.",
+          "threshold": -0.5,
+          "severity": "critical",
+          "suggested_action": "EXIT_REVIEW",
+          "required_data": ["prudent_liquidation_value"]
+        },
+        {
+          "rule_id": "profit_target",
+          "description": "Prudent profit target reached.",
+          "threshold": 0.8,
+          "severity": "warning",
+          "suggested_action": "EXIT_REVIEW",
+          "required_data": ["prudent_liquidation_value"]
+        },
+        {
+          "rule_id": "partial_profit_target",
+          "description": "Prudent partial target reached.",
+          "threshold": 0.4,
+          "severity": "warning",
+          "suggested_action": "REDUCE",
+          "required_data": ["prudent_liquidation_value"]
+        },
+        {
+          "rule_id": "time_exit",
+          "description": "Expiration window reached.",
+          "threshold": 21,
+          "severity": "warning",
+          "suggested_action": "EXIT_REVIEW",
+          "required_data": ["days_to_expiration"]
+        },
+        {
+          "rule_id": "iv_crush",
+          "description": "IV crush threshold reached.",
+          "threshold": 0.3,
+          "severity": "warning",
+          "suggested_action": "WATCH",
+          "required_data": ["current_iv"]
+        },
+        {
+          "rule_id": "liquidity_deterioration",
+          "description": "Liquidity score too low.",
+          "threshold": 0.5,
+          "severity": "warning",
+          "suggested_action": "WATCH",
+          "required_data": ["liquidity_score"]
+        },
+        {
+          "rule_id": "expected_value_negative",
+          "description": "Expected remaining value is negative.",
+          "threshold": 0.0,
+          "severity": "warning",
+          "suggested_action": "EXIT_REVIEW",
+          "required_data": ["expected_remaining_pnl_usd"]
+        },
+        {
+          "rule_id": "cvar_limit",
+          "description": "Remaining CVaR exceeds 80% of cost.",
+          "threshold": 0.8,
+          "severity": "critical",
+          "suggested_action": "EXIT_REVIEW",
+          "required_data": ["remaining_cvar_95_usd"]
+        }
+      ]
+    },
+    "state": "paper_open",
+    "human_actor": "fixture"
+  },
+  "snapshots": [
+    {
+      "as_of": "2026-01-09T15:00:00Z",
+      "current_spot": 184.0,
+      "market_value_usd": 560.0,
+      "realized_pnl_usd": 0.0,
+      "current_iv": 0.36,
+      "current_rate": 0.035,
+      "current_greeks": {
+        "delta": 32.0,
+        "gamma": 1.1,
+        "vega": 14.0,
+        "theta": -1.7
+      },
+      "current_scenario_probabilities": {
+        "adverse": 0.22,
+        "central": 0.5,
+        "upside": 0.28
+      },
+      "days_to_expiration": 161,
+      "regime": "neutral",
+      "execution_impact_usd": 3.0,
+      "prudent_liquidation_value_usd": 545.0,
+      "expected_remaining_pnl_usd": 80.0,
+      "remaining_cvar_95_usd": 280.0,
+      "liquidity_score": 0.8,
+      "bid_ask_spread_fraction": 0.08,
+      "data_fresh": true,
+      "data_sufficient": true
+    },
+    {
+      "as_of": "2026-03-02T15:00:00Z",
+      "current_spot": 176.0,
+      "market_value_usd": 410.0,
+      "realized_pnl_usd": 0.0,
+      "current_iv": 0.3,
+      "current_rate": 0.036,
+      "current_greeks": {
+        "delta": 24.0,
+        "gamma": 1.0,
+        "vega": 11.0,
+        "theta": -2.1
+      },
+      "current_scenario_probabilities": {
+        "adverse": 0.48,
+        "central": 0.42,
+        "upside": 0.1
+      },
+      "days_to_expiration": 109,
+      "regime": "adverse",
+      "execution_impact_usd": 8.0,
+      "prudent_liquidation_value_usd": 380.0,
+      "expected_remaining_pnl_usd": 20.0,
+      "remaining_cvar_95_usd": 360.0,
+      "liquidity_score": 0.48,
+      "bid_ask_spread_fraction": 0.2,
+      "data_fresh": true,
+      "data_sufficient": true,
+      "thesis_change": "weakened"
+    },
+    {
+      "as_of": "2026-05-28T15:00:00Z",
+      "current_spot": 168.0,
+      "market_value_usd": 190.0,
+      "realized_pnl_usd": 0.0,
+      "current_iv": 0.22,
+      "current_rate": 0.036,
+      "current_greeks": {
+        "delta": 12.0,
+        "gamma": 0.6,
+        "vega": 5.0,
+        "theta": -2.8
+      },
+      "current_scenario_probabilities": {
+        "adverse": 0.7,
+        "central": 0.25,
+        "upside": 0.05
+      },
+      "thesis_invalidated": true,
+      "days_to_expiration": 22,
+      "regime": "rupture",
+      "execution_impact_usd": 20.0,
+      "prudent_liquidation_value_usd": 150.0,
+      "expected_remaining_pnl_usd": -80.0,
+      "remaining_cvar_95_usd": 460.0,
+      "liquidity_score": 0.25,
+      "bid_ask_spread_fraction": 0.45,
+      "data_fresh": true,
+      "data_sufficient": true,
+      "thesis_change": "invalidated"
+    }
+  ]
+}

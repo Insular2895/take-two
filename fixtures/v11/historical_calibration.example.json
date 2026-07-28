@@ -1,0 +1,106 @@
+{
+  "dataset_id": "ttwo-v11-synthetic-calibration-example",
+  "dataset_version": "1",
+  "created_at": "2026-01-12T22:00:00Z",
+  "cutoff": "2026-01-12T22:00:00Z",
+  "timezone": "UTC",
+  "provider": "repository deterministic fixture generator",
+  "license_or_usage_notes": "Synthetic fixture for mechanics only; no market-data rights or calibration claim.",
+  "synthetic": true,
+  "split_adjustment_policy": "No corporate actions in the fixture.",
+  "dividend_adjustment_policy": "No dividends in the fixture.",
+  "records": [
+    {
+      "record_type": "underlying",
+      "timestamp": "2026-01-02T21:00:00Z",
+      "available_at": "2026-01-02T21:01:00Z",
+      "series": "TTWO.CLOSE",
+      "value": 181.0,
+      "unit": "USD/share",
+      "provider": "fixture",
+      "source_id": "fixture:ttwo-close",
+      "symbol": "TTWO"
+    },
+    {
+      "record_type": "underlying",
+      "timestamp": "2026-01-05T21:00:00Z",
+      "available_at": "2026-01-05T21:01:00Z",
+      "series": "TTWO.CLOSE",
+      "value": 182.5,
+      "unit": "USD/share",
+      "provider": "fixture",
+      "source_id": "fixture:ttwo-close",
+      "symbol": "TTWO"
+    },
+    {
+      "record_type": "underlying",
+      "timestamp": "2026-01-06T21:00:00Z",
+      "available_at": "2026-01-06T21:01:00Z",
+      "series": "TTWO.CLOSE",
+      "value": 180.75,
+      "unit": "USD/share",
+      "provider": "fixture",
+      "source_id": "fixture:ttwo-close",
+      "symbol": "TTWO"
+    },
+    {
+      "record_type": "underlying",
+      "timestamp": "2026-01-07T21:00:00Z",
+      "available_at": "2026-01-07T21:01:00Z",
+      "series": "TTWO.CLOSE",
+      "value": 184.0,
+      "unit": "USD/share",
+      "provider": "fixture",
+      "source_id": "fixture:ttwo-close",
+      "symbol": "TTWO"
+    },
+    {
+      "record_type": "underlying",
+      "timestamp": "2026-01-08T21:00:00Z",
+      "available_at": "2026-01-08T21:01:00Z",
+      "series": "TTWO.CLOSE",
+      "value": 183.25,
+      "unit": "USD/share",
+      "provider": "fixture",
+      "source_id": "fixture:ttwo-close",
+      "symbol": "TTWO"
+    },
+    {
+      "record_type": "underlying",
+      "timestamp": "2026-01-09T21:00:00Z",
+      "available_at": "2026-01-09T21:01:00Z",
+      "series": "TTWO.CLOSE",
+      "value": 186.0,
+      "unit": "USD/share",
+      "provider": "fixture",
+      "source_id": "fixture:ttwo-close",
+      "symbol": "TTWO"
+    },
+    {
+      "record_type": "option_chain",
+      "timestamp": "2026-01-09T20:55:00Z",
+      "available_at": "2026-01-09T20:56:00Z",
+      "series": "TTWO.OPTION.QUOTE",
+      "value": 7.1,
+      "unit": "USD/contract-unit",
+      "provider": "fixture",
+      "source_id": "fixture:ttwo-option",
+      "symbol": "TTWO260619C00190000",
+      "expiration": "2026-06-19T20:00:00Z",
+      "strike": 190.0,
+      "option_type": "call",
+      "bid": 7.0,
+      "ask": 7.2
+    },
+    {
+      "record_type": "risk_free_rate",
+      "timestamp": "2026-01-09T16:00:00Z",
+      "available_at": "2026-01-09T16:01:00Z",
+      "series": "USD.RATE.6M",
+      "value": 0.035,
+      "unit": "decimal",
+      "provider": "fixture",
+      "source_id": "fixture:usd-rate"
+    }
+  ]
+}

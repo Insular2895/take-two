@@ -1,0 +1,21 @@
+{
+  "status": "BLOCKED_MISSING_CALIBRATION_DATA",
+  "dataset_id": null,
+  "dataset_version": null,
+  "dataset_hash": null,
+  "format": "missing",
+  "cutoff": null,
+  "total_records": 0,
+  "accepted_records": 0,
+  "excluded_post_cutoff": 0,
+  "excluded_lookahead": 0,
+  "duplicate_records": 0,
+  "record_counts": {},
+  "errors": [
+    "No authorized historical dataset was supplied."
+  ],
+  "warnings": [
+    "Fixtures are never substituted for missing calibration data."
+  ],
+  "order_capability": "forbidden"
+}

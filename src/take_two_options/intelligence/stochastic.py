@@ -217,6 +217,13 @@ def simulate_path_set(
             warnings.append(
                 f"Heston parameters are {heston.calibration_status}; outputs are sensitivity tests."
             )
+        if not heston.feller_condition_satisfied:
+            warnings.append(
+                "Heston Feller condition 2*kappa*theta >= xi^2 is not satisfied; "
+                "the result is model-risk diagnostic only."
+            )
+        if heston.calibration_error is None:
+            warnings.append("No source-backed Heston calibration error is available.")
         assumptions = (
             "Heston variance uses full-truncation Euler discretization.",
             "Spot/variance Brownian shocks use the configured correlation.",

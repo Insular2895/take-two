@@ -13,6 +13,8 @@ from take_two_options.intelligence.schemas import (
     CandidateExitPlan,
     CandidateRobustness,
     ExitPolicyConfig,
+    ExitRuleDefinition,
+    MonitorAction,
     SimulationRegime,
     StrategyModelMetrics,
 )
@@ -108,6 +110,158 @@ def generate_exit_plan(
             f"After the partial-profit threshold, review an exit after a "
             f"{policy.trailing_drawdown:.0%} drawdown from peak modeled value."
         ),
+        rules=[
+            ExitRuleDefinition(
+                rule_id="profit_target",
+                description="Review a complete exit after the configured return target.",
+                threshold=policy.profit_target,
+                severity="warning",
+                suggested_action=MonitorAction.EXIT_REVIEW,
+                required_data=["prudent_liquidation_value", "actual_cost"],
+            ),
+            ExitRuleDefinition(
+                rule_id="partial_profit_target",
+                description="Review a partial reduction after the configured return target.",
+                threshold=policy.partial_profit_target,
+                severity="warning",
+                suggested_action=MonitorAction.REDUCE,
+                required_data=["prudent_liquidation_value", "actual_cost"],
+            ),
+            ExitRuleDefinition(
+                rule_id="operational_stop_loss",
+                description="Operational maximum loss review; not an automatic stop order.",
+                threshold=policy.operational_stop_loss,
+                severity="critical",
+                suggested_action=MonitorAction.EXIT_REVIEW,
+                required_data=["prudent_liquidation_value", "actual_cost"],
+            ),
+            ExitRuleDefinition(
+                rule_id="fundamental_invalidation",
+                description="A preserved thesis invalidation condition became true.",
+                threshold=True,
+                severity="critical",
+                suggested_action=MonitorAction.THESIS_INVALIDATED,
+                required_data=["thesis_review"],
+            ),
+            ExitRuleDefinition(
+                rule_id="time_exit",
+                description="Review exit before expiration.",
+                threshold=policy.exit_days_before_expiration,
+                severity="critical",
+                suggested_action=MonitorAction.EXIT_REVIEW,
+                required_data=["days_to_expiration"],
+            ),
+            ExitRuleDefinition(
+                rule_id="iv_crush",
+                description="Review reduction after an implied-volatility crush.",
+                threshold=policy.iv_crush_threshold,
+                severity="warning",
+                suggested_action=MonitorAction.REDUCE,
+                required_data=["entry_iv", "current_iv"],
+            ),
+            ExitRuleDefinition(
+                rule_id="liquidity_deterioration",
+                description="Review exit when liquidity falls below policy.",
+                threshold=policy.minimum_liquidity_score,
+                severity="critical",
+                suggested_action=MonitorAction.EXIT_REVIEW,
+                required_data=["liquidity_score", "bid_ask"],
+            ),
+            ExitRuleDefinition(
+                rule_id="expected_value_negative",
+                description="Review exit if expected remaining P&L becomes negative.",
+                threshold=0.0,
+                severity="critical",
+                suggested_action=MonitorAction.EXIT_REVIEW,
+                required_data=["expected_remaining_pnl"],
+            ),
+            ExitRuleDefinition(
+                rule_id="cvar_limit",
+                description="Review exit if remaining CVaR breaches policy.",
+                threshold=policy.maximum_cvar_fraction,
+                severity="critical",
+                suggested_action=MonitorAction.EXIT_REVIEW,
+                required_data=["remaining_cvar_95", "actual_cost"],
+            ),
+            ExitRuleDefinition(
+                rule_id="data_insufficient",
+                description="Block monitoring decisions when required data is missing.",
+                threshold=True,
+                severity="critical",
+                suggested_action=MonitorAction.BLOCKED_INSUFFICIENT_DATA,
+                required_data=["quotes", "greeks", "probabilities", "liquidity"],
+            ),
+            ExitRuleDefinition(
+                rule_id="data_stale",
+                description="Block a fresh decision when the snapshot is stale.",
+                threshold=False,
+                severity="critical",
+                suggested_action=MonitorAction.DATA_STALE,
+                required_data=["snapshot_timestamp"],
+            ),
+            ExitRuleDefinition(
+                rule_id="trailing_drawdown",
+                description="Review exit after drawdown from prudent liquidation peak.",
+                threshold=policy.trailing_drawdown,
+                severity="warning",
+                suggested_action=MonitorAction.EXIT_REVIEW,
+                required_data=[
+                    "peak_prudent_liquidation_value",
+                    "prudent_liquidation_value",
+                    "actual_cost",
+                ],
+            ),
+            ExitRuleDefinition(
+                rule_id="temporal_invalidation",
+                description="Review exit when the preserved thesis horizon expires.",
+                threshold="dossier_horizon_days",
+                severity="critical",
+                suggested_action=MonitorAction.EXIT_REVIEW,
+                required_data=["opened_at", "horizon_days"],
+            ),
+            *(
+                [
+                    ExitRuleDefinition(
+                        rule_id="theta_limit",
+                        description="Review exit when daily theta loss exceeds policy.",
+                        threshold=policy.maximum_theta_loss_per_day_usd,
+                        severity="warning",
+                        suggested_action=MonitorAction.REDUCE,
+                        required_data=["current_greeks.theta"],
+                    )
+                ]
+                if policy.maximum_theta_loss_per_day_usd is not None
+                else []
+            ),
+            *(
+                [
+                    ExitRuleDefinition(
+                        rule_id="exit_before_catalyst",
+                        description="Review exit inside the pre-catalyst window.",
+                        threshold=policy.exit_before_catalyst_days,
+                        severity="warning",
+                        suggested_action=MonitorAction.EXIT_REVIEW,
+                        required_data=["catalyst_date", "snapshot_timestamp"],
+                    )
+                ]
+                if policy.exit_before_catalyst_days is not None
+                else []
+            ),
+            *(
+                [
+                    ExitRuleDefinition(
+                        rule_id="exit_after_catalyst",
+                        description="Review exit after the post-catalyst holding window.",
+                        threshold=policy.exit_after_catalyst_days,
+                        severity="warning",
+                        suggested_action=MonitorAction.EXIT_REVIEW,
+                        required_data=["catalyst_date", "snapshot_timestamp"],
+                    )
+                ]
+                if policy.exit_after_catalyst_days is not None
+                else []
+            ),
+        ],
     )
 
 
@@ -212,14 +366,43 @@ def _empirical_metrics(
     tail = realized[realized <= lower]
     var_95 = max(0.0, -lower)
     cvar_95 = max(0.0, -float(np.mean(tail))) if tail.size else var_95
+    standard_error = (
+        float(np.std(realized, ddof=1)) / math.sqrt(paths)
+        if paths > 1
+        else 0.0
+    )
+    half = max(paths // 2, 1)
+    half_mean = float(np.mean(realized[:half]))
+    full_mean = float(np.mean(realized))
+    convergence_delta = abs(half_mean - full_mean) / max(cost, 1e-9)
+    convergence_status = "converged" if convergence_delta <= 0.10 else "unstable"
     horizon = float(day_grid[-1])
+    warnings = list(path_set.warnings)
+    if convergence_status == "unstable":
+        warnings.append(
+            "Monte-Carlo mean changed by more than 10% of entry cost between "
+            "the first-half and full sample."
+        )
     metrics = StrategyModelMetrics(
         candidate_id=candidate.candidate_id,
         model=path_set.model,
         regime=path_set.regime,
         paths=paths,
-        expected_pnl_usd=float(np.mean(realized)),
+        seed=path_set.seed,
+        steps=steps_plus_one - 1,
+        expected_pnl_usd=full_mean,
         median_pnl_usd=float(np.median(realized)),
+        standard_error_usd=standard_error,
+        confidence_interval_95_low_usd=full_mean - 1.96 * standard_error,
+        confidence_interval_95_high_usd=full_mean + 1.96 * standard_error,
+        convergence_status=convergence_status,
+        convergence_delta_fraction=convergence_delta,
+        model_valid=bool(np.isfinite(realized).all()),
+        calibration_status=(
+            "partial"
+            if path_set.model.value == "local_volatility"
+            else "illustrative"
+        ),
         probability_profit=float(np.mean(realized > 0)),
         probability_total_loss=float(np.mean(realized <= -0.95 * cost)),
         probability_x2=float(np.mean(realized >= cost)),
@@ -233,7 +416,7 @@ def _empirical_metrics(
         mean_days_to_profit=fmean(days_to_profit) if days_to_profit else None,
         probability_exit_before_horizon=float(np.mean(exit_days < horizon)),
         exit_reasons=dict(reasons),
-        warnings=list(path_set.warnings),
+        warnings=warnings,
     )
     return StrategyPathValuation(
         candidate_id=candidate.candidate_id,
@@ -281,6 +464,8 @@ def summarize_robustness(
     if not valuations:
         raise ValueError("robustness requires model valuations")
     expectations = [item.metrics.expected_pnl_usd for item in valuations]
+    probability_profits = [item.metrics.probability_profit for item in valuations]
+    cvars = [item.metrics.cvar_95_usd for item in valuations]
     neutral = [
         item.metrics.expected_pnl_usd
         for item in valuations
@@ -303,19 +488,41 @@ def summarize_robustness(
         + (1 - adverse_penalty) * 0.15,
     )
     flags: list[str] = []
+    invalid_models = sum(not item.metrics.model_valid for item in valuations)
     if profitable_fraction < 0.5:
         flags.append("Fewer than half of model/regime combinations have positive expectation.")
     if dispersion > cost * 0.5:
         flags.append("Neutral model expectation dispersion exceeds 50% of entry cost.")
     if max(adverse_cvars, default=0.0) > cost * 0.8:
         flags.append("Adverse CVaR exceeds 80% of entry cost.")
+    if invalid_models:
+        flags.append(f"{invalid_models} model/regime result(s) are numerically invalid.")
+    expected_dispersion = max(expectations) - min(expectations)
+    probability_dispersion = max(probability_profits) - min(probability_profits)
+    cvar_dispersion = max(cvars) - min(cvars)
+    verdict = (
+        "data_insufficient"
+        if all(item.metrics.calibration_status != "calibrated" for item in valuations)
+        else "model_dependent"
+        if probability_dispersion > 0.25 or expected_dispersion > cost
+        else "fragile"
+        if profitable_fraction < 0.5 or max(adverse_cvars, default=0.0) > cost * 0.8
+        else "conditionally_robust"
+        if flags
+        else "robust"
+    )
     return CandidateRobustness(
         candidate_id=candidate.candidate_id,
         profitable_model_fraction=profitable_fraction,
         worst_expected_pnl_usd=min(expectations),
         neutral_model_dispersion_usd=dispersion,
         adverse_cvar_usd=max(adverse_cvars, default=0.0),
+        probability_profit_dispersion=probability_dispersion,
+        expected_pnl_dispersion_usd=expected_dispersion,
+        cvar_dispersion_usd=cvar_dispersion,
+        invalid_model_count=invalid_models,
         robustness_score=score,
+        verdict=verdict,
         model_risk_flags=flags,
     )
 

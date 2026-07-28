@@ -75,6 +75,7 @@ def calibrate_local_volatility(
             moneyness_nodes=len(moneyness_grid),
             output_nodes=0,
             fallback_nodes=0,
+            arbitrage_free_input=False,
             source_ids=sorted({quote.source_id for quote in chain.quotes}),
             warnings=[
                 "Dupire extraction needs at least two expirations and three strikes."
@@ -99,6 +100,38 @@ def calibrate_local_volatility(
         dtype=float,
     )
     total_variance = implied_volatility**2 * times[:, None]
+    calendar_arbitrage_violations = int(
+        np.sum(np.diff(total_variance, axis=0) < -1e-8)
+    )
+    butterfly_arbitrage_violations = 0
+    for expiration in valid_expirations:
+        points = sorted(
+            (
+                quote.strike,
+                (float(quote.bid or 0.0) + float(quote.ask or 0.0)) / 2,
+            )
+            for quote in by_expiration[expiration]
+            if quote.bid is not None and quote.ask is not None
+        )
+        if len(points) < 3:
+            continue
+        slopes = [
+            (right_value - left_value) / (right_strike - left_strike)
+            for (left_strike, left_value), (right_strike, right_value) in zip(
+                points,
+                points[1:],
+                strict=False,
+            )
+            if right_strike > left_strike
+        ]
+        butterfly_arbitrage_violations += sum(
+            right_slope < left_slope - 1e-8
+            for left_slope, right_slope in zip(slopes, slopes[1:], strict=False)
+        )
+        butterfly_arbitrage_violations += sum(
+            points[index + 1][1] > points[index][1] + 1e-8
+            for index in range(len(points) - 1)
+        )
     time_derivative = np.gradient(total_variance, times, axis=0, edge_order=1)
     log_moneyness = np.log(np.asarray(moneyness_grid, dtype=float))
     strike_derivative = np.asarray(
@@ -151,6 +184,14 @@ def calibrate_local_volatility(
         warnings.append(
             f"{fallback_nodes} Dupire nodes were unstable and fell back to implied volatility."
         )
+    if calendar_arbitrage_violations or butterfly_arbitrage_violations:
+        status = "partial"
+        warnings.append(
+            "Input surface failed static-arbitrage diagnostics: "
+            f"calendar={calendar_arbitrage_violations}, "
+            f"butterfly/monotonicity={butterfly_arbitrage_violations}. "
+            "Nodes remain experimental and cannot be used for promotion."
+        )
     if chain.price_quality != "opra":
         status = "partial"
         warnings.append(
@@ -167,6 +208,12 @@ def calibrate_local_volatility(
         moneyness_nodes=len(moneyness_grid),
         output_nodes=len(output),
         fallback_nodes=fallback_nodes,
+        calendar_arbitrage_violations=calendar_arbitrage_violations,
+        butterfly_arbitrage_violations=butterfly_arbitrage_violations,
+        arbitrage_free_input=(
+            calendar_arbitrage_violations == 0
+            and butterfly_arbitrage_violations == 0
+        ),
         source_ids=sorted({quote.source_id for quote in chain.quotes}),
         warnings=warnings,
     )

@@ -4,12 +4,25 @@ from __future__ import annotations
 
 import json
 import math
+import platform
+import resource
+import time
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Literal
 
 import yaml
 
+from take_two_options.intelligence._numpy import np
+from take_two_options.intelligence.backtesting import (
+    load_walk_forward_dataset,
+    run_walk_forward,
+)
 from take_two_options.intelligence.bayesian import update_scenario_distribution
+from take_two_options.intelligence.calibration import (
+    fit_offline_models,
+    validate_historical_dataset,
+)
 from take_two_options.intelligence.covariance import (
     CovarianceDataError,
     dynamic_covariance,
@@ -21,19 +34,28 @@ from take_two_options.intelligence.data_hub import (
     UnifiedDataHub,
     seed_from_v10,
 )
+from take_two_options.intelligence.event_normalization import (
+    normalize_observations_to_events,
+)
 from take_two_options.intelligence.execution import (
+    assert_all_execution_paths_forbidden,
     assert_no_order_capability,
     build_execution_previews,
 )
 from take_two_options.intelligence.optimizer import optimize_allocations
+from take_two_options.intelligence.readiness import build_readiness_inventory
 from take_two_options.intelligence.reporting import write_reports
+from take_two_options.intelligence.robustness import run_stress_suite
 from take_two_options.intelligence.schemas import (
     AllocationResult,
     ConnectorState,
     ConnectorStatus,
     DataQuality,
+    FeatureStatus,
+    MachineSummary,
     NormalizedEvidenceEvent,
     ResearchPosture,
+    RunManifest,
     SimulationRegime,
     V11IntelligenceReport,
     V11Policy,
@@ -138,28 +160,49 @@ def run_intelligence(
     events_path: Path | None = None,
     factor_history_path: Path | None = None,
     connectors: list[DataConnector] | None = None,
+    calibration_data_path: Path | None = None,
+    walk_forward_path: Path | None = None,
+    runtime_profile: Literal[
+        "fast_fixture", "research", "validation", "exhaustive"
+    ] = "fast_fixture",
     historical_returns_path: Path = Path(
         "data/alpaca/ttwo_calibration_dataset_2026-07-19.json"
     ),
     created_at: datetime | None = None,
 ) -> V11IntelligenceReport:
     """Run V11 without exposing any live-order submission operation."""
+    started_at = datetime.now(UTC)
+    last_stage = time.perf_counter()
+    stage_durations: dict[str, float] = {}
+
+    def mark_stage(name: str) -> None:
+        nonlocal last_stage
+        now = time.perf_counter()
+        stage_durations[name] = round(now - last_stage, 6)
+        last_stage = now
+
+    assert_all_execution_paths_forbidden()
     scan_time = created_at or datetime.now(UTC)
     if scan_time.tzinfo is None:
         scan_time = scan_time.replace(tzinfo=UTC)
     base = ThesisScanReport.model_validate_json(base_report_path.read_text(encoding="utf-8"))
     policy = load_v11_policy(policy_path)
-    events = load_events(events_path)
+    explicit_events = load_events(events_path)
+    mark_stage("load_inputs")
     seed_sources, seed_observations = seed_from_v10(base)
     connector_list = connectors or []
     for connector in connector_list:
         assert_no_order_capability(connector)
-    data_snapshot = UnifiedDataHub(policy.required_series).collect(
+    data_snapshot = UnifiedDataHub(
+        policy.required_series,
+        freshness_hours_by_domain=policy.freshness_hours_by_domain,
+    ).collect(
         ticker=base.request.ticker,
         as_of=base.chain.as_of,
         connectors=connector_list,
         seed_sources=seed_sources,
         seed_observations=seed_observations,
+        checked_at=scan_time,
     )
     configured_connector_ids = {connector.connector_id for connector in connector_list}
     for connector_id, warning in (
@@ -192,12 +235,48 @@ def run_intelligence(
                     warnings=[warning],
                 )
             )
+    mark_stage("data_hub")
+    event_normalization = normalize_observations_to_events(
+        data_snapshot.observations,
+        policy.event_normalization_rules,
+        cutoff=base.chain.as_of,
+    )
+    if explicit_events:
+        event_normalization.events.extend(explicit_events)
+        for event in explicit_events:
+            proof = event_normalization.rule_proofs.setdefault(
+                event.normalization_rule_id,
+                {
+                    "normalization_rule_id": event.normalization_rule_id,
+                    "source": "explicit_normalized_event_file",
+                    "matches": [],
+                },
+            )
+            proof["matches"].append(
+                {
+                    "event_id": event.event_id,
+                    "source_ids": event.source_ids,
+                    "human_review_status": event.human_review_status.value,
+                }
+            )
     bayesian = update_scenario_distribution(
         priors=policy.scenario_priors,
-        events=events,
+        events=event_normalization.events,
         rules=policy.likelihood_rules,
         family_caps=policy.family_weight_caps,
+        as_of=base.chain.as_of,
     )
+    mark_stage("events_and_bayes")
+    historical_dataset, dataset_quality = validate_historical_dataset(
+        calibration_data_path
+    )
+    offline_calibration = fit_offline_models(historical_dataset, dataset_quality)
+    walk_forward = run_walk_forward(
+        load_walk_forward_dataset(walk_forward_path)
+        if walk_forward_path is not None
+        else None
+    )
+    mark_stage("offline_calibration_and_backtest")
     if factor_history_path is not None:
         factor_history, event_indices, regime_indices = load_factor_history(
             factor_history_path,
@@ -237,10 +316,12 @@ def run_intelligence(
         else policy.simulation
     )
     candidates = select_candidate_pool(base, policy.candidate_pool_size)
+    mark_stage("calibration_and_covariance")
     ready_connectors = {
         item.connector_id
         for item in data_snapshot.connectors
-        if item.state is ConnectorState.READY
+        if item.state in {ConnectorState.READY, ConnectorState.PARTIAL}
+        and item.observations > 0
     }
     combo_quotes = {}
     for connector in connector_list:
@@ -260,12 +341,15 @@ def run_intelligence(
                         }
                         for leg in candidate.base_candidate.legs
                     ],
+                    as_of=base.chain.as_of,
                 )
     path_sets = simulate_all_models(spot=base.chain.spot, policy=simulation_policy)
+    mark_stage("simulation")
     valuations: dict[str, list[StrategyPathValuation]] = {}
     exit_plans = []
     robustness = []
     validation = []
+    stress_tests = []
     for candidate in candidates:
         exit_plans.append(generate_exit_plan(candidate, policy=policy.exit_policy))
         candidate_valuations = value_candidate_across_models(
@@ -278,6 +362,7 @@ def run_intelligence(
         )
         valuations[candidate.candidate_id] = candidate_valuations
         robustness.append(summarize_robustness(candidate, candidate_valuations))
+        stress_tests.extend(run_stress_suite(candidate, candidate_valuations))
         validation.append(
             validate_candidate(
                 candidate,
@@ -285,6 +370,7 @@ def run_intelligence(
                 historical_evidence=base.historical_evidence,
             )
         )
+    mark_stage("valuation_and_validation")
     regime_weights = _regime_weights(
         policy,
         bayesian.scenario_probabilities,
@@ -302,9 +388,19 @@ def run_intelligence(
             maximum_loss_eur=policy.maximum_loss_eur,
             maximum_contracts=policy.maximum_contracts,
             eur_usd_rate=base.policy.eur_usd_rate,
+            maximum_positions=policy.maximum_positions,
+            maximum_concentration=policy.maximum_concentration,
+            minimum_liquidity_score=policy.minimum_liquidity_score,
+            maximum_relative_spread=policy.maximum_relative_spread,
+            delta_exposure_range=policy.delta_exposure_range,
+            gamma_exposure_range=policy.gamma_exposure_range,
+            vega_exposure_range=policy.vega_exposure_range,
+            theta_exposure_range=policy.theta_exposure_range,
+            allow_multiple_strategies=policy.allow_multiple_strategies,
         )
     ]
     previews = build_execution_previews(candidates, combo_quotes=combo_quotes)
+    mark_stage("allocation_and_previews")
     data_qualities = {source.quality for source in data_snapshot.sources}
     report_identity = {
         "base_report_id": base.report_id,
@@ -313,6 +409,66 @@ def run_intelligence(
         "posterior": bayesian.scenario_probabilities,
         "created_at": scan_time,
     }
+    readiness = build_readiness_inventory(
+        data_snapshot=data_snapshot,
+        local_volatility=local_calibration,
+        calibration=offline_calibration,
+        backtest=walk_forward,
+    )
+    configuration_hash = stable_hash(policy.model_dump(mode="json"))
+    data_hash = stable_hash(data_snapshot.model_dump(mode="json"))
+    input_hash = stable_hash(
+        {
+            "base": base.model_dump(mode="json"),
+            "policy": policy.model_dump(mode="json"),
+            "events": [event.model_dump(mode="json") for event in explicit_events],
+            "factor_history": (
+                factor_history_path.read_text(encoding="utf-8")
+                if factor_history_path is not None
+                else None
+            ),
+            "calibration_dataset_hash": dataset_quality.dataset_hash,
+            "walk_forward_dataset": (
+                walk_forward_path.read_text(encoding="utf-8")
+                if walk_forward_path is not None
+                else None
+            ),
+        }
+    )
+    peak_memory = float(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    peak_memory_mb = (
+        peak_memory / 1024 / 1024
+        if platform.system() == "Darwin"
+        else peak_memory / 1024
+    )
+    completed_at = datetime.now(UTC)
+    run_manifest = RunManifest(
+        run_id=f"run-{stable_hash((report_identity, input_hash))[:20]}",
+        profile=runtime_profile,
+        seed=policy.simulation.seed,
+        configuration_hash=configuration_hash,
+        data_hash=data_hash,
+        input_hash=input_hash,
+        model_versions={
+            "take_two_options": "0.11.1",
+            "schema": "11.1",
+            "python": platform.python_version(),
+            "numpy": np.__version__,
+        },
+        policy_version=policy.policy_id,
+        started_at=started_at,
+        completed_at=completed_at,
+        stage_durations_seconds=stage_durations,
+        peak_memory_mb=max(peak_memory_mb, 0.0),
+        deterministic_cache=True,
+    )
+    blocking_reasons = [
+        *data_snapshot.missing_required_series,
+        offline_calibration.status,
+        walk_forward.status,
+        "paper_trading_not_run",
+        "execution_forbidden",
+    ]
     report = V11IntelligenceReport(
         report_id=f"v11-{stable_hash(report_identity)[:20]}",
         created_at=scan_time,
@@ -326,7 +482,10 @@ def run_intelligence(
             all_execution_blocked=all(bool(item.blockers) for item in previews),
         ),
         data_snapshot=data_snapshot,
+        event_normalization=event_normalization,
         bayesian_distribution=bayesian,
+        offline_calibration=offline_calibration.model_dump(mode="json"),
+        walk_forward_backtest=walk_forward.model_dump(mode="json"),
         local_volatility_calibration=local_calibration,
         covariance=covariance,
         model_metrics=[
@@ -337,6 +496,7 @@ def run_intelligence(
         robustness=robustness,
         validation=validation,
         allocations=allocations,
+        stress_tests=stress_tests,
         exit_plans=exit_plans,
         execution_previews=previews,
         facts_verified=[
@@ -377,6 +537,29 @@ def run_intelligence(
             "Obtain explicit user approval before any future change to the "
             "forbidden execution boundary.",
         ],
+        readiness=readiness,
+        run_manifest=run_manifest,
+        machine_summary=MachineSummary(
+            schema_version="11.1",
+            generated_at=scan_time,
+            cutoff=base.chain.as_of,
+            posture=_posture(
+                candidates_available=bool(candidates),
+                allocations=allocations,
+                data_qualities=data_qualities,
+                missing_required_series=data_snapshot.missing_required_series,
+                all_execution_blocked=all(bool(item.blockers) for item in previews),
+            ),
+            result_status=(
+                FeatureStatus.FIXTURE_ONLY
+                if DataQuality.SYNTHETIC in data_qualities
+                else FeatureStatus.EXPERIMENTAL_OFFLINE
+            ),
+            calibration_status=offline_calibration.status,
+            backtest_status=walk_forward.status,
+            promotion_eligible=False,
+            blocking_reasons=blocking_reasons,
+        ),
     )
     return write_reports(
         report,

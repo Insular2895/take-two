@@ -10,9 +10,27 @@ from typing import Annotated
 import typer
 
 from take_two_options.decision.pipeline import analyze_trade
-from take_two_options.intelligence.monitoring import monitor_position as assess_position
+from take_two_options.intelligence.backtesting import (
+    load_walk_forward_dataset,
+    run_walk_forward,
+)
+from take_two_options.intelligence.calibration import (
+    build_dataset_splits,
+    fit_offline_models,
+    validate_historical_dataset,
+)
+from take_two_options.intelligence.monitoring import (
+    monitor_position as assess_position,
+)
+from take_two_options.intelligence.monitoring import (
+    replay_position_trajectory,
+)
 from take_two_options.intelligence.pipeline import run_intelligence
-from take_two_options.intelligence.schemas import PositionDossier, PositionMonitorInput
+from take_two_options.intelligence.schemas import (
+    PositionDossier,
+    PositionMonitorInput,
+    PositionTrajectoryFixture,
+)
 from take_two_options.knowledge.compiler import compile_knowledge
 from take_two_options.knowledge.loader import KnowledgeLoadError, load_knowledge
 from take_two_options.knowledge.schemas import DecisionReport
@@ -38,10 +56,15 @@ knowledge_app = typer.Typer(no_args_is_help=True)
 data_app = typer.Typer(no_args_is_help=True)
 trade_app = typer.Typer(no_args_is_help=True)
 position_app = typer.Typer(no_args_is_help=True)
+calibration_app = typer.Typer(
+    no_args_is_help=True,
+    help="Offline historical calibration and walk-forward validation; never uses live fallback.",
+)
 app.add_typer(knowledge_app, name="knowledge")
 app.add_typer(data_app, name="data")
 app.add_typer(trade_app, name="trade")
 app.add_typer(position_app, name="position")
+app.add_typer(calibration_app, name="calibration")
 app.add_typer(legacy_app, name="legacy", hidden=True)
 
 
@@ -53,6 +76,11 @@ def _csv_floats(value: str, *, option_name: str) -> list[float]:
     if not values:
         raise typer.BadParameter(f"{option_name} cannot be empty")
     return values
+
+
+def _write_model_json(path: Path, payload: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(payload, encoding="utf-8")
 
 
 @app.command("thesis-scan")
@@ -170,6 +198,18 @@ def intelligence_run(
         Path | None,
         typer.Option("--factor-history", exists=True, dir_okay=False, readable=True),
     ] = None,
+    calibration_data: Annotated[
+        Path | None,
+        typer.Option("--calibration-data", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    walk_forward: Annotated[
+        Path | None,
+        typer.Option("--walk-forward", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    profile: Annotated[
+        str,
+        typer.Option("--profile"),
+    ] = "fast_fixture",
     json_out: Annotated[Path, typer.Option("--json-out")] = Path(
         "reports/v11/latest.json"
     ),
@@ -182,11 +222,18 @@ def intelligence_run(
 ) -> None:
     """Run V11 probabilistic intelligence over a stable V10.1 structure report."""
     try:
+        if profile not in {"fast_fixture", "research", "validation", "exhaustive"}:
+            raise ValueError(
+                "--profile must be fast_fixture, research, validation, or exhaustive"
+            )
         report = run_intelligence(
             base_report_path=base_report,
             policy_path=policy,
             events_path=events,
             factor_history_path=factor_history,
+            calibration_data_path=calibration_data,
+            walk_forward_path=walk_forward,
+            runtime_profile=profile,  # type: ignore[arg-type]
             json_out=json_out,
             markdown_out=markdown_out,
             html_out=html_out,
@@ -195,9 +242,130 @@ def intelligence_run(
         typer.echo(f"V11 intelligence failed: {error}", err=True)
         raise typer.Exit(code=1) from error
     typer.echo(
-        f"{report.posture.value}: models={len(report.model_metrics)} "
+        f"{report.posture.value}: readiness={report.machine_summary.result_status.value} "
+        f"calibration={report.machine_summary.calibration_status} "
+        f"backtest={report.machine_summary.backtest_status} "
+        f"models={len(report.model_metrics)} "
         f"allocations={len(report.allocations)} report={json_out}; "
         "transmit=false; order capability forbidden"
+    )
+
+
+@calibration_app.command("validate-dataset")
+def calibration_validate_dataset(
+    dataset: Annotated[
+        Path | None,
+        typer.Option("--dataset", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/calibration/dataset_quality.json"
+    ),
+) -> None:
+    """Validate lineage, timezone, units, duplicates, and point-in-time availability."""
+    _loaded, report = validate_historical_dataset(dataset)
+    _write_model_json(output, report.model_dump_json(indent=2))
+    typer.echo(f"{report.status}: report={output}; order capability forbidden")
+
+
+@calibration_app.command("build-splits")
+def calibration_build_splits(
+    dataset: Annotated[
+        Path | None,
+        typer.Option("--dataset", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    method: Annotated[str, typer.Option("--method")] = "expanding",
+    embargo_days: Annotated[int, typer.Option("--embargo-days", min=0)] = 5,
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/calibration/splits.json"
+    ),
+) -> None:
+    """Build a rolling or expanding split with embargo and a locked final holdout."""
+    if method not in {"rolling", "expanding"}:
+        raise typer.BadParameter("--method must be rolling or expanding")
+    loaded, quality = validate_historical_dataset(dataset)
+    report = build_dataset_splits(
+        loaded,
+        quality,
+        method=method,  # type: ignore[arg-type]
+        embargo_days=embargo_days,
+    )
+    _write_model_json(output, report.model_dump_json(indent=2))
+    typer.echo(f"{report.status}: splits={len(report.splits)} report={output}")
+
+
+@calibration_app.command("fit")
+def calibration_fit(
+    dataset: Annotated[
+        Path | None,
+        typer.Option("--dataset", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/calibration/fit.json"
+    ),
+) -> None:
+    """Fit only identifiable offline parameters; refuse fake Heston calibration."""
+    loaded, quality = validate_historical_dataset(dataset)
+    report = fit_offline_models(loaded, quality)
+    _write_model_json(output, report.model_dump_json(indent=2))
+    typer.echo(f"{report.status}: report={output}; no fixture substitution")
+
+
+@calibration_app.command("evaluate")
+def calibration_evaluate(
+    walk_forward: Annotated[
+        Path | None,
+        typer.Option("--walk-forward", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/calibration/walk_forward.json"
+    ),
+) -> None:
+    """Evaluate a point-in-time walk-forward dataset with explicit baselines."""
+    report = run_walk_forward(
+        load_walk_forward_dataset(walk_forward)
+        if walk_forward is not None
+        else None
+    )
+    _write_model_json(output, report.model_dump_json(indent=2))
+    typer.echo(f"{report.status}: report={output}; holdout tuning=false")
+
+
+@calibration_app.command("report")
+def calibration_report(
+    dataset: Annotated[
+        Path | None,
+        typer.Option("--dataset", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    walk_forward: Annotated[
+        Path | None,
+        typer.Option("--walk-forward", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/calibration/offline_validation.json"
+    ),
+) -> None:
+    """Write one machine-readable offline validation summary."""
+    loaded, quality = validate_historical_dataset(dataset)
+    split_plan = build_dataset_splits(loaded, quality)
+    calibration = fit_offline_models(loaded, quality)
+    backtest = run_walk_forward(
+        load_walk_forward_dataset(walk_forward)
+        if walk_forward is not None
+        else None
+    )
+    payload = {
+        "schema_version": "11.1",
+        "dataset_quality": quality.model_dump(mode="json"),
+        "split_plan": split_plan.model_dump(mode="json"),
+        "calibration": calibration.model_dump(mode="json"),
+        "walk_forward": backtest.model_dump(mode="json"),
+        "promotion_eligible": False,
+        "order_capability": "forbidden",
+    }
+    _write_model_json(output, json.dumps(payload, indent=2))
+    typer.echo(
+        f"calibration={calibration.status}; backtest={backtest.status}; "
+        f"report={output}; promotion=false"
     )
 
 
@@ -395,6 +563,32 @@ def position_assess(
     output.write_text(report.model_dump_json(indent=2), encoding="utf-8")
     typer.echo(
         f"position action={report.action.value} report={output}; "
+        "human confirmation required; order capability forbidden"
+    )
+
+
+@position_app.command("replay")
+def position_replay(
+    trajectory: Annotated[
+        Path,
+        typer.Option("--trajectory", exists=True, dir_okay=False, readable=True),
+    ],
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/position_trajectory.json"
+    ),
+) -> None:
+    """Replay a synthetic multi-date trajectory through advisory exit rules."""
+    try:
+        fixture = PositionTrajectoryFixture.model_validate_json(
+            trajectory.read_text(encoding="utf-8")
+        )
+        report = replay_position_trajectory(fixture)
+    except (OSError, ValueError) as error:
+        typer.echo(f"Position trajectory replay failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    _write_model_json(output, report.model_dump_json(indent=2))
+    typer.echo(
+        f"{report.status}: snapshots={len(report.reports)} report={output}; "
         "human confirmation required; order capability forbidden"
     )
 

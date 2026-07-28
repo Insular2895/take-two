@@ -50,7 +50,12 @@ V11 preserves and narrows that boundary again:
    what-if support remain blockers;
 5. integer optimization always includes cash/`NO_TRADE`, never forces full
    deployment, and cannot override validation gates;
-6. the position monitor emits advice but performs no broker mutation.
+6. the position monitor emits advice but performs no broker mutation;
+7. missing historical data returns a blocked calibration/backtest status and
+   is never replaced by a fixture;
+8. every report carries feature-level readiness and keeps promotion false;
+9. a package-wide static scan rejects forbidden order imports, order
+   constructors, order methods, and any `transmit=True` literal.
 
 Changing this execution boundary is a distinct project decision requiring
 explicit user approval, threat modeling, broker-specific controls, and new
