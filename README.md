@@ -1,5 +1,8 @@
 # Take Two Options
 
+> Lecture française : [`docs/LECTURE_FR.md`](docs/LECTURE_FR.md) regroupe le handoff, les livres,
+> les sources, les formules, la recherche des phases 1 à 11 et le plan complet en français.
+
 Read-only, generic, knowledge-driven option research for bounded-risk trade
 requests. The active pipeline loads provenance-aware recipes, enumerates listed
 strikes and expirations, applies executable bid/ask and whole-contract budget
