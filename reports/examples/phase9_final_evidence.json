@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "report_id": "phase9-synthetic-no-trade",
+  "ticker": "TTWO",
+  "as_of": "2026-08-08T16:00:00Z",
+  "decision_status": "NO_TRADE",
+  "selected_candidate_id": "NO_TRADE",
+  "evidence_grade": {
+    "overall_grade": "tested",
+    "overall_rank": 2,
+    "decision_claim_cap": "software_tested_only",
+    "components": [
+      {
+        "component_id": "pricing",
+        "grade": "numerically_validated",
+        "grade_rank": 3,
+        "required_for_decision": true,
+        "satisfied_prerequisites": [
+          "implementation",
+          "passing tests",
+          "numerical validation",
+          "documentary source"
+        ],
+        "missing_prerequisites": [
+          "real out-of-sample empirical validation lineage"
+        ],
+        "blockers": []
+      },
+      {
+        "component_id": "event_probabilities",
+        "grade": "tested",
+        "grade_rank": 2,
+        "required_for_decision": true,
+        "satisfied_prerequisites": [
+          "implementation",
+          "passing tests"
+        ],
+        "missing_prerequisites": [
+          "numerical validation"
+        ],
+        "blockers": [
+          "No real TTWO calibration dataset."
+        ]
+      }
+    ],
+    "blockers": [
+      "No real TTWO calibration dataset.",
+      "numerical validation",
+      "real out-of-sample empirical validation lineage"
+    ],
+    "order_capability": "forbidden"
+  },
+  "estimates": [
+    {
+      "estimate_id": "expected-pnl",
+      "label": "Expected PnL",
+      "central": 12.0,
+      "interval": [-40.0, 70.0],
+      "unit": "USD",
+      "measure": "P",
+      "uncertainty_diagnostic": "Synthetic model range; not an OOS interval.",
+      "source_ids": ["synthetic-scenario-report"]
+    }
+  ],
+  "probabilities": [
+    {
+      "probability_id": "target",
+      "label": "Target return probability",
+      "central": 0.3,
+      "interval": [0.15, 0.48],
+      "origin": "configured_heuristic",
+      "uncertainty_diagnostic": "Belief sensitivity; not confidence coverage.",
+      "source_ids": ["synthetic-scenario-report"]
+    }
+  ],
+  "assumptions": ["Synthetic scenario weights."],
+  "favorable_scenarios": ["Upside event and stable liquidity."],
+  "failure_scenarios": ["Delay, IV crush or no fill."],
+  "model_risks": ["Model disagreement is not calibrated."],
+  "data_limits": ["No point-in-time TTWO holdout dataset."],
+  "ranking_reasons": ["Cash is preferred because the evidence gate is not met."],
+  "no_trade_reasons": [
+    "Event probabilities have software tests but no empirical validation."
+  ],
+  "source_ids": [
+    "book-bjork-arbitrage-theory",
+    "official-occ-odd-2024-current-page-2026"
+  ],
+  "synthetic_or_fixture_input": true,
+  "human_confirmation_required": true,
+  "order_capability": "forbidden"
+}

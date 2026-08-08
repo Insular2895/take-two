@@ -9,6 +9,8 @@
 - Phase-8 event probabilities remain separate user, heuristic, historical or market-implied
   inputs. The scanner has no empirically calibrated TTWO catalyst probabilities; dependency
   discounts and probability ranges are sensitivity assumptions.
+- The final evidence grade is a software/research lineage grade, not a recommendation confidence
+  score. Scanner results remain capped by missing real OOS, holdout and paper evidence.
 - The American model uses a flat configured rate/dividend yield and one IV per
   leg stressed by fixed multipliers. It is not a calibrated future IV-surface
   forecast.

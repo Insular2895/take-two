@@ -53,7 +53,7 @@ formulas:
         page: "170 and 221-223"
     implementation:
       - file: src/take_two_options/quantitative/contracts.py
-        symbols: [QuantConventionSet.discount_factor]
+        symbols: [discount_factor]
     tests:
       - file: tests/test_quantitative_foundations.py
         symbols: [test_conventions_separate_calendar_days_and_trading_sessions]
@@ -243,6 +243,73 @@ formulas:
         symbols:
           - test_wilson_probability_exposes_rare_event_and_minimum_path_uncertainty
           - test_all_canonical_path_probabilities_receive_uncertainty_sidecars
+    validation_status: tested
+
+  - formula_id: FORM-MC-SE-001
+    name: Independent-replication Monte Carlo standard error
+    statement: "For n independent replications, estimate the standard error of the sample mean as the sample standard deviation divided by sqrt(n)."
+    measure: P_or_Q_by_application
+    units: output_unit
+    assumptions:
+      - replications counted in n are independent
+      - the simulated outcome has finite variance
+      - paired antithetic paths count as one replication
+    sources:
+      - source_id: book-glasserman-monte-carlo
+        chapter: "1.1.1-1.1.3"
+        page: "1-10"
+    implementation:
+      - file: src/take_two_options/intelligence/valuation.py
+        symbols: [_empirical_metrics]
+      - file: src/take_two_options/simulation/uncertainty.py
+        symbols: [control_variate_estimate, antithetic_estimate]
+    tests:
+      - file: tests/test_intelligence_v11.py
+        symbols: [test_path_valuation_produces_full_risk_metrics_and_robustness]
+      - file: tests/test_simulation_uncertainty.py
+        symbols: [test_antithetic_pairs_are_independent_replications_for_standard_error]
+    validation_status: tested
+
+  - formula_id: FORM-MC-CI-001
+    name: Asymptotic Monte Carlo mean interval
+    statement: "Report the Monte Carlo sample mean plus or minus 1.96 estimated standard errors as an asymptotic 95% simulation-error interval."
+    measure: P_or_Q_by_application
+    units: output_unit
+    assumptions:
+      - independent finite-variance replications
+      - enough replications for the central-limit approximation
+      - interval represents Monte Carlo error, not model or parameter uncertainty
+    sources:
+      - source_id: book-glasserman-monte-carlo
+        chapter: "1.1.2-1.1.3"
+        page: "5-10"
+    implementation:
+      - file: src/take_two_options/intelligence/valuation.py
+        symbols: [_empirical_metrics]
+    tests:
+      - file: tests/test_intelligence_v11.py
+        symbols: [test_path_valuation_produces_full_risk_metrics_and_robustness]
+    validation_status: tested
+
+  - formula_id: FORM-BOOTSTRAP-001
+    name: IID percentile bootstrap interval
+    statement: "Resample observations with replacement, recompute the statistic, and use empirical alpha/2 and 1-alpha/2 quantiles of the bootstrap statistics."
+    measure: P
+    units: statistic_dependent
+    assumptions:
+      - observations are iid or exchangeable for the target statistic
+      - the empirical distribution is an adequate plug-in approximation
+      - the interval is approximate and sample size is adequate
+    sources:
+      - source_id: book-wasserman-all-statistics
+        chapter: "8.1-8.3"
+        page: "107-114"
+    implementation:
+      - file: src/take_two_options/research_statistics.py
+        symbols: [bootstrap_interval]
+    tests:
+      - file: tests/test_research_statistics.py
+        symbols: [test_intervals_and_tail_risk_are_deterministic]
     validation_status: tested
 
   - formula_id: FORM-CONTROL-VARIATE-001

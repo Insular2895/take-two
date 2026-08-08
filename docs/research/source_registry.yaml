@@ -194,9 +194,9 @@ sources:
     edition: null
     year: 2004
     volume: null
-    chapter: "4 and 8"
-    section: "4.1 Control Variates; 4.2 Antithetic Variates; American option optimal stopping"
-    page_start: 186
+    chapter: "1, 4 and 8"
+    section: "1.1 Monte Carlo principles; 4.1 Control Variates; 4.2 Antithetic Variates; American option optimal stopping"
+    page_start: 1
     page_end: 207
     pdf_file:
       - Monte Carlo methods in financial engineerin-Paul Glasserman-Springer (2004).pdf
@@ -235,7 +235,7 @@ sources:
       - tests/test_simulation_uncertainty.py
       - tests/test_intelligence_v11.py
     validation_status: tested
-    notes: "Chapter 4 printed pp. 186-207 and the chapter 8 optimal-stopping boundary were inspected directly from the local PDF."
+    notes: "Chapter 1 printed pp. 1-10, chapter 4 printed pp. 186-207 and the chapter 8 optimal-stopping boundary were inspected directly from the local PDF."
 
   - source_id: paper-kunsch-block-bootstrap
     source_type: primary_research_article
@@ -284,10 +284,10 @@ sources:
     edition: null
     year: 2001
     volume: null
-    chapter: null
-    section: null
-    page_start: null
-    page_end: null
+    chapter: "8"
+    section: "8.1-8.3 bootstrap simulation, variance and confidence intervals"
+    page_start: 107
+    page_end: 114
     pdf_file: an analysis of the longstaff-schwartz algorithm for american option pricing.pdf
     url:
       - https://hdl.handle.net/1813/9176
@@ -676,7 +676,7 @@ sources:
       - FORM-WILSON-001
       - FORM-BOOTSTRAP-001
     formula: null
-    assumptions: "Chapter and pages to be inspected before mapping formulas."
+    assumptions: "The implemented percentile bootstrap assumes iid resampling; dependent series require the separate block-bootstrap method."
     measure: not_applicable
     units: statistic_dependent
     alternatives:
@@ -693,8 +693,8 @@ sources:
       - deflated_sharpe_probability
     test_file:
       - tests/test_research_statistics.py
-    validation_status: proposed
-    notes: "The iid bootstrap remains separate; Phase 5 adds a dependency-aware block-resampling sidecar."
+    validation_status: tested
+    notes: "Chapter 8 printed pp. 107-114 inspected directly. The text warns that bootstrap intervals are approximate and very small samples may be unreliable; the iid bootstrap remains separate from Phase 5 block resampling."
 
   - source_id: book-bjork-arbitrage-theory
     source_type: local_book
@@ -1086,16 +1086,18 @@ sources:
     edition: June 2024 ODD
     year: 2024
     volume: null
-    chapter: null
-    section: "Contract characteristics, adjustments and exercise risks"
-    page_start: null
-    page_end: null
+    chapter: "II and X"
+    section: "Options nomenclature; principal risks of options positions"
+    page_start: 5
+    page_end: 90
     pdf_file: null
     url: https://www.theocc.com/company-information/documents-and-archives/options-disclosure-document
     concept:
       - contract multiplier
       - adjusted deliverables
       - exercise and assignment risk
+      - holder and writer risks
+      - liquidity and market disruption risks
     formula_id: []
     formula: null
     assumptions: "Contract-specific OCC memos remain necessary for adjusted TTWO series."
@@ -1107,11 +1109,17 @@ sources:
     implementation_file:
       - src/take_two_options/intelligence/data_hub.py
       - src/take_two_options/intelligence/execution.py
-    implementation_symbol: null
-    test_file: tests/test_intelligence_v11.py
-    validation_status: sourced
+      - src/take_two_options/reporting/evidence_grade.py
+    implementation_symbol:
+      - FinalDecisionEvidenceReport
+      - final_decision_markdown
+      - final_decision_html
+    test_file:
+      - tests/test_intelligence_v11.py
+      - tests/test_evidence_grade_reporting.py
+    validation_status: tested
     verified_on: "2026-08-08"
-    notes: "The OCC page still presents the June 2024 ODD as the distribution version observed on the verification date."
+    notes: "The official OCC page and June 2024 PDF chapters II/X were inspected online; the page still presented this ODD as the distribution version observed on the verification date."
 
   - source_id: official-fred-alfred-realtime-periods-2026
     source_type: official_api_documentation
@@ -1186,6 +1194,35 @@ sources:
     notes: null
 
 formula_links:
+  - formula_id: FORM-MEASURE-CHANGE-001
+    name: Explicit P/Q measure boundary
+    source_id:
+      - book-bjork-arbitrage-theory
+      - book-andersen-piterbarg-interest-rate-modeling
+    source_location_status: inspected_bjork_10_2_12_2_and_andersen_piterbarg_1_3_4_2_1
+    implementation_file:
+      - src/take_two_options/quantitative/contracts.py
+      - src/take_two_options/intelligence/stochastic.py
+    implementation_symbol:
+      - Measure
+      - MeasureTransition
+      - StochasticPathSet
+    test_file: tests/test_quantitative_foundations.py
+    validation_status: tested
+    notes: "Measure tags prevent implicit P/Q conversion; they do not estimate a change of measure."
+
+  - formula_id: FORM-DISCOUNT-FACTOR-001
+    name: Continuous discount factor
+    source_id:
+      - book-bjork-arbitrage-theory
+      - book-andersen-piterbarg-interest-rate-modeling
+    source_location_status: inspected_bjork_12_2_and_andersen_piterbarg_4_2_1_5_A
+    implementation_file: src/take_two_options/quantitative/contracts.py
+    implementation_symbol: discount_factor
+    test_file: tests/test_quantitative_foundations.py
+    validation_status: tested
+    notes: "Flat continuously compounded rate and Actual/365 Fixed are explicit product conventions."
+
   - formula_id: FORM-BS-PRICE-001
     name: Black-Scholes European option value
     source_id:
@@ -1232,6 +1269,18 @@ formula_links:
     validation_status: tested
     notes: "Finite-grid diagnostic; continuous asymptotic proof is not claimed."
 
+  - formula_id: FORM-FD-CONVERGENCE-001
+    name: Finite-difference grid-refinement diagnostic
+    source_id:
+      - book-suli-mayers-numerical-analysis
+      - book-andersen-piterbarg-interest-rate-modeling
+    source_location_status: inspected_suli_mayers_1_6_1_7_2_7_and_andersen_piterbarg_2_3_3_2_2
+    implementation_file: src/take_two_options/quantitative/numerical_validation.py
+    implementation_symbol: assess_fd_convergence
+    test_file: tests/test_quantitative_foundations.py
+    validation_status: tested
+    notes: "Successive-grid agreement is a numerical diagnostic, not a proof of model correctness."
+
   - formula_id: FORM-EWMA-001
     name: Exponentially weighted conditional variance
     source_id:
@@ -1273,6 +1322,46 @@ formula_links:
       - tests/test_simulation_uncertainty.py
     validation_status: tested
     notes: "Canonical path probabilities now receive sidecars; weighted paths explicitly receive no binomial interval."
+
+  - formula_id: FORM-MC-SE-001
+    name: Monte Carlo standard error
+    source_id:
+      - book-glasserman-monte-carlo
+    source_location_status: inspected_chapter_1_printed_pages_1_10
+    implementation_file:
+      - src/take_two_options/intelligence/valuation.py
+      - src/take_two_options/simulation/uncertainty.py
+    implementation_symbol:
+      - _empirical_metrics
+      - control_variate_estimate
+      - antithetic_estimate
+    test_file:
+      - tests/test_intelligence_v11.py
+      - tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "Only independent replications, or independent antithetic pair means, count in the denominator."
+
+  - formula_id: FORM-MC-CI-001
+    name: Asymptotic Monte Carlo interval
+    source_id:
+      - book-glasserman-monte-carlo
+    source_location_status: inspected_chapter_1_printed_pages_5_10
+    implementation_file: src/take_two_options/intelligence/valuation.py
+    implementation_symbol: _empirical_metrics
+    test_file: tests/test_intelligence_v11.py
+    validation_status: tested
+    notes: "This interval covers simulation error only, not model or parameter uncertainty."
+
+  - formula_id: FORM-BOOTSTRAP-001
+    name: IID percentile bootstrap interval
+    source_id:
+      - book-wasserman-all-statistics
+    source_location_status: inspected_chapter_8_printed_pages_107_114
+    implementation_file: src/take_two_options/research_statistics.py
+    implementation_symbol: bootstrap_interval
+    test_file: tests/test_research_statistics.py
+    validation_status: tested
+    notes: "Approximate iid percentile interval; dependent series use a separate block bootstrap."
 
   - formula_id: FORM-CONTROL-VARIATE-001
     name: Linear control-variate estimator

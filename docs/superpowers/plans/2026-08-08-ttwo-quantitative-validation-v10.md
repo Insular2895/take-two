@@ -262,8 +262,8 @@ Commit proposé : `feat(optimization): expose robust integer objectives and pare
 ## Phase 8 — Scénarios événementiels et décision séquentielle
 
 État : contrats point-in-time, dépendances déclarées, origines de probabilités, scénarios de chocs,
-sensibilité des croyances et règles advisory implémentés ; tests ciblés verts ; commit atomique à
-créer.
+sensibilité des croyances et règles advisory implémentés ; gate complet vert (186 tests) ; commit
+atomique `e5cc451`.
 
 ### Documentary Research
 
@@ -292,12 +292,27 @@ Commit proposé : `feat(decision): make event updates sequential and evidence gr
 
 ## Phase 9 — Rapport final, dashboard et documentation
 
+État : grade de preuve monotone, sidecar final obligatoire, dashboard statique, matrice de lignée,
+registre d'errata et audit de validité implémentés ; gate complet vert (191 tests) ; commit atomique
+à créer.
+
 ### Documentary Research
 
 - Questions : communiquer incertitude, grade et limites sans produire un conseil garanti.
 - Principal : Wasserman pour les intervalles ; OCC pour les termes/risques.
 - Risques : synthétique confondu avec réel, statut supérieur à la preuve, formules orphelines.
 - Validation : schémas, golden reports, inspection autonome/offline.
+- PDF/pages : Wasserman ch. 8 pp. 107–114 ; Glasserman ch. 1 pp. 1–10 ; OCC ODD June 2024
+  ch. II/X pp. 5–90.
+- Concepts : point/intervalle/diagnostic séparés, faible maillon, risque optionnel visible,
+  currentness documentaire.
+- Formules : `FORM-MC-SE-001`, `FORM-MC-CI-001`, `FORM-BOOTSTRAP-001`.
+- Hypothèses : grade par prérequis, lineage hashée, aucune compensation inter-composants.
+- Alternatives refusées : score de confiance unique, grade production par tests, dashboard réseau.
+- Contradictions : précision MC ≠ validité modèle ; `production_ready_offline` ≠ validation
+  financière.
+- Fichiers : `reporting/evidence_grade.py`, `validate_research_registry.py`, validity/errata/matrix.
+- Tests : `tests/test_evidence_grade_reporting.py` et gate offline complet.
 
 ### Implémentation proposée
 

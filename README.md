@@ -956,6 +956,20 @@ et conserve `NO_TRADE`. Les plans `research_eligible_now`, `wait`, `revalue_*`, 
 `roll_review` sont des règles humaines point-in-time ; toutes les sorties gardent
 `order_capability=forbidden`.
 
+Le rapport final peut être accompagné d'un `FinalDecisionEvidenceReport`. Ce sidecar exige les
+estimations et intervalles, les probabilités et leur origine, hypothèses, scénarios favorables et
+d'échec, risques de modèle, limites des données, raisons exactes du classement et de `NO_TRADE`.
+Son grade suit une chaîne monotone et prend le plus faible composant requis :
+
+`proposed → implemented → tested → numerically_validated → empirically_validated →
+holdout_validated → paper_validated`.
+
+Ce grade mesure la preuve disponible, pas la confiance dans un gain. La matrice
+[`formula_lineage_matrix.md`](docs/research/formula_lineage_matrix.md) relie chaque formule à ses
+sources, son code et ses tests ; le CI rejette les références orphelines. Les contradictions et
+corrections restent visibles dans
+[`errata_registry.yaml`](docs/research/errata_registry.yaml).
+
 ## 9. Volatilité locale Dupire
 
 La chaîne V10.1 est interpolée sur une grille de moneyness :

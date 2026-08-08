@@ -38,6 +38,10 @@
   Independence, shared-driver discounts, user belief bounds and all event shock distributions are
   still explicit assumptions; no real TTWO catalyst probability, causal effect or latent-state
   transition is calibrated. Bounded belief ranges are sensitivity sets, not confidence regions.
+- The final evidence sidecar enforces complete sections, intervals/diagnostics and a monotone
+  weakest-link grade. Hashes establish artifact identity, not correctness; grade inputs still need
+  independent review, and the current chain remains `software_tested_only` because real OOS,
+  fresh holdout and paper evidence are absent. Static reporting is not financial validation.
 - MarketData.app historical chains are EOD bid/ask, not intraday NBBO or
   simultaneous combo fills.
 - Alpaca indicative snapshots do not supply the open-interest/underlying fields

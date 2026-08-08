@@ -43,6 +43,9 @@ jobs:
       - name: Validate offline fixtures
         run: python scripts/validate_offline_artifacts.py
 
+      - name: Validate documentary lineage
+        run: python scripts/validate_research_registry.py
+
       - name: Enforce security boundary
         run: python scripts/security_gate.py
 
