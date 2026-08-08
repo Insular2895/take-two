@@ -3,6 +3,17 @@
     "QualityScore": {
       "additionalProperties": false,
       "properties": {
+        "confidence": {
+          "default": "VERY_LOW",
+          "enum": [
+            "VERY_LOW",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ],
+          "title": "Confidence",
+          "type": "string"
+        },
         "contributions": {
           "items": {
             "$ref": "#/$defs/ScoreContribution"
@@ -26,6 +37,13 @@
         "kind": {
           "$ref": "#/$defs/ScoreKind"
         },
+        "missing_components": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Components",
+          "type": "array"
+        },
         "raw_metrics": {
           "items": {
             "$ref": "#/$defs/RawScoreMetric"
@@ -46,6 +64,27 @@
           ],
           "default": null,
           "title": "Score"
+        },
+        "score_coverage": {
+          "default": 0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Score Coverage",
+          "type": "number"
+        },
+        "score_value": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score Value"
         },
         "sensitivity_interval": {
           "anyOf": [
@@ -203,6 +242,13 @@
       ],
       "title": "Classification",
       "type": "string"
+    },
+    "classification_rationale": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Classification Rationale",
+      "type": "array"
     },
     "classification_rule_version": {
       "title": "Classification Rule Version",

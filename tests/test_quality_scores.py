@@ -76,7 +76,10 @@ def test_score_is_monotone_and_exposes_raw_metrics_and_sensitivity() -> None:
 def test_missing_metric_produces_no_score() -> None:
     result = calculate_quality_score(_formula(), _metrics(0.2)[:1])
     assert result.score is None
-    assert result.contributions == []
+    assert result.score_value is not None
+    assert result.score_coverage == pytest.approx(0.6)
+    assert len(result.contributions) == 1
+    assert result.missing_components == ["probability_profit"]
     assert "probability_profit" in result.unavailable_reasons[0]
 
 
@@ -102,19 +105,23 @@ def test_classification_keeps_high_risk_and_execution_blocks_visible() -> None:
     )
 
 
-def test_committed_tt_report_has_five_unavailable_scores_and_no_composite() -> None:
+def test_committed_tt_report_has_five_real_partial_aware_scores_and_no_composite() -> None:
     report = FiveScoreReport.model_validate_json(
         (ROOT / "reports/pre_opra/five_scores_2026-08-08.json").read_text()
     )
     assert report.composite_score is None
-    assert report.classification == "BLOCKED_VALIDATION"
-    assert all(
-        score.score is None
-        for score in (
-            report.opportunity,
-            report.risk,
-            report.evidence,
-            report.model_agreement,
-            report.execution_quality,
-        )
+    assert report.classification == "AVOID"
+    scores = (
+        report.opportunity,
+        report.risk,
+        report.evidence,
+        report.model_agreement,
+        report.execution_quality,
     )
+    assert all(score.score_value is not None for score in scores)
+    assert report.opportunity.score_coverage == 1
+    assert report.risk.score_coverage == 1
+    assert report.evidence.score_coverage == pytest.approx(0.8)
+    assert report.model_agreement.score_coverage == pytest.approx(0.5)
+    assert report.execution_quality.missing_components == ["live_execution_component"]
+    assert report.classification_rule_version == "pre-opra-v2"

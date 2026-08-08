@@ -75,6 +75,10 @@ class QualityScore(StrictModel):
     formula_version: str
     formula_status: Literal["draft_to_validate", "validated", "unavailable"]
     score: float | None = Field(default=None, ge=0, le=100)
+    score_value: float | None = Field(default=None, ge=0, le=100)
+    score_coverage: float = Field(default=0, ge=0, le=1)
+    missing_components: list[str] = Field(default_factory=list)
+    confidence: Literal["VERY_LOW", "LOW", "MEDIUM", "HIGH"] = "VERY_LOW"
     raw_metrics: list[RawScoreMetric]
     contributions: list[ScoreContribution]
     sensitivity_interval: tuple[float, float] | None
@@ -85,8 +89,14 @@ class QualityScore(StrictModel):
         complete = all(metric.available for metric in self.raw_metrics)
         if self.score is not None and (not complete or self.unavailable_reasons):
             raise ValueError("computed scores require all raw metrics and no blockers")
-        if self.score is None and self.contributions:
-            raise ValueError("unavailable scores cannot publish contributions")
+        if self.score is not None and self.score_value != self.score:
+            raise ValueError("a fully covered score and score_value must agree")
+        if self.score_coverage == 0 and self.score_value is not None:
+            raise ValueError("zero coverage cannot publish a partial score value")
+        if self.score_coverage < 1 and self.score is not None:
+            raise ValueError("legacy score is reserved for complete coverage")
+        if self.score_coverage == 1 and self.missing_components:
+            raise ValueError("complete coverage cannot retain missing components")
         return self
 
 
@@ -117,6 +127,7 @@ class FiveScoreReport(StrictModel):
     classification: CandidateClassification
     classification_rule_version: str
     classification_status: Literal["draft_to_validate", "validated"]
+    classification_rationale: list[str] = Field(default_factory=list)
     failed_constraints: list[str]
     holdout_used: Literal[False]
     order_capability: Literal["forbidden"] = "forbidden"
@@ -159,6 +170,7 @@ def calculate_quality_score(
     metrics: list[RawScoreMetric],
     *,
     weight_perturbation: float = 0.10,
+    confidence: Literal["VERY_LOW", "LOW", "MEDIUM", "HIGH"] | None = None,
 ) -> QualityScore:
     if not 0 <= weight_perturbation < 1:
         raise ValueError("weight perturbation must be in [0, 1)")
@@ -173,12 +185,22 @@ def calculate_quality_score(
         if all(component.weight_status == "validated" for component in formula.components)
         else "draft_to_validate"
     )
-    if reasons:
+    available_components = [
+        component
+        for component in formula.components
+        if component.metric_name in by_name and by_name[component.metric_name].available
+    ]
+    coverage = sum(component.weight for component in available_components)
+    if not available_components:
         return QualityScore(
             kind=formula.kind,
             formula_version=formula.version,
             formula_status=formula_status,
             score=None,
+            score_value=None,
+            score_coverage=0,
+            missing_components=[component.metric_name for component in formula.components],
+            confidence=confidence or "VERY_LOW",
             raw_metrics=metrics,
             contributions=[],
             sensitivity_interval=None,
@@ -186,7 +208,7 @@ def calculate_quality_score(
         )
     normalized = [
         _normalize(_required_value(by_name[component.metric_name]), component)
-        for component in formula.components
+        for component in available_components
     ]
     contributions = [
         ScoreContribution(
@@ -196,27 +218,49 @@ def calculate_quality_score(
             weight=component.weight,
             points=100 * value * component.weight,
         )
-        for component, value in zip(formula.components, normalized, strict=True)
+        for component, value in zip(available_components, normalized, strict=True)
     ]
-    score = sum(item.points for item in contributions)
-    candidates = [score]
-    for index in range(len(formula.components)):
-        weights = [component.weight for component in formula.components]
+    score_value = sum(item.points for item in contributions)
+    candidates = [score_value]
+    for index in range(len(available_components)):
+        weights = [component.weight for component in available_components]
         weights[index] *= 1 + weight_perturbation
-        total = sum(weights)
+        original_total = sum(component.weight for component in available_components)
+        perturbed_total = sum(weights)
         candidates.append(
             100
-            * sum(value * weight / total for value, weight in zip(normalized, weights, strict=True))
+            * original_total
+            * sum(
+                value * weight / perturbed_total
+                for value, weight in zip(normalized, weights, strict=True)
+            )
         )
+    resolved_confidence = confidence or (
+        "HIGH"
+        if coverage >= 0.90
+        else "MEDIUM"
+        if coverage >= 0.70
+        else "LOW"
+        if coverage >= 0.40
+        else "VERY_LOW"
+    )
     return QualityScore(
         kind=formula.kind,
         formula_version=formula.version,
         formula_status=formula_status,
-        score=score,
+        score=score_value if not reasons else None,
+        score_value=score_value,
+        score_coverage=coverage,
+        missing_components=[
+            component.metric_name
+            for component in formula.components
+            if component not in available_components
+        ],
+        confidence=resolved_confidence,
         raw_metrics=metrics,
         contributions=contributions,
         sensitivity_interval=(min(candidates), max(candidates)),
-        unavailable_reasons=[],
+        unavailable_reasons=reasons,
     )
 
 
@@ -227,16 +271,31 @@ def classify_candidate(
     evidence: float,
     model_agreement: float,
     execution_quality: float,
+    development_expected_return: float | None = None,
+    uplift_vs_cash: float | None = None,
+    evidence_coverage: float = 1.0,
+    execution_coverage: float = 1.0,
 ) -> CandidateClassification:
-    """Apply draft pre-opra-v1 rules; thresholds remain subject to validation."""
+    """Apply pre-opra-v2 rules to separate poor evidence from poor economics."""
     if risk >= 80:
         return "HIGH_RISK"
+    if execution_coverage < 0.50:
+        return "BLOCKED_EXECUTION"
+    if (
+        development_expected_return is not None
+        and uplift_vs_cash is not None
+        and development_expected_return <= 0
+        and uplift_vs_cash <= 0
+    ):
+        return "AVOID"
+    if opportunity < 30:
+        return "AVOID"
+    if evidence_coverage < 0.50:
+        return "BLOCKED_VALIDATION"
     if execution_quality < 30:
         return "BLOCKED_EXECUTION"
     if evidence < 30 or model_agreement < 30:
         return "SPECULATIVE"
-    if opportunity < 30:
-        return "AVOID"
     if opportunity >= 75 and risk <= 40 and min(evidence, model_agreement, execution_quality) >= 70:
         return "STRONG_CANDIDATE"
     return "CANDIDATE"

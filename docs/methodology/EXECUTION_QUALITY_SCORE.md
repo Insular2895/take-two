@@ -1,8 +1,8 @@
-# Execution quality score — `pre-opra-v1`
+# Execution quality score — `pre-opra-v2`
 
 Échelle 0–100, plus haut = exécution estimée de meilleure qualité. Les entrées prévues
-sont spread relatif/absolu, volume, open interest, fraîcheur, nombre de jambes, slippage,
-commissions, incertitude de fill et disponibilité. Les données indicatives ou historiques
-pré-OPRA sont explicitement limitées et ne peuvent produire une note validée. Le module
-reste read-only, sans création ni transmission d'ordre. Poids et bornes sont
-`draft_to_validate`.
+sont taux de passage des filtres historiques (20 %), coût/capital (25 %), jambes actives
+(15 %), complétude bid/ask (15 %) et exécution live (25 %). Le dernier composant reste
+`pending_opra`, soit 75 % de couverture pré-OPRA. La formule est validée mécaniquement,
+mais les données historiques ne prouvent pas les fills. Le module reste read-only, sans
+création ni transmission d'ordre.

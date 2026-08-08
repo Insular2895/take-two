@@ -13,7 +13,7 @@ does not open the final holdout, and keeps licensed observations outside Git.
 | C6 | Historical volatility surfaces | CLOSED_DIAGNOSTIC | `reports/pre_opra/historical_surfaces_2026-08-08.json` | 50 calendar-arbitrage violations, 21 failed snapshots, rights confirmation; Heston blocked |
 | C7 | Empirical/GARCH/Heston models | CLOSED_DIAGNOSTIC | `reports/pre_opra/empirical_calibration_2026-08-08.json` | One development split; Heston blocked; rights confirmation |
 | C8 | Final development walk-forward | CLOSED_DIAGNOSTIC | `reports/pre_opra/walk_forward_protocol_2026-08-08.json` | 25 observations vs 41 formal minimum; holdout remains UNOPENED |
-| C9 | Five quality scores | PENDING | — | Partial-coverage rules absent |
+| C9 | Five quality scores | CLOSED_DIAGNOSTIC | `reports/pre_opra/five_scores_2026-08-08.json` | Low confidence; holdout/rights/live execution remain missing |
 | C10 | Severity, gates and frontier | PENDING | — | Confidence intervals absent |
 | C11 | Engine-vs-baseline verdict | PENDING | — | No evidence-backed verdict yet |
 | C12 | Final dashboard and report | PENDING | — | Final artifacts not rebuilt |

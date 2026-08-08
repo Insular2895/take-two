@@ -1,7 +1,7 @@
-# Risk score — `pre-opra-v1`
+# Risk score — `pre-opra-v2`
 
 Échelle 0–100, 0 = risque mesuré le plus faible, 100 = extrême. Les entrées prévues
-sont probabilités de pertes sévères, CVaR 95 %, perte maximale, drawdown, gap, theta,
-incertitude modèle et stress de liquidité. Les métriques brutes et la severe-loss ladder
-restent prioritaires. Bornes et poids sont `draft_to_validate`; aucune moyenne avec
-l'opportunity score n'est autorisée.
+sont CVaR 95 % (25 %), drawdown (20 %), probabilités de pertes 25/50/70/90 % (10 %
+chacune), perte quasi totale (10 %) et coût d'exécution/capital (5 %). Les métriques
+brutes et la severe-loss ladder restent prioritaires. La formule et sa monotonie sont
+testées ; aucune moyenne avec l'opportunity score n'est autorisée.

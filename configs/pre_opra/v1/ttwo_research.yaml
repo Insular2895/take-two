@@ -203,11 +203,11 @@ report_policy:
   maximum_candidates: 5
   language: fr
   score_versions:
-    opportunity: pre-opra-v1
-    risk: pre-opra-v1
-    evidence: pre-opra-v1
-    model_agreement: pre-opra-v1
-    execution_quality: pre-opra-v1
+    opportunity: pre-opra-v2
+    risk: pre-opra-v2
+    evidence: pre-opra-v2
+    model_agreement: pre-opra-v2
+    execution_quality: pre-opra-v2
 
 extensions:
   option_normalization:
@@ -300,3 +300,7 @@ extensions:
     formal_policy: {train: 20, validation: 8, embargo: 5, test: 8}
     multiple_testing: holm
     final_holdout_used: false
+  five_scores:
+    aggregate_report: reports/pre_opra/five_scores_2026-08-08.json
+    partial_score_policy: preserve_original_weights_without_renormalization
+    classification_rule_version: pre-opra-v2
