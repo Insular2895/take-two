@@ -363,6 +363,52 @@ formulas:
           - test_calibration_stays_insufficient_and_holdout_identity_is_mandatory
     validation_status: tested
 
+  - formula_id: FORM-PARETO-DOMINANCE-001
+    name: Non-compensatory allocation Pareto dominance
+    statement: "Allocation A dominates B only when A is no worse on both return objectives and every risk/cost objective, and is strictly better on at least one."
+    measure: not_applicable
+    units: budget_normalized_objective_vector
+    assumptions:
+      - every compared point is integer-feasible under the same policy
+      - expected and worst-case returns are maximized
+      - volatility, CVaR, cost, maximum loss, execution risk and model dispersion are minimized
+      - the all-zero cash/NO_TRADE allocation belongs to the feasible set
+    sources:
+      - source_id: book-boyd-vandenberghe-convex-optimization
+        chapter: "4.7.3-4.7.5"
+        page: "177-184"
+    implementation:
+      - file: src/take_two_options/optimization/allocation_pareto.py
+        symbols: [dominates_allocation, allocation_pareto_frontier]
+    tests:
+      - file: tests/test_allocation_pareto.py
+        symbols: [test_exact_pareto_frontier_removes_dominated_points_and_preserves_cash]
+    validation_status: tested
+
+  - formula_id: FORM-ROBUST-ALLOCATION-OBJECTIVE-001
+    name: Versioned scalar allocation utility
+    statement: "Normalize selected expected return by budget and subtract declared variance, CVaR, execution and model-dispersion penalties."
+    measure: P_for_member_forecasts
+    units: dimensionless_utility
+    assumptions:
+      - objective kind and coefficient version are explicit
+      - scenario weights carry explicit heuristic or validated-OOS semantics
+      - scalar ranking does not replace the full Pareto frontier
+      - whole-contract constraints are enforced before scoring
+    sources:
+      - source_id: book-boyd-vandenberghe-convex-optimization
+        chapter: "4.7.4-4.7.5"
+        page: "178-184"
+    implementation:
+      - file: src/take_two_options/optimization/allocation_pareto.py
+        symbols: [OptimizationObjectiveContract, evaluate_scalar_objective]
+      - file: src/take_two_options/intelligence/optimizer.py
+        symbols: [optimize_allocations_with_frontier]
+    tests:
+      - file: tests/test_allocation_pareto.py
+        symbols: [test_versioned_objectives_select_weighted_or_worst_case_expectation]
+    validation_status: tested
+
   - formula_id: FORM-PBO-001
     name: Combinatorially symmetric probability of backtest overfitting diagnostic
     statement: "Across symmetric train/test fold combinations, measure how often the in-sample winner ranks below the OOS median."

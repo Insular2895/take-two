@@ -16,13 +16,24 @@ from take_two_options.intelligence.schemas import (
 )
 from take_two_options.intelligence.valuation import StrategyPathValuation
 from take_two_options.knowledge.provenance import stable_hash
+from take_two_options.optimization.allocation_pareto import (
+    AllocationObjectiveKind,
+    AllocationOptimizationReport,
+    AllocationParetoPoint,
+    OptimizationObjectiveContract,
+    allocation_pareto_frontier,
+    evaluate_scalar_objective,
+)
 from take_two_options.thesis_scanner.schemas import ThesisCandidate
 
 
 @dataclass(frozen=True)
 class _ScoredAllocation:
     counts: tuple[int, ...]
+    cost_eur: float
+    maximum_loss_eur: float
     expected_usd: float
+    worst_case_expected_usd: float
     volatility_usd: float
     cvar_usd: float
     execution_risk_usd: float
@@ -108,9 +119,7 @@ def _continuous_diagnostics(
     if covariance.ndim == 0:
         covariance = np.asarray([[float(covariance)]])
     x = np.asarray(counts, dtype=float)
-    gradient = expected / budget_usd - (
-        2 * risk_aversion * covariance @ x / budget_usd**2
-    )
+    gradient = expected / budget_usd - (2 * risk_aversion * covariance @ x / budget_usd**2)
     hessian = -2 * risk_aversion * covariance / budget_usd**2
     eigenvalues = np.linalg.eigvalsh((hessian + hessian.T) / 2)
     return ContinuousDiagnostics(
@@ -126,7 +135,7 @@ def _continuous_diagnostics(
     )
 
 
-def optimize_allocations(
+def optimize_allocations_with_frontier(
     *,
     candidates: list[ThesisCandidate],
     valuations: dict[str, list[StrategyPathValuation]],
@@ -146,10 +155,11 @@ def optimize_allocations(
     vega_exposure_range: tuple[float, float] = (-1_000_000.0, 1_000_000.0),
     theta_exposure_range: tuple[float, float] = (-1_000_000.0, 1_000_000.0),
     allow_multiple_strategies: bool = True,
-) -> list[AllocationResult]:
+    objective_contract: OptimizationObjectiveContract | None = None,
+) -> AllocationOptimizationReport:
     """Enumerate the finite integer set; retaining cash and no-trade are explicit choices."""
     if not candidates:
-        return []
+        raise ValueError("allocation optimization requires candidates")
     if set(valuations) != {candidate.candidate_id for candidate in candidates}:
         raise ValueError("every optimization candidate requires valuations")
     reference_valuations = valuations[candidates[0].candidate_id]
@@ -161,19 +171,27 @@ def optimize_allocations(
         if {item.model_key for item in valuations[candidate.candidate_id]} != model_keys:
             raise ValueError("candidate path valuation groups must align exactly")
     contract_counts = [
-        sum(leg.quantity for leg in candidate.base_candidate.legs)
-        for candidate in candidates
+        sum(leg.quantity for leg in candidate.base_candidate.legs) for candidate in candidates
     ]
     costs_eur = [candidate.execution.total_cost_eur for candidate in candidates]
     losses_eur = [candidate.maximum_loss_eur for candidate in candidates]
     execution_risk_usd = [
-        candidate.decision_metrics.maximum_leg_relative_spread
-        * candidate.execution.total_cost_usd
+        candidate.decision_metrics.maximum_leg_relative_spread * candidate.execution.total_cost_usd
         for candidate in candidates
     ]
     budget_usd = budget_eur * eur_usd_rate
+    objective_contract = objective_contract or OptimizationObjectiveContract(
+        objective_id=f"{profile_name}-weighted-mean-risk",
+        kind=AllocationObjectiveKind.WEIGHTED_MEAN_RISK,
+        risk_aversion=profile.risk_aversion,
+        cvar_aversion=profile.cvar_aversion,
+        execution_penalty=profile.execution_penalty,
+        model_risk_penalty=profile.model_risk_penalty,
+        regime_weight_semantics="configured_heuristic_sensitivity",
+    )
     scored: list[_ScoredAllocation] = []
     for counts in _integer_vectors(contract_counts, maximum_contracts=maximum_contracts):
+        is_cash = not any(counts)
         cost_eur = sum(count * cost for count, cost in zip(counts, costs_eur, strict=True))
         loss_eur = sum(count * loss for count, loss in zip(counts, losses_eur, strict=True))
         if cost_eur > budget_eur + 1e-9 or loss_eur > maximum_loss_eur + 1e-9:
@@ -190,13 +208,10 @@ def optimize_allocations(
         ):
             continue
         selected_candidates = [
-            candidate
-            for count, candidate in zip(counts, candidates, strict=True)
-            if count > 0
+            candidate for count, candidate in zip(counts, candidates, strict=True) if count > 0
         ]
         if any(
-            candidate.decision_metrics.maximum_leg_relative_spread
-            > maximum_relative_spread + 1e-12
+            candidate.decision_metrics.maximum_leg_relative_spread > maximum_relative_spread + 1e-12
             for candidate in selected_candidates
         ):
             continue
@@ -235,9 +250,8 @@ def optimize_allocations(
             "vega": vega_exposure_range,
             "theta": theta_exposure_range,
         }
-        if any(
-            value < exposure_ranges[name][0] - 1e-12
-            or value > exposure_ranges[name][1] + 1e-12
+        if not is_cash and any(
+            value < exposure_ranges[name][0] - 1e-12 or value > exposure_ranges[name][1] + 1e-12
             for name, value in exposures.items()
         ):
             continue
@@ -256,16 +270,12 @@ def optimize_allocations(
                 np.zeros_like(reference_valuations[0].pnl_usd),
             )
             group_pnls[model_key] = combined
-        group_expectations = {
-            key: float(np.mean(values)) for key, values in group_pnls.items()
-        }
+        group_expectations = {key: float(np.mean(values)) for key, values in group_pnls.items()}
         expected = sum(weights[key] * value for key, value in group_expectations.items())
+        worst_case_expected = min(group_expectations.values(), default=0.0)
         variance = sum(
             weights[key]
-            * (
-                float(np.var(values, ddof=1))
-                + (float(np.mean(values)) - expected) ** 2
-            )
+            * (float(np.var(values, ddof=1)) + (float(np.mean(values)) - expected) ** 2)
             for key, values in group_pnls.items()
         )
         stress_groups = [
@@ -278,25 +288,30 @@ def optimize_allocations(
             default=0.0,
         )
         execution = sum(
-            count * risk
-            for count, risk in zip(counts, execution_risk_usd, strict=True)
+            count * risk for count, risk in zip(counts, execution_risk_usd, strict=True)
         )
         dispersion = (
             max(group_expectations.values()) - min(group_expectations.values())
             if group_expectations
             else 0.0
         )
-        objective = (
-            expected / budget_usd
-            - profile.risk_aversion * variance / budget_usd**2
-            - profile.cvar_aversion * cvar / budget_usd
-            - profile.execution_penalty * execution / budget_usd
-            - profile.model_risk_penalty * dispersion / budget_usd
+        objective = evaluate_scalar_objective(
+            objective_contract,
+            weighted_expected_usd=expected,
+            worst_case_expected_usd=worst_case_expected,
+            variance_usd2=variance,
+            cvar_usd=cvar,
+            execution_risk_usd=execution,
+            model_dispersion_usd=dispersion,
+            budget_usd=budget_usd,
         )
         scored.append(
             _ScoredAllocation(
                 counts=counts,
+                cost_eur=cost_eur,
+                maximum_loss_eur=loss_eur,
                 expected_usd=expected,
+                worst_case_expected_usd=worst_case_expected,
                 volatility_usd=math.sqrt(max(variance, 0.0)),
                 cvar_usd=cvar,
                 execution_risk_usd=execution,
@@ -314,13 +329,42 @@ def optimize_allocations(
         reverse=True,
     )
     ranked = list(enumerate(scored, start=1))
+
+    def allocation_id_for(item: _ScoredAllocation) -> str:
+        identity = {
+            "profile": profile_name,
+            "objective_id": objective_contract.objective_id,
+            "objective_version": objective_contract.version,
+            "counts": item.counts,
+            "candidates": [candidate.candidate_id for candidate in candidates],
+        }
+        return f"v11-allocation-{stable_hash(identity)[:16]}"
+
+    pareto_frontier = allocation_pareto_frontier(
+        [
+            AllocationParetoPoint(
+                allocation_id=allocation_id_for(item),
+                counts=item.counts,
+                expected_return_fraction=item.expected_usd / budget_usd,
+                worst_case_return_fraction=(item.worst_case_expected_usd / budget_usd),
+                volatility_fraction=item.volatility_usd / budget_usd,
+                cvar_fraction=item.cvar_usd / budget_usd,
+                cost_fraction=item.cost_eur / budget_eur,
+                maximum_loss_fraction=item.maximum_loss_eur / budget_eur,
+                execution_risk_fraction=item.execution_risk_usd / budget_usd,
+                model_dispersion_fraction=item.model_dispersion_usd / budget_usd,
+                scalar_objective=item.objective,
+                no_trade=not any(item.counts),
+            )
+            for item in scored
+        ]
+    )
+    no_trade_allocation_id = next(
+        point.allocation_id for point in pareto_frontier if point.no_trade
+    )
     selected = ranked[: profile.maximum_allocations]
     cash_baseline = next(
-        (
-            (rank, item)
-            for rank, item in ranked
-            if not any(item.counts)
-        ),
+        ((rank, item) for rank, item in ranked if not any(item.counts)),
         None,
     )
     if (
@@ -377,6 +421,7 @@ def optimize_allocations(
                 for count, candidate in zip(item.counts, candidates, strict=True)
             ),
         }
+        no_trade = not lines
         active_constraints = [
             name
             for name, used, limit in (
@@ -389,6 +434,8 @@ def optimize_allocations(
             if limit > 0 and used >= 0.95 * limit
         ]
         for name, value in aggregate_greeks.items():
+            if no_trade:
+                break
             lower, upper = {
                 "delta": delta_exposure_range,
                 "gamma": gamma_exposure_range,
@@ -398,15 +445,9 @@ def optimize_allocations(
             span = max(upper - lower, 1e-9)
             if value - lower <= 0.05 * span or upper - value <= 0.05 * span:
                 active_constraints.append(f"{name}_exposure")
-        no_trade = not lines
-        identity = {
-            "profile": profile_name,
-            "counts": item.counts,
-            "candidates": [candidate.candidate_id for candidate in candidates],
-        }
         results.append(
             AllocationResult(
-                allocation_id=f"v11-allocation-{stable_hash(identity)[:16]}",
+                allocation_id=allocation_id_for(item),
                 profile=profile_name,
                 rank=rank,
                 lines=lines,
@@ -427,22 +468,26 @@ def optimize_allocations(
                         allow_multiple_strategies or selected_positions <= 1
                     ),
                     "delta_exposure": (
-                        delta_exposure_range[0]
+                        no_trade
+                        or delta_exposure_range[0]
                         <= aggregate_greeks["delta"]
                         <= delta_exposure_range[1]
                     ),
                     "gamma_exposure": (
-                        gamma_exposure_range[0]
+                        no_trade
+                        or gamma_exposure_range[0]
                         <= aggregate_greeks["gamma"]
                         <= gamma_exposure_range[1]
                     ),
                     "vega_exposure": (
-                        vega_exposure_range[0]
+                        no_trade
+                        or vega_exposure_range[0]
                         <= aggregate_greeks["vega"]
                         <= vega_exposure_range[1]
                     ),
                     "theta_exposure": (
-                        theta_exposure_range[0]
+                        no_trade
+                        or theta_exposure_range[0]
                         <= aggregate_greeks["theta"]
                         <= theta_exposure_range[1]
                     ),
@@ -465,7 +510,7 @@ def optimize_allocations(
                     candidates=candidates,
                     valuations=valuations,
                     weights=weights,
-                    risk_aversion=profile.risk_aversion,
+                    risk_aversion=objective_contract.risk_aversion,
                     budget_usd=budget_usd,
                 ),
                 no_trade=no_trade,
@@ -486,22 +531,81 @@ def optimize_allocations(
                     ),
                 ],
                 cash_reason=(
-                    "Cash/NO_TRADE has objective zero and dominates feasible risky allocations."
+                    "Cash/NO_TRADE is the required zero-allocation reference with objective zero."
                     if no_trade
                     else "Unused cash is retained because whole contracts and hard constraints "
                     "make the residual budget non-deployable without weakening policy."
                 ),
                 reasons=(
-                    [
-                        "Holding cash dominates all enumerated allocations under this profile."
-                    ]
+                    ["Cash baseline is retained as an explicit feasible reference."]
                     if no_trade
                     else [
                         "Exact whole-contract enumeration; unused budget is retained as cash.",
-                        "Objective includes expectation, variance, adverse CVaR, execution, "
-                        "and model dispersion.",
+                        f"Objective contract {objective_contract.objective_id} "
+                        f"version {objective_contract.version} is explicit.",
                     ]
                 ),
             )
         )
-    return results
+    return AllocationOptimizationReport(
+        objective=objective_contract,
+        feasible_allocations=len(scored),
+        pareto_frontier=pareto_frontier,
+        selected_allocations=results,
+        no_trade_allocation_id=no_trade_allocation_id,
+        assumptions=(
+            "The feasible integer set is enumerated exhaustively within configured caps.",
+            "Pareto dominance is non-compensatory across return, risk, cost, loss, "
+            "execution, and model dispersion.",
+            "Configured heuristic regime weights are not calibrated probabilities.",
+        ),
+    )
+
+
+def optimize_allocations(
+    *,
+    candidates: list[ThesisCandidate],
+    valuations: dict[str, list[StrategyPathValuation]],
+    regime_weights: dict[SimulationRegime, float],
+    profile_name: str,
+    profile: OptimizerProfileConfig,
+    budget_eur: float,
+    maximum_loss_eur: float,
+    maximum_contracts: int,
+    eur_usd_rate: float,
+    maximum_positions: int = 4,
+    maximum_concentration: float = 1.0,
+    minimum_liquidity_score: float = 0.0,
+    maximum_relative_spread: float = 1.0,
+    delta_exposure_range: tuple[float, float] = (-1_000_000.0, 1_000_000.0),
+    gamma_exposure_range: tuple[float, float] = (-1_000_000.0, 1_000_000.0),
+    vega_exposure_range: tuple[float, float] = (-1_000_000.0, 1_000_000.0),
+    theta_exposure_range: tuple[float, float] = (-1_000_000.0, 1_000_000.0),
+    allow_multiple_strategies: bool = True,
+    objective_contract: OptimizationObjectiveContract | None = None,
+) -> list[AllocationResult]:
+    """Compatibility API returning scalar-ranked selections from the richer report."""
+
+    if not candidates:
+        return []
+    return optimize_allocations_with_frontier(
+        candidates=candidates,
+        valuations=valuations,
+        regime_weights=regime_weights,
+        profile_name=profile_name,
+        profile=profile,
+        budget_eur=budget_eur,
+        maximum_loss_eur=maximum_loss_eur,
+        maximum_contracts=maximum_contracts,
+        eur_usd_rate=eur_usd_rate,
+        maximum_positions=maximum_positions,
+        maximum_concentration=maximum_concentration,
+        minimum_liquidity_score=minimum_liquidity_score,
+        maximum_relative_spread=maximum_relative_spread,
+        delta_exposure_range=delta_exposure_range,
+        gamma_exposure_range=gamma_exposure_range,
+        vega_exposure_range=vega_exposure_range,
+        theta_exposure_range=theta_exposure_range,
+        allow_multiple_strategies=allow_multiple_strategies,
+        objective_contract=objective_contract,
+    ).selected_allocations

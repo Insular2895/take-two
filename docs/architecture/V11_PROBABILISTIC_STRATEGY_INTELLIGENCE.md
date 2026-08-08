@@ -181,7 +181,7 @@ candidate pool. It enforces:
 - bounded-debit margin;
 - V10.1 liquidity/admissibility state.
 
-Its objective combines posterior-weighted mean P&L, variance, adverse/rupture
+Its objective combines configured-scenario-weighted mean P&L, variance, adverse/rupture
 CVaR, execution risk, and cross-model dispersion. Prudent, balanced, and
 aggressive profiles alter only declared coefficients. Cash reserve and the
 all-zero `NO_TRADE` vector are always legitimate; capital deployment is never
@@ -193,6 +193,11 @@ delta/gamma/vega/theta exposure are exact hard constraints.
 Gradient, Hessian, and eigenvalue diagnostics describe only the smooth
 mean-variance surrogate. CVaR, execution penalties, and integer feasibility
 are evaluated by exact enumeration.
+
+The scalar objective is an explicit versioned contract. A separate sidecar computes the full
+non-compensatory Pareto frontier over weighted/worst-case return, volatility, CVaR, cost, maximum
+loss, execution risk and model dispersion. Cash/NO_TRADE is always included; a Pareto point is
+not a recommendation.
 
 ## Promotion gates
 

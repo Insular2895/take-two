@@ -391,27 +391,29 @@ sources:
     notes: "PDF metadata verifies title and both authors."
 
   - source_id: book-boyd-vandenberghe-convex-optimization
-    source_type: local_book_identity_to_review
+    source_type: local_book
     author:
       - Stephen Boyd
       - Lieven Vandenberghe
     title: Convex Optimization
-    edition: null
-    year: null
+    edition: "seventh printing with corrections"
+    year: 2009
     volume: null
-    chapter: null
-    section: null
-    page_start: null
-    page_end: null
+    chapter: "4"
+    section: "4.7 Vector optimization"
+    page_start: 174
+    page_end: 187
     pdf_file: convex optimization.pdf
     concept:
       - constrained optimization
       - duality and KKT
       - robust allocation
       - Pareto frontiers
-    formula_id: []
+    formula_id:
+      - FORM-PARETO-DOMINANCE-001
+      - FORM-ROBUST-ALLOCATION-OBJECTIVE-001
     formula: null
-    assumptions: "Title-page identity must be confirmed before citation."
+    assumptions: "Pareto dominance is evaluated only over the explicitly declared feasible objectives; integer feasibility is handled by exhaustive enumeration, not convex relaxation."
     measure: not_applicable
     units: objective_dependent
     alternatives:
@@ -420,15 +422,19 @@ sources:
       - convex relaxation may not preserve whole-contract feasibility
     implementation_file:
       - src/take_two_options/intelligence/optimizer.py
+      - src/take_two_options/optimization/allocation_pareto.py
       - src/take_two_options/optimization/pareto.py
     implementation_symbol:
       - optimize_allocations
+      - optimize_allocations_with_frontier
+      - allocation_pareto_frontier
       - pareto_rank
     test_file:
       - tests/test_intelligence_v11.py
+      - tests/test_allocation_pareto.py
       - tests/test_knowledge_optimizer.py
-    validation_status: proposed
-    notes: "The existing exact enumerator should not be replaced without a measured need."
+    validation_status: tested
+    notes: "Title/copyright pages and printed section 4.7 pp. 174-187 were inspected; exact enumeration remains canonical for the bounded integer set."
 
   - source_id: book-tsay-analysis-financial-time-series
     source_type: local_book
@@ -1279,6 +1285,34 @@ formula_links:
     test_file: tests/test_model_uncertainty.py
     validation_status: tested
     notes: "Synthetic directional scoring only; no TTWO calibration or holdout claim."
+
+  - formula_id: FORM-PARETO-DOMINANCE-001
+    name: Allocation Pareto dominance
+    source_id:
+      - book-boyd-vandenberghe-convex-optimization
+    source_location_status: inspected_section_4_7_3_to_4_7_5_pages_177_184
+    implementation_file: src/take_two_options/optimization/allocation_pareto.py
+    implementation_symbol:
+      - dominates_allocation
+      - allocation_pareto_frontier
+    test_file: tests/test_allocation_pareto.py
+    validation_status: tested
+    notes: "Direct dominance is evaluated on every exhaustively enumerated feasible integer point."
+
+  - formula_id: FORM-ROBUST-ALLOCATION-OBJECTIVE-001
+    name: Versioned scalar allocation objective
+    source_id:
+      - book-boyd-vandenberghe-convex-optimization
+    source_location_status: inspected_scalarization_sections_4_7_4_4_7_5
+    implementation_file:
+      - src/take_two_options/optimization/allocation_pareto.py
+      - src/take_two_options/intelligence/optimizer.py
+    implementation_symbol:
+      - evaluate_scalar_objective
+      - optimize_allocations_with_frontier
+    test_file: tests/test_allocation_pareto.py
+    validation_status: tested
+    notes: "Scalar ranking never replaces the separately returned Pareto frontier."
 
   - formula_id: FORM-PBO-001
     name: Probability of backtest overfitting diagnostic

@@ -31,6 +31,7 @@ from take_two_options.intelligence.execution import (
     execution_gateway,
 )
 from take_two_options.intelligence.monitoring import monitor_position
+from take_two_options.intelligence.optimizer import optimize_allocations_with_frontier
 from take_two_options.intelligence.pipeline import load_v11_policy, run_intelligence
 from take_two_options.intelligence.schemas import (
     DataQuality,
@@ -253,6 +254,29 @@ def test_path_valuation_produces_full_risk_metrics_and_robustness() -> None:
         ensemble.within_model_predictive_variance + ensemble.between_model_predictive_variance
     )
     assert "ensemble_weights_are_not_validated_oos" in ensemble.blockers
+    frontier = optimize_allocations_with_frontier(
+        candidates=[candidate],
+        valuations={candidate.candidate_id: valuations},
+        regime_weights={regime: 0.25 for regime in SimulationRegime},
+        profile_name="prudent",
+        profile=policy.optimizer_profiles["prudent"],
+        budget_eur=policy.budget_eur,
+        maximum_loss_eur=policy.maximum_loss_eur,
+        maximum_contracts=policy.maximum_contracts,
+        eur_usd_rate=base.policy.eur_usd_rate,
+        maximum_positions=policy.maximum_positions,
+        maximum_concentration=policy.maximum_concentration,
+        minimum_liquidity_score=policy.minimum_liquidity_score,
+        maximum_relative_spread=policy.maximum_relative_spread,
+        delta_exposure_range=policy.delta_exposure_range,
+        gamma_exposure_range=policy.gamma_exposure_range,
+        vega_exposure_range=policy.vega_exposure_range,
+        theta_exposure_range=policy.theta_exposure_range,
+        allow_multiple_strategies=policy.allow_multiple_strategies,
+    )
+    assert frontier.oracle_method == "exhaustive_integer_enumeration"
+    assert any(point.no_trade for point in frontier.pareto_frontier)
+    assert frontier.feasible_allocations >= len(frontier.pareto_frontier)
 
 
 def test_exit_plan_is_created_at_candidate_selection() -> None:

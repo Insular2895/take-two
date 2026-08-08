@@ -1,6 +1,6 @@
 # Plan TTWO Quantitative Validation V10
 
-Statut : `in_progress_phase_6_implemented`
+Statut : `in_progress_phase_7_implemented`
 
 Date : 2026-08-08
 
@@ -219,7 +219,7 @@ Commit proposé : `feat(simulation): validate path exits and monte carlo uncerta
 État : croyance heuristique renommée sémantiquement sans rupture de schéma ; ensembles
 modèle/paramètres et diagnostics de calibration implémentés ; modèle bayésien statistique
 différé faute de likelihood/outcomes explicites ; gate complet vert (177 tests) ; commit
-atomique à créer.
+`fc00bc4`.
 
 ### Documentary Research
 
@@ -238,6 +238,10 @@ atomique à créer.
 Commit proposé : `feat(uncertainty): separate heuristic belief from calibrated model uncertainty`
 
 ## Phase 7 — Optimisation budget et frontière de Pareto
+
+État : contrats d'objectif versionnés, oracle entier conservé et frontière exhaustive
+non dominée avec cash/NO_TRADE implémentés ; gate complet vert (180 tests) ; commit atomique à
+créer.
 
 ### Documentary Research
 

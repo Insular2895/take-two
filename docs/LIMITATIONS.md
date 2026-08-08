@@ -29,6 +29,10 @@
   predictive and Monte Carlo uncertainty, but current equal weights and illustrative members
   remain diagnostic. No fitted likelihood, real posterior predictive distribution or TTWO
   holdout calibration exists.
+- Allocation objectives are now explicit/versioned and a full non-compensatory Pareto frontier
+  is computed from the exhaustively enumerated whole-contract feasible set, always including
+  cash/NO_TRADE. Frontier membership is conditional on the candidate universe, objective vector
+  and uncalibrated regime inputs; pairwise dominance is intentionally limited to small budgets.
 - MarketData.app historical chains are EOD bid/ask, not intraday NBBO or
   simultaneous combo fills.
 - Alpaca indicative snapshots do not supply the open-interest/underlying fields
