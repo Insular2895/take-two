@@ -311,3 +311,12 @@ extensions:
     bootstrap_samples: 2000
     seed: 20260808
     gate_settings: [permissive-predefined, central-predefined, strict-predefined]
+  engine_verdict:
+    aggregate_report: reports/pre_opra/engine_verdict_2026-08-08.json
+    rule_version: pre-opra-engine-value-v1
+    allowed_verdicts:
+      - ENGINE_ADDS_VALUE
+      - ENGINE_NOT_PROVEN_SUPERIOR
+      - PROMISING_BUT_NOT_PROVEN
+      - BLOCKED_BY_DATA
+      - VALIDATION_FAILED

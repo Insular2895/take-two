@@ -10,6 +10,7 @@ from typing import Any
 from pydantic import BaseModel
 
 from take_two_options.config.contracts import PreOpraConfig
+from take_two_options.decision.engine_verdict import EngineVerdictReport
 from take_two_options.decision.quality_scores import FiveScoreReport
 from take_two_options.decision.severity_gates import SeverityGateReport
 from take_two_options.empirical_calibration import EmpiricalCalibrationReport
@@ -42,6 +43,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "comparable_panel_dataset.schema.json": ComparablePanelDataset,
     "data_usage_rights.schema.json": DataUsageRightsReport,
     "empirical_calibration.schema.json": EmpiricalCalibrationReport,
+    "engine_verdict_report.schema.json": EngineVerdictReport,
     "five_score_report.schema.json": FiveScoreReport,
     "final_pre_opra_report.schema.json": FinalPreOpraReport,
     "severity_gate_report.schema.json": SeverityGateReport,
