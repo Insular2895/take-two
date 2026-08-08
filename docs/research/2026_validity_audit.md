@@ -1,7 +1,7 @@
 # 2026 validity audit
 
 Date: 2026-08-08  
-Scope: V10 quantitative validation phases 1–10
+Scope: V10 quantitative validation phases 1–11
 Maximum claim: `numerically_validated_research_only`
 
 This audit grades evidence, not attractiveness of a TTWO position. The overall decision chain is
@@ -23,6 +23,7 @@ real option history, event calibration, an unopened holdout or a paper campaign.
 | Event scenarios/sequential rules | `tested` | point-in-time graph, origins, sensitivity, advisory rules | real TTWO probabilities/dependencies/shocks |
 | Final evidence report/dashboard | `tested` | mandatory sections, monotone grade, static HTML | human/product/regulatory review |
 | Integral release-evidence audit | `tested` | deterministic registry/manifest/holdout/security review | independent review and real-data campaign |
+| Advanced extension materiality gate | `tested` | deterministic reject/defer/prototype/candidate rules | real TTWO ablation, ranking and cost evidence |
 | Real empirical validation | `proposed` | protocol only | authorized point-in-time dataset |
 | Fresh final holdout | `proposed` | one-time ledger only | unopened dataset hash and execution |
 | Paper validation | `proposed` | plan only | minimum-duration paper campaign |
@@ -34,6 +35,10 @@ event/model inputs and absent real OOS evidence. `production_ready` is not used.
 Phase 10 therefore authorizes a research-only software release, not financial promotion:
 `READY_RESEARCH_ONLY` / `BLOCKED_MISSING_REAL_EVIDENCE`. There are no active experiment manifests
 to replay, and no predictive-accuracy before/after claim is possible without authorized data.
+
+Phase 11 integrates no advanced model. Eight extensions are deferred and three rejected for the
+current scope; none is a prototype or implementation candidate. Those statuses express missing
+incremental evidence and are reopened only by the measurable gates in the committed review.
 
 Open methodological contradictions and corrections are tracked in
 [`errata_registry.yaml`](errata_registry.yaml). Formula lineage is checked in

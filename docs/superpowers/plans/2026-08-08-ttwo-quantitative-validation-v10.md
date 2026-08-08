@@ -326,7 +326,7 @@ Commit proposé : `docs(reporting): publish evidence grades formula lineage and 
 
 ## Phase 10 — Validation intégrale et revue des limites
 
-État : revue déterministe implémentée ; aucun manifest actif ni holdout final n'existe, donc zéro
+État : terminé au commit `226cf76` ; aucun manifest actif ni holdout final n'existe, donc zéro
 expérience réelle a pu être rejouée et aucune comparaison de précision prédictive n'est possible.
 Release recherche : `READY_RESEARCH_ONLY`. Promotion financière :
 `BLOCKED_MISSING_REAL_EVIDENCE`. Gate complète verte : 192 tests, Ruff, mypy, dépendances,
@@ -378,6 +378,11 @@ Commit proposé : `test(validation): complete quantitative evidence and safety r
 
 ## Phase 11 — Évaluation des extensions avancées
 
+État : gate documentaire déterministe implémentée. Huit extensions sont `defer`, trois sont
+`reject` pour le scope actuel, aucune n'est `prototype` ou `candidate_for_implementation` et aucun
+modèle avancé n'est intégré. Gate complète verte : 194 tests, Ruff, mypy, dépendances, six
+schémas, artefacts offline, 36 sources, revues déterministes et sécurité.
+
 ### Documentary Research
 
 - Questions : gain matériel de Bergomi/rough vol/filtering/taux avancés sur TTWO ; données/identifiabilité/coût.
@@ -385,6 +390,14 @@ Commit proposé : `test(validation): complete quantitative evidence and safety r
 - Secondaires : Glasserman, Tsay, Nocedal/Wright, Särkkä.
 - Risques : sophistication séduisante, calibration instable, gain inobservable.
 - Validation : ablation OOS, sensibilité du classement, CI du gain, coût numérique.
+- Passages inspectés : tous les fragments Bergomi ch. 3–12 + épilogue ; Särkkä ch. 1, 5–8, 11,
+  16 ; Andersen–Piterbarg ch. 6 et 10–15 par OCR borné ; trois sources primaires rough volatility.
+- Formules : aucune formule importée ; l'étape évalue seulement le gain incrémental potentiel.
+- Alternatives : conserver Heston/SVI, règles transparentes, courbe Treasury déterministe et MC
+  pseudo-aléatoire jusqu'à échec matériel mesuré.
+- Limites : sources index/SPX non transférables à TTWO, corpus local fragmentaire, aucun dataset
+  réel/holdout/paper run.
+- Fichiers : `validation/extension_evaluation.py`, revue JSON, rapport documentaire et test.
 
 ### Gate d'évaluation
 

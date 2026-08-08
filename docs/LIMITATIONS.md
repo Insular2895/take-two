@@ -46,6 +46,10 @@
   Its `READY_RESEARCH_ONLY` status validates the repository's guarded research workflow only;
   financial promotion remains `BLOCKED_MISSING_REAL_EVIDENCE`, and no predictive-accuracy gain is
   claimed from the larger test suite.
+- Phase 11 evaluated Bergomi/rough volatility, Bayesian filtering, advanced rates and other BOOK
+  extensions without integrating any model. No candidate passed the authorized-data,
+  identifiability, OOS materiality, ranking-sensitivity, numerical-cost and independent-review
+  gates. Current-scope `reject` statuses are reversible if their recorded materiality gate passes.
 - MarketData.app historical chains are EOD bid/ask, not intraday NBBO or
   simultaneous combo fills.
 - Alpaca indicative snapshots do not supply the open-interest/underlying fields

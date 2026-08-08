@@ -1,0 +1,348 @@
+{
+  "schema_version": "1.0",
+  "reviewed_on": "2026-08-08",
+  "overall_status": "NO_ADVANCED_MODEL_IMPLEMENTATION",
+  "maximum_claim": "documentary_gate_only",
+  "assessments": [
+    {
+      "extension_id": "bergomi_forward_variance",
+      "label": "Bergomi forward-variance dynamics",
+      "scope": "current_ttwo_research_release",
+      "out_of_scope_current_release": false,
+      "status": "defer",
+      "source_ids": [
+        "book-bergomi-stochastic-volatility-modeling"
+      ],
+      "data_requirements": [
+        "multi-date arbitrage-screened TTWO option surfaces",
+        "observable variance or smile-dynamics hedging targets"
+      ],
+      "comparison_baseline": "validated Heston plus SVI surface",
+      "evidence": {
+        "authorized_data_ready": false,
+        "identifiable_against_baseline": false,
+        "oos_material_gain_demonstrated": false,
+        "ranking_sensitivity_completed": false,
+        "numerical_cost_benchmarked": false,
+        "independent_review_completed": false,
+        "synthetic_prototype_completed": false
+      },
+      "blockers": [
+        "Heston has not passed a real TTWO calibration gate",
+        "no TTWO forward-variance or smile-dynamics history is available"
+      ],
+      "reconsideration_gate": "Show stable OOS pricing and ranking gain versus Heston/SVI.",
+      "implementation_allowed": false,
+      "order_capability": "forbidden"
+    },
+    {
+      "extension_id": "rough_bergomi",
+      "label": "Rough Bergomi volatility",
+      "scope": "current_ttwo_research_release",
+      "out_of_scope_current_release": false,
+      "status": "defer",
+      "source_ids": [
+        "paper-gatheral-jaisson-rosenbaum-volatility-rough",
+        "paper-bayer-friz-gatheral-pricing-rough-volatility",
+        "paper-livieri-mouti-pallavicini-rosenbaum-option-roughness"
+      ],
+      "data_requirements": [
+        "high-frequency TTWO volatility estimates",
+        "dense short-maturity point-in-time TTWO option surfaces"
+      ],
+      "comparison_baseline": "validated Heston and finite-factor Bergomi",
+      "evidence": {
+        "authorized_data_ready": false,
+        "identifiable_against_baseline": false,
+        "oos_material_gain_demonstrated": false,
+        "ranking_sensitivity_completed": false,
+        "numerical_cost_benchmarked": false,
+        "independent_review_completed": false,
+        "synthetic_prototype_completed": false
+      },
+      "blockers": [
+        "available roughness evidence is mainly index-based, not TTWO-specific",
+        "non-Markovian calibration and simulation cost has not been benchmarked"
+      ],
+      "reconsideration_gate": "Estimate stable TTWO roughness and beat simpler models OOS.",
+      "implementation_allowed": false,
+      "order_capability": "forbidden"
+    },
+    {
+      "extension_id": "bayesian_filtering",
+      "label": "Bayesian latent-state filtering",
+      "scope": "current_ttwo_research_release",
+      "out_of_scope_current_release": false,
+      "status": "defer",
+      "source_ids": [
+        "book-sarkka-svensson-bayesian-filtering-smoothing"
+      ],
+      "data_requirements": [
+        "time-indexed state transition and measurement data",
+        "identified likelihood with repeated outcomes"
+      ],
+      "comparison_baseline": "configured heuristic belief updater and transparent regimes",
+      "evidence": {
+        "authorized_data_ready": false,
+        "identifiable_against_baseline": false,
+        "oos_material_gain_demonstrated": false,
+        "ranking_sensitivity_completed": false,
+        "numerical_cost_benchmarked": false,
+        "independent_review_completed": false,
+        "synthetic_prototype_completed": false
+      },
+      "blockers": [
+        "no identified TTWO state-space likelihood exists",
+        "event outcomes are too sparse for calibration and filter comparison"
+      ],
+      "reconsideration_gate": "Pre-register a state-space model and improve OOS calibration.",
+      "implementation_allowed": false,
+      "order_capability": "forbidden"
+    },
+    {
+      "extension_id": "stochastic_rates_hjm_lmm",
+      "label": "Stochastic rates, HJM and Libor-market models",
+      "scope": "current_ttwo_research_release",
+      "out_of_scope_current_release": true,
+      "status": "reject",
+      "source_ids": [
+        "book-andersen-piterbarg-interest-rate-modeling"
+      ],
+      "data_requirements": [
+        "point-in-time discount and forward curves",
+        "material multi-tenor rate exposure in the target decision"
+      ],
+      "comparison_baseline": "provenance-tagged deterministic Treasury curve",
+      "evidence": {
+        "authorized_data_ready": false,
+        "identifiable_against_baseline": false,
+        "oos_material_gain_demonstrated": false,
+        "ranking_sensitivity_completed": false,
+        "numerical_cost_benchmarked": false,
+        "independent_review_completed": false,
+        "synthetic_prototype_completed": false
+      },
+      "blockers": [
+        "TTWO option ranking sensitivity to stochastic rates is unmeasured",
+        "the models target rate-derivative dynamics absent from current scope"
+      ],
+      "reconsideration_gate": "Demonstrate material price/rank changes versus a deterministic curve.",
+      "implementation_allowed": false,
+      "order_capability": "forbidden"
+    },
+    {
+      "extension_id": "essvi_surface",
+      "label": "eSSVI volatility surface",
+      "scope": "current_ttwo_research_release",
+      "out_of_scope_current_release": false,
+      "status": "defer",
+      "source_ids": [
+        "paper-mingone-essvi",
+        "paper-cohort-corbetta-martini-laachir-ssvi"
+      ],
+      "data_requirements": [
+        "dense cleaned multi-expiry TTWO surfaces across many dates"
+      ],
+      "comparison_baseline": "raw SVI with explicit finite-grid arbitrage diagnostics",
+      "evidence": {
+        "authorized_data_ready": false,
+        "identifiable_against_baseline": false,
+        "oos_material_gain_demonstrated": false,
+        "ranking_sensitivity_completed": false,
+        "numerical_cost_benchmarked": false,
+        "independent_review_completed": false,
+        "synthetic_prototype_completed": false
+      },
+      "blockers": [
+        "raw SVI has not yet failed a real TTWO holdout benchmark"
+      ],
+      "reconsideration_gate": "Show raw-SVI failure and eSSVI OOS stability on real surfaces.",
+      "implementation_allowed": false,
+      "order_capability": "forbidden"
+    },
+    {
+      "extension_id": "learned_regimes",
+      "label": "HMM or machine-learned regimes",
+      "scope": "current_ttwo_research_release",
+      "out_of_scope_current_release": false,
+      "status": "defer",
+      "source_ids": [
+        "book-tsay-analysis-financial-time-series"
+      ],
+      "data_requirements": [
+        "long point-in-time multi-regime factor history"
+      ],
+      "comparison_baseline": "transparent configured regime rules",
+      "evidence": {
+        "authorized_data_ready": false,
+        "identifiable_against_baseline": false,
+        "oos_material_gain_demonstrated": false,
+        "ranking_sensitivity_completed": false,
+        "numerical_cost_benchmarked": false,
+        "independent_review_completed": false,
+        "synthetic_prototype_completed": false
+      },
+      "blockers": [
+        "regime labels and transition stability are not empirically established"
+      ],
+      "reconsideration_gate": "Improve stable chronological OOS calibration versus simple rules.",
+      "implementation_allowed": false,
+      "order_capability": "forbidden"
+    },
+    {
+      "extension_id": "hierarchical_event_bayes",
+      "label": "Hierarchical Bayesian event model",
+      "scope": "current_ttwo_research_release",
+      "out_of_scope_current_release": false,
+      "status": "defer",
+      "source_ids": [
+        "book-mcelreath-statistical-rethinking"
+      ],
+      "data_requirements": [
+        "reviewed repeated event outcomes across a justified population"
+      ],
+      "comparison_baseline": "bounded user/configured scenario probability sets",
+      "evidence": {
+        "authorized_data_ready": false,
+        "identifiable_against_baseline": false,
+        "oos_material_gain_demonstrated": false,
+        "ranking_sensitivity_completed": false,
+        "numerical_cost_benchmarked": false,
+        "independent_review_completed": false,
+        "synthetic_prototype_completed": false
+      },
+      "blockers": [
+        "independent GTA VI-like outcomes are too sparse for partial pooling"
+      ],
+      "reconsideration_gate": "Justify the population and validate posterior predictions OOS.",
+      "implementation_allowed": false,
+      "order_capability": "forbidden"
+    },
+    {
+      "extension_id": "longstaff_schwartz",
+      "label": "Longstaff-Schwartz stopping regression",
+      "scope": "current_ttwo_research_release",
+      "out_of_scope_current_release": false,
+      "status": "defer",
+      "source_ids": [
+        "paper-clement-lamberton-protter-lsm"
+      ],
+      "data_requirements": [
+        "contracts with measured material checkpoint/FD discrepancy"
+      ],
+      "comparison_baseline": "QuantLib finite difference plus checkpoint exit controls",
+      "evidence": {
+        "authorized_data_ready": false,
+        "identifiable_against_baseline": false,
+        "oos_material_gain_demonstrated": false,
+        "ranking_sensitivity_completed": false,
+        "numerical_cost_benchmarked": false,
+        "independent_review_completed": false,
+        "synthetic_prototype_completed": false
+      },
+      "blockers": [
+        "no material real-contract discrepancy has been demonstrated"
+      ],
+      "reconsideration_gate": "Measure a material gap and validate basis/path reuse controls.",
+      "implementation_allowed": false,
+      "order_capability": "forbidden"
+    },
+    {
+      "extension_id": "higher_order_greeks_aad",
+      "label": "Higher-order Greeks and adjoint differentiation",
+      "scope": "current_ttwo_research_release",
+      "out_of_scope_current_release": true,
+      "status": "reject",
+      "source_ids": [
+        "book-nocedal-wright-numerical-optimization"
+      ],
+      "data_requirements": [
+        "measured sensitivity-management decision requiring these Greeks"
+      ],
+      "comparison_baseline": "current first-order research diagnostics",
+      "evidence": {
+        "authorized_data_ready": false,
+        "identifiable_against_baseline": false,
+        "oos_material_gain_demonstrated": false,
+        "ranking_sensitivity_completed": false,
+        "numerical_cost_benchmarked": false,
+        "independent_review_completed": false,
+        "synthetic_prototype_completed": false
+      },
+      "blockers": [
+        "read-only small-budget scope has no demonstrated decision need"
+      ],
+      "reconsideration_gate": "Tie stable higher-order sensitivities to a validated decision rule.",
+      "implementation_allowed": false,
+      "order_capability": "forbidden"
+    },
+    {
+      "extension_id": "sobol_qmc_distributed",
+      "label": "Sobol, QMC or distributed Monte Carlo",
+      "scope": "current_ttwo_research_release",
+      "out_of_scope_current_release": false,
+      "status": "defer",
+      "source_ids": [
+        "book-glasserman-monte-carlo"
+      ],
+      "data_requirements": [
+        "profiled production-sized simulation workloads"
+      ],
+      "comparison_baseline": "seeded pseudo-random MC with measured variance reduction",
+      "evidence": {
+        "authorized_data_ready": false,
+        "identifiable_against_baseline": false,
+        "oos_material_gain_demonstrated": false,
+        "ranking_sensitivity_completed": false,
+        "numerical_cost_benchmarked": false,
+        "independent_review_completed": false,
+        "synthetic_prototype_completed": false
+      },
+      "blockers": [
+        "no reproducible runtime or error bottleneck is established"
+      ],
+      "reconsideration_gate": "Show unbiased reproducible error/cost gain on canonical workloads.",
+      "implementation_allowed": false,
+      "order_capability": "forbidden"
+    },
+    {
+      "extension_id": "neural_vol_surface",
+      "label": "Neural volatility surface",
+      "scope": "current_ttwo_research_release",
+      "out_of_scope_current_release": true,
+      "status": "reject",
+      "source_ids": [
+        "paper-gatheral-jacquier-svi"
+      ],
+      "data_requirements": [
+        "large multi-regime arbitrage-reviewed option-surface corpus"
+      ],
+      "comparison_baseline": "interpretable constrained SVI/eSSVI",
+      "evidence": {
+        "authorized_data_ready": false,
+        "identifiable_against_baseline": false,
+        "oos_material_gain_demonstrated": false,
+        "ranking_sensitivity_completed": false,
+        "numerical_cost_benchmarked": false,
+        "independent_review_completed": false,
+        "synthetic_prototype_completed": false
+      },
+      "blockers": [
+        "data volume, transparency and arbitrage guarantees are insufficient"
+      ],
+      "reconsideration_gate": "Beat constrained surfaces OOS with enforceable arbitrage controls.",
+      "implementation_allowed": false,
+      "order_capability": "forbidden"
+    }
+  ],
+  "candidate_for_implementation": [],
+  "integrated_advanced_models": [],
+  "implementation_allowed": false,
+  "source_limitations": [
+    "Bergomi chapters 1-2 and Andersen-Piterbarg Volume III are absent locally.",
+    "The Gatheral book is absent; primary rough-volatility papers were used instead.",
+    "Andersen-Piterbarg image-only passages were inspected by bounded OCR.",
+    "No source establishes incremental TTWO decision value without TTWO data."
+  ],
+  "order_capability": "forbidden"
+}

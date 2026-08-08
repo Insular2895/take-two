@@ -5,7 +5,7 @@
   "financial_promotion_status": "BLOCKED_MISSING_REAL_EVIDENCE",
   "maximum_decision_claim": "software_tested_only",
   "formula_count": 25,
-  "source_count": 31,
+  "source_count": 36,
   "formula_status_counts": {
     "numerically_validated": 2,
     "tested": 23
@@ -13,8 +13,8 @@
   "source_status_counts": {
     "implemented": 1,
     "proposed": 3,
-    "sourced": 17,
-    "tested": 10
+    "sourced": 21,
+    "tested": 11
   },
   "invalid_promoted_claims": [],
   "active_experiment_manifests": [],

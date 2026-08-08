@@ -1940,6 +1940,7 @@ La livraison V11 est contrôlée par :
 .venv/bin/python scripts/validate_offline_artifacts.py
 .venv/bin/python scripts/validate_research_registry.py
 .venv/bin/python scripts/phase10_release_audit.py --check
+.venv/bin/python scripts/phase11_extension_gate.py --check
 .venv/bin/python scripts/security_gate.py
 .venv/bin/pip check
 ```

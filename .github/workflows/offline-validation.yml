@@ -49,6 +49,9 @@ jobs:
       - name: Validate release evidence review
         run: python scripts/phase10_release_audit.py --check
 
+      - name: Validate advanced extension gate
+        run: python scripts/phase11_extension_gate.py --check
+
       - name: Enforce security boundary
         run: python scripts/security_gate.py
 

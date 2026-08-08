@@ -13,6 +13,8 @@
   score. Scanner results remain capped by missing real OOS, holdout and paper evidence.
 - Phase 10 found no active experiment manifest to replay and no authorized aligned dataset for a
   predictive-accuracy comparison. Its release status is research-only, never a trading claim.
+- Phase 11 adds an evaluation gate, not Bergomi, rough volatility, a latent-state filter or a
+  stochastic-rate model. All advanced extensions remain deferred or rejected for current scope.
 - The American model uses a flat configured rate/dividend yield and one IV per
   leg stressed by fixed multipliers. It is not a calibrated future IV-surface
   forecast.

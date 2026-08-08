@@ -29,7 +29,7 @@ sources:
     year: null
     volume: null
     chapter: "3-12; epilogue/reference fragment"
-    section: null
+    section: "Phase 11: chapter openings and targeted passages across every available fragment"
     page_start: null
     page_end: null
     pdf_file:
@@ -67,7 +67,7 @@ sources:
     implementation_symbol: null
     test_file: null
     validation_status: sourced
-    notes: "One bibliographic work, never eleven independent books. Chapter headings were verified directly from the PDFs."
+    notes: "One bibliographic work, never eleven independent books. Phase 11 inspected all available chapter fragments, with emphasis on forward variance, smile dynamics, calibration and practical state dimension."
 
   - source_id: book-andersen-piterbarg-interest-rate-modeling
     source_type: local_book_fragments
@@ -82,7 +82,7 @@ sources:
       - "Volume I — Foundations and Vanilla Models"
       - "Volume II — Term Structure Models"
     chapter: "1-15"
-    section: "Priority: 1.3, 1.9-1.10, 2.3-2.11, 3.2-3.5, 4.2-4.5, 6.1-6.5, 8-10, 14-15"
+    section: "Priority: 1.3, 1.9-1.10, 2.3-2.11, 3.2-3.5, 4.2-4.5, 6.1-6.5, 8-15; Phase-11 OCR samples across chapters 6 and 10-15"
     page_start: null
     page_end: null
     pdf_file:
@@ -113,7 +113,7 @@ sources:
     implementation_symbol: null
     test_file: null
     validation_status: sourced
-    notes: "Title, authors, 2010 date, volume structure and chapter map were extracted from the PDFs."
+    notes: "Title, authors, 2010 date, volume structure and chapter map were extracted from the PDFs. Phase 11 used bounded OCR because the advanced-rate fragments are image-only."
 
   - source_id: book-gatheral-volatility-surface
     source_type: required_book_missing
@@ -1230,6 +1230,202 @@ sources:
     test_file: tests/test_phase10_release_audit.py
     validation_status: tested
     notes: "Internal evidence artifact; not an external methodological authority."
+
+  - source_id: book-sarkka-svensson-bayesian-filtering-smoothing
+    source_type: local_book
+    author:
+      - Simo Särkkä
+      - Lennart Svensson
+    title: Bayesian Filtering and Smoothing
+    edition: "Second Edition"
+    year: 2023
+    volume: null
+    chapter: "1, 5-8, 11, 16"
+    section: "state-space models, filters and parameter estimation"
+    page_start: 1
+    page_end: 348
+    pdf_file: bayesian filtering and smooting second edition.pdf
+    url: null
+    concept:
+      - state transition and measurement models
+      - nonlinear Gaussian filtering
+      - particle filtering
+      - state-space parameter estimation
+    formula_id: []
+    formula: null
+    assumptions: "A filter requires an explicit transition model, measurement likelihood and sequential observations."
+    measure: P
+    units: model_dependent
+    alternatives:
+      - transparent configured regime rules
+      - non-state-space probability calibration
+    limitations:
+      - general filtering reference, not a TTWO empirical study
+      - no TTWO state-space likelihood has been identified
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Contents, chapters 1 and 16, and state/measurement model prerequisites inspected read-only."
+
+  - source_id: paper-gatheral-jaisson-rosenbaum-volatility-rough
+    source_type: primary_paper
+    author:
+      - Jim Gatheral
+      - Thibault Jaisson
+      - Mathieu Rosenbaum
+    title: Volatility is rough
+    edition: arXiv_1410.3394
+    year: 2014
+    volume: null
+    chapter: null
+    section: "abstract and primary metadata"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url:
+      - https://arxiv.org/abs/1410.3394
+    concept:
+      - rough log-volatility
+      - high-frequency volatility estimation
+      - Hurst exponent below one half
+    formula_id: []
+    formula: null
+    assumptions: "The published evidence is market/time-series specific and must be re-estimated for TTWO."
+    measure: P
+    units: log_volatility_and_time_scale
+    alternatives:
+      - GARCH
+      - Markovian stochastic volatility
+    limitations:
+      - does not demonstrate incremental TTWO option-decision value
+      - high-frequency TTWO inputs are absent
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Primary arXiv abstract and metadata inspected; no formula was imported."
+
+  - source_id: paper-bayer-friz-gatheral-pricing-rough-volatility
+    source_type: primary_paper
+    author:
+      - Christian Bayer
+      - Peter Friz
+      - Jim Gatheral
+    title: Pricing under rough volatility
+    edition: Quantitative_Finance_16_6
+    year: 2016
+    volume: "16(6)"
+    chapter: null
+    section: "abstract and primary preprint metadata"
+    page_start: 887
+    page_end: 904
+    pdf_file: null
+    url:
+      - https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2554754
+      - https://doi.org/10.1080/14697688.2015.1099717
+    concept:
+      - rough Bergomi pricing
+      - forward variance curve
+      - integrated volatility claims
+    formula_id: []
+    formula: null
+    assumptions: "SPX fit evidence cannot be transferred to a single equity without an OOS comparison."
+    measure: Q
+    units: variance_curve_and_option_prices
+    alternatives:
+      - Heston
+      - finite-factor Bergomi
+    limitations:
+      - SPX and variance-swap application differs from TTWO
+      - non-Markovian simulation and calibration cost remains unbenchmarked here
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Primary SSRN preprint metadata and publisher DOI inspected; no model integrated."
+
+  - source_id: paper-livieri-mouti-pallavicini-rosenbaum-option-roughness
+    source_type: primary_paper
+    author:
+      - Giulia Livieri
+      - Saad Mouti
+      - Andrea Pallavicini
+      - Mathieu Rosenbaum
+    title: "Rough volatility: evidence from option prices"
+    edition: arXiv_1702.02777
+    year: 2017
+    volume: null
+    chapter: null
+    section: "abstract and primary metadata"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url:
+      - https://arxiv.org/abs/1702.02777
+    concept:
+      - option-implied roughness
+      - short-maturity at-the-money options
+      - maturity smoothing of Hurst estimates
+    formula_id: []
+    formula: null
+    assumptions: "Short-maturity SPX evidence requires an independent TTWO replication."
+    measure: Q
+    units: implied_volatility_and_maturity
+    alternatives:
+      - historical high-frequency roughness estimate
+      - Markovian volatility models
+    limitations:
+      - evidence uses SPX rather than TTWO
+      - available TTWO surfaces are not dense enough for replication
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Primary arXiv abstract and metadata inspected; no formula was imported."
+
+  - source_id: internal-phase11-extension-evaluation
+    source_type: repository_validation_evidence
+    author:
+      - Take Two quantitative validation project
+    title: Phase 11 advanced extension evidence gate
+    edition: "1.0"
+    year: 2026
+    volume: null
+    chapter: null
+    section: "data, identifiability, OOS materiality, ranking and cost gates"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: null
+    concept:
+      - documentary extension classification
+      - material-gain gate
+      - no advanced model integration
+    formula_id: []
+    formula: null
+    assumptions: "Documentary relevance never substitutes for a measured TTWO OOS gain."
+    measure: mixed_P_Q_by_extension
+    units: not_applicable
+    alternatives:
+      - retain validated simpler baseline
+    limitations:
+      - all current evidence gates are false due to missing authorized data
+      - reject statuses apply only to the current repository scope
+    implementation_file:
+      - src/take_two_options/validation/extension_evaluation.py
+      - scripts/phase11_extension_gate.py
+    implementation_symbol:
+      - classify_extension
+      - build_phase11_extension_review
+    test_file: tests/test_phase11_extension_evaluation.py
+    validation_status: tested
+    verified_on: "2026-08-08"
+    notes: "Internal decision gate; not an external proof of model value."
 
 formula_links:
   - formula_id: FORM-MEASURE-CHANGE-001
