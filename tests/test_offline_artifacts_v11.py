@@ -28,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_committed_json_schemas_are_current_and_strict() -> None:
     schema_paths = sorted((ROOT / "schemas").glob("*.schema.json"))
     assert {path.name for path in schema_paths} == {
+        "baseline_comparison.schema.json",
         "backtest_report.schema.json",
         "calibration_report.schema.json",
         "empirical_calibration.schema.json",

@@ -20,12 +20,14 @@ from take_two_options.intelligence.schemas import (
     NormalizedEvidenceEvent,
     UnifiedObservation,
 )
+from take_two_options.validation.baseline_comparison import BaselineComparisonReport
 from take_two_options.validation.final_holdout import HoldoutLedgerEntry
 from take_two_options.validation.walk_forward_protocol import WalkForwardProtocolReport
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_DIRECTORY = ROOT / "schemas"
 SCHEMAS: dict[str, type[BaseModel]] = {
+    "baseline_comparison.schema.json": BaselineComparisonReport,
     "empirical_calibration.schema.json": EmpiricalCalibrationReport,
     "pre_opra_config.schema.json": PreOpraConfig,
     "historical_dataset_manifest.schema.json": HistoricalDatasetManifest,

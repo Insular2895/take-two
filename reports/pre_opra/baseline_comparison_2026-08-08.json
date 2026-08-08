@@ -1,0 +1,37 @@
+{
+  "blockers": [
+    "The private cache is filtered and does not form a preregistered full-chain panel.",
+    "Historical IV and delta fields are absent, so fixed-delta entries are not reproducible.",
+    "Aligned point-in-time entry and exit paths do not exist for all nine strategies.",
+    "Historical option-data licensing remains to_review.",
+    "The final holdout remains unopened and is not used to repair these gaps."
+  ],
+  "conventions": {
+    "capital": 4000.0,
+    "currency": "USD",
+    "entry_convention": "same point-in-time decision close",
+    "exit_convention": "same configured horizon close or expiry settlement",
+    "fees": "configured per-contract commissions applied to every option strategy",
+    "fx_policy": "none: capital and instruments denominated in USD",
+    "horizon": "configured campaign horizon",
+    "large_loss_threshold": 0.25,
+    "spread_assumption": "same observable bid-ask execution rule",
+    "target_return": 0.5
+  },
+  "dataset_hash": "0b09a9a9b1de6a9132e2f0eaf1a9cc15152d2fce59e40baefd21812c9886f556",
+  "deltas": [],
+  "holdout_used": false,
+  "missing_strategies": [
+    "cash", "no_position", "underlying", "buy_and_hold", "atm_long_call",
+    "fixed_delta_long_call", "standard_bull_call_spread", "random_admissible",
+    "engine_candidate"
+  ],
+  "multiple_testing": null,
+  "order_capability": "forbidden",
+  "regret_vs_best_simple_baseline": null,
+  "report_id": "ttwo-baseline-comparison-v1",
+  "rows": [],
+  "schema_version": "1.0",
+  "status": "BLOCKED_INCOMPARABLE_DATA",
+  "ticker": "TTWO"
+}
