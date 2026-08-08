@@ -1,6 +1,11 @@
 # Dataset événements et régimes — phase I
 
-Statut TTWO : `BLOCKED_MISSING_GOVERNED_EVENTS`.
+Statut TTWO : `DEVELOPMENT_DATASET_READY`.
+
+The governed subset combines official SEC filing acceptance timestamps, the Take-Two investor
+relations RSS feed, and three dated official release pages. Event outcomes are descriptive and do
+not establish causality. The full daily regime sequence remains local because it is derived from
+licensed underlying bars; the committed report contains events and aggregate event-study cells.
 
 Un événement conserve quatre temps distincts : événement, publication, disponibilité
 et cutoff de décision. Une donnée disponible après le cutoff est exclue. La déduplication

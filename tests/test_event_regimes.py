@@ -66,11 +66,13 @@ def test_contradictory_duplicate_is_retained_and_not_silently_deduplicated() -> 
     assert report.conflicts[0].event_ids == ["e1", "e2"]
 
 
-def test_committed_tt_report_has_no_invented_event_observations() -> None:
+def test_committed_tt_report_contains_governed_events_without_licensed_regime_rows() -> None:
     report = EventRegimeReport.model_validate_json(
         (ROOT / "reports/pre_opra/event_regime_dataset_2026-08-08.json").read_text()
     )
-    assert report.status == "BLOCKED_MISSING_GOVERNED_EVENTS"
-    assert report.accepted_events == []
+    assert report.status == "DEVELOPMENT_DATASET_READY"
+    assert report.accepted_events
+    assert report.event_study
+    assert report.regimes == []
     assert report.threshold_status == "draft_to_validate"
     assert report.holdout_used is False

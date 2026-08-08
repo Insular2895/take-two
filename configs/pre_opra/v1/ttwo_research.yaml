@@ -223,3 +223,25 @@ extensions:
       - data/treasury/daily_treasury_yield_curve_2026.csv
     private_output: data/pre_opra/market_context.json
     aggregate_summary: reports/pre_opra/market_context_2026-08-08.json
+  event_history:
+    start: 2025-07-01
+    private_output: data/pre_opra/event_regime_dataset.json
+    aggregate_output: reports/pre_opra/event_regime_dataset_2026-08-08.json
+    trend_threshold: 0.05
+    high_volatility_threshold: 0.40
+    manual_events:
+      - event_id: ir-mafia-release-2025-08-08
+        kind: product_release
+        available_at: 2025-08-09T00:00:00+00:00
+        source_url: https://www.take2games.com/ir/news/mafia-old-country-now-available-worldwide
+        summary: "Mafia: The Old Country became available worldwide."
+      - event_id: ir-nba2k26-release-2025-09-05
+        kind: product_release
+        available_at: 2025-09-06T00:00:00+00:00
+        source_url: https://www.take2games.com/ir/news/ball-over-everything-nbar-2k26-superstar-and-leave-no-doubt
+        summary: NBA 2K26 Superstar and Leave No Doubt editions became available.
+      - event_id: ir-borderlands4-release-2025-09-12
+        kind: product_release
+        available_at: 2025-09-13T00:00:00+00:00
+        source_url: https://www.take2games.com/ir/news/break-free-borderlandsr4-now-available-worldwide
+        summary: Borderlands 4 became available worldwide.
