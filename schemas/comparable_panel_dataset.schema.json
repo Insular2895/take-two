@@ -1,0 +1,289 @@
+{
+  "$defs": {
+    "ComparablePanelObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_cutoff": {
+          "format": "date-time",
+          "title": "Decision Cutoff",
+          "type": "string"
+        },
+        "entry_date": {
+          "format": "date",
+          "title": "Entry Date",
+          "type": "string"
+        },
+        "exit_date": {
+          "format": "date",
+          "title": "Exit Date",
+          "type": "string"
+        },
+        "observation_id": {
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "option_target_dte": {
+          "exclusiveMinimum": 0,
+          "title": "Option Target Dte",
+          "type": "integer"
+        },
+        "outcomes": {
+          "items": {
+            "$ref": "#/$defs/PanelOutcome"
+          },
+          "title": "Outcomes",
+          "type": "array"
+        },
+        "signal_date": {
+          "format": "date",
+          "title": "Signal Date",
+          "type": "string"
+        },
+        "signal_momentum_20": {
+          "title": "Signal Momentum 20",
+          "type": "number"
+        },
+        "signal_realized_volatility_20": {
+          "minimum": 0,
+          "title": "Signal Realized Volatility 20",
+          "type": "number"
+        }
+      },
+      "required": [
+        "observation_id",
+        "signal_date",
+        "decision_cutoff",
+        "entry_date",
+        "exit_date",
+        "option_target_dte",
+        "signal_momentum_20",
+        "signal_realized_volatility_20",
+        "outcomes"
+      ],
+      "title": "ComparablePanelObservation",
+      "type": "object"
+    },
+    "ComparableStrategy": {
+      "enum": [
+        "cash",
+        "no_position",
+        "underlying",
+        "buy_and_hold",
+        "atm_long_call",
+        "fixed_delta_long_call",
+        "standard_bull_call_spread",
+        "random_admissible",
+        "engine_candidate"
+      ],
+      "title": "ComparableStrategy",
+      "type": "string"
+    },
+    "PanelLeg": {
+      "additionalProperties": false,
+      "properties": {
+        "expiration": {
+          "format": "date",
+          "title": "Expiration",
+          "type": "string"
+        },
+        "option_symbol": {
+          "title": "Option Symbol",
+          "type": "string"
+        },
+        "side": {
+          "$ref": "#/$defs/PositionSide"
+        },
+        "signal_delta": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signal Delta"
+        },
+        "signal_implied_volatility": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signal Implied Volatility"
+        },
+        "strike": {
+          "title": "Strike",
+          "type": "number"
+        }
+      },
+      "required": [
+        "option_symbol",
+        "side",
+        "strike",
+        "expiration",
+        "signal_implied_volatility",
+        "signal_delta"
+      ],
+      "title": "PanelLeg",
+      "type": "object"
+    },
+    "PanelOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "deployed_capital_eur": {
+          "minimum": 0,
+          "title": "Deployed Capital Eur",
+          "type": "number"
+        },
+        "gross_return": {
+          "title": "Gross Return",
+          "type": "number"
+        },
+        "legs": {
+          "items": {
+            "$ref": "#/$defs/PanelLeg"
+          },
+          "title": "Legs",
+          "type": "array"
+        },
+        "maximum_loss_eur": {
+          "minimum": 0,
+          "title": "Maximum Loss Eur",
+          "type": "number"
+        },
+        "net_return": {
+          "minimum": -1,
+          "title": "Net Return",
+          "type": "number"
+        },
+        "quantity": {
+          "minimum": 0,
+          "title": "Quantity",
+          "type": "integer"
+        },
+        "selected_rule": {
+          "title": "Selected Rule",
+          "type": "string"
+        },
+        "strategy": {
+          "$ref": "#/$defs/ComparableStrategy"
+        },
+        "transaction_cost_eur": {
+          "minimum": 0,
+          "title": "Transaction Cost Eur",
+          "type": "number"
+        }
+      },
+      "required": [
+        "strategy",
+        "gross_return",
+        "net_return",
+        "transaction_cost_eur",
+        "deployed_capital_eur",
+        "maximum_loss_eur",
+        "quantity",
+        "selected_rule",
+        "legs"
+      ],
+      "title": "PanelOutcome",
+      "type": "object"
+    },
+    "PositionSide": {
+      "enum": [
+        "long",
+        "short"
+      ],
+      "title": "PositionSide",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/comparable_panel_dataset.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "dataset_id": {
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "final_holdout_used": {
+      "const": false,
+      "default": false,
+      "title": "Final Holdout Used",
+      "type": "boolean"
+    },
+    "frozen_rules": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          }
+        ]
+      },
+      "title": "Frozen Rules",
+      "type": "object"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "observations": {
+      "items": {
+        "$ref": "#/$defs/ComparablePanelObservation"
+      },
+      "minItems": 4,
+      "title": "Observations",
+      "type": "array"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "retrospective_coverage_filter": {
+      "const": true,
+      "default": true,
+      "title": "Retrospective Coverage Filter",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_hashes": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Source Hashes",
+      "type": "object"
+    },
+    "ticker": {
+      "const": "TTWO",
+      "default": "TTWO",
+      "title": "Ticker",
+      "type": "string"
+    }
+  },
+  "required": [
+    "dataset_id",
+    "generated_at",
+    "observations",
+    "source_hashes",
+    "frozen_rules"
+  ],
+  "title": "ComparablePanelDataset",
+  "type": "object"
+}

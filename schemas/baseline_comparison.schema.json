@@ -8,6 +8,11 @@
           "title": "Cvar 95",
           "type": "number"
         },
+        "evidence": {
+          "minLength": 1,
+          "title": "Evidence",
+          "type": "string"
+        },
         "expected_return": {
           "title": "Expected Return",
           "type": "number"
@@ -15,6 +20,10 @@
         "maximum_drawdown": {
           "minimum": 0,
           "title": "Maximum Drawdown",
+          "type": "number"
+        },
+        "median_return": {
+          "title": "Median Return",
           "type": "number"
         },
         "observations": {
@@ -26,6 +35,24 @@
           "maximum": 1,
           "minimum": 0,
           "title": "Probability Large Loss",
+          "type": "number"
+        },
+        "probability_loss_50": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Loss 50",
+          "type": "number"
+        },
+        "probability_loss_70": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Loss 70",
+          "type": "number"
+        },
+        "probability_loss_90": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Loss 90",
           "type": "number"
         },
         "probability_profit": {
@@ -97,14 +124,19 @@
         "observations",
         "total_return",
         "expected_return",
+        "median_return",
         "cvar_95",
         "maximum_drawdown",
         "probability_profit",
         "probability_target",
         "probability_large_loss",
+        "probability_loss_50",
+        "probability_loss_70",
+        "probability_loss_90",
         "sharpe",
         "sortino",
         "transaction_costs",
+        "evidence",
         "status"
       ],
       "title": "BaselineMetricRow",

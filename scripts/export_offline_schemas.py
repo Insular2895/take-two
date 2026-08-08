@@ -31,6 +31,7 @@ from take_two_options.intelligence.schemas import (
 from take_two_options.quantitative.historical_surfaces import HistoricalSurfaceReport
 from take_two_options.reporting.pre_opra_final import FinalPreOpraReport
 from take_two_options.validation.baseline_comparison import BaselineComparisonReport
+from take_two_options.validation.comparable_panel import ComparablePanelDataset
 from take_two_options.validation.final_holdout import HoldoutLedgerEntry
 from take_two_options.validation.walk_forward_protocol import WalkForwardProtocolReport
 
@@ -38,6 +39,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_DIRECTORY = ROOT / "schemas"
 SCHEMAS: dict[str, type[BaseModel]] = {
     "baseline_comparison.schema.json": BaselineComparisonReport,
+    "comparable_panel_dataset.schema.json": ComparablePanelDataset,
     "data_usage_rights.schema.json": DataUsageRightsReport,
     "empirical_calibration.schema.json": EmpiricalCalibrationReport,
     "five_score_report.schema.json": FiveScoreReport,

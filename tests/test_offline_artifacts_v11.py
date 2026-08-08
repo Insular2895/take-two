@@ -29,6 +29,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
     schema_paths = sorted((ROOT / "schemas").glob("*.schema.json"))
     assert {path.name for path in schema_paths} == {
         "baseline_comparison.schema.json",
+        "comparable_panel_dataset.schema.json",
         "backtest_report.schema.json",
         "calibration_report.schema.json",
         "data_usage_rights.schema.json",

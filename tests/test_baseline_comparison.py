@@ -116,14 +116,13 @@ def test_misaligned_observations_are_rejected() -> None:
         )
 
 
-def test_committed_real_report_is_blocked_without_invented_performance() -> None:
+def test_committed_real_report_contains_all_aligned_strategies_without_holdout() -> None:
     report = BaselineComparisonReport.model_validate_json(
         (ROOT / "reports/pre_opra/baseline_comparison_2026-08-08.json").read_text()
     )
-    assert report.status == "BLOCKED_INCOMPARABLE_DATA"
-    assert report.rows == []
-    assert set(report.missing_strategies) == set(MANDATORY_STRATEGIES)
-    raw = json.loads(
-        (ROOT / "reports/pre_opra/baseline_comparison_2026-08-08.json").read_text()
-    )
+    assert report.status == "DIAGNOSTIC_ONLY_LICENSE_REVIEW"
+    assert len(report.rows) == len(MANDATORY_STRATEGIES)
+    assert report.missing_strategies == []
+    assert all(row.observations >= 4 for row in report.rows)
+    raw = json.loads((ROOT / "reports/pre_opra/baseline_comparison_2026-08-08.json").read_text())
     assert raw["holdout_used"] is False

@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import random
 from enum import StrEnum
-from statistics import fmean, stdev
+from statistics import fmean, median, stdev
 from typing import Literal
 
 from pydantic import Field, model_validator
@@ -91,14 +91,19 @@ class BaselineMetricRow(StrictModel):
     observations: int = Field(gt=0)
     total_return: float
     expected_return: float
+    median_return: float
     cvar_95: float = Field(ge=0)
     maximum_drawdown: float = Field(ge=0)
     probability_profit: float = Field(ge=0, le=1)
     probability_target: float = Field(ge=0, le=1)
     probability_large_loss: float = Field(ge=0, le=1)
+    probability_loss_50: float = Field(ge=0, le=1)
+    probability_loss_70: float = Field(ge=0, le=1)
+    probability_loss_90: float = Field(ge=0, le=1)
     sharpe: float | None
     sortino: float | None
     transaction_costs: float = Field(ge=0)
+    evidence: str = Field(min_length=1)
     status: Literal["baseline", "candidate"]
 
 
@@ -229,6 +234,7 @@ def strategy_metrics(
         observations=len(values),
         total_return=_total_return(values),
         expected_return=fmean(values),
+        median_return=median(values),
         cvar_95=conditional_value_at_risk(values),
         maximum_drawdown=_maximum_drawdown(values),
         probability_profit=sum(value > 0 for value in values) / len(values),
@@ -236,12 +242,15 @@ def strategy_metrics(
             sum(value >= conventions.target_return for value in values) / len(values)
         ),
         probability_large_loss=(
-            sum(value <= -conventions.large_loss_threshold for value in values)
-            / len(values)
+            sum(value <= -conventions.large_loss_threshold for value in values) / len(values)
         ),
+        probability_loss_50=sum(value <= -0.50 for value in values) / len(values),
+        probability_loss_70=sum(value <= -0.70 for value in values) / len(values),
+        probability_loss_90=sum(value <= -0.90 for value in values) / len(values),
         sharpe=_ratio(values, volatility),
         sortino=_ratio(values, downside),
         transaction_costs=sum(series.transaction_costs),
+        evidence="aligned_panel_input",
         status=role,
     )
 
@@ -265,24 +274,19 @@ def _bootstrap_mean_interval(
     generator = random.Random(seed)
     count = len(differences)
     estimates = sorted(
-        fmean(differences[generator.randrange(count)] for _ in range(count))
-        for _ in range(samples)
+        fmean(differences[generator.randrange(count)] for _ in range(count)) for _ in range(samples)
     )
     lower = estimates[math.floor(0.025 * (samples - 1))]
     upper = estimates[math.ceil(0.975 * (samples - 1))]
     return lower, upper
 
 
-def _paired_permutation_p_value(
-    differences: list[float], *, samples: int, seed: int
-) -> float:
+def _paired_permutation_p_value(differences: list[float], *, samples: int, seed: int) -> float:
     generator = random.Random(seed)
     observed = abs(fmean(differences))
     exceedances = 0
     for _ in range(samples):
-        permuted = fmean(
-            value if generator.random() < 0.5 else -value for value in differences
-        )
+        permuted = fmean(value if generator.random() < 0.5 else -value for value in differences)
         exceedances += abs(permuted) >= observed
     return (exceedances + 1) / (samples + 1)
 
@@ -343,8 +347,7 @@ def compare_with_baselines(
     if any(item.observation_ids != reference_ids for item in series[1:]):
         raise ValueError("all strategy series must share identically ordered observation IDs")
     rows = [
-        strategy_metrics(by_strategy[strategy], conventions)
-        for strategy in MANDATORY_STRATEGIES
+        strategy_metrics(by_strategy[strategy], conventions) for strategy in MANDATORY_STRATEGIES
     ]
     rows_by_strategy = {row.strategy: row for row in rows}
     candidate_series = by_strategy[ComparableStrategy.ENGINE_CANDIDATE]
@@ -429,9 +432,7 @@ def compare_with_baselines(
             )
         )
     simple = [
-        row.total_return
-        for row in rows
-        if row.strategy is not ComparableStrategy.ENGINE_CANDIDATE
+        row.total_return for row in rows if row.strategy is not ComparableStrategy.ENGINE_CANDIDATE
     ]
     fold_matrix = [by_strategy[strategy].net_returns for strategy in MANDATORY_STRATEGIES]
     multiple_testing = MultipleTestingDiagnostics(
