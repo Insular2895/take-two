@@ -6,7 +6,7 @@ does not open the final holdout, and keeps licensed observations outside Git.
 | Closure | Scope | Status | Evidence | Remaining limitation |
 |---|---|---|---|---|
 | C1 | Historical option normalization | CLOSED_FOR_LOCAL_RESEARCH | `reports/pre_opra/option_normalization_2026-08-08.json` | EOD quotes; vendor IV/Greeks absent; no simultaneous combo fills |
-| C2 | Data rights and governance | PENDING | — | Provider terms and account rights to document |
+| C2 | Data rights and governance | CLOSED_WITH_HUMAN_CONFIRMATIONS | `docs/data/DATA_USAGE_RIGHTS.md`; `reports/pre_opra/data_usage_rights_2026-08-08.json` | Account classification and grants remain subscriber confirmations |
 | C3 | Spot, rates, dividends, FX | PENDING | — | Point-in-time alignment to complete |
 | C4 | Governed event history | PENDING | — | Official event set to acquire |
 | C5 | Comparable baseline panel | PENDING | — | Real comparable panel absent |

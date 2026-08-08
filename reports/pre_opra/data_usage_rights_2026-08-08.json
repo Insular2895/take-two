@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "report_id": "ttwo-pre-opra-data-rights-v1",
+  "generated_at": "2026-08-08T00:00:00Z",
+  "records": [
+    {
+      "provider": "Market Data",
+      "dataset_class": "historical US option EOD quotes",
+      "account_scope": "self-service subscription; exact entitlement not inspected",
+      "local_private_research": "conditional",
+      "local_retention": "conditional",
+      "internal_derived_analysis": "conditional",
+      "raw_redistribution": "forbidden",
+      "aggregate_publication": "conditional",
+      "raw_github": "forbidden",
+      "attribution_required": true,
+      "deletion_on_termination": true,
+      "terms_urls": [
+        "https://www.marketdata.app/terms/",
+        "https://www.marketdata.app/docs/account/data-policies/data-redistribution/",
+        "https://www.marketdata.app/terms/public-use/"
+      ],
+      "reviewed_at": "2026-08-08T00:00:00Z",
+      "rationale": "Self-service data is for the subscriber's own use; redistribution and bulk exports are forbidden. Public-use terms permit non-reconstructible aggregates for qualifying educational work with attribution.",
+      "unresolved": [
+        "Confirm subscriber professional/non-professional classification.",
+        "Confirm current subscription and deletion obligations before continued use.",
+        "Obtain written authorization for any use beyond local private research."
+      ]
+    },
+    {
+      "provider": "Alpaca",
+      "dataset_class": "IEX adjusted US equity bars and corporate actions",
+      "account_scope": "authenticated customer API",
+      "local_private_research": "conditional",
+      "local_retention": "conditional",
+      "internal_derived_analysis": "conditional",
+      "raw_redistribution": "forbidden",
+      "aggregate_publication": "conditional",
+      "raw_github": "forbidden",
+      "attribution_required": true,
+      "deletion_on_termination": false,
+      "terms_urls": [
+        "https://files.alpaca.markets/disclosures/library/AcctAppMarginAndCustAgmt.pdf",
+        "https://docs.alpaca.markets/docs/about-market-data-api"
+      ],
+      "reviewed_at": "2026-08-08T00:00:00Z",
+      "rationale": "The customer agreement prohibits reproduction, distribution, sale, or commercial exploitation of market data without written consent.",
+      "unresolved": [
+        "Confirm account-specific market-data display/subscriber agreements.",
+        "Confirm whether derived public aggregates need separate consent."
+      ]
+    },
+    {
+      "provider": "U.S. Department of the Treasury",
+      "dataset_class": "daily par yield curve rates",
+      "account_scope": "public official website",
+      "local_private_research": "allowed",
+      "local_retention": "allowed",
+      "internal_derived_analysis": "allowed",
+      "raw_redistribution": "conditional",
+      "aggregate_publication": "allowed",
+      "raw_github": "conditional",
+      "attribution_required": true,
+      "deletion_on_termination": false,
+      "terms_urls": [
+        "https://home.treasury.gov/policy-issues/financing-the-government/interest-rate-statistics/interest-rate-xml-files",
+        "https://home.treasury.gov/footer/privacy-act/privacy-policy"
+      ],
+      "reviewed_at": "2026-08-08T00:00:00Z",
+      "rationale": "Official public rate files are available without authentication; attribution and source disclaimers are retained. Third-party material is excluded.",
+      "unresolved": [
+        "Human legal review is recommended before republishing raw files."
+      ]
+    },
+    {
+      "provider": "European Central Bank",
+      "dataset_class": "EUR/USD reference exchange rates",
+      "account_scope": "public official website",
+      "local_private_research": "allowed",
+      "local_retention": "allowed",
+      "internal_derived_analysis": "allowed",
+      "raw_redistribution": "allowed",
+      "aggregate_publication": "allowed",
+      "raw_github": "allowed",
+      "attribution_required": true,
+      "deletion_on_termination": false,
+      "terms_urls": [
+        "https://www.ecb.europa.eu/services/using-our-site/disclaimer/html/index.en.html"
+      ],
+      "reviewed_at": "2026-08-08T00:00:00Z",
+      "rationale": "ECB permits free use when information is accurate, the ECB is cited, and any modification or derived calculation is disclosed.",
+      "unresolved": []
+    },
+    {
+      "provider": "U.S. Securities and Exchange Commission",
+      "dataset_class": "EDGAR submissions and XBRL facts",
+      "account_scope": "public data.sec.gov APIs",
+      "local_private_research": "allowed",
+      "local_retention": "allowed",
+      "internal_derived_analysis": "allowed",
+      "raw_redistribution": "conditional",
+      "aggregate_publication": "allowed",
+      "raw_github": "conditional",
+      "attribution_required": true,
+      "deletion_on_termination": false,
+      "terms_urls": [
+        "https://www.sec.gov/about/developer-resources",
+        "https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data"
+      ],
+      "reviewed_at": "2026-08-08T00:00:00Z",
+      "rationale": "EDGAR data is publicly downloadable; automated access must declare a user agent, stay under ten requests per second, and avoid excessive crawling.",
+      "unresolved": [
+        "Do not assume third-party exhibits are free of separate rights."
+      ]
+    }
+  ],
+  "raw_licensed_data_committed": false,
+  "legal_review_status": "HUMAN_REVIEW_RECOMMENDED",
+  "order_capability": "forbidden"
+}

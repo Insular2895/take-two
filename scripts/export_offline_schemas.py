@@ -14,6 +14,7 @@ from take_two_options.decision.quality_scores import FiveScoreReport
 from take_two_options.decision.severity_gates import SeverityGateReport
 from take_two_options.empirical_calibration import EmpiricalCalibrationReport
 from take_two_options.historical_data.contracts import HistoricalDatasetManifest
+from take_two_options.historical_data.data_rights import DataUsageRightsReport
 from take_two_options.historical_data.event_regimes import EventRegimeReport
 from take_two_options.historical_data.option_observations import (
     HistoricalOptionDatasetSummary,
@@ -36,6 +37,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_DIRECTORY = ROOT / "schemas"
 SCHEMAS: dict[str, type[BaseModel]] = {
     "baseline_comparison.schema.json": BaselineComparisonReport,
+    "data_usage_rights.schema.json": DataUsageRightsReport,
     "empirical_calibration.schema.json": EmpiricalCalibrationReport,
     "five_score_report.schema.json": FiveScoreReport,
     "final_pre_opra_report.schema.json": FinalPreOpraReport,

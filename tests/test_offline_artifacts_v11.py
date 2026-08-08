@@ -31,6 +31,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
         "baseline_comparison.schema.json",
         "backtest_report.schema.json",
         "calibration_report.schema.json",
+        "data_usage_rights.schema.json",
         "empirical_calibration.schema.json",
         "event.schema.json",
         "event_regime_report.schema.json",
