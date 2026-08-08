@@ -96,7 +96,7 @@ The default pipeline seeds spot, FX, rate, dividend, and option-chain
 observations from V10.1. It does not open network connections. Unconfigured
 connectors appear as `not_configured`, not as successful sources.
 
-## Evidence and Bayesian scenarios
+## Evidence and configured heuristic scenarios
 
 Events are normalized to a finite ontology. A stable `canonical_fact_id`
 deduplicates several reports of the same underlying fact. Evidence families
@@ -106,7 +106,7 @@ confidence. A contradictory event reverses the configured likelihood signal.
 Deterministic normalization records exact rule, observed value, source, expiry,
 duplicate cluster, contradiction cluster and human-review status. Text or
 catalyst matches remain pending until explicit review. For every accepted or
-deduplicated event, the Bayesian report retains:
+deduplicated event, the compatibility-named Bayesian report retains:
 
 - prior distribution;
 - scenario likelihoods;
@@ -120,6 +120,12 @@ deduplicated event, the Bayesian report retains:
 The default priors and likelihood tables are hypotheses in
 `configs/intelligence/v11.yaml`. They are not observed frequencies and cannot
 be promoted without calibration and out-of-sample review.
+
+The active semantic label is `configured_heuristic_belief`, not statistical
+posterior. The legacy schema name remains stable for historical artifacts. A
+separate model-uncertainty sidecar decomposes within-model, between-model and
+Monte Carlo uncertainty; equal weights remain diagnostic rather than
+posterior model odds.
 
 ## Stochastic ensemble
 

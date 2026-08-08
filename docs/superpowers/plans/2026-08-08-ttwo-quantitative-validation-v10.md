@@ -1,6 +1,6 @@
 # Plan TTWO Quantitative Validation V10
 
-Statut : `in_progress_phase_5_implemented`
+Statut : `in_progress_phase_6_implemented`
 
 Date : 2026-08-08
 
@@ -194,7 +194,7 @@ Commit proposé : `feat(validation): seal experiments and enforce point-in-time 
 ## Phase 5 — Monte Carlo des règles de sortie
 
 État : state machine et diagnostics d'incertitude implémentés ; LSM différé faute d'écart
-matériel mesuré ; gate complet vert (173 tests) ; commit atomique à créer.
+matériel mesuré ; gate complet vert (173 tests) ; commit `7488f5e`.
 
 ### Documentary Research
 
@@ -215,6 +215,11 @@ matériel mesuré ; gate complet vert (173 tests) ; commit atomique à créer.
 Commit proposé : `feat(simulation): validate path exits and monte carlo uncertainty`
 
 ## Phase 6 — Incertitude de modèle et bayésien
+
+État : croyance heuristique renommée sémantiquement sans rupture de schéma ; ensembles
+modèle/paramètres et diagnostics de calibration implémentés ; modèle bayésien statistique
+différé faute de likelihood/outcomes explicites ; gate complet vert (177 tests) ; commit
+atomique à créer.
 
 ### Documentary Research
 

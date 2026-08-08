@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from dataclasses import dataclass
 
@@ -26,7 +28,22 @@ class StochasticPathSet:
     variances: NDArray
     assumptions: tuple[str, ...]
     warnings: tuple[str, ...]
+    parameter_set_id: str
     measure: Measure = Measure.REAL_WORLD
+
+
+def _parameter_set_id(
+    policy: SimulationPolicy,
+    model: StochasticModel,
+    regime: SimulationRegimeConfig,
+) -> str:
+    payload = {
+        "model": model.value,
+        "regime": regime.model_dump(mode="json"),
+        "simulation_policy": policy.model_dump(mode="json"),
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def _seed(base: int, model: StochasticModel, regime: SimulationRegime) -> int:
@@ -90,9 +107,7 @@ def _jump_increment(
 
 def _jump_compensator(regime: SimulationRegimeConfig) -> float:
     jump = regime.jump
-    expected_multiplier_minus_one = math.exp(
-        jump.log_mean + 0.5 * jump.log_volatility**2
-    ) - 1
+    expected_multiplier_minus_one = math.exp(jump.log_mean + 0.5 * jump.log_volatility**2) - 1
     return jump.intensity_per_year * expected_multiplier_minus_one
 
 
@@ -127,15 +142,11 @@ def simulate_path_set(
         transition_steps = max(round(policy.steps * 0.20), 1)
         for step in range(1, policy.steps + 1):
             transition = min(step / transition_steps, 1.0)
-            step_variance = (
-                (1 - transition) * initial_variance
-                + transition * scenario_variance
-            )
+            step_variance = (1 - transition) * initial_variance + transition * scenario_variance
             step_volatility = math.sqrt(step_variance)
             z = rng.standard_normal(policy.paths)
             spots[:, step] = spots[:, step - 1] * np.exp(
-                (regime.annual_drift - 0.5 * step_variance) * dt
-                + step_volatility * sqrt_dt * z
+                (regime.annual_drift - 0.5 * step_variance) * dt + step_volatility * sqrt_dt * z
             )
             variances[:, step] = step_variance
         assumptions = (
@@ -153,14 +164,12 @@ def simulate_path_set(
             )
             transition = min(step / transition_steps, 1.0)
             local_volatility = base_local_volatility * (
-                1
-                + transition * (regime.volatility_multiplier - 1)
+                1 + transition * (regime.volatility_multiplier - 1)
             )
             local_variance = np.maximum(local_volatility**2, 1e-10)
             z = rng.standard_normal(policy.paths)
             spots[:, step] = previous * np.exp(
-                (regime.annual_drift - 0.5 * local_variance) * dt
-                + local_volatility * sqrt_dt * z
+                (regime.annual_drift - 0.5 * local_variance) * dt + local_volatility * sqrt_dt * z
             )
             variances[:, step] = local_variance
         assumptions = (
@@ -171,15 +180,10 @@ def simulate_path_set(
         heston = policy.heston
         correlation_scale = math.sqrt(max(1.0 - heston.correlation**2, 0.0))
         target_variance_scale = (
-            regime.volatility_multiplier**2
-            * (1.0 + regime.initial_iv_shift) ** 2
+            regime.volatility_multiplier**2 * (1.0 + regime.initial_iv_shift) ** 2
         )
         variances[:, 0] = max(heston.initial_variance, 1e-10)
-        compensator = (
-            _jump_compensator(regime)
-            if model is StochasticModel.HESTON_JUMP
-            else 0.0
-        )
+        compensator = _jump_compensator(regime) if model is StochasticModel.HESTON_JUMP else 0.0
         for step in range(1, policy.steps + 1):
             previous_variance = np.maximum(variances[:, step - 1], 0.0)
             z_spot = rng.standard_normal(policy.paths)
@@ -191,28 +195,16 @@ def simulate_path_set(
                 else np.zeros(policy.paths)
             )
             spots[:, step] = spots[:, step - 1] * np.exp(
-                (
-                    regime.annual_drift
-                    - compensator
-                    - 0.5 * previous_variance
-                )
-                * dt
+                (regime.annual_drift - compensator - 0.5 * previous_variance) * dt
                 + np.sqrt(previous_variance) * sqrt_dt * z_spot
                 + jump_increment
             )
             next_variance = (
                 previous_variance
                 + heston.mean_reversion
-                * (
-                    heston.long_run_variance
-                    * target_variance_scale
-                    - previous_variance
-                )
+                * (heston.long_run_variance * target_variance_scale - previous_variance)
                 * dt
-                + heston.vol_of_variance
-                * np.sqrt(previous_variance)
-                * sqrt_dt
-                * z_variance
+                + heston.vol_of_variance * np.sqrt(previous_variance) * sqrt_dt * z_variance
             )
             variances[:, step] = np.maximum(next_variance, 0.0)
         if heston.calibration_status != "calibrated":
@@ -246,6 +238,7 @@ def simulate_path_set(
         variances=variances,
         assumptions=assumptions,
         warnings=tuple(warnings),
+        parameter_set_id=_parameter_set_id(policy, model, regime),
     )
 
 

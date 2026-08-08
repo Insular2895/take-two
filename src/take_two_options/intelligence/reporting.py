@@ -49,7 +49,7 @@ def markdown_report(report: V11IntelligenceReport) -> str:
             "",
             "## 3. Probabilités initiales, postérieures et sensibilité",
             "",
-            "| Scénario | Posterior | Minimum sensibilité | Maximum sensibilité |",
+            "| Scénario | Croyance configurée | Minimum sensibilité | Maximum sensibilité |",
             "| --- | ---: | ---: | ---: |",
         ]
     )
@@ -62,13 +62,13 @@ def markdown_report(report: V11IntelligenceReport) -> str:
         maximum = (
             sensitivity.posterior_maximum[scenario] if sensitivity is not None else probability
         )
-        lines.append(
-            f"| {scenario} | {probability:.2%} | {minimum:.2%} | {maximum:.2%} |"
-        )
+        lines.append(f"| {scenario} | {probability:.2%} | {minimum:.2%} | {maximum:.2%} |")
     lines.extend(
         [
             "",
-            f"- Confiance : `{report.bayesian_distribution.confidence_level}`",
+            "- Nature : `configured_heuristic_belief` (pas un posterior statistique calibré)",
+            f"- Suffisance des preuves : "
+            f"`{report.bayesian_distribution.evidence_sufficiency_level}`",
             f"- Classement stable sous sensibilité : "
             f"`{sensitivity.ranking_stable if sensitivity else False}`",
             "",
@@ -149,8 +149,12 @@ def markdown_report(report: V11IntelligenceReport) -> str:
         )
     lines.extend(["", "## 14–15. Allocation et cash non utilisé", ""])
     for allocation in report.allocations:
-        label = "cash / NO_TRADE" if allocation.no_trade else ", ".join(
-            f"{line.strategy_units}× {line.candidate_id}" for line in allocation.lines
+        label = (
+            "cash / NO_TRADE"
+            if allocation.no_trade
+            else ", ".join(
+                f"{line.strategy_units}× {line.candidate_id}" for line in allocation.lines
+            )
         )
         lines.extend(
             [
@@ -253,19 +257,25 @@ def html_report(report: V11IntelligenceReport) -> str:
         )
         if report.bayesian_distribution.sensitivity is not None
     )
-    event_rows = "".join(
-        "<tr>"
-        f"<td>{esc(event.event_type.value)}</td><td>{esc(event.family.value)}</td>"
-        f"<td>{esc(event.normalization_rule_id)}</td>"
-        f"<td>{esc(event.human_review_status.value)}</td>"
-        f"<td>{esc(', '.join(event.source_ids))}</td>"
-        "</tr>"
-        for event in report.event_normalization.events
-    ) or "<tr><td colspan=\"5\">Aucun événement normalisé.</td></tr>"
-    contradiction_rows = "".join(
-        f"<li><code>{esc(cluster)}</code> : {esc(', '.join(event_ids))}</li>"
-        for cluster, event_ids in report.event_normalization.contradiction_clusters.items()
-    ) or "<li>Aucune contradiction normalisée.</li>"
+    event_rows = (
+        "".join(
+            "<tr>"
+            f"<td>{esc(event.event_type.value)}</td><td>{esc(event.family.value)}</td>"
+            f"<td>{esc(event.normalization_rule_id)}</td>"
+            f"<td>{esc(event.human_review_status.value)}</td>"
+            f"<td>{esc(', '.join(event.source_ids))}</td>"
+            "</tr>"
+            for event in report.event_normalization.events
+        )
+        or '<tr><td colspan="5">Aucun événement normalisé.</td></tr>'
+    )
+    contradiction_rows = (
+        "".join(
+            f"<li><code>{esc(cluster)}</code> : {esc(', '.join(event_ids))}</li>"
+            for cluster, event_ids in report.event_normalization.contradiction_clusters.items()
+        )
+        or "<li>Aucune contradiction normalisée.</li>"
+    )
     model_rows = "".join(
         "<tr>"
         f"<td>{esc(metric.candidate_id)}</td><td>{esc(metric.model.value)}</td>"
@@ -307,9 +317,7 @@ def html_report(report: V11IntelligenceReport) -> str:
         allocation_label = (
             "cash / NO_TRADE"
             if item.no_trade
-            else ", ".join(
-                f"{line.strategy_units}× {line.candidate_id}" for line in item.lines
-            )
+            else ", ".join(f"{line.strategy_units}× {line.candidate_id}" for line in item.lines)
         )
         allocation_card_parts.append(
             "<article>"
@@ -356,19 +364,13 @@ def html_report(report: V11IntelligenceReport) -> str:
         "</tr>"
         for item in report.readiness
     )
-    blockers = "".join(
-        f"<li>{esc(item)}</li>" for item in report.machine_summary.blocking_reasons
-    )
+    blockers = "".join(f"<li>{esc(item)}</li>" for item in report.machine_summary.blocking_reasons)
     limitations = "".join(f"<li>{esc(item)}</li>" for item in report.limitations)
-    missing_series = esc(
-        ", ".join(report.data_snapshot.missing_required_series) or "aucune"
-    )
+    missing_series = esc(", ".join(report.data_snapshot.missing_required_series) or "aucune")
     calibration_status_html = esc(report.offline_calibration.get("status"))
     backtest_status_html = esc(report.walk_forward_backtest.get("status"))
     local_status_html = esc(report.local_volatility_calibration.status)
-    arbitrage_status_html = str(
-        report.local_volatility_calibration.arbitrage_free_input
-    ).lower()
+    arbitrage_status_html = str(report.local_volatility_calibration.arbitrage_free_input).lower()
     return f"""<!doctype html>
 <html lang="fr">
 <head>
@@ -422,7 +424,8 @@ th,td{{min-width:130px}}}}
 <article><h3>Local volatility</h3><p><code>{local_status_html}</code></p>
 <p>Arbitrage-free input: {arbitrage_status_html}</p></article></div>
 </section>
-<section><h2>3. Probabilités initiales et postérieures</h2>
+<section><h2>3. Croyances heuristiques configurées</h2>
+<p>Ces valeurs ne sont pas un posterior statistique calibré.</p>
 <div class="table"><table><thead><tr><th>Scénario</th><th>Central</th><th>Minimum</th>
 <th>Maximum</th></tr></thead><tbody>{posterior_rows}</tbody></table></div></section>
 <section><h2>4. Provenance des événements</h2><div class="table"><table>

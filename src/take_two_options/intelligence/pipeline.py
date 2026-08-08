@@ -18,7 +18,7 @@ from take_two_options.intelligence.backtesting import (
     load_walk_forward_dataset,
     run_walk_forward,
 )
-from take_two_options.intelligence.bayesian import update_scenario_distribution
+from take_two_options.intelligence.bayesian import update_heuristic_scenario_beliefs
 from take_two_options.intelligence.calibration import (
     fit_offline_models,
     validate_historical_dataset,
@@ -141,11 +141,7 @@ def _posture(
     top = [item for item in allocations if item.rank == 1]
     if top and all(item.no_trade for item in top):
         return ResearchPosture.NO_TRADE
-    if (
-        missing_required_series
-        or DataQuality.SYNTHETIC in data_qualities
-        or all_execution_blocked
-    ):
+    if missing_required_series or DataQuality.SYNTHETIC in data_qualities or all_execution_blocked:
         return ResearchPosture.WATCHLIST
     return ResearchPosture.PAPER_REVIEW
 
@@ -165,9 +161,7 @@ def run_intelligence(
     runtime_profile: Literal[
         "fast_fixture", "research", "validation", "exhaustive"
     ] = "fast_fixture",
-    historical_returns_path: Path = Path(
-        "data/alpaca/ttwo_calibration_dataset_2026-07-19.json"
-    ),
+    historical_returns_path: Path = Path("data/alpaca/ttwo_calibration_dataset_2026-07-19.json"),
     created_at: datetime | None = None,
 ) -> V11IntelligenceReport:
     """Run V11 without exposing any live-order submission operation."""
@@ -259,7 +253,7 @@ def run_intelligence(
                     "human_review_status": event.human_review_status.value,
                 }
             )
-    bayesian = update_scenario_distribution(
+    bayesian = update_heuristic_scenario_beliefs(
         priors=policy.scenario_priors,
         events=event_normalization.events,
         rules=policy.likelihood_rules,
@@ -267,14 +261,10 @@ def run_intelligence(
         as_of=base.chain.as_of,
     )
     mark_stage("events_and_bayes")
-    historical_dataset, dataset_quality = validate_historical_dataset(
-        calibration_data_path
-    )
+    historical_dataset, dataset_quality = validate_historical_dataset(calibration_data_path)
     offline_calibration = fit_offline_models(historical_dataset, dataset_quality)
     walk_forward = run_walk_forward(
-        load_walk_forward_dataset(walk_forward_path)
-        if walk_forward_path is not None
-        else None
+        load_walk_forward_dataset(walk_forward_path) if walk_forward_path is not None else None
     )
     mark_stage("offline_calibration_and_backtest")
     if factor_history_path is not None:
@@ -320,15 +310,11 @@ def run_intelligence(
     ready_connectors = {
         item.connector_id
         for item in data_snapshot.connectors
-        if item.state in {ConnectorState.READY, ConnectorState.PARTIAL}
-        and item.observations > 0
+        if item.state in {ConnectorState.READY, ConnectorState.PARTIAL} and item.observations > 0
     }
     combo_quotes = {}
     for connector in connector_list:
-        if (
-            isinstance(connector, IBKROpraConnector)
-            and connector.connector_id in ready_connectors
-        ):
+        if isinstance(connector, IBKROpraConnector) and connector.connector_id in ready_connectors:
             for candidate in candidates:
                 combo_quotes[candidate.candidate_id] = connector.quote_combo(
                     candidate_id=candidate.candidate_id,
@@ -437,9 +423,7 @@ def run_intelligence(
     )
     peak_memory = float(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     peak_memory_mb = (
-        peak_memory / 1024 / 1024
-        if platform.system() == "Darwin"
-        else peak_memory / 1024
+        peak_memory / 1024 / 1024 if platform.system() == "Darwin" else peak_memory / 1024
     )
     completed_at = datetime.now(UTC)
     run_manifest = RunManifest(

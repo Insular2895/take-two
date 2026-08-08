@@ -24,6 +24,11 @@
   crossings; Wilson assumes iid unweighted trials, block-bootstrap coverage depends on
   stationarity and block length, and no rare-event importance sampler is implemented. LSM is
   deferred until a real material gap against finite-difference/checkpoint controls is measured.
+- The V11 scenario updater is now explicitly labeled a `configured_heuristic_belief`; its legacy
+  Bayesian schema name is retained only for compatibility. Model/parameter ensembles decompose
+  predictive and Monte Carlo uncertainty, but current equal weights and illustrative members
+  remain diagnostic. No fitted likelihood, real posterior predictive distribution or TTWO
+  holdout calibration exists.
 - MarketData.app historical chains are EOD bid/ask, not intraday NBBO or
   simultaneous combo fills.
 - Alpaca indicative snapshots do not supply the open-interest/underlying fields

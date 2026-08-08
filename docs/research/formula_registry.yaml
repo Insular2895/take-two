@@ -309,6 +309,60 @@ formulas:
         symbols: [test_circular_block_bootstrap_is_seeded_and_preserves_dependency_blocks]
     validation_status: tested
 
+  - formula_id: FORM-PREDICTIVE-MIXTURE-001
+    name: Model/parameter predictive mixture decomposition
+    statement: "For declared weights, aggregate member means and split predictive variance into weighted within-member variance plus between-member mean variance."
+    measure: P
+    units: output_unit_and_squared_output_unit
+    assumptions:
+      - declared member weights sum to one
+      - each member represents a distinct model/parameter predictive distribution
+      - member simulations are independent for the reported Monte Carlo standard error
+      - weights are not posterior model probabilities without independent validation
+    sources:
+      - source_id: book-mcelreath-statistical-rethinking
+        chapter: "3.3 and 7.5"
+        page: "61-68 and 229-239"
+    implementation:
+      - file: src/take_two_options/quantitative/model_uncertainty.py
+        symbols: [summarize_model_ensemble]
+      - file: src/take_two_options/intelligence/valuation.py
+        symbols: [summarize_valuation_ensemble]
+    tests:
+      - file: tests/test_model_uncertainty.py
+        symbols: [test_model_ensemble_separates_within_between_and_monte_carlo_uncertainty]
+      - file: tests/test_intelligence_v11.py
+        symbols: [test_path_valuation_produces_full_risk_metrics_and_robustness]
+    validation_status: tested
+
+  - formula_id: FORM-PROBABILITY-CALIBRATION-001
+    name: Binary forecast calibration and proper-score diagnostics
+    statement: "Compare aligned binary forecasts and outcomes using squared probability error, log loss, calibration bins and weighted absolute bin gaps."
+    measure: P
+    units: probability_score
+    assumptions:
+      - point-in-time forecasts precede aligned binary outcomes
+      - sample size and dataset role are explicit
+      - bin-level Wilson intervals require iid Bernoulli outcomes
+    sources:
+      - source_id: paper-brier-probability-forecast-verification
+        chapter: "primary article"
+        page: "1-3"
+      - source_id: book-mcelreath-statistical-rethinking
+        chapter: "7.2-7.5"
+        page: "206-239"
+    implementation:
+      - file: src/take_two_options/quantitative/probability_calibration.py
+        symbols: [evaluate_binary_calibration]
+      - file: src/take_two_options/intelligence/backtesting.py
+        symbols: [run_walk_forward]
+    tests:
+      - file: tests/test_model_uncertainty.py
+        symbols:
+          - test_calibration_curve_and_scores_distinguish_calibrated_synthetic_forecasts
+          - test_calibration_stays_insufficient_and_holdout_identity_is_mandatory
+    validation_status: tested
+
   - formula_id: FORM-PBO-001
     name: Combinatorially symmetric probability of backtest overfitting diagnostic
     statement: "Across symmetric train/test fold combinations, measure how often the in-sample winner ranks below the OOS median."

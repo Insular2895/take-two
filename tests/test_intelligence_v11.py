@@ -10,7 +10,10 @@ import yaml
 
 from take_two_options.exceptions import ForbiddenOperation
 from take_two_options.intelligence._numpy import np
-from take_two_options.intelligence.bayesian import update_scenario_distribution
+from take_two_options.intelligence.bayesian import (
+    update_heuristic_scenario_beliefs,
+    update_scenario_distribution,
+)
 from take_two_options.intelligence.covariance import dynamic_covariance
 from take_two_options.intelligence.data_hub import (
     FredConnector,
@@ -49,11 +52,13 @@ from take_two_options.intelligence.valuation import (
     generate_exit_plan,
     select_candidate_pool,
     summarize_robustness,
+    summarize_valuation_ensemble,
     value_candidate_across_models,
 )
 from take_two_options.intelligence.volatility_calibration import (
     calibrate_local_volatility,
 )
+from take_two_options.quantitative.model_uncertainty import EnsembleWeightBasis
 from take_two_options.thesis_scanner.schemas import ThesisScanReport
 
 BASE_REPORT = Path("reports/examples/v10_thesis_scan.json")
@@ -66,9 +71,7 @@ def _base_report() -> ThesisScanReport:
 
 def _small_policy():
     policy = load_v11_policy(POLICY)
-    simulation = policy.simulation.model_copy(
-        update={"paths": 64, "steps": 12, "horizon_days": 60}
-    )
+    simulation = policy.simulation.model_copy(update={"paths": 64, "steps": 12, "horizon_days": 60})
     return policy.model_copy(update={"simulation": simulation, "candidate_pool_size": 2})
 
 
@@ -135,6 +138,15 @@ def test_bayesian_updates_deduplicate_fact_and_cap_family_weight() -> None:
     assert result.updates[2].family_cap_applied
     assert result.updates[2].effective_weight == pytest.approx(0.2)
     assert sum(result.scenario_probabilities.values()) == pytest.approx(1)
+    assert result.semantic_type == "configured_heuristic_belief"
+    assert result.evidence_sufficiency_level == result.confidence_level
+    explicitly_named = update_heuristic_scenario_beliefs(
+        priors={"success": 0.5, "delay": 0.5},
+        events=events,
+        rules=rules,
+        family_caps={EvidenceFamily.COMPANY_PRIMARY: 1.0},
+    )
+    assert explicitly_named == result
 
 
 def test_dynamic_covariance_is_psd_and_uses_special_windows() -> None:
@@ -167,9 +179,7 @@ def test_dynamic_covariance_is_psd_and_uses_special_windows() -> None:
 
 def test_stochastic_models_are_seeded_positive_and_share_entry_iv() -> None:
     policy = _small_policy().simulation
-    adverse = next(
-        item for item in policy.regimes if item.regime is SimulationRegime.ADVERSE
-    )
+    adverse = next(item for item in policy.regimes if item.regime is SimulationRegime.ADVERSE)
     first = simulate_path_set(
         spot=230,
         policy=policy,
@@ -226,14 +236,23 @@ def test_path_valuation_produces_full_risk_metrics_and_robustness() -> None:
         exit_policy=policy.exit_policy,
     )
     robustness = summarize_robustness(candidate, valuations)
+    ensemble = summarize_valuation_ensemble(
+        valuations,
+        weight_basis=EnsembleWeightBasis.EQUAL_SENSITIVITY,
+    )
     assert len(valuations) == 16
+    assert len({item.parameter_set_id for item in valuations}) == 16
     assert all(0 <= item.metrics.probability_profit <= 1 for item in valuations)
     assert all(item.metrics.cvar_95_usd >= item.metrics.var_95_usd for item in valuations)
     assert all(
-        item.metrics.reasonable_worst_pnl_usd <= item.metrics.median_pnl_usd
-        for item in valuations
+        item.metrics.reasonable_worst_pnl_usd <= item.metrics.median_pnl_usd for item in valuations
     )
     assert 0 <= robustness.robustness_score <= 100
+    assert ensemble.claim_status == "diagnostic_only"
+    assert ensemble.total_predictive_variance == pytest.approx(
+        ensemble.within_model_predictive_variance + ensemble.between_model_predictive_variance
+    )
+    assert "ensemble_weights_are_not_validated_oos" in ensemble.blockers
 
 
 def test_exit_plan_is_created_at_candidate_selection() -> None:
@@ -596,10 +615,7 @@ def test_full_v11_pipeline_is_reproducible_and_writes_all_reports(
     assert all(not item.promotion_eligible for item in report.validation)
     assert report.local_volatility_calibration.status == "partial"
     assert len(report.allocations) == 6
-    assert all(
-        allocation.constraint_checks["whole_contracts"]
-        for allocation in report.allocations
-    )
+    assert all(allocation.constraint_checks["whole_contracts"] for allocation in report.allocations)
     assert any(allocation.no_trade for allocation in report.allocations)
     assert all(item.transmit is False for item in report.execution_previews)
     assert all(item.combo_quote is not None for item in report.execution_previews)
@@ -619,13 +635,12 @@ def test_full_v11_pipeline_is_reproducible_and_writes_all_reports(
     assert report.machine_summary.promotion_eligible is False
     assert report.machine_summary.order_capability == "forbidden"
     assert report.offline_calibration["status"] == "BLOCKED_MISSING_CALIBRATION_DATA"
-    assert report.walk_forward_backtest["status"] == (
-        "BLOCKED_MISSING_CALIBRATION_DATA"
-    )
+    assert report.walk_forward_backtest["status"] == ("BLOCKED_MISSING_CALIBRATION_DATA")
     assert all(
         item.status.value not in {"production_ready_offline"}
         for item in report.readiness
-        if item.feature in {
+        if item.feature
+        in {
             "bayesian_scenario_engine",
             "multi_model_simulation",
             "historical_calibration",

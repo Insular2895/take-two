@@ -469,6 +469,93 @@ sources:
     validation_status: sourced
     notes: "Third edition, Wiley and 2010 copyright verified directly; chapter 3 passages inspected."
 
+  - source_id: book-mcelreath-statistical-rethinking
+    source_type: local_book
+    author:
+      - Richard McElreath
+    title: Statistical Rethinking
+    subtitle: A Bayesian Course with Examples in R and Stan
+    edition: Second Edition
+    year: 2019
+    volume: null
+    chapter: "2, 3 and 7"
+    section: "small/large worlds; posterior predictive simulation; predictive accuracy and model comparison"
+    page_start: 19
+    page_end: 239
+    pdf_file: Statistical Rethinking 2nd Edition.pdf
+    url: null
+    concept:
+      - explicit prior and likelihood
+      - posterior predictive distribution
+      - prior predictive checks
+      - predictive scoring
+      - model comparison and overfitting
+    formula_id:
+      - FORM-PREDICTIVE-MIXTURE-001
+      - FORM-PROBABILITY-CALIBRATION-001
+    formula: null
+    assumptions: "A statistical posterior requires an explicit data-generating likelihood, priors and observed data; configured evidence weights alone are insufficient."
+    measure: P
+    units: model_dependent
+    alternatives:
+      - book-wasserman-all-statistics
+    limitations:
+      - examples are pedagogical and not TTWO validation
+      - predictive performance in the model's small world does not guarantee real-world performance
+    implementation_file:
+      - src/take_two_options/quantitative/model_uncertainty.py
+      - src/take_two_options/quantitative/probability_calibration.py
+      - src/take_two_options/intelligence/bayesian.py
+    implementation_symbol:
+      - summarize_model_ensemble
+      - evaluate_binary_calibration
+      - update_heuristic_scenario_beliefs
+    test_file:
+      - tests/test_model_uncertainty.py
+      - tests/test_intelligence_v11.py
+    validation_status: tested
+    notes: "Title page, contents, chapters 2-3 and chapter 7 passages were inspected directly from the local PDF."
+
+  - source_id: paper-brier-probability-forecast-verification
+    source_type: primary_research_article
+    author:
+      - Glenn W. Brier
+    title: Verification of Forecasts Expressed in Terms of Probability
+    edition: null
+    year: 1950
+    volume: "78(1)"
+    chapter: null
+    section: null
+    page_start: 1
+    page_end: 3
+    pdf_file: null
+    url:
+      - https://doi.org/10.1175/1520-0493(1950)078%3C0001:VOFEIT%3E2.0.CO;2
+    concept:
+      - probability forecast verification
+      - squared probability score
+    formula_id:
+      - FORM-PROBABILITY-CALIBRATION-001
+    formula: null
+    assumptions: "Binary probability forecasts and subsequently observed outcomes are aligned."
+    measure: P
+    units: squared_probability_error
+    alternatives:
+      - log predictive score
+    limitations:
+      - primary publisher metadata inspected; no TTWO application evidence
+    implementation_file:
+      - src/take_two_options/intelligence/backtesting.py
+      - src/take_two_options/quantitative/probability_calibration.py
+    implementation_symbol:
+      - run_walk_forward
+      - evaluate_binary_calibration
+    test_file:
+      - tests/test_offline_reliability_v11.py
+      - tests/test_model_uncertainty.py
+    validation_status: tested
+    notes: "Primary AMS journal record, publication date, pages and DOI inspected."
+
   - source_id: paper-wilson-binomial-interval
     source_type: primary_research_article_metadata
     author:
@@ -1163,6 +1250,35 @@ formula_links:
     test_file: tests/test_simulation_uncertainty.py
     validation_status: tested
     notes: "Seed and block size are explicit; coverage and block-length optimality are not claimed."
+
+  - formula_id: FORM-PREDICTIVE-MIXTURE-001
+    name: Model and parameter predictive mixture decomposition
+    source_id:
+      - book-mcelreath-statistical-rethinking
+    source_location_status: inspected_chapters_3_and_7
+    implementation_file:
+      - src/take_two_options/quantitative/model_uncertainty.py
+      - src/take_two_options/intelligence/valuation.py
+    implementation_symbol:
+      - summarize_model_ensemble
+      - summarize_valuation_ensemble
+    test_file:
+      - tests/test_model_uncertainty.py
+      - tests/test_intelligence_v11.py
+    validation_status: tested
+    notes: "Equal/user weights remain diagnostic; declared OOS evidence is recorded but does not certify validation."
+
+  - formula_id: FORM-PROBABILITY-CALIBRATION-001
+    name: Binary probability calibration diagnostics
+    source_id:
+      - paper-brier-probability-forecast-verification
+      - book-mcelreath-statistical-rethinking
+    source_location_status: primary_brier_metadata_and_mcelreath_chapter_7_inspected
+    implementation_file: src/take_two_options/quantitative/probability_calibration.py
+    implementation_symbol: evaluate_binary_calibration
+    test_file: tests/test_model_uncertainty.py
+    validation_status: tested
+    notes: "Synthetic directional scoring only; no TTWO calibration or holdout claim."
 
   - formula_id: FORM-PBO-001
     name: Probability of backtest overfitting diagnostic

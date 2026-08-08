@@ -213,9 +213,7 @@ class UnifiedDataSnapshot(StrictModel):
                 or observation.provider is None
                 or observation.raw_hash is None
             ):
-                raise ValueError(
-                    f"observation {observation.observation_id} lacks complete lineage"
-                )
+                raise ValueError(f"observation {observation.observation_id} lacks complete lineage")
             if not observation.point_in_time_valid:
                 raise ValueError(
                     f"observation {observation.observation_id} is not point-in-time valid"
@@ -375,6 +373,15 @@ class BayesianScenarioDistribution(StrictModel):
     sensitivity: BayesianSensitivityReport | None = None
     confidence_level: Literal["low", "medium", "high"] = "low"
     assumptions: list[str] = Field(default_factory=list)
+
+    @property
+    def semantic_type(self) -> Literal["configured_heuristic_belief"]:
+        """Compatibility-safe label: this is not a fitted statistical posterior."""
+        return "configured_heuristic_belief"
+
+    @property
+    def evidence_sufficiency_level(self) -> Literal["low", "medium", "high"]:
+        return self.confidence_level
 
     @model_validator(mode="after")
     def validate_distribution(self) -> BayesianScenarioDistribution:

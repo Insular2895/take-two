@@ -13,6 +13,8 @@ qualification financière validée.
 - erreur Monte-Carlo et non-convergence ;
 - désaccord GBM/local-vol/Heston/Heston+jumps ;
 - dépendance aux priors et likelihoods ;
+- confusion entre croyance heuristique configurée et posterior statistique calibré ;
+- poids d'ensemble égaux/utilisateur pris à tort pour des probabilités de modèle ;
 - biais de sélection, surapprentissage et contamination du holdout ;
 - coûts, liquidité, FX, gap et quote combo indisponible.
 
@@ -26,3 +28,8 @@ stress bloquant restent visibles.
 Un bon rang expérimental n’est ni un ordre, ni une recommandation, ni une promesse.
 Lorsque les modèles divergent, le verdict devient `model_dependent`, `fragile` ou
 `data_insufficient`. `NO_TRADE` et le cash sont des résultats normaux.
+
+Le champ legacy `BayesianScenarioDistribution` décrit actuellement une croyance heuristique
+configurée. L'interface et les rapports l'étiquettent comme telle. Une revendication statistique
+exigerait un outcome observé, une likelihood générative, des priors contrôlés, des vérifications
+prior/posterior predictive et une validation OOS hachée.

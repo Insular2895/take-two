@@ -1,4 +1,4 @@
-"""Auditable Bayesian updates with evidence-family caps and fact deduplication."""
+"""Auditable configured belief updates; not a fitted Bayesian probability model."""
 
 from __future__ import annotations
 
@@ -40,8 +40,7 @@ def _sensitivity_posterior(
         rule = rule_map.get((event.event_type, event.family))
         if (
             rule is None
-            or event.human_review_status
-            in {HumanReviewStatus.PENDING, HumanReviewStatus.REJECTED}
+            or event.human_review_status in {HumanReviewStatus.PENDING, HumanReviewStatus.REJECTED}
             or (as_of is not None and event.observed_at > as_of)
             or (as_of is not None and event.expires_at is not None and event.expires_at < as_of)
             or event.canonical_fact_id in used_facts
@@ -53,17 +52,8 @@ def _sensitivity_posterior(
             if event.contradictory_source_ids or event.contradiction_cluster_id
             else event.confidence
         )
-        raw_weight = (
-            rule.base_weight
-            * contradiction_confidence
-            * event.novelty
-            * weight_scale
-        )
-        weighted = (
-            raw_weight
-            * event.quality_multiplier
-            * event.freshness_multiplier
-        )
+        raw_weight = rule.base_weight * contradiction_confidence * event.novelty * weight_scale
+        weighted = raw_weight * event.quality_multiplier * event.freshness_multiplier
         remaining = max(
             family_caps.get(event.family, 0.0) - family_used[event.family],
             0.0,
@@ -88,7 +78,7 @@ def _sensitivity_posterior(
     return posterior
 
 
-def update_scenario_distribution(
+def update_heuristic_scenario_beliefs(
     *,
     priors: dict[str, float],
     events: list[NormalizedEvidenceEvent],
@@ -96,7 +86,7 @@ def update_scenario_distribution(
     family_caps: dict[EvidenceFamily, float],
     as_of: datetime | None = None,
 ) -> BayesianScenarioDistribution:
-    """Apply fractional Bayes factors while preventing duplicate-news amplification."""
+    """Apply configured fractional weights while preventing duplicate-news amplification."""
     posterior = _normalized(dict(priors))
     rule_map = {(rule.event_type, rule.family): rule for rule in rules}
     used_facts: set[str] = set()
@@ -128,9 +118,7 @@ def update_scenario_distribution(
             else event.confidence
         )
         requested_weight = (
-            0.0
-            if event.direction == "neutral"
-            else rule.base_weight * event.confidence
+            0.0 if event.direction == "neutral" else rule.base_weight * event.confidence
         )
         raw_weight = (
             0.0
@@ -138,12 +126,8 @@ def update_scenario_distribution(
             else rule.base_weight * confidence_after_contradiction * event.novelty
         )
         weight_after_quality = raw_weight * event.quality_multiplier
-        weight_after_freshness = (
-            weight_after_quality * event.freshness_multiplier
-        )
-        weight_after_deduplication = (
-            0.0 if deduplicated else weight_after_freshness
-        )
+        weight_after_freshness = weight_after_quality * event.freshness_multiplier
+        weight_after_deduplication = 0.0 if deduplicated else weight_after_freshness
         family_cap = family_caps.get(event.family, 0.0)
         remaining_family_weight = max(
             family_cap - family_used[event.family],
@@ -200,8 +184,7 @@ def update_scenario_distribution(
                 unnormalized_posterior=unnormalized,
                 posterior=dict(posterior),
                 probability_delta={
-                    scenario: posterior[scenario] - prior[scenario]
-                    for scenario in posterior
+                    scenario: posterior[scenario] - prior[scenario] for scenario in posterior
                 },
                 confidence=event.confidence,
                 confidence_after_contradiction=confidence_after_contradiction,
@@ -214,10 +197,7 @@ def update_scenario_distribution(
                     else "Deterministic configured likelihood update with quality, "
                     "freshness, deduplication, and family-cap controls."
                 ),
-                rule_id=(
-                    rule.rule_id
-                    or f"likelihood:{rule.event_type.value}:{rule.family.value}"
-                ),
+                rule_id=(rule.rule_id or f"likelihood:{rule.event_type.value}:{rule.family.value}"),
                 contradictory_source_ids=event.contradictory_source_ids,
             )
         )
@@ -238,12 +218,10 @@ def update_scenario_distribution(
         as_of=as_of,
     )
     minimum = {
-        scenario: min(low[scenario], posterior[scenario], high[scenario])
-        for scenario in posterior
+        scenario: min(low[scenario], posterior[scenario], high[scenario]) for scenario in posterior
     }
     maximum = {
-        scenario: max(low[scenario], posterior[scenario], high[scenario])
-        for scenario in posterior
+        scenario: max(low[scenario], posterior[scenario], high[scenario]) for scenario in posterior
     }
     rankings = [
         tuple(
@@ -256,7 +234,7 @@ def update_scenario_distribution(
         for distribution in (low, posterior, high)
     ]
     unique_effective_events = sum(update.effective_weight > 0 for update in updates)
-    confidence_level = (
+    evidence_sufficiency_level = (
         "high"
         if unique_effective_events >= 5
         and not any(update.contradictory_source_ids for update in updates)
@@ -283,11 +261,32 @@ def update_scenario_distribution(
                 "they are not statistical confidence intervals."
             ],
         ),
-        confidence_level=confidence_level,
+        confidence_level=evidence_sufficiency_level,
         assumptions=[
-            "Likelihoods and priors are explicit configuration inputs, not learned truth.",
+            "This is a configured heuristic belief distribution, not a fitted "
+            "statistical posterior.",
+            "Likelihood-like scores and priors are explicit inputs, not learned truth.",
             "Repeated reports with the same canonical_fact_id count once.",
             "Each evidence family has a cumulative fractional-weight cap.",
             "Posterior probabilities support research; they do not authorize execution.",
         ],
+    )
+
+
+def update_scenario_distribution(
+    *,
+    priors: dict[str, float],
+    events: list[NormalizedEvidenceEvent],
+    rules: list[LikelihoodRule],
+    family_caps: dict[EvidenceFamily, float],
+    as_of: datetime | None = None,
+) -> BayesianScenarioDistribution:
+    """Backward-compatible alias for :func:`update_heuristic_scenario_beliefs`."""
+
+    return update_heuristic_scenario_beliefs(
+        priors=priors,
+        events=events,
+        rules=rules,
+        family_caps=family_caps,
+        as_of=as_of,
     )

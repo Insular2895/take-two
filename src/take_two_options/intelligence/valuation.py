@@ -20,6 +20,12 @@ from take_two_options.intelligence.schemas import (
 )
 from take_two_options.intelligence.stochastic import StochasticPathSet
 from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS
+from take_two_options.quantitative.model_uncertainty import (
+    EnsembleMemberEstimate,
+    EnsembleWeightBasis,
+    ModelUncertaintyReport,
+    summarize_model_ensemble,
+)
 from take_two_options.thesis_scanner.schemas import ThesisCandidate, ThesisScanReport
 
 
@@ -27,6 +33,7 @@ from take_two_options.thesis_scanner.schemas import ThesisCandidate, ThesisScanR
 class StrategyPathValuation:
     candidate_id: str
     model_key: str
+    parameter_set_id: str
     pnl_usd: NDArray
     exit_days: NDArray
     metrics: StrategyModelMetrics
@@ -38,12 +45,7 @@ def _normal_cdf(values: NDArray) -> NDArray:
     t = 1.0 / (1.0 + 0.2316419 * absolute)
     density = np.exp(-0.5 * absolute**2) / math.sqrt(2 * math.pi)
     polynomial = t * (
-        0.319381530
-        + t
-        * (
-            -0.356563782
-            + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))
-        )
+        0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429)))
     )
     positive = 1.0 - density * polynomial
     return np.where(values >= 0, positive, 1.0 - positive)
@@ -69,17 +71,16 @@ def _black_scholes(
     safe_volatility = np.maximum(volatility, 1e-6)
     root_time = math.sqrt(time_years)
     d1 = (
-        np.log(safe_spot / strike)
-        + (rate - dividend_yield + 0.5 * safe_volatility**2) * time_years
+        np.log(safe_spot / strike) + (rate - dividend_yield + 0.5 * safe_volatility**2) * time_years
     ) / (safe_volatility * root_time)
     d2 = d1 - safe_volatility * root_time
     if option_type is OptionType.CALL:
         return safe_spot * math.exp(-dividend_yield * time_years) * _normal_cdf(
             d1
         ) - strike * math.exp(-rate * time_years) * _normal_cdf(d2)
-    return strike * math.exp(-rate * time_years) * _normal_cdf(
-        -d2
-    ) - safe_spot * math.exp(-dividend_yield * time_years) * _normal_cdf(-d1)
+    return strike * math.exp(-rate * time_years) * _normal_cdf(-d2) - safe_spot * math.exp(
+        -dividend_yield * time_years
+    ) * _normal_cdf(-d1)
 
 
 def generate_exit_plan(
@@ -290,9 +291,7 @@ def _position_values(
                 dividend_yield=dividend_yield,
                 option_type=leg.quote.option_type,
             )
-            values[:, step] += (
-                leg.side.sign * leg.quantity * leg.quote.multiplier * option_value
-            )
+            values[:, step] += leg.side.sign * leg.quantity * leg.quote.multiplier * option_value
     return values, day_grid
 
 
@@ -333,9 +332,7 @@ def _empirical_metrics(
             pnl = float(pnl_paths[path, step])
             peak_pnl = max(peak_pnl, pnl)
             days_to_expiration = max(candidate.dte - float(day_grid[step]), 0.0)
-            iv_drop = 1.0 - (
-                float(volatility_paths[path, step]) / float(initial_volatility[path])
-            )
+            iv_drop = 1.0 - (float(volatility_paths[path, step]) / float(initial_volatility[path]))
             if pnl >= exit_policy.profit_target * cost:
                 selected_step = step
                 selected_reason = "profit_target"
@@ -367,11 +364,7 @@ def _empirical_metrics(
     tail = realized[realized <= lower]
     var_95 = max(0.0, -lower)
     cvar_95 = max(0.0, -float(np.mean(tail))) if tail.size else var_95
-    standard_error = (
-        float(np.std(realized, ddof=1)) / math.sqrt(paths)
-        if paths > 1
-        else 0.0
-    )
+    standard_error = float(np.std(realized, ddof=1)) / math.sqrt(paths) if paths > 1 else 0.0
     half = max(paths // 2, 1)
     half_mean = float(np.mean(realized[:half]))
     full_mean = float(np.mean(realized))
@@ -400,9 +393,7 @@ def _empirical_metrics(
         convergence_delta_fraction=convergence_delta,
         model_valid=bool(np.isfinite(realized).all()),
         calibration_status=(
-            "partial"
-            if path_set.model.value == "local_volatility"
-            else "illustrative"
+            "partial" if path_set.model.value == "local_volatility" else "illustrative"
         ),
         probability_profit=float(np.mean(realized > 0)),
         probability_total_loss=float(np.mean(realized <= -0.95 * cost)),
@@ -421,7 +412,10 @@ def _empirical_metrics(
     )
     return StrategyPathValuation(
         candidate_id=candidate.candidate_id,
-        model_key=f"{path_set.model.value}:{path_set.regime.value}",
+        model_key=(
+            f"{path_set.model.value}:{path_set.regime.value}:{path_set.parameter_set_id[:12]}"
+        ),
+        parameter_set_id=path_set.parameter_set_id,
         pnl_usd=realized,
         exit_days=exit_days,
         metrics=metrics,
@@ -458,6 +452,43 @@ def value_candidate_across_models(
     return valuations
 
 
+def summarize_valuation_ensemble(
+    valuations: list[StrategyPathValuation],
+    *,
+    weight_basis: EnsembleWeightBasis = EnsembleWeightBasis.EQUAL_SENSITIVITY,
+    weights: list[float] | None = None,
+    validation_dataset_hash: str | None = None,
+) -> ModelUncertaintyReport:
+    """Propagate model/parameter members without treating equal weights as posterior odds."""
+
+    if not valuations:
+        raise ValueError("valuation ensemble requires at least one member")
+    if weights is None:
+        weights = [1.0 / len(valuations)] * len(valuations)
+    if len(weights) != len(valuations):
+        raise ValueError("weights and valuations must have equal length")
+    members = [
+        EnsembleMemberEstimate(
+            member_id=valuation.model_key,
+            model_id=(f"{valuation.metrics.model.value}:{valuation.metrics.regime.value}"),
+            parameter_set_id=valuation.parameter_set_id,
+            weight=weight,
+            expected_value=valuation.metrics.expected_pnl_usd,
+            outcome_variance=float(np.var(valuation.pnl_usd, ddof=1)),
+            mean_standard_error=valuation.metrics.standard_error_usd,
+            probability_profit=valuation.metrics.probability_profit,
+            observations=valuation.metrics.paths,
+            calibration_status=valuation.metrics.calibration_status,
+        )
+        for valuation, weight in zip(valuations, weights, strict=True)
+    ]
+    return summarize_model_ensemble(
+        members,
+        weight_basis=weight_basis,
+        validation_dataset_hash=validation_dataset_hash,
+    )
+
+
 def summarize_robustness(
     candidate: ThesisCandidate,
     valuations: list[StrategyPathValuation],
@@ -484,9 +515,7 @@ def summarize_robustness(
     adverse_penalty = min(max(adverse_cvars, default=0.0) / cost, 1.0)
     score = 100 * max(
         0.0,
-        profitable_fraction * 0.65
-        + (1 - dispersion_penalty) * 0.20
-        + (1 - adverse_penalty) * 0.15,
+        profitable_fraction * 0.65 + (1 - dispersion_penalty) * 0.20 + (1 - adverse_penalty) * 0.15,
     )
     flags: list[str] = []
     invalid_models = sum(not item.metrics.model_valid for item in valuations)
