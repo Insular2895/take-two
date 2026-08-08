@@ -1,0 +1,303 @@
+{
+  "$defs": {
+    "PhaseResult": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "title": "Artifact",
+          "type": "string"
+        },
+        "phase": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
+        "remaining": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Remaining",
+          "type": "array"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "validated": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Validated",
+          "type": "array"
+        }
+      },
+      "required": [
+        "phase",
+        "title",
+        "status",
+        "artifact",
+        "validated",
+        "remaining"
+      ],
+      "title": "PhaseResult",
+      "type": "object"
+    },
+    "RunManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "code_commit": {
+          "maxLength": 40,
+          "minLength": 7,
+          "title": "Code Commit",
+          "type": "string"
+        },
+        "command": {
+          "title": "Command",
+          "type": "string"
+        },
+        "configuration_hash": {
+          "maxLength": 64,
+          "minLength": 64,
+          "title": "Configuration Hash",
+          "type": "string"
+        },
+        "dataset_hash": {
+          "maxLength": 64,
+          "minLength": 64,
+          "title": "Dataset Hash",
+          "type": "string"
+        },
+        "dependencies": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Dependencies",
+          "type": "object"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "holdout_used": {
+          "const": false,
+          "title": "Holdout Used",
+          "type": "boolean"
+        },
+        "order_capability": {
+          "const": "forbidden",
+          "default": "forbidden",
+          "title": "Order Capability",
+          "type": "string"
+        },
+        "platform": {
+          "title": "Platform",
+          "type": "string"
+        },
+        "python_version": {
+          "title": "Python Version",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "seed": {
+          "title": "Seed",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "generated_at",
+        "code_commit",
+        "configuration_hash",
+        "dataset_hash",
+        "seed",
+        "python_version",
+        "platform",
+        "dependencies",
+        "command",
+        "holdout_used"
+      ],
+      "title": "RunManifest",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/final_pre_opra_report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "best_blocked_candidate": {
+      "title": "Best Blocked Candidate",
+      "type": "string"
+    },
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Blockers",
+      "type": "array"
+    },
+    "decision": {
+      "const": "NO_POSITION_RECOMMENDED",
+      "title": "Decision",
+      "type": "string"
+    },
+    "decision_scope": {
+      "const": "research_only_not_investment_advice",
+      "title": "Decision Scope",
+      "type": "string"
+    },
+    "evidence_grade": {
+      "enum": [
+        "software_tested_only",
+        "numerically_validated",
+        "historically_validated",
+        "forward_validated"
+      ],
+      "title": "Evidence Grade",
+      "type": "string"
+    },
+    "external_source_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "External Source Ids",
+      "type": "array"
+    },
+    "holdout_state": {
+      "const": "UNOPENED",
+      "title": "Holdout State",
+      "type": "string"
+    },
+    "holdout_used": {
+      "const": false,
+      "title": "Holdout Used",
+      "type": "boolean"
+    },
+    "key_metrics": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "title": "Key Metrics",
+      "type": "object"
+    },
+    "opra_readiness": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Opra Readiness",
+      "type": "array"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "overall_status": {
+      "enum": [
+        "READY_RESEARCH_ONLY",
+        "BLOCKED_BY_DATA"
+      ],
+      "title": "Overall Status",
+      "type": "string"
+    },
+    "phase_m_started": {
+      "const": false,
+      "title": "Phase M Started",
+      "type": "boolean"
+    },
+    "phase_results": {
+      "items": {
+        "$ref": "#/$defs/PhaseResult"
+      },
+      "maxItems": 12,
+      "minItems": 12,
+      "title": "Phase Results",
+      "type": "array"
+    },
+    "report_id": {
+      "title": "Report Id",
+      "type": "string"
+    },
+    "run_manifest": {
+      "$ref": "#/$defs/RunManifest"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "score_status": {
+      "additionalProperties": {
+        "enum": [
+          "unavailable",
+          "computed"
+        ],
+        "type": "string"
+      },
+      "title": "Score Status",
+      "type": "object"
+    },
+    "ticker": {
+      "title": "Ticker",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "report_id",
+    "ticker",
+    "overall_status",
+    "evidence_grade",
+    "decision",
+    "decision_scope",
+    "run_manifest",
+    "phase_results",
+    "key_metrics",
+    "score_status",
+    "best_blocked_candidate",
+    "blockers",
+    "opra_readiness",
+    "external_source_ids",
+    "holdout_state",
+    "holdout_used",
+    "phase_m_started"
+  ],
+  "title": "FinalPreOpraReport",
+  "type": "object"
+}

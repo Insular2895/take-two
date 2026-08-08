@@ -1,0 +1,19 @@
+{
+  "code_commit": "44ad47cb42e1ee6f1854e22b8678786cfe54dca6",
+  "command": ".venv/bin/python scripts/build_pre_opra_final_report.py --generated-at 2026-08-08T20:30:00+02:00",
+  "configuration_hash": "629e654b6192f84d681f9e974c6b55934e873bd6df1c7d34554c4983775d6a49",
+  "dataset_hash": "0b09a9a9b1de6a9132e2f0eaf1a9cc15152d2fce59e40baefd21812c9886f556",
+  "dependencies": {
+    "PyYAML": "6.0.3",
+    "QuantLib": "1.43",
+    "numpy": "2.5.1",
+    "pydantic": "2.13.4"
+  },
+  "generated_at": "2026-08-08T20:30:00+02:00",
+  "holdout_used": false,
+  "order_capability": "forbidden",
+  "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+  "python_version": "3.14.4",
+  "schema_version": "1.0",
+  "seed": 20260808
+}

@@ -1,0 +1,219 @@
+{
+  "best_blocked_candidate": "UNAVAILABLE",
+  "blockers": [
+    "Historical option-data licensing remains to_review.",
+    "No aligned comparable panel exists for all nine mandatory strategies.",
+    "Historical IV/delta, governed rates and dividends are incomplete.",
+    "No governed point-in-time event history exists.",
+    "The five score formulas and thresholds remain draft_to_validate.",
+    "The final holdout is unprovisioned and intentionally UNOPENED."
+  ],
+  "decision": "NO_POSITION_RECOMMENDED",
+  "decision_scope": "research_only_not_investment_advice",
+  "evidence_grade": "software_tested_only",
+  "external_source_ids": [
+    "Market Data terms and option-chain documentation",
+    "Alpaca historical options and subscription documentation",
+    "SEC EDGAR API documentation"
+  ],
+  "holdout_state": "UNOPENED",
+  "holdout_used": false,
+  "key_metrics": {
+    "annualized_realized_volatility": 0.2965765,
+    "comparable_strategy_panels": 0,
+    "excess_kurtosis": 6.96457,
+    "governed_events": 0,
+    "maximum_drawdown": 0.27664,
+    "option_dates": 250,
+    "price_observations": 616,
+    "private_option_envelopes": 1998,
+    "private_option_rows": 46413,
+    "return_observations": 615,
+    "validated_surface_dates": 0,
+    "walk_forward_windows": 7
+  },
+  "opra_readiness": [
+    "Obtain authorized OPRA access and document storage/redistribution rights.",
+    "Ingest append-only raw snapshots with checksums and point-in-time timestamps.",
+    "Run shadow/paper validation; do not add order capability.",
+    "Keep Phase M separate and require explicit user validation before starting it."
+  ],
+  "order_capability": "forbidden",
+  "overall_status": "BLOCKED_BY_DATA",
+  "phase_m_started": false,
+  "phase_results": [
+    {
+      "artifact": "../../docs/audits/PRE_OPRA_GAP_ANALYSIS.md",
+      "phase": "A",
+      "remaining": [
+        "validation financi\u00e8re"
+      ],
+      "status": "READY_RESEARCH_ONLY",
+      "title": "audit des gaps",
+      "validated": [
+        "fronti\u00e8re de preuve audit\u00e9e"
+      ]
+    },
+    {
+      "artifact": "../../docs/config/PRE_OPRA_CONFIG.md",
+      "phase": "B",
+      "remaining": [
+        "valider les hypoth\u00e8ses draft"
+      ],
+      "status": "CONFIG_READY",
+      "title": "configuration",
+      "validated": [
+        "configuration unifi\u00e9e et portable"
+      ]
+    },
+    {
+      "artifact": "data_inventory_2026-08-08.json",
+      "phase": "C",
+      "remaining": [
+        "licence et couverture compl\u00e8te"
+      ],
+      "status": "BLOCKED",
+      "title": "donn\u00e9es PIT",
+      "validated": [
+        "inventaire et provenance"
+      ]
+    },
+    {
+      "artifact": "empirical_calibration_2026-08-08.json",
+      "phase": "D",
+      "remaining": [
+        "surface IV r\u00e9elle et erreurs standards"
+      ],
+      "status": "DIAGNOSTIC_ONLY_LICENSE_REVIEW",
+      "title": "calibration",
+      "validated": [
+        "diagnostics empiriques"
+      ]
+    },
+    {
+      "artifact": "walk_forward_protocol_2026-08-08.json",
+      "phase": "E",
+      "remaining": [
+        "rendements comparables r\u00e9els"
+      ],
+      "status": "DIAGNOSTIC_ONLY_LICENSE_REVIEW",
+      "title": "walk-forward",
+      "validated": [
+        "purge, embargo et gel"
+      ]
+    },
+    {
+      "artifact": "../../validation/final_holdout_ledger.jsonl",
+      "phase": "F",
+      "remaining": [
+        "provisionner sans ouvrir avant pr\u00e9requis"
+      ],
+      "status": "UNOPENED",
+      "title": "holdout final",
+      "validated": [
+        "ledger irr\u00e9versible"
+      ]
+    },
+    {
+      "artifact": "baseline_comparison_2026-08-08.json",
+      "phase": "G",
+      "remaining": [
+        "panel des neuf strat\u00e9gies"
+      ],
+      "status": "BLOCKED_INCOMPARABLE_DATA",
+      "title": "baselines",
+      "validated": [
+        "m\u00e9canique appari\u00e9e et tests multiples"
+      ]
+    },
+    {
+      "artifact": "historical_surfaces_2026-08-08.json",
+      "phase": "H",
+      "remaining": [
+        "taux, dividendes, IV et licence"
+      ],
+      "status": "BLOCKED_MISSING_GOVERNED_INPUTS",
+      "title": "surfaces",
+      "validated": [
+        "SVI/arbitrage sur fixtures"
+      ]
+    },
+    {
+      "artifact": "event_regime_dataset_2026-08-08.json",
+      "phase": "I",
+      "remaining": [
+        "historique \u00e9v\u00e9nementiel PIT"
+      ],
+      "status": "BLOCKED_MISSING_GOVERNED_EVENTS",
+      "title": "\u00e9v\u00e9nements/r\u00e9gimes",
+      "validated": [
+        "anti-lookahead et conflits"
+      ]
+    },
+    {
+      "artifact": "five_scores_2026-08-08.json",
+      "phase": "J",
+      "remaining": [
+        "valider poids, bornes et donn\u00e9es"
+      ],
+      "status": "BLOCKED_VALIDATION",
+      "title": "cinq scores",
+      "validated": [
+        "formules distinctes et tra\u00e7ables"
+      ]
+    },
+    {
+      "artifact": "severity_and_gate_sensitivity_2026-08-08.json",
+      "phase": "K",
+      "remaining": [
+        "distribution candidat gouvern\u00e9e"
+      ],
+      "status": "BLOCKED_NO_CANDIDATE_DISTRIBUTION",
+      "title": "s\u00e9v\u00e9rit\u00e9/gates",
+      "validated": [
+        "ladder et sensibilit\u00e9 test\u00e9es"
+      ]
+    },
+    {
+      "artifact": "final_pre_opra_report_2026-08-08.html",
+      "phase": "L",
+      "remaining": [
+        "lever les bloqueurs avant OPRA"
+      ],
+      "status": "BLOCKED_BY_DATA",
+      "title": "rapport final",
+      "validated": [
+        "rendu statique coh\u00e9rent"
+      ]
+    }
+  ],
+  "report_id": "ttwo-final-pre-opra-v1",
+  "run_manifest": {
+    "code_commit": "44ad47cb42e1ee6f1854e22b8678786cfe54dca6",
+    "command": ".venv/bin/python scripts/build_pre_opra_final_report.py --generated-at 2026-08-08T20:30:00+02:00",
+    "configuration_hash": "629e654b6192f84d681f9e974c6b55934e873bd6df1c7d34554c4983775d6a49",
+    "dataset_hash": "0b09a9a9b1de6a9132e2f0eaf1a9cc15152d2fce59e40baefd21812c9886f556",
+    "dependencies": {
+      "PyYAML": "6.0.3",
+      "QuantLib": "1.43",
+      "numpy": "2.5.1",
+      "pydantic": "2.13.4"
+    },
+    "generated_at": "2026-08-08T20:30:00+02:00",
+    "holdout_used": false,
+    "order_capability": "forbidden",
+    "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+    "python_version": "3.14.4",
+    "schema_version": "1.0",
+    "seed": 20260808
+  },
+  "schema_version": "1.0",
+  "score_status": {
+    "evidence": "unavailable",
+    "execution_quality": "unavailable",
+    "model_agreement": "unavailable",
+    "opportunity": "unavailable",
+    "risk": "unavailable"
+  },
+  "ticker": "TTWO"
+}

@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from export_offline_schemas import SCHEMAS
+
 from take_two_options.intelligence.backtesting import (
     load_walk_forward_dataset,
     run_walk_forward,
@@ -18,8 +20,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main() -> int:
     schemas = sorted((ROOT / "schemas").glob("*.schema.json"))
-    if len(schemas) != 6:
-        raise RuntimeError(f"Expected six JSON Schemas; found {len(schemas)}.")
+    actual_names = {path.name for path in schemas}
+    if actual_names != set(SCHEMAS):
+        raise RuntimeError("Committed JSON Schema set differs from the exported contracts.")
     for path in schemas:
         payload = json.loads(path.read_text(encoding="utf-8"))
         if payload.get("$schema") != "https://json-schema.org/draft/2020-12/schema":

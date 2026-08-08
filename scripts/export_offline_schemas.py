@@ -24,6 +24,7 @@ from take_two_options.intelligence.schemas import (
     UnifiedObservation,
 )
 from take_two_options.quantitative.historical_surfaces import HistoricalSurfaceReport
+from take_two_options.reporting.pre_opra_final import FinalPreOpraReport
 from take_two_options.validation.baseline_comparison import BaselineComparisonReport
 from take_two_options.validation.final_holdout import HoldoutLedgerEntry
 from take_two_options.validation.walk_forward_protocol import WalkForwardProtocolReport
@@ -34,6 +35,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "baseline_comparison.schema.json": BaselineComparisonReport,
     "empirical_calibration.schema.json": EmpiricalCalibrationReport,
     "five_score_report.schema.json": FiveScoreReport,
+    "final_pre_opra_report.schema.json": FinalPreOpraReport,
     "severity_gate_report.schema.json": SeverityGateReport,
     "pre_opra_config.schema.json": PreOpraConfig,
     "historical_dataset_manifest.schema.json": HistoricalDatasetManifest,

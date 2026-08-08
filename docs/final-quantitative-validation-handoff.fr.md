@@ -1,5 +1,10 @@
 # Handoff final français — validation quantitative TTWO, phases 0 à 11
 
+> Mise à jour pré-OPRA du 8 août 2026 : les phases A à L sont terminées. Le point
+> d'entrée consolidé est `docs/FINAL_PRE_OPRA_VALIDATION.md`; le dashboard est
+> `reports/pre_opra/final_pre_opra_report_2026-08-08.html`. Statut :
+> `BLOCKED_BY_DATA`, phase M non démarrée.
+
 Date : 2026-08-08  
 Document canonique : [`final-quantitative-validation-handoff.md`](final-quantitative-validation-handoff.md)
 
@@ -231,4 +236,3 @@ git log --oneline main..HEAD
 Le dépôt démontre une discipline logicielle, numérique et documentaire solide dans son périmètre.
 Il ne démontre pas encore une capacité prédictive TTWO, une rentabilité, une exécution réaliste ou
 une conformité de distribution commerciale. Toute lecture doit conserver cette distinction.
-

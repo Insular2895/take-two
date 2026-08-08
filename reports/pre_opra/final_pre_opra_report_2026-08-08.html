@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>TTWO — validation finale pré-OPRA</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;margin:auto;max-width:1180px;
+padding:32px;color:#172033;background:#f6f8fb}
+h1,h2{color:#11264d} .banner{padding:20px;border-left:6px solid #b42318;background:#fff0ee}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+article{background:white;padding:16px;border-radius:8px}
+table{width:100%;border-collapse:collapse;background:white}
+th,td{padding:9px;border:1px solid #d7dfeb;text-align:left}
+code{word-break:break-all}
+</style></head><body>
+<h1>Validation quantitative finale pré-OPRA — TTWO</h1>
+<section class="banner"><strong>BLOCKED_BY_DATA — NO_POSITION_RECOMMENDED</strong><br>
+Logiciel testé, preuve financière insuffisante. Recherche uniquement,
+aucun ordre possible.</section>
+<h2>Phases A–L</h2><table><thead><tr><th>Phase</th><th>Objet</th>
+<th>Statut</th><th>Livrable</th></tr></thead><tbody><tr><td>A</td><td>audit des gaps</td><td><code>READY_RESEARCH_ONLY</code></td><td>../../docs/audits/PRE_OPRA_GAP_ANALYSIS.md</td></tr><tr><td>B</td><td>configuration</td><td><code>CONFIG_READY</code></td><td>../../docs/config/PRE_OPRA_CONFIG.md</td></tr><tr><td>C</td><td>données PIT</td><td><code>BLOCKED</code></td><td>data_inventory_2026-08-08.json</td></tr><tr><td>D</td><td>calibration</td><td><code>DIAGNOSTIC_ONLY_LICENSE_REVIEW</code></td><td>empirical_calibration_2026-08-08.json</td></tr><tr><td>E</td><td>walk-forward</td><td><code>DIAGNOSTIC_ONLY_LICENSE_REVIEW</code></td><td>walk_forward_protocol_2026-08-08.json</td></tr><tr><td>F</td><td>holdout final</td><td><code>UNOPENED</code></td><td>../../validation/final_holdout_ledger.jsonl</td></tr><tr><td>G</td><td>baselines</td><td><code>BLOCKED_INCOMPARABLE_DATA</code></td><td>baseline_comparison_2026-08-08.json</td></tr><tr><td>H</td><td>surfaces</td><td><code>BLOCKED_MISSING_GOVERNED_INPUTS</code></td><td>historical_surfaces_2026-08-08.json</td></tr><tr><td>I</td><td>événements/régimes</td><td><code>BLOCKED_MISSING_GOVERNED_EVENTS</code></td><td>event_regime_dataset_2026-08-08.json</td></tr><tr><td>J</td><td>cinq scores</td><td><code>BLOCKED_VALIDATION</code></td><td>five_scores_2026-08-08.json</td></tr><tr><td>K</td><td>sévérité/gates</td><td><code>BLOCKED_NO_CANDIDATE_DISTRIBUTION</code></td><td>severity_and_gate_sensitivity_2026-08-08.json</td></tr><tr><td>L</td><td>rapport final</td><td><code>BLOCKED_BY_DATA</code></td><td>final_pre_opra_report_2026-08-08.html</td></tr></tbody></table>
+<h2>Métriques réellement calculées</h2><ul><li><code>private_option_envelopes</code>: 1998</li><li><code>private_option_rows</code>: 46413</li><li><code>option_dates</code>: 250</li><li><code>price_observations</code>: 616</li><li><code>return_observations</code>: 615</li><li><code>annualized_realized_volatility</code>: 0.2965765</li><li><code>excess_kurtosis</code>: 6.96457</li><li><code>maximum_drawdown</code>: 0.27664</li><li><code>walk_forward_windows</code>: 7</li><li><code>comparable_strategy_panels</code>: 0</li><li><code>validated_surface_dates</code>: 0</li><li><code>governed_events</code>: 0</li></ul>
+<h2>Cinq scores distincts</h2><div class="grid"><article><h3>opportunity</h3><p>unavailable</p></article><article><h3>risk</h3><p>unavailable</p></article><article><h3>evidence</h3><p>unavailable</p></article><article><h3>model_agreement</h3><p>unavailable</p></article><article><h3>execution_quality</h3><p>unavailable</p></article></div>
+<h2>Meilleur candidat bloqué</h2><p><code>UNAVAILABLE</code></p>
+<h2>Bloqueurs</h2><ul><li>Historical option-data licensing remains to_review.</li><li>No aligned comparable panel exists for all nine mandatory strategies.</li><li>Historical IV/delta, governed rates and dividends are incomplete.</li><li>No governed point-in-time event history exists.</li><li>The five score formulas and thresholds remain draft_to_validate.</li><li>The final holdout is unprovisioned and intentionally UNOPENED.</li></ul>
+<h2>Préparation OPRA future — phase M non démarrée</h2><ul><li>Obtain authorized OPRA access and document storage/redistribution rights.</li><li>Ingest append-only raw snapshots with checksums and point-in-time timestamps.</li><li>Run shadow/paper validation; do not add order capability.</li><li>Keep Phase M separate and require explicit user validation before starting it.</li></ul>
+<h2>Reproductibilité</h2><ul><li>commit <code>44ad47cb42e1ee6f1854e22b8678786cfe54dca6</code></li>
+<li>config <code>629e654b6192f84d681f9e974c6b55934e873bd6df1c7d34554c4983775d6a49</code></li>
+<li>dataset <code>0b09a9a9b1de6a9132e2f0eaf1a9cc15152d2fce59e40baefd21812c9886f556</code></li>
+<li>holdout UNOPENED, inutilisé</li><li>order_capability forbidden</li></ul>
+</body></html>

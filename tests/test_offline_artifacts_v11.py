@@ -35,6 +35,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
         "event.schema.json",
         "event_regime_report.schema.json",
         "five_score_report.schema.json",
+        "final_pre_opra_report.schema.json",
         "historical_dataset_manifest.schema.json",
         "historical_surface_report.schema.json",
         "holdout_ledger_entry.schema.json",
