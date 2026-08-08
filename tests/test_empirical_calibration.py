@@ -58,6 +58,9 @@ def test_empirical_calibration_is_deterministic_and_never_claims_holdout() -> No
     assert len(first.volatility_models) == 4
     assert all(model.one_step_variance_forecast > 0 for model in first.volatility_models)
     assert all(model.standard_error_status == "not_calculable" for model in first.volatility_models)
+    assert first.chronological_oos is not None
+    assert first.chronological_oos.final_holdout_used is False
+    assert len(first.chronological_oos.evaluations) == 6
     assert first.heston_status == "BLOCKED_INSUFFICIENT_CALIBRATION_DATA"
 
 
@@ -84,9 +87,14 @@ def test_committed_empirical_report_matches_contract_and_exposes_limits() -> Non
         )
     )
     assert report.empirical is not None
-    assert report.empirical.return_observations == 615
+    assert report.empirical.return_observations == 630
     assert report.empirical.bootstrap_annualized_log_mean.lower < 0
     assert report.status == "DIAGNOSTIC_ONLY_LICENSE_REVIEW"
+    assert report.chronological_oos is not None
+    assert report.chronological_oos.train_observations == 420
+    assert report.chronological_oos.test_observations == 210
+    assert report.chronological_oos.best_by_qlike == "gjr_garch_11-gaussian"
+    assert report.heston_reasons
     assert all(
         model.status == "diagnostic_fit_license_blocked"
         for model in report.volatility_models

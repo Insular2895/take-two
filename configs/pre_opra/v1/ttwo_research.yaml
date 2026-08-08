@@ -278,3 +278,13 @@ extensions:
     strike_moneyness: [0.50, 1.50]
     vendor_iv_policy: never_impute_missing
     heston_policy: gate_before_calibration
+  empirical_calibration:
+    market_context_input: data/pre_opra/market_context.json
+    surface_diagnostics_input: reports/pre_opra/historical_surfaces_2026-08-08.json
+    aggregate_report: reports/pre_opra/empirical_calibration_2026-08-08.json
+    bootstrap_draws: 2000
+    bootstrap_block_size: 5
+    seed: 20260808
+    chronological_train_fraction: 0.6666666667
+    historical_volatility_window: 40
+    final_holdout_used: false

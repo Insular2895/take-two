@@ -1,5 +1,78 @@
 {
   "$defs": {
+    "ChronologicalVolatilityComparison": {
+      "additionalProperties": false,
+      "properties": {
+        "best_by_predictive_nll": {
+          "title": "Best By Predictive Nll",
+          "type": "string"
+        },
+        "best_by_qlike": {
+          "title": "Best By Qlike",
+          "type": "string"
+        },
+        "evaluations": {
+          "items": {
+            "$ref": "#/$defs/VolatilityForecastEvaluation"
+          },
+          "minItems": 3,
+          "title": "Evaluations",
+          "type": "array"
+        },
+        "ewma_decay_selected_on_train": {
+          "exclusiveMaximum": 1,
+          "exclusiveMinimum": 0,
+          "title": "Ewma Decay Selected On Train",
+          "type": "number"
+        },
+        "final_holdout_used": {
+          "const": false,
+          "default": false,
+          "title": "Final Holdout Used",
+          "type": "boolean"
+        },
+        "historical_window": {
+          "exclusiveMinimum": 1,
+          "title": "Historical Window",
+          "type": "integer"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "method": {
+          "const": "single_frozen_train_then_sequential_forecast",
+          "title": "Method",
+          "type": "string"
+        },
+        "test_observations": {
+          "exclusiveMinimum": 0,
+          "title": "Test Observations",
+          "type": "integer"
+        },
+        "train_observations": {
+          "minimum": 100,
+          "title": "Train Observations",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "method",
+        "train_observations",
+        "test_observations",
+        "historical_window",
+        "ewma_decay_selected_on_train",
+        "evaluations",
+        "best_by_qlike",
+        "best_by_predictive_nll",
+        "limitations"
+      ],
+      "title": "ChronologicalVolatilityComparison",
+      "type": "object"
+    },
     "EmpiricalReturnDiagnostics": {
       "additionalProperties": false,
       "properties": {
@@ -211,6 +284,55 @@
       "title": "VarCoverageDiagnostic",
       "type": "object"
     },
+    "VolatilityForecastEvaluation": {
+      "additionalProperties": false,
+      "properties": {
+        "gaussian_predictive_nll": {
+          "title": "Gaussian Predictive Nll",
+          "type": "number"
+        },
+        "mean_squared_variance_error": {
+          "minimum": 0,
+          "title": "Mean Squared Variance Error",
+          "type": "number"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "qlike": {
+          "title": "Qlike",
+          "type": "number"
+        },
+        "var_95_breach_rate": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Var 95 Breach Rate",
+          "type": "number"
+        },
+        "var_95_breaches": {
+          "minimum": 0,
+          "title": "Var 95 Breaches",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "model_id",
+        "observations",
+        "mean_squared_variance_error",
+        "qlike",
+        "gaussian_predictive_nll",
+        "var_95_breaches",
+        "var_95_breach_rate"
+      ],
+      "title": "VolatilityForecastEvaluation",
+      "type": "object"
+    },
     "VolatilityModelFit": {
       "additionalProperties": false,
       "properties": {
@@ -397,6 +519,17 @@
       "title": "Blockers",
       "type": "array"
     },
+    "chronological_oos": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ChronologicalVolatilityComparison"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "dataset_hash": {
       "maxLength": 64,
       "minLength": 64,
@@ -432,6 +565,13 @@
       "title": "Generated At",
       "type": "string"
     },
+    "heston_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Heston Reasons",
+      "type": "array"
+    },
     "heston_status": {
       "const": "BLOCKED_INSUFFICIENT_CALIBRATION_DATA",
       "title": "Heston Status",
@@ -444,6 +584,13 @@
       ],
       "title": "License Status",
       "type": "string"
+    },
+    "model_addition_decisions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Model Addition Decisions",
+      "type": "array"
     },
     "order_capability": {
       "const": "forbidden",

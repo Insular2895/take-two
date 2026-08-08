@@ -11,7 +11,7 @@ does not open the final holdout, and keeps licensed observations outside Git.
 | C4 | Governed event history | CLOSED_FOR_DEVELOPMENT | `reports/pre_opra/event_regime_dataset_2026-08-08.json` | Official subset, not an exhaustive causal event ontology |
 | C5 | Comparable baseline panel | CLOSED_DIAGNOSTIC | `reports/pre_opra/baseline_comparison_2026-08-08.json` | Short-DTE development panel; account rights confirmation; not final holdout |
 | C6 | Historical volatility surfaces | CLOSED_DIAGNOSTIC | `reports/pre_opra/historical_surfaces_2026-08-08.json` | 50 calendar-arbitrage violations, 21 failed snapshots, rights confirmation; Heston blocked |
-| C7 | Empirical/GARCH/Heston models | PENDING | — | Empirical comparison absent |
+| C7 | Empirical/GARCH/Heston models | CLOSED_DIAGNOSTIC | `reports/pre_opra/empirical_calibration_2026-08-08.json` | One development split; Heston blocked; rights confirmation |
 | C8 | Final development walk-forward | PENDING | — | Final holdout remains unopened |
 | C9 | Five quality scores | PENDING | — | Partial-coverage rules absent |
 | C10 | Severity, gates and frontier | PENDING | — | Confidence intervals absent |

@@ -4,41 +4,47 @@
   "ticker": "TTWO",
   "generated_at": "2026-08-08T20:00:00Z",
   "decision_cutoff": "2026-08-08T20:00:00Z",
-  "source_ids": ["ALPACA-STOCK-BARS-TTWO-20260719T112124Z"],
-  "dataset_hash": "1c302947b6fbb65c9e536cd57185767cbdbff5a9f38969826fbf9bb6a56fdaa8",
+  "source_ids": [
+    "alpaca_corporate_actions",
+    "alpaca_underlying",
+    "ecb_fx",
+    "sec_dividend_policy",
+    "treasury"
+  ],
+  "dataset_hash": "090e2db20f4ca6716722559cf1b30e2f5b0804867b5614da6a2edd6d6756471d",
   "dataset_role": "development_diagnostic",
   "license_status": "to_review",
   "status": "DIAGNOSTIC_ONLY_LICENSE_REVIEW",
   "empirical": {
-    "price_observations": 616,
-    "return_observations": 615,
+    "price_observations": 631,
+    "return_observations": 630,
     "coverage_start": "2024-02-01T05:00:00Z",
-    "coverage_end": "2026-07-17T04:00:00Z",
-    "arithmetic_mean_daily": 0.0007487343131878449,
-    "log_mean_daily": 0.0005741399101726966,
-    "annualized_log_mean": 0.14468325736351956,
-    "annualized_realized_volatility": 0.296576527686319,
-    "skewness": 0.03998175566472264,
-    "excess_kurtosis": 6.964574809886011,
+    "coverage_end": "2026-08-07T04:00:00Z",
+    "arithmetic_mean_daily": 0.0008017697586031575,
+    "log_mean_daily": 0.0006246764446017489,
+    "annualized_log_mean": 0.15741846403964072,
+    "annualized_realized_volatility": 0.2985990319828694,
+    "skewness": 0.09962840766135615,
+    "excess_kurtosis": 6.6982802469232485,
     "largest_negative_gap": -0.08684117438981265,
     "largest_positive_gap": 0.1404755397649633,
     "maximum_drawdown": 0.27663953953763143,
     "bootstrap_annualized_log_mean": {
-      "lower": -0.19849189545245385,
-      "central": 0.14468325736351956,
-      "upper": 0.5102203827405447
+      "lower": -0.22802165517209586,
+      "central": 0.15741846403964072,
+      "upper": 0.504567771129998
     },
     "bootstrap_annualized_volatility": {
-      "lower": 0.26086896082382294,
-      "central": 0.296576527686319,
-      "upper": 0.3325879712621178
+      "lower": 0.2619661955908546,
+      "central": 0.2985990319828694,
+      "upper": 0.3334276699482927
     },
     "bootstrap_maximum_drawdown": {
-      "lower": 0.16935243511319467,
+      "lower": 0.17476766868517402,
       "central": 0.27663953953763143,
-      "upper": 0.5589104677752385
+      "upper": 0.5891482980649132
     },
-    "bootstrap_draws": 1000,
+    "bootstrap_draws": 2000,
     "bootstrap_block_size": 5,
     "seed": 20260808
   },
@@ -48,41 +54,41 @@
       "family": "garch_11",
       "innovation": "gaussian",
       "status": "diagnostic_fit_license_blocked",
-      "observations": 615,
+      "observations": 630,
       "parameters": {
-        "mean": 0.0005741399101726966,
-        "omega": 0.00005933650099865303,
+        "mean": 0.0006246764446017489,
+        "omega": 0.000060148551282492564,
         "alpha": 0.03,
         "beta": 0.8,
         "persistence": 0.8300000000000001
       },
       "standard_errors": {},
       "standard_error_status": "not_calculable",
-      "log_likelihood": 1577.9090590510289,
-      "aic": -3145.8181181020577,
-      "bic": -3123.710006763025,
+      "log_likelihood": 1611.7303168906697,
+      "aic": -3213.4606337813393,
+      "bic": -3191.2320346844112,
       "converged": true,
       "starts_evaluated": 13,
       "residual_ljung_box": {
         "lags": 10,
-        "statistic": 4.82308447741362,
-        "p_value": 0.9026783538088364,
+        "statistic": 5.969271732559472,
+        "p_value": 0.8178382561113585,
         "series": "standardized_residuals"
       },
       "squared_residual_ljung_box": {
         "lags": 10,
-        "statistic": 2.350506003649763,
-        "p_value": 0.9928797903230706,
+        "statistic": 2.7858278915611994,
+        "p_value": 0.9860245669683793,
         "series": "squared_standardized_residuals"
       },
       "var_coverage_95": {
         "confidence": 0.95,
-        "observations": 615,
-        "expected_breaches": 30.75,
+        "observations": 630,
+        "expected_breaches": 31.5,
         "observed_breaches": 26,
-        "observed_rate": 0.04227642276422764
+        "observed_rate": 0.04126984126984127
       },
-      "one_step_variance_forecast": 0.0003547316233132701,
+      "one_step_variance_forecast": 0.00043804173153640737,
       "diagnostics": [
         "Deterministic constrained grid fit; it is not an optimizer convergence proof.",
         "Parameter standard errors are not calculable from this grid and are not invented.",
@@ -94,10 +100,10 @@
       "family": "garch_11",
       "innovation": "student_t",
       "status": "diagnostic_fit_license_blocked",
-      "observations": 615,
+      "observations": 630,
       "parameters": {
-        "mean": 0.0005741399101726966,
-        "omega": 0.00002094229447011286,
+        "mean": 0.0006246764446017489,
+        "omega": 0.000021228900452644462,
         "alpha": 0.06,
         "beta": 0.88,
         "persistence": 0.94,
@@ -105,31 +111,31 @@
       },
       "standard_errors": {},
       "standard_error_status": "not_calculable",
-      "log_likelihood": 1646.5977711309376,
-      "aic": -3281.1955422618753,
-      "bic": -3254.665808655036,
+      "log_likelihood": 1681.17923056695,
+      "aic": -3350.3584611339,
+      "bic": -3323.6841422175867,
       "converged": true,
       "starts_evaluated": 52,
       "residual_ljung_box": {
         "lags": 10,
-        "statistic": 2.992744853389079,
-        "p_value": 0.9815942852629157,
+        "statistic": 3.967457700019812,
+        "p_value": 0.9488030800286061,
         "series": "standardized_residuals"
       },
       "squared_residual_ljung_box": {
         "lags": 10,
-        "statistic": 2.13341539037908,
-        "p_value": 0.9952115457678928,
+        "statistic": 2.3355076514646798,
+        "p_value": 0.9930621807508727,
         "series": "squared_standardized_residuals"
       },
       "var_coverage_95": {
         "confidence": 0.95,
-        "observations": 615,
-        "expected_breaches": 30.75,
+        "observations": 630,
+        "expected_breaches": 31.5,
         "observed_breaches": 28,
-        "observed_rate": 0.04552845528455285
+        "observed_rate": 0.044444444444444446
       },
-      "one_step_variance_forecast": 0.00037912149119170326,
+      "one_step_variance_forecast": 0.0005283616010625302,
       "diagnostics": [
         "Deterministic constrained grid fit; it is not an optimizer convergence proof.",
         "Parameter standard errors are not calculable from this grid and are not invented.",
@@ -141,10 +147,10 @@
       "family": "gjr_garch_11",
       "innovation": "gaussian",
       "status": "diagnostic_fit_license_blocked",
-      "observations": 615,
+      "observations": 630,
       "parameters": {
-        "mean": 0.0005741399101726966,
-        "omega": 0.00005584611858696755,
+        "mean": 0.0006246764446017489,
+        "omega": 0.000056610401207051815,
         "alpha": 0.03,
         "beta": 0.8,
         "persistence": 0.8400000000000001,
@@ -152,31 +158,31 @@
       },
       "standard_errors": {},
       "standard_error_status": "not_calculable",
-      "log_likelihood": 1578.5893176279722,
-      "aic": -3145.1786352559443,
-      "bic": -3118.648901649105,
+      "log_likelihood": 1612.4650666451873,
+      "aic": -3212.9301332903747,
+      "bic": -3186.255814374061,
       "converged": true,
       "starts_evaluated": 37,
       "residual_ljung_box": {
         "lags": 10,
-        "statistic": 4.286421630469456,
-        "p_value": 0.9335023432570637,
+        "statistic": 5.448336407763485,
+        "p_value": 0.8592904402986185,
         "series": "standardized_residuals"
       },
       "squared_residual_ljung_box": {
         "lags": 10,
-        "statistic": 2.2372962590698435,
-        "p_value": 0.9941766395265842,
+        "statistic": 2.634478397423379,
+        "p_value": 0.988767794354484,
         "series": "squared_standardized_residuals"
       },
       "var_coverage_95": {
         "confidence": 0.95,
-        "observations": 615,
-        "expected_breaches": 30.75,
+        "observations": 630,
+        "expected_breaches": 31.5,
         "observed_breaches": 25,
-        "observed_rate": 0.04065040650406504
+        "observed_rate": 0.03968253968253968
       },
-      "one_step_variance_forecast": 0.0003618694423271139,
+      "one_step_variance_forecast": 0.00043729380217059335,
       "diagnostics": [
         "Deterministic constrained grid fit; it is not an optimizer convergence proof.",
         "Parameter standard errors are not calculable from this grid and are not invented.",
@@ -188,10 +194,10 @@
       "family": "gjr_garch_11",
       "innovation": "student_t",
       "status": "diagnostic_fit_license_blocked",
-      "observations": 615,
+      "observations": 630,
       "parameters": {
-        "mean": 0.0005741399101726966,
-        "omega": 0.00002094229447011282,
+        "mean": 0.0006246764446017489,
+        "omega": 0.00002122890045264442,
         "alpha": 0.03,
         "beta": 0.88,
         "persistence": 0.9400000000000001,
@@ -200,31 +206,31 @@
       },
       "standard_errors": {},
       "standard_error_status": "not_calculable",
-      "log_likelihood": 1648.066264011019,
-      "aic": -3282.132528022038,
-      "bic": -3251.1811721473923,
+      "log_likelihood": 1682.7706344450594,
+      "aic": -3351.5412688901188,
+      "bic": -3320.42123015442,
       "converged": true,
       "starts_evaluated": 148,
       "residual_ljung_box": {
         "lags": 10,
-        "statistic": 2.9790122097948952,
-        "p_value": 0.9819136647827198,
+        "statistic": 3.977607488710675,
+        "p_value": 0.9483514932984107,
         "series": "standardized_residuals"
       },
       "squared_residual_ljung_box": {
         "lags": 10,
-        "statistic": 2.649506346744065,
-        "p_value": 0.9885133661546144,
+        "statistic": 2.8338963095647407,
+        "p_value": 0.9850671539843892,
         "series": "squared_standardized_residuals"
       },
       "var_coverage_95": {
         "confidence": 0.95,
-        "observations": 615,
-        "expected_breaches": 30.75,
+        "observations": 630,
+        "expected_breaches": 31.5,
         "observed_breaches": 27,
-        "observed_rate": 0.04390243902439024
+        "observed_rate": 0.04285714285714286
       },
-      "one_step_variance_forecast": 0.0003873227348789311,
+      "one_step_variance_forecast": 0.000435553358697324,
       "diagnostics": [
         "Deterministic constrained grid fit; it is not an optimizer convergence proof.",
         "Parameter standard errors are not calculable from this grid and are not invented.",
@@ -232,12 +238,92 @@
       ]
     }
   ],
+  "chronological_oos": {
+    "method": "single_frozen_train_then_sequential_forecast",
+    "train_observations": 420,
+    "test_observations": 210,
+    "historical_window": 40,
+    "ewma_decay_selected_on_train": 0.97,
+    "evaluations": [
+      {
+        "model_id": "historical_variance_40d",
+        "observations": 210,
+        "mean_squared_variance_error": 1.002139958197227e-6,
+        "qlike": -6.465465197408312,
+        "gaussian_predictive_nll": -2.3137940654994833,
+        "var_95_breaches": 9,
+        "var_95_breach_rate": 0.04285714285714286
+      },
+      {
+        "model_id": "ewma",
+        "observations": 210,
+        "mean_squared_variance_error": 9.71742984707009e-7,
+        "qlike": -6.624540189120728,
+        "gaussian_predictive_nll": -2.393331561355691,
+        "var_95_breaches": 9,
+        "var_95_breach_rate": 0.04285714285714286
+      },
+      {
+        "model_id": "garch_11-gaussian",
+        "observations": 210,
+        "mean_squared_variance_error": 9.64251553587684e-7,
+        "qlike": -6.701499360948659,
+        "gaussian_predictive_nll": -2.4318111472696566,
+        "var_95_breaches": 13,
+        "var_95_breach_rate": 0.06190476190476191
+      },
+      {
+        "model_id": "garch_11-student_t",
+        "observations": 210,
+        "mean_squared_variance_error": 9.615477126523582e-7,
+        "qlike": -6.686477987838982,
+        "gaussian_predictive_nll": -2.4243004607148184,
+        "var_95_breaches": 9,
+        "var_95_breach_rate": 0.04285714285714286
+      },
+      {
+        "model_id": "gjr_garch_11-gaussian",
+        "observations": 210,
+        "mean_squared_variance_error": 9.593619211908769e-7,
+        "qlike": -6.710949987212993,
+        "gaussian_predictive_nll": -2.436536460401824,
+        "var_95_breaches": 11,
+        "var_95_breach_rate": 0.05238095238095238
+      },
+      {
+        "model_id": "gjr_garch_11-student_t",
+        "observations": 210,
+        "mean_squared_variance_error": 9.534357538524144e-7,
+        "qlike": -6.702403577154221,
+        "gaussian_predictive_nll": -2.4322632553724377,
+        "var_95_breaches": 9,
+        "var_95_breach_rate": 0.04285714285714286
+      }
+    ],
+    "best_by_qlike": "gjr_garch_11-gaussian",
+    "best_by_predictive_nll": "gjr_garch_11-gaussian",
+    "final_holdout_used": false,
+    "limitations": [
+      "This is one chronological development split, not the unopened final holdout.",
+      "Model parameters are frozen at the split; only conditional variance states update.",
+      "Gaussian 95% VaR coverage is a common diagnostic and not a tail-model approval."
+    ]
+  },
+  "model_addition_decisions": [
+    "Student-t innovations retained for diagnostics: excess kurtosis is 6.698 and GARCH AIC improves by 136.898 versus Gaussian.",
+    "GJR asymmetry tested but not promoted as the default: its Student-t BIC gain is -3.263, and selection remains governed by chronological forecasts."
+  ],
   "heston_status": "BLOCKED_INSUFFICIENT_CALIBRATION_DATA",
+  "heston_reasons": [
+    "50 development snapshots contain calendar-arbitrage violations.",
+    "A constrained multi-start Heston optimizer and parameter-stability audit are absent.",
+    "Parameter identifiability and out-of-sample pricing stability are therefore unproven."
+  ],
   "blockers": [
     "Account-specific historical-data rights remain to review.",
     "Development sample was already exposed and is not a fresh final holdout.",
-    "Volatility fits require chronological walk-forward validation.",
-    "Heston is blocked because no eligible IV surface history is available.",
+    "The chronological volatility comparison is a development split, not the final holdout.",
+    "Heston remains blocked by implementation, arbitrage, and identifiability gates.",
     "Grid-search parameter standard errors are not identifiable."
   ],
   "order_capability": "forbidden"

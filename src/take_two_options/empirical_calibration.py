@@ -101,6 +101,29 @@ class VolatilityModelFit(StrictModel):
     diagnostics: list[str]
 
 
+class VolatilityForecastEvaluation(StrictModel):
+    model_id: str
+    observations: int = Field(gt=0)
+    mean_squared_variance_error: float = Field(ge=0)
+    qlike: float
+    gaussian_predictive_nll: float
+    var_95_breaches: int = Field(ge=0)
+    var_95_breach_rate: float = Field(ge=0, le=1)
+
+
+class ChronologicalVolatilityComparison(StrictModel):
+    method: Literal["single_frozen_train_then_sequential_forecast"]
+    train_observations: int = Field(ge=100)
+    test_observations: int = Field(gt=0)
+    historical_window: int = Field(gt=1)
+    ewma_decay_selected_on_train: float = Field(gt=0, lt=1)
+    evaluations: list[VolatilityForecastEvaluation] = Field(min_length=3)
+    best_by_qlike: str
+    best_by_predictive_nll: str
+    final_holdout_used: Literal[False] = False
+    limitations: list[str]
+
+
 class EmpiricalCalibrationReport(StrictModel):
     schema_version: Literal["1.0"]
     report_id: str
@@ -118,7 +141,10 @@ class EmpiricalCalibrationReport(StrictModel):
     ]
     empirical: EmpiricalReturnDiagnostics | None
     volatility_models: list[VolatilityModelFit]
+    chronological_oos: ChronologicalVolatilityComparison | None = None
+    model_addition_decisions: list[str] = Field(default_factory=list)
     heston_status: Literal["BLOCKED_INSUFFICIENT_CALIBRATION_DATA"]
+    heston_reasons: list[str] = Field(default_factory=list)
     blockers: list[str]
     order_capability: Literal["forbidden"] = "forbidden"
 
@@ -464,6 +490,152 @@ def _fit_volatility_model(
     )
 
 
+def _forecast_evaluation(
+    model_id: str, forecasts: list[float], residuals: list[float]
+) -> VolatilityForecastEvaluation:
+    realized = [value**2 for value in residuals]
+    qlike = fmean(
+        math.log(forecast) + actual / forecast
+        for forecast, actual in zip(forecasts, realized, strict=True)
+    )
+    return VolatilityForecastEvaluation(
+        model_id=model_id,
+        observations=len(residuals),
+        mean_squared_variance_error=fmean(
+            (forecast - actual) ** 2
+            for forecast, actual in zip(forecasts, realized, strict=True)
+        ),
+        qlike=qlike,
+        gaussian_predictive_nll=0.5 * (math.log(2 * math.pi) + qlike),
+        var_95_breaches=sum(
+            residual < -1.6448536269514722 * math.sqrt(forecast)
+            for residual, forecast in zip(residuals, forecasts, strict=True)
+        ),
+        var_95_breach_rate=sum(
+            residual < -1.6448536269514722 * math.sqrt(forecast)
+            for residual, forecast in zip(residuals, forecasts, strict=True)
+        )
+        / len(residuals),
+    )
+
+
+def chronological_volatility_comparison(
+    returns: list[float],
+    *,
+    train_observations: int | None = None,
+    historical_window: int = 40,
+) -> ChronologicalVolatilityComparison:
+    """Freeze parameters on an initial segment, then forecast the untouched suffix in order."""
+
+    train_count = train_observations or int(len(returns) * 2 / 3)
+    if train_count < 100 or len(returns) - train_count < 20:
+        raise ValueError("chronological comparison requires at least 100 train and 20 test returns")
+    train = returns[:train_count]
+    test = returns[train_count:]
+    mean = fmean(train)
+    train_residuals = [value - mean for value in train]
+    test_residuals = [value - mean for value in test]
+    decay_candidates = (0.85, 0.90, 0.94, 0.97)
+    decay_scores: list[tuple[float, float, list[float]]] = []
+    for decay in decay_candidates:
+        current = variance(train_residuals)
+        fitted: list[float] = []
+        for residual in train_residuals:
+            fitted.append(current)
+            current = decay * current + (1.0 - decay) * residual**2
+        score = fmean(
+            math.log(value) + residual**2 / value
+            for residual, value in zip(train_residuals, fitted, strict=True)
+        )
+        decay_scores.append((score, decay, fitted))
+    _, selected_decay, ewma_in_sample = min(decay_scores, key=lambda item: item[0])
+
+    comparison_families: tuple[Literal["garch_11", "gjr_garch_11"], ...] = (
+        "garch_11",
+        "gjr_garch_11",
+    )
+    comparison_innovations: tuple[Literal["gaussian", "student_t"], ...] = (
+        "gaussian",
+        "student_t",
+    )
+    fits = [
+        _fit_volatility_model(
+            train,
+            family=family,
+            innovation=innovation,
+            license_status="authorized_internal",
+        )
+        for family in comparison_families
+        for innovation in comparison_innovations
+    ]
+    histories: dict[str, list[float]] = {"historical_variance_40d": []}
+    states: dict[str, float] = {"ewma": ewma_in_sample[-1]}
+    histories["ewma"] = []
+    for fit in fits:
+        parameters = fit.parameters
+        conditional = _conditional_variances(
+            train_residuals,
+            omega=parameters["omega"],
+            alpha=parameters["alpha"],
+            beta=parameters["beta"],
+            gamma=parameters.get("gamma", 0.0),
+        )
+        states[fit.model_id] = (
+            parameters["omega"]
+            + parameters["alpha"] * train_residuals[-1] ** 2
+            + parameters.get("gamma", 0.0)
+            * train_residuals[-1] ** 2
+            * float(train_residuals[-1] < 0)
+            + parameters["beta"] * conditional[-1]
+        )
+        histories[fit.model_id] = []
+
+    rolling = list(train_residuals)
+    for residual in test_residuals:
+        histories["historical_variance_40d"].append(
+            max(variance(rolling[-historical_window:]), 1e-12)
+        )
+        histories["ewma"].append(max(states["ewma"], 1e-12))
+        states["ewma"] = (
+            selected_decay * states["ewma"] + (1.0 - selected_decay) * residual**2
+        )
+        for fit in fits:
+            parameters = fit.parameters
+            previous = states[fit.model_id]
+            histories[fit.model_id].append(max(previous, 1e-12))
+            states[fit.model_id] = (
+                parameters["omega"]
+                + parameters["alpha"] * residual**2
+                + parameters.get("gamma", 0.0)
+                * residual**2
+                * float(residual < 0)
+                + parameters["beta"] * previous
+            )
+        rolling.append(residual)
+
+    evaluations = [
+        _forecast_evaluation(model_id, forecasts, test_residuals)
+        for model_id, forecasts in histories.items()
+    ]
+    return ChronologicalVolatilityComparison(
+        method="single_frozen_train_then_sequential_forecast",
+        train_observations=len(train),
+        test_observations=len(test),
+        historical_window=historical_window,
+        ewma_decay_selected_on_train=selected_decay,
+        evaluations=evaluations,
+        best_by_qlike=min(evaluations, key=lambda item: item.qlike).model_id,
+        best_by_predictive_nll=min(
+            evaluations, key=lambda item: item.gaussian_predictive_nll
+        ).model_id,
+        limitations=[
+            "This is one chronological development split, not the unopened final holdout.",
+            "Model parameters are frozen at the split; only conditional variance states update.",
+            "Gaussian 95% VaR coverage is a common diagnostic and not a tail-model approval.",
+        ],
+    )
+
+
 def calibrate_empirical_returns(
     observations: list[PriceObservation],
     *,
@@ -474,6 +646,7 @@ def calibrate_empirical_returns(
     bootstrap_draws: int = 1_000,
     bootstrap_block_size: int = 5,
     seed: int = 20_260_808,
+    heston_surface_summary: dict[str, int] | None = None,
 ) -> EmpiricalCalibrationReport:
     eligible = [item for item in observations if item.available_at <= decision_cutoff]
     dataset_hash = stable_hash([item.model_dump(mode="json") for item in eligible])
@@ -491,7 +664,10 @@ def calibrate_empirical_returns(
             status="BLOCKED_INSUFFICIENT_DATA",
             empirical=None,
             volatility_models=[],
+            chronological_oos=None,
+            model_addition_decisions=[],
             heston_status="BLOCKED_INSUFFICIENT_CALIBRATION_DATA",
+            heston_reasons=["Return history is insufficient for the empirical prerequisite."],
             blockers=["At least 30 point-in-time eligible prices are required."],
         )
     empirical, returns = empirical_diagnostics(
@@ -518,10 +694,50 @@ def calibrate_empirical_returns(
         for family in families
         for innovation in innovations
     ]
+    chronological_oos = (
+        chronological_volatility_comparison(returns) if len(returns) >= 120 else None
+    )
+    by_id = {model.model_id: model for model in models}
+    student_t_aic_gain = (
+        by_id["garch_11-gaussian"].aic - by_id["garch_11-student_t"].aic
+        if by_id["garch_11-gaussian"].aic is not None
+        and by_id["garch_11-student_t"].aic is not None
+        else 0.0
+    )
+    gjr_bic_gain = (
+        by_id["garch_11-student_t"].bic - by_id["gjr_garch_11-student_t"].bic
+        if by_id["garch_11-student_t"].bic is not None
+        and by_id["gjr_garch_11-student_t"].bic is not None
+        else 0.0
+    )
+    model_addition_decisions = [
+        (
+            "Student-t innovations retained for diagnostics: excess kurtosis is "
+            f"{empirical.excess_kurtosis:.3f} and GARCH AIC improves by "
+            f"{student_t_aic_gain:.3f} versus Gaussian."
+        ),
+        (
+            "GJR asymmetry tested but not promoted as the default: its Student-t BIC gain is "
+            f"{gjr_bic_gain:.3f}, and selection remains governed by chronological forecasts."
+        ),
+    ]
+    if chronological_oos is None:
+        model_addition_decisions.append(
+            "Chronological comparison omitted: fewer than 100 train plus 20 test returns."
+        )
+    surface_summary = heston_surface_summary or {}
+    heston_reasons = [
+        (
+            f"{surface_summary.get('calendar_arbitrage_violations', 0)} development snapshots "
+            "contain calendar-arbitrage violations."
+        ),
+        "A constrained multi-start Heston optimizer and parameter-stability audit are absent.",
+        "Parameter identifiability and out-of-sample pricing stability are therefore unproven.",
+    ]
     blockers = [
         "Development sample was already exposed and is not a fresh final holdout.",
-        "Volatility fits require chronological walk-forward validation.",
-        "Heston is blocked because no eligible IV surface history is available.",
+        "The chronological volatility comparison is a development split, not the final holdout.",
+        "Heston remains blocked by implementation, arbitrage, and identifiability gates.",
         "Grid-search parameter standard errors are not identifiable.",
     ]
     if license_status == "to_review":
@@ -543,6 +759,9 @@ def calibrate_empirical_returns(
         ),
         empirical=empirical,
         volatility_models=models,
+        chronological_oos=chronological_oos,
+        model_addition_decisions=model_addition_decisions,
         heston_status="BLOCKED_INSUFFICIENT_CALIBRATION_DATA",
+        heston_reasons=heston_reasons,
         blockers=blockers,
     )
