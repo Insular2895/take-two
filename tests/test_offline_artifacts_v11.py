@@ -30,6 +30,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
     assert {path.name for path in schema_paths} == {
         "backtest_report.schema.json",
         "calibration_report.schema.json",
+        "empirical_calibration.schema.json",
         "event.schema.json",
         "historical_dataset_manifest.schema.json",
         "model_validation.schema.json",

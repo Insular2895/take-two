@@ -1,0 +1,244 @@
+{
+  "schema_version": "1.0",
+  "report_id": "ttwo-empirical-calibration-v1",
+  "ticker": "TTWO",
+  "generated_at": "2026-08-08T20:00:00Z",
+  "decision_cutoff": "2026-08-08T20:00:00Z",
+  "source_ids": ["ALPACA-STOCK-BARS-TTWO-20260719T112124Z"],
+  "dataset_hash": "1c302947b6fbb65c9e536cd57185767cbdbff5a9f38969826fbf9bb6a56fdaa8",
+  "dataset_role": "development_diagnostic",
+  "license_status": "to_review",
+  "status": "DIAGNOSTIC_ONLY_LICENSE_REVIEW",
+  "empirical": {
+    "price_observations": 616,
+    "return_observations": 615,
+    "coverage_start": "2024-02-01T05:00:00Z",
+    "coverage_end": "2026-07-17T04:00:00Z",
+    "arithmetic_mean_daily": 0.0007487343131878449,
+    "log_mean_daily": 0.0005741399101726966,
+    "annualized_log_mean": 0.14468325736351956,
+    "annualized_realized_volatility": 0.296576527686319,
+    "skewness": 0.03998175566472264,
+    "excess_kurtosis": 6.964574809886011,
+    "largest_negative_gap": -0.08684117438981265,
+    "largest_positive_gap": 0.1404755397649633,
+    "maximum_drawdown": 0.27663953953763143,
+    "bootstrap_annualized_log_mean": {
+      "lower": -0.19849189545245385,
+      "central": 0.14468325736351956,
+      "upper": 0.5102203827405447
+    },
+    "bootstrap_annualized_volatility": {
+      "lower": 0.26086896082382294,
+      "central": 0.296576527686319,
+      "upper": 0.3325879712621178
+    },
+    "bootstrap_maximum_drawdown": {
+      "lower": 0.16935243511319467,
+      "central": 0.27663953953763143,
+      "upper": 0.5589104677752385
+    },
+    "bootstrap_draws": 1000,
+    "bootstrap_block_size": 5,
+    "seed": 20260808
+  },
+  "volatility_models": [
+    {
+      "model_id": "garch_11-gaussian",
+      "family": "garch_11",
+      "innovation": "gaussian",
+      "status": "diagnostic_fit_license_blocked",
+      "observations": 615,
+      "parameters": {
+        "mean": 0.0005741399101726966,
+        "omega": 0.00005933650099865303,
+        "alpha": 0.03,
+        "beta": 0.8,
+        "persistence": 0.8300000000000001
+      },
+      "standard_errors": {},
+      "standard_error_status": "not_calculable",
+      "log_likelihood": 1577.9090590510289,
+      "aic": -3145.8181181020577,
+      "bic": -3123.710006763025,
+      "converged": true,
+      "starts_evaluated": 13,
+      "residual_ljung_box": {
+        "lags": 10,
+        "statistic": 4.82308447741362,
+        "p_value": 0.9026783538088364,
+        "series": "standardized_residuals"
+      },
+      "squared_residual_ljung_box": {
+        "lags": 10,
+        "statistic": 2.350506003649763,
+        "p_value": 0.9928797903230706,
+        "series": "squared_standardized_residuals"
+      },
+      "var_coverage_95": {
+        "confidence": 0.95,
+        "observations": 615,
+        "expected_breaches": 30.75,
+        "observed_breaches": 26,
+        "observed_rate": 0.04227642276422764
+      },
+      "one_step_variance_forecast": 0.0003547316233132701,
+      "diagnostics": [
+        "Deterministic constrained grid fit; it is not an optimizer convergence proof.",
+        "Parameter standard errors are not calculable from this grid and are not invented.",
+        "In-sample AIC/BIC cannot establish predictive superiority."
+      ]
+    },
+    {
+      "model_id": "garch_11-student_t",
+      "family": "garch_11",
+      "innovation": "student_t",
+      "status": "diagnostic_fit_license_blocked",
+      "observations": 615,
+      "parameters": {
+        "mean": 0.0005741399101726966,
+        "omega": 0.00002094229447011286,
+        "alpha": 0.06,
+        "beta": 0.88,
+        "persistence": 0.94,
+        "degrees_of_freedom": 5.0
+      },
+      "standard_errors": {},
+      "standard_error_status": "not_calculable",
+      "log_likelihood": 1646.5977711309376,
+      "aic": -3281.1955422618753,
+      "bic": -3254.665808655036,
+      "converged": true,
+      "starts_evaluated": 52,
+      "residual_ljung_box": {
+        "lags": 10,
+        "statistic": 2.992744853389079,
+        "p_value": 0.9815942852629157,
+        "series": "standardized_residuals"
+      },
+      "squared_residual_ljung_box": {
+        "lags": 10,
+        "statistic": 2.13341539037908,
+        "p_value": 0.9952115457678928,
+        "series": "squared_standardized_residuals"
+      },
+      "var_coverage_95": {
+        "confidence": 0.95,
+        "observations": 615,
+        "expected_breaches": 30.75,
+        "observed_breaches": 28,
+        "observed_rate": 0.04552845528455285
+      },
+      "one_step_variance_forecast": 0.00037912149119170326,
+      "diagnostics": [
+        "Deterministic constrained grid fit; it is not an optimizer convergence proof.",
+        "Parameter standard errors are not calculable from this grid and are not invented.",
+        "In-sample AIC/BIC cannot establish predictive superiority."
+      ]
+    },
+    {
+      "model_id": "gjr_garch_11-gaussian",
+      "family": "gjr_garch_11",
+      "innovation": "gaussian",
+      "status": "diagnostic_fit_license_blocked",
+      "observations": 615,
+      "parameters": {
+        "mean": 0.0005741399101726966,
+        "omega": 0.00005584611858696755,
+        "alpha": 0.03,
+        "beta": 0.8,
+        "persistence": 0.8400000000000001,
+        "gamma": 0.02
+      },
+      "standard_errors": {},
+      "standard_error_status": "not_calculable",
+      "log_likelihood": 1578.5893176279722,
+      "aic": -3145.1786352559443,
+      "bic": -3118.648901649105,
+      "converged": true,
+      "starts_evaluated": 37,
+      "residual_ljung_box": {
+        "lags": 10,
+        "statistic": 4.286421630469456,
+        "p_value": 0.9335023432570637,
+        "series": "standardized_residuals"
+      },
+      "squared_residual_ljung_box": {
+        "lags": 10,
+        "statistic": 2.2372962590698435,
+        "p_value": 0.9941766395265842,
+        "series": "squared_standardized_residuals"
+      },
+      "var_coverage_95": {
+        "confidence": 0.95,
+        "observations": 615,
+        "expected_breaches": 30.75,
+        "observed_breaches": 25,
+        "observed_rate": 0.04065040650406504
+      },
+      "one_step_variance_forecast": 0.0003618694423271139,
+      "diagnostics": [
+        "Deterministic constrained grid fit; it is not an optimizer convergence proof.",
+        "Parameter standard errors are not calculable from this grid and are not invented.",
+        "In-sample AIC/BIC cannot establish predictive superiority."
+      ]
+    },
+    {
+      "model_id": "gjr_garch_11-student_t",
+      "family": "gjr_garch_11",
+      "innovation": "student_t",
+      "status": "diagnostic_fit_license_blocked",
+      "observations": 615,
+      "parameters": {
+        "mean": 0.0005741399101726966,
+        "omega": 0.00002094229447011282,
+        "alpha": 0.03,
+        "beta": 0.88,
+        "persistence": 0.9400000000000001,
+        "gamma": 0.06,
+        "degrees_of_freedom": 5.0
+      },
+      "standard_errors": {},
+      "standard_error_status": "not_calculable",
+      "log_likelihood": 1648.066264011019,
+      "aic": -3282.132528022038,
+      "bic": -3251.1811721473923,
+      "converged": true,
+      "starts_evaluated": 148,
+      "residual_ljung_box": {
+        "lags": 10,
+        "statistic": 2.9790122097948952,
+        "p_value": 0.9819136647827198,
+        "series": "standardized_residuals"
+      },
+      "squared_residual_ljung_box": {
+        "lags": 10,
+        "statistic": 2.649506346744065,
+        "p_value": 0.9885133661546144,
+        "series": "squared_standardized_residuals"
+      },
+      "var_coverage_95": {
+        "confidence": 0.95,
+        "observations": 615,
+        "expected_breaches": 30.75,
+        "observed_breaches": 27,
+        "observed_rate": 0.04390243902439024
+      },
+      "one_step_variance_forecast": 0.0003873227348789311,
+      "diagnostics": [
+        "Deterministic constrained grid fit; it is not an optimizer convergence proof.",
+        "Parameter standard errors are not calculable from this grid and are not invented.",
+        "In-sample AIC/BIC cannot establish predictive superiority."
+      ]
+    }
+  ],
+  "heston_status": "BLOCKED_INSUFFICIENT_CALIBRATION_DATA",
+  "blockers": [
+    "Account-specific historical-data rights remain to review.",
+    "Development sample was already exposed and is not a fresh final holdout.",
+    "Volatility fits require chronological walk-forward validation.",
+    "Heston is blocked because no eligible IV surface history is available.",
+    "Grid-search parameter standard errors are not identifiable."
+  ],
+  "order_capability": "forbidden"
+}
