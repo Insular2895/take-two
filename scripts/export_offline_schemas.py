@@ -20,6 +20,7 @@ from take_two_options.intelligence.schemas import (
     NormalizedEvidenceEvent,
     UnifiedObservation,
 )
+from take_two_options.validation.walk_forward_protocol import WalkForwardProtocolReport
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_DIRECTORY = ROOT / "schemas"
@@ -33,6 +34,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "calibration_report.schema.json": OfflineCalibrationReport,
     "backtest_report.schema.json": WalkForwardReport,
     "model_validation.schema.json": CandidateValidationSummary,
+    "walk_forward_protocol.schema.json": WalkForwardProtocolReport,
 }
 
 

@@ -1,0 +1,299 @@
+{
+  "$defs": {
+    "PredictionSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "brier_score": {
+          "minimum": 0,
+          "title": "Brier Score",
+          "type": "number"
+        },
+        "log_loss": {
+          "minimum": 0,
+          "title": "Log Loss",
+          "type": "number"
+        },
+        "mean_predicted_probability_profit": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Mean Predicted Probability Profit",
+          "type": "number"
+        },
+        "mean_realized_log_return": {
+          "title": "Mean Realized Log Return",
+          "type": "number"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "realized_probability_profit": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Realized Probability Profit",
+          "type": "number"
+        }
+      },
+      "required": [
+        "observations",
+        "mean_predicted_probability_profit",
+        "realized_probability_profit",
+        "mean_realized_log_return",
+        "brier_score",
+        "log_loss"
+      ],
+      "title": "PredictionSummary",
+      "type": "object"
+    },
+    "WalkForwardWindowManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "calibrated_through": {
+          "format": "date-time",
+          "title": "Calibrated Through",
+          "type": "string"
+        },
+        "configuration_hash": {
+          "maxLength": 64,
+          "minLength": 64,
+          "title": "Configuration Hash",
+          "type": "string"
+        },
+        "dataset_hash": {
+          "maxLength": 64,
+          "minLength": 64,
+          "title": "Dataset Hash",
+          "type": "string"
+        },
+        "embargoed_observation_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Embargoed Observation Ids",
+          "type": "array"
+        },
+        "frozen_model_hash": {
+          "maxLength": 64,
+          "minLength": 64,
+          "title": "Frozen Model Hash",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "rolling",
+            "expanding"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "model_parameters": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Model Parameters",
+          "type": "object"
+        },
+        "prediction_record_disclosure": {
+          "const": "aggregate_only_license_restricted",
+          "title": "Prediction Record Disclosure",
+          "type": "string"
+        },
+        "private_prediction_records_hash": {
+          "maxLength": 64,
+          "minLength": 64,
+          "title": "Private Prediction Records Hash",
+          "type": "string"
+        },
+        "purged_observation_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Purged Observation Ids",
+          "type": "array"
+        },
+        "recalibrated_after_test": {
+          "const": false,
+          "title": "Recalibrated After Test",
+          "type": "boolean"
+        },
+        "test_end": {
+          "format": "date-time",
+          "title": "Test End",
+          "type": "string"
+        },
+        "test_start": {
+          "format": "date-time",
+          "title": "Test Start",
+          "type": "string"
+        },
+        "test_summary": {
+          "$ref": "#/$defs/PredictionSummary"
+        },
+        "train_end": {
+          "format": "date-time",
+          "title": "Train End",
+          "type": "string"
+        },
+        "train_observations": {
+          "exclusiveMinimum": 0,
+          "title": "Train Observations",
+          "type": "integer"
+        },
+        "train_start": {
+          "format": "date-time",
+          "title": "Train Start",
+          "type": "string"
+        },
+        "validation_end": {
+          "format": "date-time",
+          "title": "Validation End",
+          "type": "string"
+        },
+        "validation_start": {
+          "format": "date-time",
+          "title": "Validation Start",
+          "type": "string"
+        },
+        "validation_summary": {
+          "$ref": "#/$defs/PredictionSummary"
+        },
+        "window_id": {
+          "title": "Window Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window_id",
+        "method",
+        "train_start",
+        "train_end",
+        "validation_start",
+        "validation_end",
+        "test_start",
+        "test_end",
+        "calibrated_through",
+        "dataset_hash",
+        "configuration_hash",
+        "model_id",
+        "model_parameters",
+        "frozen_model_hash",
+        "train_observations",
+        "purged_observation_ids",
+        "embargoed_observation_ids",
+        "validation_summary",
+        "test_summary",
+        "private_prediction_records_hash",
+        "prediction_record_disclosure",
+        "recalibrated_after_test"
+      ],
+      "title": "WalkForwardWindowManifest",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/walk_forward_protocol.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "configuration_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Configuration Hash",
+      "type": "string"
+    },
+    "dataset_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Dataset Hash",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "holdout_touched": {
+      "const": false,
+      "title": "Holdout Touched",
+      "type": "boolean"
+    },
+    "license_status": {
+      "enum": [
+        "authorized_internal",
+        "to_review"
+      ],
+      "title": "License Status",
+      "type": "string"
+    },
+    "method": {
+      "enum": [
+        "rolling",
+        "expanding"
+      ],
+      "title": "Method",
+      "type": "string"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "report_id": {
+      "title": "Report Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "DIAGNOSTIC_ONLY_LICENSE_REVIEW",
+        "WALK_FORWARD_EVALUATED",
+        "BLOCKED_INSUFFICIENT_HISTORY"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "ticker": {
+      "title": "Ticker",
+      "type": "string"
+    },
+    "windows": {
+      "items": {
+        "$ref": "#/$defs/WalkForwardWindowManifest"
+      },
+      "title": "Windows",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "report_id",
+    "ticker",
+    "generated_at",
+    "dataset_hash",
+    "configuration_hash",
+    "method",
+    "status",
+    "windows",
+    "holdout_touched",
+    "license_status",
+    "blockers"
+  ],
+  "title": "WalkForwardProtocolReport",
+  "type": "object"
+}

@@ -37,6 +37,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
         "observation.schema.json",
         "pre_opra_config.schema.json",
         "readiness.schema.json",
+        "walk_forward_protocol.schema.json",
     }
     for path in schema_paths:
         schema = json.loads(path.read_text(encoding="utf-8"))
