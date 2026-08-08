@@ -19,6 +19,11 @@
   signal-alignment placebo and a one-time hash-chained holdout ledger are implemented. The real
   holdout is absent and unopened; permutation exchangeability and full primary-paper PBO
   conformance remain limitations.
+- Simulated exits now use a serializable chronological state machine, and canonical path
+  probabilities have Wilson/ESS/minimum-path sidecars. Daily checkpoints still miss intraday
+  crossings; Wilson assumes iid unweighted trials, block-bootstrap coverage depends on
+  stationarity and block length, and no rare-event importance sampler is implemented. LSM is
+  deferred until a real material gap against finite-difference/checkpoint controls is measured.
 - MarketData.app historical chains are EOD bid/ask, not intraday NBBO or
   simultaneous combo fills.
 - Alpaca indicative snapshots do not supply the open-interest/underlying fields

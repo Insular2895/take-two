@@ -1,6 +1,6 @@
 # Plan TTWO Quantitative Validation V10
 
-Statut : `in_progress_phase_1_complete`
+Statut : `in_progress_phase_5_implemented`
 
 Date : 2026-08-08
 
@@ -68,7 +68,7 @@ Livrables proposés après validation :
 
 ## Phase 1 — Conventions, P/Q et audit numérique
 
-État : implémenté ; gate complet vert (146 tests) ; commit atomique à créer.
+État : implémenté ; gate complet vert (146 tests) ; commit `ba8c335`.
 
 ### Documentary Research
 
@@ -103,7 +103,7 @@ Commit proposé : `feat(quant): centralize conventions measures and numerical au
 ## Phase 2 — Solveur IV et surface SVI/eSSVI
 
 État : implémenté ; eSSVI différé derrière le gate ; gate complet vert (152 tests) ; commit
-atomique à créer.
+`32f3222`.
 
 ### Documentary Research
 
@@ -135,7 +135,7 @@ Commit proposé : `feat(quant): add diagnosed iv solving and svi surface validat
 ## Phase 3 — Calibration robuste et séries temporelles
 
 État : baselines EWMA/GARCH diagnostiquées et comparaison OOS synthétique implémentées ; Heston
-bloqué par le gate de données ; gate complet vert (156 tests) ; commit atomique à créer.
+bloqué par le gate de données ; gate complet vert (156 tests) ; commit `3d72715`.
 
 ### Documentary Research
 
@@ -164,7 +164,7 @@ Commit proposé : `feat(quant): add calibration diagnostics and volatility basel
 ## Phase 4 — Protocole de backtest et nouveau holdout
 
 État : protocole, manifests, split point-in-time, placebo corrigé, ex æquo PBO et ledger
-implémentés ; holdout réel absent/non ouvert ; gate complet vert (164 tests) ; commit à créer.
+implémentés ; holdout réel absent/non ouvert ; gate complet vert (164 tests) ; commit `41fb2f9`.
 
 ### Documentary Research
 
@@ -192,6 +192,9 @@ implémentés ; holdout réel absent/non ouvert ; gate complet vert (164 tests) 
 Commit proposé : `feat(validation): seal experiments and enforce point-in-time holdouts`
 
 ## Phase 5 — Monte Carlo des règles de sortie
+
+État : state machine et diagnostics d'incertitude implémentés ; LSM différé faute d'écart
+matériel mesuré ; gate complet vert (173 tests) ; commit atomique à créer.
 
 ### Documentary Research
 

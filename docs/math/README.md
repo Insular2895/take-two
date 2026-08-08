@@ -22,6 +22,12 @@ The executable contract is
 `src/take_two_options/quantitative/contracts.py`. The structured lineage is maintained in
 `docs/research/formula_registry.yaml`.
 
+Monte Carlo output uncertainty is carried in sidecar reports from
+`src/take_two_options/simulation/uncertainty.py`. Unweighted binary path outcomes use Wilson
+intervals; weighted paths report ESS but no binomial interval. Antithetic standard errors count
+pairs as independent replications, and control-variate reports retain variance before and after
+adjustment.
+
 ## Evidence levels
 
 `sourced` means the source passage has been inspected. `implemented` means code exists.

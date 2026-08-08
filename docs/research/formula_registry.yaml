@@ -220,6 +220,95 @@ formulas:
           - test_rolling_forecast_comparison_is_reproducible_and_labeled_synthetic
     validation_status: tested
 
+  - formula_id: FORM-WILSON-001
+    name: Wilson binomial score interval
+    statement: "Invert the normal score test for an iid binomial proportion instead of using the symmetric Wald interval."
+    measure: not_applicable
+    units: probability
+    assumptions:
+      - independent identically distributed Bernoulli trials
+      - confidence strictly between zero and one
+      - weighted paths require another interval method
+    sources:
+      - source_id: paper-wilson-binomial-interval
+        chapter: "journal article"
+        page: "209-212; primary metadata inspected, full text blocked"
+    implementation:
+      - file: src/take_two_options/research_statistics.py
+        symbols: [wilson_interval]
+      - file: src/take_two_options/simulation/uncertainty.py
+        symbols: [estimate_probability, estimate_path_probabilities]
+    tests:
+      - file: tests/test_simulation_uncertainty.py
+        symbols:
+          - test_wilson_probability_exposes_rare_event_and_minimum_path_uncertainty
+          - test_all_canonical_path_probabilities_receive_uncertainty_sidecars
+    validation_status: tested
+
+  - formula_id: FORM-CONTROL-VARIATE-001
+    name: Linear control-variate estimator
+    statement: "Y_cv=Y-b*(X-E[X]), with sample coefficient b=Cov(X,Y)/Var(X)."
+    measure: P_or_Q_by_application
+    units: payoff_or_statistic_unit
+    assumptions:
+      - aligned finite observations
+      - known expectation of the control
+      - non-zero control variance
+      - same-sample coefficient confidence intervals are asymptotic
+    sources:
+      - source_id: book-glasserman-monte-carlo
+        chapter: "4.1"
+        page: "186-201, equations 4.1-4.5 and output analysis"
+    implementation:
+      - file: src/take_two_options/simulation/uncertainty.py
+        symbols: [control_variate_estimate]
+    tests:
+      - file: tests/test_simulation_uncertainty.py
+        symbols: [test_control_variate_reports_measured_variance_reduction]
+    validation_status: tested
+
+  - formula_id: FORM-ANTITHETIC-001
+    name: Antithetic paired estimator
+    statement: "Average each law-preserving pair (Y,Y_tilde), then average the independent pair means."
+    measure: P_or_Q_by_application
+    units: payoff_or_statistic_unit
+    assumptions:
+      - each member of a pair has the target marginal law
+      - pairs are independent across replications
+      - benefit requires negative paired-output covariance
+    sources:
+      - source_id: book-glasserman-monte-carlo
+        chapter: "4.2"
+        page: "205-207, equations 4.27-4.29"
+    implementation:
+      - file: src/take_two_options/simulation/uncertainty.py
+        symbols: [antithetic_estimate]
+    tests:
+      - file: tests/test_simulation_uncertainty.py
+        symbols: [test_antithetic_pairs_are_independent_replications_for_standard_error]
+    validation_status: tested
+
+  - formula_id: FORM-BLOCK-BOOTSTRAP-001
+    name: Circular moving-block bootstrap percentile interval
+    statement: "Resample contiguous circular blocks until the original series length is restored, then take empirical statistic quantiles."
+    measure: P
+    units: statistic_dependent
+    assumptions:
+      - stationary dependent observations
+      - declared block length and bootstrap sample count
+      - percentile interval is adequate for the stated use
+    sources:
+      - source_id: paper-kunsch-block-bootstrap
+        chapter: "primary article metadata and abstract"
+        page: "1217-1241"
+    implementation:
+      - file: src/take_two_options/simulation/uncertainty.py
+        symbols: [circular_block_bootstrap]
+    tests:
+      - file: tests/test_simulation_uncertainty.py
+        symbols: [test_circular_block_bootstrap_is_seeded_and_preserves_dependency_blocks]
+    validation_status: tested
+
   - formula_id: FORM-PBO-001
     name: Combinatorially symmetric probability of backtest overfitting diagnostic
     statement: "Across symmetric train/test fold combinations, measure how often the in-sample winner ranks below the OOS median."

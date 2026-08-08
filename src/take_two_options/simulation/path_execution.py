@@ -9,6 +9,7 @@ from datetime import date, timedelta
 from take_two_options.domain import OptionType, PositionSide
 from take_two_options.knowledge.schemas import CandidateLeg, CompiledStrategyCandidate
 from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS
+from take_two_options.simulation.exit_state import advance_exit_state, initial_exit_state
 
 
 @dataclass(frozen=True)
@@ -34,9 +35,7 @@ def _option_value(
 ) -> float:
     if time_years <= 0:
         return (
-            max(spot - strike, 0.0)
-            if option_type is OptionType.CALL
-            else max(strike - spot, 0.0)
+            max(spot - strike, 0.0) if option_type is OptionType.CALL else max(strike - spot, 0.0)
         )
     volatility = max(volatility, 0.0001)
     scale = volatility * math.sqrt(time_years)
@@ -80,9 +79,7 @@ def _position_exit_value(
             if leg.side is PositionSide.LONG
             else theoretical * (1 + half_spread)
         )
-        value += (
-            leg.side.sign * leg.quantity * leg.quote.multiplier * max(executable, 0.0)
-        )
+        value += leg.side.sign * leg.quantity * leg.quote.multiplier * max(executable, 0.0)
     return value
 
 
@@ -99,15 +96,10 @@ def execute_path(
     maximum_holding = min(maximum_holding, max((earliest_expiration - start_date).days, 1))
     entry_costs = candidate.risk.fees + candidate.risk.slippage
     exit_contract_sides = sum(leg.quantity for leg in candidate.legs)
-    exit_costs = exit_contract_sides * (
-        commission_per_contract_side + slippage_per_contract_side
-    )
+    exit_costs = exit_contract_sides * (commission_per_contract_side + slippage_per_contract_side)
     denominator = max(candidate.risk.maximum_loss, 0.01)
-    peak_pnl = -entry_costs
-    maximum_drawdown = 0.0
     final_pnl = -entry_costs
-    exit_reason = "time_exit"
-    exit_day = maximum_holding
+    exit_state = initial_exit_state(final_pnl)
     for day in range(1, maximum_holding + 1):
         value = _position_exit_value(
             candidate,
@@ -115,25 +107,24 @@ def execute_path(
             valuation_date=start_date + timedelta(days=day),
         )
         pnl = value - candidate.risk.entry_debit - entry_costs - exit_costs
-        peak_pnl = max(peak_pnl, pnl)
-        maximum_drawdown = max(maximum_drawdown, peak_pnl - pnl)
         return_on_risk = pnl / denominator
-        if (
-            candidate.exit_policy.profit_target is not None
-            and return_on_risk >= candidate.exit_policy.profit_target
-        ):
-            final_pnl, exit_reason, exit_day = pnl, "profit_target", day
-            break
-        if (
-            candidate.exit_policy.stop_loss is not None
-            and return_on_risk <= -candidate.exit_policy.stop_loss
-        ):
-            final_pnl, exit_reason, exit_day = pnl, "stop_loss", day
-            break
+        exit_state = advance_exit_state(
+            exit_state,
+            day=day,
+            pnl=pnl,
+            return_on_risk=return_on_risk,
+            is_final_checkpoint=day == maximum_holding,
+            profit_target=candidate.exit_policy.profit_target,
+            stop_loss=candidate.exit_policy.stop_loss,
+        )
         final_pnl = pnl
+        if exit_state.terminal:
+            break
+    if not exit_state.terminal:
+        raise RuntimeError("path execution ended without a terminal exit state")
     return PathExecutionResult(
         pnl=round(final_pnl, 6),
-        exit_day=exit_day,
-        exit_reason=exit_reason,
-        maximum_drawdown=round(maximum_drawdown, 6),
+        exit_day=exit_state.exit_day or maximum_holding,
+        exit_reason=exit_state.state.value,
+        maximum_drawdown=round(exit_state.maximum_drawdown, 6),
     )

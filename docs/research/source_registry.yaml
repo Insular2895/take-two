@@ -194,10 +194,10 @@ sources:
     edition: null
     year: 2004
     volume: null
-    chapter: null
-    section: null
-    page_start: null
-    page_end: null
+    chapter: "4 and 8"
+    section: "4.1 Control Variates; 4.2 Antithetic Variates; American option optimal stopping"
+    page_start: 186
+    page_end: 207
     pdf_file:
       - Monte Carlo methods in financial engineerin-Paul Glasserman-Springer (2004).pdf
       - Monte_Carlo_Methods_In_Financial_Enginee.pdf
@@ -209,8 +209,10 @@ sources:
     formula_id:
       - FORM-MC-SE-001
       - FORM-MC-CI-001
+      - FORM-CONTROL-VARIATE-001
+      - FORM-ANTITHETIC-001
     formula: null
-    assumptions: "Chapter and edition must be verified before citation."
+    assumptions: "Replications used for standard errors must be independent; paired antithetic paths count as one replication."
     measure: P_or_Q_by_application
     units: null
     alternatives:
@@ -219,15 +221,95 @@ sources:
       - two non-identical payloads likely represent the same work
     implementation_file:
       - src/take_two_options/simulation/convergence.py
+      - src/take_two_options/simulation/uncertainty.py
+      - src/take_two_options/simulation/exit_state.py
       - src/take_two_options/intelligence/valuation.py
     implementation_symbol:
       - expectation_converged
+      - control_variate_estimate
+      - antithetic_estimate
+      - advance_exit_state
       - value_candidate
     test_file:
       - tests/test_knowledge_optimizer.py
+      - tests/test_simulation_uncertainty.py
       - tests/test_intelligence_v11.py
-    validation_status: proposed
-    notes: "Current code has deterministic seeds and a basic half/full convergence test; documentary mapping is not complete."
+    validation_status: tested
+    notes: "Chapter 4 printed pp. 186-207 and the chapter 8 optimal-stopping boundary were inspected directly from the local PDF."
+
+  - source_id: paper-kunsch-block-bootstrap
+    source_type: primary_research_article
+    author:
+      - Hans R. Künsch
+    title: The Jackknife and the Bootstrap for General Stationary Observations
+    edition: null
+    year: 1989
+    volume: "17(3)"
+    chapter: null
+    section: null
+    page_start: 1217
+    page_end: 1241
+    pdf_file: null
+    url:
+      - https://doi.org/10.1214/aos/1176347265
+    concept:
+      - block bootstrap
+      - stationary dependent observations
+      - resampling uncertainty
+    formula_id:
+      - FORM-BLOCK-BOOTSTRAP-001
+    formula: null
+    assumptions: "The observed sequence is stationary with dependence compatible with block resampling."
+    measure: P
+    units: statistic_dependent
+    alternatives:
+      - stationary bootstrap
+      - dependent parametric bootstrap
+    limitations:
+      - primary bibliographic metadata and abstract inspected, not full article text
+      - block-length selection remains application-specific
+    implementation_file: src/take_two_options/simulation/uncertainty.py
+    implementation_symbol: circular_block_bootstrap
+    test_file: tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "The implementation uses circular moving blocks; it does not claim automatic block-length optimality."
+
+  - source_id: paper-clement-lamberton-protter-lsm
+    source_type: local_paper_and_primary_repository_metadata
+    author:
+      - Emmanuelle Clément
+      - Damien Lamberton
+      - Philip Protter
+    title: An analysis of the Longstaff-Schwartz algorithm for American option pricing
+    edition: null
+    year: 2001
+    volume: null
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: an analysis of the longstaff-schwartz algorithm for american option pricing.pdf
+    url:
+      - https://hdl.handle.net/1813/9176
+    concept:
+      - least-squares Monte Carlo
+      - American option optimal stopping
+      - convergence analysis
+    formula_id: []
+    formula: null
+    assumptions: "Regression basis, sample reuse and stopping-time filtration require explicit validation before implementation."
+    measure: Q
+    units: option_price
+    alternatives:
+      - finite-difference American pricing
+    limitations:
+      - local PDF text extraction is corrupted
+      - primary repository metadata inspected, formulas not extracted
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    notes: "LSM is deferred until a material FD/checkpoint gap is demonstrated on an authorized panel."
 
   - source_id: book-suli-mayers-numerical-analysis
     source_type: local_book
@@ -387,6 +469,48 @@ sources:
     validation_status: sourced
     notes: "Third edition, Wiley and 2010 copyright verified directly; chapter 3 passages inspected."
 
+  - source_id: paper-wilson-binomial-interval
+    source_type: primary_research_article_metadata
+    author:
+      - Edwin B. Wilson
+    title: Probable Inference, the Law of Succession, and Statistical Inference
+    edition: null
+    year: 1927
+    volume: "22(158)"
+    chapter: null
+    section: null
+    page_start: 209
+    page_end: 212
+    pdf_file: null
+    url:
+      - https://doi.org/10.1080/01621459.1927.10502953
+    concept:
+      - binomial score confidence interval
+      - rare observed counts
+    formula_id:
+      - FORM-WILSON-001
+    formula: null
+    assumptions: "Independent identically distributed Bernoulli trials."
+    measure: not_applicable
+    units: probability
+    alternatives:
+      - exact binomial interval
+      - likelihood interval
+    limitations:
+      - Crossref primary metadata inspected; publisher PDF access returned HTTP 403
+      - not applicable to weighted or dependent paths without a separate method
+    implementation_file:
+      - src/take_two_options/research_statistics.py
+      - src/take_two_options/simulation/uncertainty.py
+    implementation_symbol:
+      - wilson_interval
+      - estimate_probability
+    test_file:
+      - tests/test_research_statistics.py
+      - tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "No full-text claim is made; implementation behavior is covered by deterministic tests."
+
   - source_id: book-wasserman-all-statistics
     source_type: local_book
     author:
@@ -418,14 +542,16 @@ sources:
       - PDF has recoverable structural warnings
     implementation_file:
       - src/take_two_options/research_statistics.py
+      - src/take_two_options/simulation/uncertainty.py
     implementation_symbol:
       - wilson_interval
       - bootstrap_interval
+      - circular_block_bootstrap
       - deflated_sharpe_probability
     test_file:
       - tests/test_research_statistics.py
     validation_status: proposed
-    notes: "Wilson and i.i.d. bootstrap utilities already exist; their use is not uniform across V11 metrics."
+    notes: "The iid bootstrap remains separate; Phase 5 adds a dependency-aware block-resampling sidecar."
 
   - source_id: book-bjork-arbitrage-theory
     source_type: local_book
@@ -990,13 +1116,53 @@ formula_links:
   - formula_id: FORM-WILSON-001
     name: Wilson binomial confidence interval
     source_id:
-      - book-wasserman-all-statistics
-    source_location_status: to_research
-    implementation_file: src/take_two_options/research_statistics.py
-    implementation_symbol: wilson_interval
-    test_file: tests/test_research_statistics.py
+      - paper-wilson-binomial-interval
+    source_location_status: primary_metadata_inspected_publisher_pdf_http_403
+    implementation_file:
+      - src/take_two_options/research_statistics.py
+      - src/take_two_options/simulation/uncertainty.py
+    implementation_symbol:
+      - wilson_interval
+      - estimate_probability
+      - estimate_path_probabilities
+    test_file:
+      - tests/test_research_statistics.py
+      - tests/test_simulation_uncertainty.py
     validation_status: tested
-    notes: "Utility exists and is tested, but is not uniformly wired into V11 probability outputs."
+    notes: "Canonical path probabilities now receive sidecars; weighted paths explicitly receive no binomial interval."
+
+  - formula_id: FORM-CONTROL-VARIATE-001
+    name: Linear control-variate estimator
+    source_id:
+      - book-glasserman-monte-carlo
+    source_location_status: inspected_section_4_1_printed_pages_186_201
+    implementation_file: src/take_two_options/simulation/uncertainty.py
+    implementation_symbol: control_variate_estimate
+    test_file: tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "Reports the estimated coefficient and variance before/after; same-sample coefficient inference is asymptotic."
+
+  - formula_id: FORM-ANTITHETIC-001
+    name: Antithetic paired estimator
+    source_id:
+      - book-glasserman-monte-carlo
+    source_location_status: inspected_section_4_2_printed_pages_205_207
+    implementation_file: src/take_two_options/simulation/uncertainty.py
+    implementation_symbol: antithetic_estimate
+    test_file: tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "Pair means, not individual paths, are counted as independent replications."
+
+  - formula_id: FORM-BLOCK-BOOTSTRAP-001
+    name: Circular moving-block bootstrap interval
+    source_id:
+      - paper-kunsch-block-bootstrap
+    source_location_status: primary_metadata_and_abstract_inspected
+    implementation_file: src/take_two_options/simulation/uncertainty.py
+    implementation_symbol: circular_block_bootstrap
+    test_file: tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "Seed and block size are explicit; coverage and block-length optimality are not claimed."
 
   - formula_id: FORM-PBO-001
     name: Probability of backtest overfitting diagnostic
