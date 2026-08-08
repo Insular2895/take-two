@@ -1,0 +1,129 @@
+{
+  "$defs": {
+    "HoldoutState": {
+      "enum": [
+        "UNOPENED",
+        "OPENED_ONCE",
+        "CONTAMINATED",
+        "INVALID"
+      ],
+      "title": "HoldoutState",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/holdout_ledger_entry.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actor": {
+      "minLength": 1,
+      "title": "Actor",
+      "type": "string"
+    },
+    "code_commit": {
+      "minLength": 7,
+      "title": "Code Commit",
+      "type": "string"
+    },
+    "dataset_hash": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dataset Hash"
+    },
+    "entry_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Entry Hash",
+      "type": "string"
+    },
+    "event": {
+      "enum": [
+        "initialize",
+        "provision",
+        "open_once",
+        "report_unchanged",
+        "mark_contaminated",
+        "invalidate"
+      ],
+      "title": "Event",
+      "type": "string"
+    },
+    "holdout_id": {
+      "minLength": 1,
+      "title": "Holdout Id",
+      "type": "string"
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "title": "Occurred At",
+      "type": "string"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "previous_hash": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previous Hash"
+    },
+    "purpose": {
+      "minLength": 1,
+      "title": "Purpose",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sequence": {
+      "exclusiveMinimum": 0,
+      "title": "Sequence",
+      "type": "integer"
+    },
+    "state": {
+      "$ref": "#/$defs/HoldoutState"
+    },
+    "tuning_performed": {
+      "const": false,
+      "title": "Tuning Performed",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "schema_version",
+    "sequence",
+    "occurred_at",
+    "event",
+    "state",
+    "holdout_id",
+    "code_commit",
+    "actor",
+    "purpose",
+    "entry_hash",
+    "tuning_performed",
+    "order_capability"
+  ],
+  "title": "HoldoutLedgerEntry",
+  "type": "object"
+}

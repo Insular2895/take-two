@@ -1,7 +1,7 @@
 schema_version: "1.0"
 protocol_id: ttwo-v10-final-holdout-protocol
 sealed_on: "2026-08-08"
-status: awaiting_authorized_dataset
+status: UNOPENED
 descriptor:
   holdout_id: ttwo-v10-final-holdout
   canonical_descriptor: "ttwo-v10-final-holdout|unprovisioned|point-in-time-eod-options|never-open-before-phase4|2026-08-08"
@@ -28,4 +28,11 @@ gate:
   hash_verified: false
   content_opened: false
   empirical_promotion_allowed: false
+ledger:
+  path: validation/final_holdout_ledger.jsonl
+  state: UNOPENED
+  dataset_identity_provisioned: false
+  irreversible_open_transition: UNOPENED_TO_OPENED_ONCE
+  reopening_forbidden: true
+  tuning_after_open_forbidden: true
 blocking_reason: "No authorized real point-in-time option dataset is present; no dataset hash can be truthfully sealed."

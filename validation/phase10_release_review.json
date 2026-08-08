@@ -24,14 +24,14 @@
     "v8",
     "v9"
   ],
-  "final_holdout_status": "not_created_no_dataset",
+  "final_holdout_status": "UNOPENED_UNPROVISIONED",
   "example_report_id": "phase9-synthetic-no-trade",
   "example_decision_status": "NO_TRADE",
   "reproducibility_status": "STRUCTURAL_ONLY_NO_ACTIVE_EXPERIMENT_MANIFESTS",
   "release_blockers": [
     "No authorized real point-in-time TTWO option dataset is committed.",
     "No active experiment manifest can be replayed; only legacy contaminated runs exist.",
-    "The fresh final holdout has not been created or sealed.",
+    "The fresh final holdout is initialized but has no provisioned dataset hash.",
     "No minimum-duration paper campaign has been completed.",
     "Live combo quotes, realized slippage, fill and rejection evidence are absent."
   ],

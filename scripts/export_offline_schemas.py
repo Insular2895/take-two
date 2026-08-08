@@ -20,6 +20,7 @@ from take_two_options.intelligence.schemas import (
     NormalizedEvidenceEvent,
     UnifiedObservation,
 )
+from take_two_options.validation.final_holdout import HoldoutLedgerEntry
 from take_two_options.validation.walk_forward_protocol import WalkForwardProtocolReport
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +29,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "empirical_calibration.schema.json": EmpiricalCalibrationReport,
     "pre_opra_config.schema.json": PreOpraConfig,
     "historical_dataset_manifest.schema.json": HistoricalDatasetManifest,
+    "holdout_ledger_entry.schema.json": HoldoutLedgerEntry,
     "readiness.schema.json": FeatureReadiness,
     "observation.schema.json": UnifiedObservation,
     "event.schema.json": NormalizedEvidenceEvent,

@@ -12,6 +12,7 @@ from pydantic import Field
 
 from take_two_options.domain import StrictModel
 from take_two_options.reporting.evidence_grade import FinalDecisionEvidenceReport
+from take_two_options.validation.final_holdout import load_holdout_ledger
 
 
 class ReleaseEvidenceReview(StrictModel):
@@ -81,13 +82,15 @@ def build_release_evidence_review(root: Path) -> ReleaseEvidenceReview:
             encoding="utf-8"
         )
     )
-    holdout_status_text = (root / "validation/HOLDOUT_LEDGER_STATUS.md").read_text(
-        encoding="utf-8"
-    )
+    holdout_entries = load_holdout_ledger(root / "validation/final_holdout_ledger.jsonl")
     final_holdout_status = (
-        "not_created_no_dataset"
-        if "`not_created_no_dataset`" in holdout_status_text
-        else "unknown"
+        "UNOPENED_UNPROVISIONED"
+        if holdout_entries
+        and holdout_entries[-1].state.value == "UNOPENED"
+        and holdout_entries[-1].dataset_hash is None
+        else holdout_entries[-1].state.value
+        if holdout_entries
+        else "not_initialized"
     )
     example = FinalDecisionEvidenceReport.model_validate_json(
         (root / "reports/examples/phase9_final_evidence.json").read_text(encoding="utf-8")
@@ -95,7 +98,7 @@ def build_release_evidence_review(root: Path) -> ReleaseEvidenceReview:
     blockers = [
         "No authorized real point-in-time TTWO option dataset is committed.",
         "No active experiment manifest can be replayed; only legacy contaminated runs exist.",
-        "The fresh final holdout has not been created or sealed.",
+        "The fresh final holdout is initialized but has no provisioned dataset hash.",
         "No minimum-duration paper campaign has been completed.",
         "Live combo quotes, realized slippage, fill and rejection evidence are absent.",
     ]

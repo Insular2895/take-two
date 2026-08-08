@@ -20,6 +20,6 @@ def test_phase10_release_review_is_deterministic_and_conservative() -> None:
     assert committed.active_experiment_manifests == []
     assert committed.reproduced_experiment_manifests == []
     assert committed.contaminated_holdouts == ["v7", "v8", "v9"]
-    assert committed.final_holdout_status == "not_created_no_dataset"
+    assert committed.final_holdout_status == "UNOPENED_UNPROVISIONED"
     assert committed.invalid_promoted_claims == []
     assert committed.order_capability == "forbidden"

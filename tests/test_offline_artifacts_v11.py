@@ -33,6 +33,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
         "empirical_calibration.schema.json",
         "event.schema.json",
         "historical_dataset_manifest.schema.json",
+        "holdout_ledger_entry.schema.json",
         "model_validation.schema.json",
         "observation.schema.json",
         "pre_opra_config.schema.json",
