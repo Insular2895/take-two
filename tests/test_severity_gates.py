@@ -73,12 +73,29 @@ def test_empty_candidate_pool_is_not_presented_as_financial_gate_sensitivity() -
     assert frequency == 1
 
 
-def test_committed_tt_report_marks_all_severity_outputs_unavailable() -> None:
+def test_committed_tt_report_exposes_real_severity_intervals_and_frontier() -> None:
     report = SeverityGateReport.model_validate_json(
         (ROOT / "reports/pre_opra/severity_and_gate_sensitivity_2026-08-08.json").read_text()
     )
-    assert report.status == "BLOCKED_NO_CANDIDATE_DISTRIBUTION"
-    assert report.payoff_severity is None
-    assert report.best_blocked_candidate.selection_status == "unavailable"
-    assert report.no_position_frequency == 1
-    assert report.sensitivity_interpretation == "pipeline_blocked_empty_candidate_pool"
+    assert report.status == "DEVELOPMENT_ANALYSIS_READY"
+    assert report.payoff_severity is not None
+    assert report.payoff_severity.observations == 10
+    assert report.payoff_severity.severe_loss_ladder[0].probability == pytest.approx(0.5)
+    assert all(
+        point.wilson_interval_95[0]
+        <= point.probability
+        <= point.wilson_interval_95[1]
+        for point in report.payoff_severity.severe_loss_ladder
+    )
+    assert report.best_blocked_candidate.selection_status == "identified"
+    assert report.best_blocked_candidate.failed_gates[0].name == "opportunity"
+    assert report.no_position_frequency == pytest.approx(2 / 3)
+    assert report.sensitivity_interpretation == "candidate_pool_evaluated"
+    engine = next(
+        point
+        for point in report.opportunity_risk_frontier
+        if point.candidate_id == "engine_candidate"
+    )
+    assert not engine.pareto_efficient
+    assert "buy_and_hold" in engine.dominated_by
+    assert report.holdout_used is False

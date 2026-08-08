@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import random
 from statistics import fmean, median
 from typing import Literal
 
@@ -18,6 +19,9 @@ class SevereLossPoint(StrictModel):
     loss_threshold: float = Field(gt=0, le=1)
     probability: float = Field(ge=0, le=1)
     observations: int = Field(gt=0)
+    wilson_interval_95: tuple[float, float]
+    bootstrap_interval_95: tuple[float, float]
+    bootstrap_samples: int = Field(gt=0)
 
 
 class PayoffSeverity(StrictModel):
@@ -83,6 +87,18 @@ class GateSensitivityRow(StrictModel):
     no_position_recommended: bool
 
 
+class OpportunityRiskFrontierPoint(StrictModel):
+    candidate_id: str
+    opportunity: float = Field(ge=0, le=100)
+    risk: float = Field(ge=0, le=100)
+    evidence: float = Field(ge=0, le=100)
+    model_agreement: float | None = Field(default=None, ge=0, le=100)
+    execution_quality: float = Field(ge=0, le=100)
+    pareto_efficient: bool
+    dominated_by: list[str]
+    basis: str
+
+
 class SeverityGateReport(StrictModel):
     schema_version: Literal["1.0"]
     report_id: str
@@ -96,6 +112,9 @@ class SeverityGateReport(StrictModel):
     payoff_severity: PayoffSeverity | None
     best_blocked_candidate: BestBlockedCandidate
     gate_sensitivity: list[GateSensitivityRow]
+    opportunity_risk_frontier: list[OpportunityRiskFrontierPoint] = Field(
+        default_factory=list
+    )
     no_position_frequency: float | None = Field(default=None, ge=0, le=1)
     sensitivity_interpretation: Literal[
         "candidate_pool_evaluated",
@@ -106,9 +125,61 @@ class SeverityGateReport(StrictModel):
     order_capability: Literal["forbidden"] = "forbidden"
 
 
-def payoff_severity(returns: list[float]) -> PayoffSeverity:
+def _wilson_interval(successes: int, observations: int) -> tuple[float, float]:
+    z = 1.959963984540054
+    probability = successes / observations
+    denominator = 1.0 + z**2 / observations
+    center = (probability + z**2 / (2 * observations)) / denominator
+    half_width = (
+        z
+        * math.sqrt(
+            probability * (1 - probability) / observations
+            + z**2 / (4 * observations**2)
+        )
+        / denominator
+    )
+    return max(0.0, center - half_width), min(1.0, center + half_width)
+
+
+def _bootstrap_probability_interval(
+    indicators: list[bool], *, samples: int, seed: int
+) -> tuple[float, float]:
+    generator = random.Random(seed)
+    observations = len(indicators)
+    estimates = sorted(
+        sum(indicators[generator.randrange(observations)] for _ in range(observations))
+        / observations
+        for _ in range(samples)
+    )
+    return (
+        estimates[math.floor(0.025 * (samples - 1))],
+        estimates[math.ceil(0.975 * (samples - 1))],
+    )
+
+
+def payoff_severity(
+    returns: list[float], *, bootstrap_samples: int = 2_000, seed: int = 20_260_808
+) -> PayoffSeverity:
     if not returns or any(not math.isfinite(value) or value < -1 for value in returns):
         raise ValueError("returns must be finite, non-empty and bounded below by -100%")
+    if bootstrap_samples <= 0:
+        raise ValueError("bootstrap_samples must be positive")
+    ladder = []
+    for index, threshold in enumerate(LOSS_THRESHOLDS):
+        indicators = [value < -threshold for value in returns]
+        successes = sum(indicators)
+        ladder.append(
+            SevereLossPoint(
+                loss_threshold=threshold,
+                probability=successes / len(returns),
+                observations=len(returns),
+                wilson_interval_95=_wilson_interval(successes, len(returns)),
+                bootstrap_interval_95=_bootstrap_probability_interval(
+                    indicators, samples=bootstrap_samples, seed=seed + index
+                ),
+                bootstrap_samples=bootstrap_samples,
+            )
+        )
     return PayoffSeverity(
         observations=len(returns),
         mean_return=fmean(returns),
@@ -116,15 +187,29 @@ def payoff_severity(returns: list[float]) -> PayoffSeverity:
         worst_return=min(returns),
         cvar_95_loss=conditional_value_at_risk(returns),
         probability_profit=sum(value > 0 for value in returns) / len(returns),
-        severe_loss_ladder=[
-            SevereLossPoint(
-                loss_threshold=threshold,
-                probability=sum(value < -threshold for value in returns) / len(returns),
-                observations=len(returns),
-            )
-            for threshold in LOSS_THRESHOLDS
-        ],
+        severe_loss_ladder=ladder,
     )
+
+
+def mark_pareto_frontier(
+    points: list[OpportunityRiskFrontierPoint],
+) -> list[OpportunityRiskFrontierPoint]:
+    output = []
+    for point in points:
+        dominating = [
+            other.candidate_id
+            for other in points
+            if other.candidate_id != point.candidate_id
+            and other.opportunity >= point.opportunity
+            and other.risk <= point.risk
+            and (other.opportunity > point.opportunity or other.risk < point.risk)
+        ]
+        output.append(
+            point.model_copy(
+                update={"pareto_efficient": not dominating, "dominated_by": dominating}
+            )
+        )
+    return output
 
 
 def evaluate_gate_sensitivity(

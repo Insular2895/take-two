@@ -209,6 +209,80 @@
       "title": "GateSetting",
       "type": "object"
     },
+    "OpportunityRiskFrontierPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "title": "Basis",
+          "type": "string"
+        },
+        "candidate_id": {
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "dominated_by": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Dominated By",
+          "type": "array"
+        },
+        "evidence": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Evidence",
+          "type": "number"
+        },
+        "execution_quality": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Execution Quality",
+          "type": "number"
+        },
+        "model_agreement": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Agreement"
+        },
+        "opportunity": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Opportunity",
+          "type": "number"
+        },
+        "pareto_efficient": {
+          "title": "Pareto Efficient",
+          "type": "boolean"
+        },
+        "risk": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Risk",
+          "type": "number"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "opportunity",
+        "risk",
+        "evidence",
+        "execution_quality",
+        "pareto_efficient",
+        "dominated_by",
+        "basis"
+      ],
+      "title": "OpportunityRiskFrontierPoint",
+      "type": "object"
+    },
     "PayoffSeverity": {
       "additionalProperties": false,
       "properties": {
@@ -266,6 +340,25 @@
     "SevereLossPoint": {
       "additionalProperties": false,
       "properties": {
+        "bootstrap_interval_95": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Bootstrap Interval 95",
+          "type": "array"
+        },
+        "bootstrap_samples": {
+          "exclusiveMinimum": 0,
+          "title": "Bootstrap Samples",
+          "type": "integer"
+        },
         "loss_threshold": {
           "exclusiveMinimum": 0,
           "maximum": 1,
@@ -282,12 +375,29 @@
           "minimum": 0,
           "title": "Probability",
           "type": "number"
+        },
+        "wilson_interval_95": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Wilson Interval 95",
+          "type": "array"
         }
       },
       "required": [
         "loss_threshold",
         "probability",
-        "observations"
+        "observations",
+        "wilson_interval_95",
+        "bootstrap_interval_95",
+        "bootstrap_samples"
       ],
       "title": "SevereLossPoint",
       "type": "object"
@@ -343,6 +453,13 @@
       ],
       "default": null,
       "title": "No Position Frequency"
+    },
+    "opportunity_risk_frontier": {
+      "items": {
+        "$ref": "#/$defs/OpportunityRiskFrontierPoint"
+      },
+      "title": "Opportunity Risk Frontier",
+      "type": "array"
     },
     "order_capability": {
       "const": "forbidden",

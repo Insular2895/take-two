@@ -304,3 +304,10 @@ extensions:
     aggregate_report: reports/pre_opra/five_scores_2026-08-08.json
     partial_score_policy: preserve_original_weights_without_renormalization
     classification_rule_version: pre-opra-v2
+  severity_gates:
+    aggregate_report: reports/pre_opra/severity_and_gate_sensitivity_2026-08-08.json
+    loss_thresholds: [0.10, 0.25, 0.50, 0.70, 0.90, 0.99]
+    interval_methods: [wilson_95, bootstrap_percentile_95]
+    bootstrap_samples: 2000
+    seed: 20260808
+    gate_settings: [permissive-predefined, central-predefined, strict-predefined]
