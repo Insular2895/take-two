@@ -1,0 +1,794 @@
+schema_version: "1.0"
+generated_on: "2026-08-08"
+validation_status: draft_to_validate
+policy:
+  pdf_root_requested: "/Users/insular/take two/take-two/BOOK"
+  pdf_root_resolved_candidate: "/Users/insular/Desktop/book 📙"
+  resolved_candidate_requires_confirmation: true
+  pdf_access: read_only
+  summary_is_not_evidence: true
+  unknown_metadata_must_remain_null: true
+  allowed_evidence_states:
+    - proposed
+    - sourced
+    - implemented
+    - tested
+    - numerically_validated
+    - empirically_validated
+    - holdout_validated
+    - production_ready
+  current_maximum_claim: sourced
+
+sources:
+  - source_id: book-bergomi-stochastic-volatility-modeling
+    source_type: local_book_fragments
+    author:
+      - Lorenzo Bergomi
+    title: Stochastic Volatility Modeling
+    edition: null
+    year: null
+    volume: null
+    chapter: "3-12; epilogue/reference fragment"
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file:
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C3.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C4.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C5.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C6.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C7.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C9.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C10.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C11.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C12.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_ref.pdf
+    concept:
+      - stochastic volatility
+      - Heston diagnostics
+      - forward variance
+      - volatility smile dynamics
+      - local-stochastic volatility
+    formula_id: []
+    formula: null
+    assumptions: "To be extracted per chapter before use; chapters 1-2 are absent."
+    measure: "mixed/section-dependent; must be tagged P or Q per extracted formula"
+    units: "not yet extracted"
+    alternatives:
+      - Heston
+      - local volatility
+      - SVI/eSSVI as a surface parameterization rather than a dynamics model
+    limitations:
+      - fragmented and incomplete local copy
+      - edition and year unknown
+      - no formula is accepted from a summary alone
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    notes: "One bibliographic work, never eleven independent books. Chapter headings were verified directly from the PDFs."
+
+  - source_id: book-andersen-piterbarg-interest-rate-modeling
+    source_type: local_book_fragments
+    author:
+      - Leif B.G. Andersen
+      - Vladimir V. Piterbarg
+    title: Interest Rate Modeling
+    subtitle: null
+    edition: null
+    year: 2010
+    volume:
+      - "Volume I — Foundations and Vanilla Models"
+      - "Volume II — Term Structure Models"
+    chapter: "1-15"
+    section: "Priority: 1.3, 1.9-1.10, 2.3-2.11, 3.2-3.5, 4.2-4.5, 6.1-6.5, 8-10, 14-15"
+    page_start: null
+    page_end: null
+    pdf_file:
+      - interest rate/Interest_Rate_Modeling_by_Piterbarg_I-1.pdf
+      - interest rate/Interest_Rate_Modeling_by_Piterbarg_I-2.pdf
+      - interest rate/Interest_Rate_Modeling_by_Piterbarg_II.pdf
+    concept:
+      - martingale measures and P/Q separation
+      - numerical pricing stability
+      - Monte Carlo variance reduction
+      - yield-curve construction and interpolation
+      - short-rate and HJM models
+    formula_id: []
+    formula: null
+    assumptions: "Extract per section; the three local files cover Volume I in two fragments and Volume II, not all three volumes."
+    measure: "mixed/section-dependent; risk-neutral sections must be explicitly tagged Q"
+    units: "rates, discount factors, year fractions and day-counts must be recorded per use"
+    alternatives:
+      - deterministic Treasury curve
+      - FRED/ALFRED point-in-time rates
+      - simple bootstrapped discount curve
+    limitations:
+      - Volume III absent
+      - edition unknown
+      - some files carry structural PDF warnings
+      - a sophisticated rate model is not justified for TTWO without materiality evidence
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    notes: "Title, authors, 2010 date, volume structure and chapter map were extracted from the PDFs."
+
+  - source_id: book-gatheral-volatility-surface
+    source_type: required_book_missing
+    author:
+      - Jim Gatheral
+    title: "The Volatility Surface: A Practitioner's Guide"
+    edition: null
+    year: null
+    volume: null
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: null
+    concept:
+      - SVI
+      - static arbitrage
+      - local volatility
+    formula_id:
+      - FORM-SVI-RAW-001
+      - FORM-SVI-ARBITRAGE-001
+    formula: null
+    assumptions: null
+    measure: Q
+    units: total variance and log-forward-moneyness
+    alternatives:
+      - authoritative original SVI papers
+      - eSSVI primary papers
+    limitations:
+      - not present in the resolved local library
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: proposed
+    notes: "Phase 2 is not documentary-ready until a primary SVI source is available and inspected."
+
+  - source_id: book-shreve-stochastic-calculus-finance-ii
+    source_type: required_book_missing
+    author:
+      - Steven E. Shreve
+    title: "Stochastic Calculus for Finance II: Continuous-Time Models"
+    edition: null
+    year: null
+    volume: II
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: null
+    concept:
+      - Ito calculus
+      - change of measure
+      - Black-Scholes
+      - P/Q separation
+    formula_id:
+      - FORM-BS-PRICE-001
+      - FORM-MEASURE-CHANGE-001
+    formula: null
+    assumptions: null
+    measure: P_and_Q
+    units: null
+    alternatives:
+      - book-andersen-piterbarg-interest-rate-modeling
+      - book-bjork-arbitrage-theory
+    limitations:
+      - requested volume absent; only Shreve Volume I is present
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: proposed
+    notes: "Do not silently substitute Volume I for the requested continuous-time source."
+
+  - source_id: book-glasserman-monte-carlo
+    source_type: local_book_probable_duplicates
+    author:
+      - Paul Glasserman
+    title: Monte Carlo Methods in Financial Engineering
+    edition: null
+    year: 2004
+    volume: null
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file:
+      - Monte Carlo methods in financial engineerin-Paul Glasserman-Springer (2004).pdf
+      - Monte_Carlo_Methods_In_Financial_Enginee.pdf
+    concept:
+      - Monte Carlo convergence
+      - variance reduction
+      - American option simulation
+      - rare-event estimation
+    formula_id:
+      - FORM-MC-SE-001
+      - FORM-MC-CI-001
+    formula: null
+    assumptions: "Chapter and edition must be verified before citation."
+    measure: P_or_Q_by_application
+    units: null
+    alternatives:
+      - book-andersen-piterbarg-interest-rate-modeling
+    limitations:
+      - two non-identical payloads likely represent the same work
+    implementation_file:
+      - src/take_two_options/simulation/convergence.py
+      - src/take_two_options/intelligence/valuation.py
+    implementation_symbol:
+      - expectation_converged
+      - value_candidate
+    test_file:
+      - tests/test_knowledge_optimizer.py
+      - tests/test_intelligence_v11.py
+    validation_status: proposed
+    notes: "Current code has deterministic seeds and a basic half/full convergence test; documentary mapping is not complete."
+
+  - source_id: book-suli-mayers-numerical-analysis
+    source_type: local_book_identity_to_review
+    author:
+      - Endre Süli
+      - David Mayers
+    title: An Introduction to Numerical Analysis
+    edition: null
+    year: null
+    volume: null
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: Numerical_Analysis.pdf
+    concept:
+      - root finding
+      - conditioning
+      - interpolation
+      - finite differences
+      - convergence
+    formula_id:
+      - FORM-IV-ROOT-001
+      - FORM-FD-CONVERGENCE-001
+    formula: null
+    assumptions: "Identity must be confirmed from the title pages before use."
+    measure: not_applicable
+    units: numerical_scale_dependent
+    alternatives:
+      - book-nocedal-wright-numerical-optimization
+    limitations:
+      - file metadata does not establish author, title, edition or year
+    implementation_file:
+      - src/take_two_options/american.py
+      - src/take_two_options/intelligence/volatility_calibration.py
+    implementation_symbol:
+      - historical_option_analytics
+      - calibrate_local_volatility
+    test_file:
+      - tests/test_american.py
+      - tests/test_intelligence_v11.py
+    validation_status: proposed
+    notes: null
+
+  - source_id: book-nocedal-wright-numerical-optimization
+    source_type: local_book
+    author:
+      - Jorge Nocedal
+      - Stephen J. Wright
+    title: Numerical Optimization
+    edition: null
+    year: null
+    volume: null
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: NocedalJ.pdf
+    concept:
+      - constrained optimization
+      - line search
+      - trust regions
+      - calibration diagnostics
+    formula_id: []
+    formula: null
+    assumptions: "Edition and chapter remain to be verified."
+    measure: not_applicable
+    units: objective_dependent
+    alternatives:
+      - book-boyd-vandenberghe-convex-optimization
+    limitations:
+      - bibliographic edition/year not established
+    implementation_file:
+      - src/take_two_options/intelligence/optimizer.py
+    implementation_symbol:
+      - optimize_allocations
+    test_file:
+      - tests/test_intelligence_v11.py
+    validation_status: proposed
+    notes: "PDF metadata verifies title and both authors."
+
+  - source_id: book-boyd-vandenberghe-convex-optimization
+    source_type: local_book_identity_to_review
+    author:
+      - Stephen Boyd
+      - Lieven Vandenberghe
+    title: Convex Optimization
+    edition: null
+    year: null
+    volume: null
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: convex optimization.pdf
+    concept:
+      - constrained optimization
+      - duality and KKT
+      - robust allocation
+      - Pareto frontiers
+    formula_id: []
+    formula: null
+    assumptions: "Title-page identity must be confirmed before citation."
+    measure: not_applicable
+    units: objective_dependent
+    alternatives:
+      - exact integer enumeration for the current bounded TTWO budget
+    limitations:
+      - convex relaxation may not preserve whole-contract feasibility
+    implementation_file:
+      - src/take_two_options/intelligence/optimizer.py
+      - src/take_two_options/optimization/pareto.py
+    implementation_symbol:
+      - optimize_allocations
+      - pareto_rank
+    test_file:
+      - tests/test_intelligence_v11.py
+      - tests/test_knowledge_optimizer.py
+    validation_status: proposed
+    notes: "The existing exact enumerator should not be replaced without a measured need."
+
+  - source_id: book-tsay-analysis-financial-time-series
+    source_type: local_book
+    author:
+      - Ruey S. Tsay
+    title: Analysis of Financial Time Series
+    edition: Third Edition
+    year: null
+    volume: null
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: 42-analysis-of-financial-time-series-third-edition-wiley-series-in-probability-and-statistics-(www.tawcer.com).pdf
+    concept:
+      - ARMA
+      - GARCH
+      - conditional volatility
+      - diagnostics
+    formula_id:
+      - FORM-GARCH-001
+    formula: null
+    assumptions: "Chapter/year must be verified before use."
+    measure: P
+    units: return_frequency_dependent
+    alternatives:
+      - EWMA
+      - historical volatility baseline
+    limitations:
+      - model usefulness depends on sufficient point-in-time TTWO history and structural-break tests
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: proposed
+    notes: null
+
+  - source_id: book-wasserman-all-statistics
+    source_type: local_book
+    author:
+      - Larry Wasserman
+    title: "All of Statistics: A Concise Course in Statistical Inference"
+    edition: null
+    year: 2004
+    volume: null
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: 2004 - wasserman - all of statistics.pdf
+    concept:
+      - confidence intervals
+      - bootstrap
+      - tests
+      - model selection
+    formula_id:
+      - FORM-WILSON-001
+      - FORM-BOOTSTRAP-001
+    formula: null
+    assumptions: "Chapter and pages to be inspected before mapping formulas."
+    measure: not_applicable
+    units: statistic_dependent
+    alternatives:
+      - primary statistical papers for specialized multiple-testing procedures
+    limitations:
+      - PDF has recoverable structural warnings
+    implementation_file:
+      - src/take_two_options/research_statistics.py
+    implementation_symbol:
+      - wilson_interval
+      - bootstrap_interval
+      - deflated_sharpe_probability
+    test_file:
+      - tests/test_research_statistics.py
+    validation_status: proposed
+    notes: "Wilson and i.i.d. bootstrap utilities already exist; their use is not uniform across V11 metrics."
+
+  - source_id: book-bjork-arbitrage-theory
+    source_type: local_book
+    author:
+      - Tomas Björk
+    title: Arbitrage Theory in Continuous Time
+    edition: null
+    year: 2009
+    volume: null
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: Tomas Bjork Arbitrage Theory in Continuous Time (Oxford Finance)  2009.pdf
+    concept:
+      - absence of arbitrage
+      - equivalent measures
+      - numeraires
+      - incomplete markets
+    formula_id:
+      - FORM-MEASURE-CHANGE-001
+    formula: null
+    assumptions: "Edition/chapter/pages must be verified."
+    measure: P_and_Q
+    units: null
+    alternatives:
+      - book-andersen-piterbarg-interest-rate-modeling
+      - book-shreve-stochastic-calculus-finance-ii
+    limitations:
+      - local filename year is not a substitute for edition verification
+    implementation_file:
+      - src/take_two_options/simulation/legacy_models.py
+      - src/take_two_options/intelligence/stochastic.py
+    implementation_symbol: null
+    test_file: null
+    validation_status: proposed
+    notes: null
+
+  - source_id: repo-readme-v11-1
+    source_type: repository_documentation
+    author:
+      - take-two maintainers
+    title: TTWO Options Research Engine README
+    edition: "repository HEAD 178cfe8"
+    year: 2026
+    volume: null
+    chapter: null
+    section: "Formulas, V10/V11 architecture, safety contract"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    concept:
+      - implemented formulas
+      - report semantics
+      - read-only safety
+    formula_id: []
+    formula: "Multiple formulas documented without a formal formula registry."
+    assumptions: "Repository documentation can describe implementation but is not an independent theoretical source."
+    measure: mixed
+    units: mixed
+    alternatives: []
+    limitations:
+      - no formula-to-source-to-code-to-test identifiers
+    implementation_file: README.md
+    implementation_symbol: null
+    test_file: null
+    validation_status: implemented
+    notes: null
+
+  - source_id: official-quantlib-1-43
+    source_type: official_software_documentation
+    author:
+      - QuantLib project
+    title: QuantLib 1.43 release and official documentation
+    edition: "1.43"
+    year: 2026
+    volume: null
+    chapter: null
+    section: "Release notes and reference manual"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url:
+      - https://www.quantlib.org/docs.shtml
+      - https://github.com/lballabio/QuantLib/releases/tag/v1.43
+    concept:
+      - American finite-difference pricing dependency
+      - API compatibility
+    formula_id: []
+    formula: null
+    assumptions: "Official software documentation validates API/version facts, not TTWO numerical correctness."
+    measure: Q_for_pricing_use
+    units: caller_defined
+    alternatives: []
+    limitations:
+      - independent benchmark tests remain required
+    implementation_file: src/take_two_options/american.py
+    implementation_symbol: null
+    test_file: tests/test_american.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Repository pin and installed distribution are both 1.43, the current official release observed during Phase 0."
+
+  - source_id: official-alpaca-historical-options-2026
+    source_type: official_api_documentation
+    author:
+      - Alpaca
+    title: Historical Option Data
+    edition: current_web
+    year: 2026
+    volume: null
+    chapter: null
+    section: "Availability and data sources"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://docs.alpaca.markets/us/docs/historical-option-data
+    concept:
+      - historical option data availability
+      - OPRA versus indicative feed
+    formula_id: []
+    formula: null
+    assumptions: "Entitlement and feed label must be persisted per observation."
+    measure: observed_market_data
+    units: provider_schema
+    alternatives:
+      - MarketData.app historical EOD chains
+      - IBKR subscribed market data
+    limitations:
+      - official page states history begins in February 2024
+      - indicative quotes are not actual OPRA quotes
+    implementation_file: src/take_two_options/alpaca_data.py
+    implementation_symbol: null
+    test_file: tests/test_alpaca_data.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: null
+
+  - source_id: official-marketdata-option-chain-2026
+    source_type: official_api_documentation
+    author:
+      - Market Data
+    title: Option Chain API
+    edition: current_web
+    year: 2026
+    volume: null
+    chapter: null
+    section: "Current and historical end-of-day chains"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://www.marketdata.app/docs/api/options/chain/
+    concept:
+      - option-chain ingestion
+      - point-in-time EOD history
+    formula_id: []
+    formula: null
+    assumptions: "Access level, timestamp and entitlement must be captured."
+    measure: observed_market_data
+    units: provider_schema
+    alternatives:
+      - Alpaca OPRA
+      - IBKR API
+    limitations:
+      - official product page says intraday options history is not offered
+    implementation_file: src/take_two_options/marketdata_data.py
+    implementation_symbol: null
+    test_file: tests/test_marketdata_data.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: null
+
+  - source_id: official-ibkr-market-data-2026
+    source_type: official_api_documentation
+    author:
+      - Interactive Brokers
+    title: Market Data Subscriptions
+    edition: current_web
+    year: 2026
+    volume: null
+    chapter: null
+    section: Introduction
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://www.interactivebrokers.com/docs/general/market-data-subscriptions/introduction
+    concept:
+      - API market-data entitlements
+      - read-only broker facts
+    formula_id: []
+    formula: null
+    assumptions: "Most securities require Level 1 subscription for API data."
+    measure: observed_market_data
+    units: provider_schema
+    alternatives:
+      - Alpaca
+      - MarketData.app
+    limitations:
+      - live entitlement was not exercised in Phase 0
+    implementation_file: src/take_two_options/reporting/ibkr_ticket.py
+    implementation_symbol: null
+    test_file:
+      - tests/test_intelligence_v11.py
+      - tests/test_thesis_scanner.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "This source does not authorize order capability; TTWO remains transmit=false and what_if=true."
+
+  - source_id: official-occ-odd-2024-current-page-2026
+    source_type: official_market_documentation
+    author:
+      - The Options Clearing Corporation
+    title: Characteristics and Risks of Standardized Options
+    edition: June 2024 ODD
+    year: 2024
+    volume: null
+    chapter: null
+    section: "Contract characteristics, adjustments and exercise risks"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://www.theocc.com/company-information/documents-and-archives/options-disclosure-document
+    concept:
+      - contract multiplier
+      - adjusted deliverables
+      - exercise and assignment risk
+    formula_id: []
+    formula: null
+    assumptions: "Contract-specific OCC memos remain necessary for adjusted TTWO series."
+    measure: contract_terms
+    units: contract_specific
+    alternatives: []
+    limitations:
+      - generic ODD cannot identify a specific adjusted deliverable
+    implementation_file:
+      - src/take_two_options/intelligence/data_hub.py
+      - src/take_two_options/intelligence/execution.py
+    implementation_symbol: null
+    test_file: tests/test_intelligence_v11.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "The OCC page still presents the June 2024 ODD as the distribution version observed on the verification date."
+
+  - source_id: official-fred-alfred-realtime-periods-2026
+    source_type: official_api_documentation
+    author:
+      - Federal Reserve Bank of St. Louis
+    title: FRED API Real-Time Periods
+    edition: current_web
+    year: 2026
+    volume: null
+    chapter: null
+    section: Introduction
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://fred.stlouisfed.org/docs/api/fred/realtime_period.html
+    concept:
+      - vintage-aware macro and rate observations
+      - prevention of revised-data leakage
+    formula_id: []
+    formula: null
+    assumptions: "Backtests must request the real-time period known at the decision date."
+    measure: point_in_time_observation
+    units: series_specific
+    alternatives:
+      - Treasury daily XML feed for direct Treasury rates
+    limitations:
+      - default API behavior represents what is known today unless vintage parameters are supplied
+    implementation_file: src/take_two_options/intelligence/data_hub.py
+    implementation_symbol: null
+    test_file: tests/test_intelligence_v11.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: null
+
+  - source_id: official-us-treasury-daily-rates-2026
+    source_type: official_government_data_documentation
+    author:
+      - U.S. Department of the Treasury
+    title: Daily Treasury Rates and XML Feed
+    edition: current_web
+    year: 2026
+    volume: null
+    chapter: null
+    section: "Par yield curve methodology and feed structure"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url:
+      - https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_
+      - https://home.treasury.gov/treasury-daily-interest-rate-xml-feed
+    concept:
+      - Treasury term structure
+      - rate provenance
+      - interpolation regime break
+    formula_id:
+      - FORM-DISCOUNT-FACTOR-001
+    formula: null
+    assumptions: "Par yields are not directly discount factors; curve construction must be explicit."
+    measure: observed_rate_curve
+    units: annual_rate_by_maturity
+    alternatives:
+      - FRED/ALFRED vintage series
+      - licensed zero curve
+    limitations:
+      - official methodology changed to monotone convex spline on 2021-12-06
+      - source curve and derived discount curve must not be conflated
+    implementation_file: src/take_two_options/intelligence/data_hub.py
+    implementation_symbol: null
+    test_file: tests/test_intelligence_v11.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: null
+
+formula_links:
+  - formula_id: FORM-BS-PRICE-001
+    name: Black-Scholes European option value
+    source_id:
+      - book-shreve-stochastic-calculus-finance-ii
+      - book-andersen-piterbarg-interest-rate-modeling
+    source_location_status: to_research
+    implementation_file: src/take_two_options/pricing.py
+    implementation_symbol: black_scholes_price_greeks
+    test_file: tests/test_pricing.py
+    validation_status: implemented
+    notes: "No page is registered yet; the implementation is not upgraded to sourced by this placeholder."
+
+  - formula_id: FORM-IV-ROOT-001
+    name: Implied-volatility root solve
+    source_id:
+      - book-suli-mayers-numerical-analysis
+    source_location_status: to_research
+    implementation_file: src/take_two_options/american.py
+    implementation_symbol: historical_option_analytics
+    test_file: tests/test_american.py
+    validation_status: implemented
+    notes: "Current bisection lacks a structured convergence/residual/bracket diagnostic result."
+
+  - formula_id: FORM-WILSON-001
+    name: Wilson binomial confidence interval
+    source_id:
+      - book-wasserman-all-statistics
+    source_location_status: to_research
+    implementation_file: src/take_two_options/research_statistics.py
+    implementation_symbol: wilson_interval
+    test_file: tests/test_research_statistics.py
+    validation_status: tested
+    notes: "Utility exists and is tested, but is not uniformly wired into V11 probability outputs."
+
+  - formula_id: FORM-PBO-001
+    name: Probability of backtest overfitting diagnostic
+    source_id: null
+    source_location_status: primary_source_missing
+    implementation_file: src/take_two_options/validation/pbo.py
+    implementation_symbol: probability_of_backtest_overfitting
+    test_file: tests/test_knowledge_optimizer.py
+    validation_status: tested
+    notes: "Tie handling and CSCV conformance need review against a primary paper before numerical validation."
+
+  - formula_id: FORM-PLACEBO-001
+    name: Strategy placebo diagnostic
+    source_id: null
+    source_location_status: primary_source_missing
+    implementation_file: src/take_two_options/validation/placebo.py
+    implementation_symbol: placebo_diagnostics
+    test_file: tests/test_knowledge_optimizer.py
+    validation_status: tested
+    notes: "Shuffling a return vector preserves its mean, so the present randomized-mean comparator is not a valid signal placebo."
