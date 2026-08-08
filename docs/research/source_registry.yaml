@@ -354,12 +354,12 @@ sources:
       - Ruey S. Tsay
     title: Analysis of Financial Time Series
     edition: Third Edition
-    year: null
+    year: 2010
     volume: null
-    chapter: null
-    section: null
-    page_start: null
-    page_end: null
+    chapter: "3 and 10"
+    section: "3.1-3.5 inspected for Phase 3"
+    page_start: 110
+    page_end: 139
     pdf_file: 42-analysis-of-financial-time-series-third-edition-wiley-series-in-probability-and-statistics-(www.tawcer.com).pdf
     concept:
       - ARMA
@@ -367,9 +367,10 @@ sources:
       - conditional volatility
       - diagnostics
     formula_id:
+      - FORM-EWMA-001
       - FORM-GARCH-001
     formula: null
-    assumptions: "Chapter/year must be verified before use."
+    assumptions: "Conditional-variance models require chronological fitting and standardized-residual checks."
     measure: P
     units: return_frequency_dependent
     alternatives:
@@ -377,11 +378,14 @@ sources:
       - historical volatility baseline
     limitations:
       - model usefulness depends on sufficient point-in-time TTWO history and structural-break tests
-    implementation_file: null
-    implementation_symbol: null
-    test_file: null
-    validation_status: proposed
-    notes: null
+    implementation_file: src/take_two_options/quantitative/calibration.py
+    implementation_symbol:
+      - fit_ewma
+      - fit_garch_11
+      - compare_volatility_forecasts
+    test_file: tests/test_quantitative_calibration.py
+    validation_status: sourced
+    notes: "Third edition, Wiley and 2010 copyright verified directly; chapter 3 passages inspected."
 
   - source_id: book-wasserman-all-statistics
     source_type: local_book
@@ -892,6 +896,30 @@ formula_links:
     test_file: tests/test_implied_volatility_svi.py
     validation_status: tested
     notes: "Finite-grid diagnostic; continuous asymptotic proof is not claimed."
+
+  - formula_id: FORM-EWMA-001
+    name: Exponentially weighted conditional variance
+    source_id:
+      - book-tsay-analysis-financial-time-series
+    source_location_status: inspected_chapter_3_and_section_10_1
+    implementation_file: src/take_two_options/quantitative/calibration.py
+    implementation_symbol:
+      - ewma_variances
+      - fit_ewma
+    test_file: tests/test_quantitative_calibration.py
+    validation_status: tested
+    notes: "Chronological one-step recursion; no TTWO predictive claim."
+
+  - formula_id: FORM-GARCH-001
+    name: Stationary Gaussian GARCH(1,1)
+    source_id:
+      - book-tsay-analysis-financial-time-series
+    source_location_status: inspected_section_3_5_pages_131_139
+    implementation_file: src/take_two_options/quantitative/calibration.py
+    implementation_symbol: fit_garch_11
+    test_file: tests/test_quantitative_calibration.py
+    validation_status: tested
+    notes: "Synthetic recovery and OOS harness only; real TTWO validation remains absent."
 
   - formula_id: FORM-WILSON-001
     name: Wilson binomial confidence interval

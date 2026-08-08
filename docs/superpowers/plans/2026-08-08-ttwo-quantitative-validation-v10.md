@@ -134,6 +134,9 @@ Commit proposé : `feat(quant): add diagnosed iv solving and svi surface validat
 
 ## Phase 3 — Calibration robuste et séries temporelles
 
+État : baselines EWMA/GARCH diagnostiquées et comparaison OOS synthétique implémentées ; Heston
+bloqué par le gate de données ; gate complet vert (156 tests) ; commit atomique à créer.
+
 ### Documentary Research
 
 - Questions : baseline RV/EWMA/GARCH ; innovations ; diagnostics ; Heston identifiabilité ; multi-start et incertitude paramètres.

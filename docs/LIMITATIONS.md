@@ -12,6 +12,9 @@
 - The diagnosed IV solver and raw-SVI fitter expose failures and synthetic recovery, but no real
   point-in-time TTWO surface has validated fit quality. Butterfly/calendar checks are finite-grid
   diagnostics; eSSVI remains unimplemented behind explicit data and arbitrage gates.
+- EWMA and stationary Gaussian GARCH baselines now have likelihood, residual and chronological
+  forecast diagnostics. Their committed evidence is synthetic; heavy tails, leverage, structural
+  breaks and real TTWO OOS superiority remain unvalidated. Heston calibration remains blocked.
 - MarketData.app historical chains are EOD bid/ask, not intraday NBBO or
   simultaneous combo fills.
 - Alpaca indicative snapshots do not supply the open-interest/underlying fields
