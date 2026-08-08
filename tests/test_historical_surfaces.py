@@ -63,11 +63,17 @@ def test_post_cutoff_quote_is_excluded_and_visible() -> None:
     assert report.snapshots[0].status == "BLOCKED_INSUFFICIENT_DATA"
 
 
-def test_committed_tt_gets_no_fabricated_surface_or_heston_parameters() -> None:
+def test_committed_tt_surface_report_is_real_but_does_not_force_heston() -> None:
     report = HistoricalSurfaceReport.model_validate_json(
         (ROOT / "reports/pre_opra/historical_surfaces_2026-08-08.json").read_text()
     )
-    assert report.status == "BLOCKED_MISSING_GOVERNED_INPUTS"
-    assert report.snapshots == []
+    assert report.status == "DEVELOPMENT_DIAGNOSTIC_LIMITED"
+    assert report.construction is not None
+    assert report.construction.input_observations == 20_884
+    assert report.construction.iv_inversions_succeeded > 0
+    assert report.construction.eligible_snapshots == len(report.snapshots)
+    assert any(snapshot.status == "FITTED" for snapshot in report.snapshots)
+    assert any(snapshot.status == "ARBITRAGE_VIOLATION" for snapshot in report.snapshots)
     assert not report.heston_gate.eligible
-    assert "risk-free curve" in " ".join(report.missing_inputs)
+    assert "multi-start Heston" in " ".join(report.missing_inputs)
+    assert report.holdout_used is False

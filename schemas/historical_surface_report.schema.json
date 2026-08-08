@@ -260,6 +260,98 @@
       "title": "SVIParameters",
       "type": "object"
     },
+    "SurfaceConstructionAudit": {
+      "additionalProperties": false,
+      "properties": {
+        "calls_considered": {
+          "minimum": 0,
+          "title": "Calls Considered",
+          "type": "integer"
+        },
+        "eligible_slices": {
+          "minimum": 0,
+          "title": "Eligible Slices",
+          "type": "integer"
+        },
+        "eligible_snapshots": {
+          "minimum": 0,
+          "title": "Eligible Snapshots",
+          "type": "integer"
+        },
+        "exclusion_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Exclusion Counts",
+          "type": "object"
+        },
+        "forward_convention": {
+          "title": "Forward Convention",
+          "type": "string"
+        },
+        "heston_shape_eligible_snapshots": {
+          "minimum": 0,
+          "title": "Heston Shape Eligible Snapshots",
+          "type": "integer"
+        },
+        "input_observations": {
+          "minimum": 0,
+          "title": "Input Observations",
+          "type": "integer"
+        },
+        "iv_inversions_failed": {
+          "minimum": 0,
+          "title": "Iv Inversions Failed",
+          "type": "integer"
+        },
+        "iv_inversions_succeeded": {
+          "minimum": 0,
+          "title": "Iv Inversions Succeeded",
+          "type": "integer"
+        },
+        "option_style": {
+          "const": "american_call_equal_to_european_under_verified_zero_dividend",
+          "title": "Option Style",
+          "type": "string"
+        },
+        "quote_weighting": {
+          "title": "Quote Weighting",
+          "type": "string"
+        },
+        "quotes_used_in_fitted_slices": {
+          "minimum": 0,
+          "title": "Quotes Used In Fitted Slices",
+          "type": "integer"
+        },
+        "rate_convention": {
+          "title": "Rate Convention",
+          "type": "string"
+        },
+        "usable_quotes_before_iv": {
+          "minimum": 0,
+          "title": "Usable Quotes Before Iv",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "input_observations",
+        "calls_considered",
+        "usable_quotes_before_iv",
+        "iv_inversions_succeeded",
+        "iv_inversions_failed",
+        "quotes_used_in_fitted_slices",
+        "eligible_slices",
+        "eligible_snapshots",
+        "heston_shape_eligible_snapshots",
+        "exclusion_counts",
+        "option_style",
+        "forward_convention",
+        "rate_convention",
+        "quote_weighting"
+      ],
+      "title": "SurfaceConstructionAudit",
+      "type": "object"
+    },
     "SurfaceSliceDiagnostic": {
       "additionalProperties": false,
       "properties": {
@@ -396,6 +488,17 @@
       "title": "Blockers",
       "type": "array"
     },
+    "construction": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SurfaceConstructionAudit"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "dataset_hash": {
       "anyOf": [
         {
@@ -461,6 +564,7 @@
     "status": {
       "enum": [
         "VALIDATED_DEVELOPMENT_ONLY",
+        "DEVELOPMENT_DIAGNOSTIC_LIMITED",
         "FIXTURE_ONLY_NOT_VALIDATED",
         "BLOCKED_MISSING_GOVERNED_INPUTS"
       ],

@@ -266,3 +266,15 @@ extensions:
     permutation_samples: 4000
     private_output: data/pre_opra/comparable_panel.json
     aggregate_report: reports/pre_opra/baseline_comparison_2026-08-08.json
+  historical_surfaces:
+    option_input: data/pre_opra/normalized_options.jsonl
+    market_context_input: data/pre_opra/market_context.json
+    aggregate_report: reports/pre_opra/historical_surfaces_2026-08-08.json
+    option_side: call
+    minimum_distinct_strikes: 5
+    minimum_open_interest: 20
+    maximum_relative_spread: 0.30
+    maturity_days: [7, 365]
+    strike_moneyness: [0.50, 1.50]
+    vendor_iv_policy: never_impute_missing
+    heston_policy: gate_before_calibration

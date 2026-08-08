@@ -10,7 +10,7 @@ does not open the final holdout, and keeps licensed observations outside Git.
 | C3 | Spot, rates, dividends, FX | CLOSED_FOR_DEVELOPMENT | `reports/pre_opra/market_context_2026-08-08.json` | IEX rather than SIP; conservative next-day availability lags |
 | C4 | Governed event history | CLOSED_FOR_DEVELOPMENT | `reports/pre_opra/event_regime_dataset_2026-08-08.json` | Official subset, not an exhaustive causal event ontology |
 | C5 | Comparable baseline panel | CLOSED_DIAGNOSTIC | `reports/pre_opra/baseline_comparison_2026-08-08.json` | Short-DTE development panel; account rights confirmation; not final holdout |
-| C6 | Historical volatility surfaces | PENDING | — | Surface diagnostics absent |
+| C6 | Historical volatility surfaces | CLOSED_DIAGNOSTIC | `reports/pre_opra/historical_surfaces_2026-08-08.json` | 50 calendar-arbitrage violations, 21 failed snapshots, rights confirmation; Heston blocked |
 | C7 | Empirical/GARCH/Heston models | PENDING | — | Empirical comparison absent |
 | C8 | Final development walk-forward | PENDING | — | Final holdout remains unopened |
 | C9 | Five quality scores | PENDING | — | Partial-coverage rules absent |
