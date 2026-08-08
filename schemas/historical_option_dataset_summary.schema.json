@@ -1,0 +1,180 @@
+{
+  "$id": "https://schemas.take-two-options.invalid/v11.1/historical_option_dataset_summary.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "availability_policy": {
+      "minLength": 1,
+      "title": "Availability Policy",
+      "type": "string"
+    },
+    "conflicting_observations": {
+      "minimum": 0,
+      "title": "Conflicting Observations",
+      "type": "integer"
+    },
+    "dataset_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Dataset Hash",
+      "type": "string"
+    },
+    "dataset_id": {
+      "minLength": 1,
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "exact_duplicates_removed": {
+      "minimum": 0,
+      "title": "Exact Duplicates Removed",
+      "type": "integer"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "non_null_field_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Non Null Field Counts",
+      "type": "object"
+    },
+    "normalized_location": {
+      "const": "local_private",
+      "default": "local_private",
+      "title": "Normalized Location",
+      "type": "string"
+    },
+    "observations_per_requested_date": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Observations Per Requested Date",
+      "type": "object"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "quality_flag_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Quality Flag Counts",
+      "type": "object"
+    },
+    "quote_time_end": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Quote Time End"
+    },
+    "quote_time_start": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Quote Time Start"
+    },
+    "raw_data_committed": {
+      "const": false,
+      "default": false,
+      "title": "Raw Data Committed",
+      "type": "boolean"
+    },
+    "raw_envelopes": {
+      "minimum": 0,
+      "title": "Raw Envelopes",
+      "type": "integer"
+    },
+    "raw_rows": {
+      "minimum": 0,
+      "title": "Raw Rows",
+      "type": "integer"
+    },
+    "requested_date_end": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Requested Date End"
+    },
+    "requested_date_start": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Requested Date Start"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "ticker": {
+      "minLength": 1,
+      "title": "Ticker",
+      "type": "string"
+    },
+    "unique_observations": {
+      "minimum": 0,
+      "title": "Unique Observations",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "dataset_id",
+    "ticker",
+    "generated_at",
+    "raw_envelopes",
+    "raw_rows",
+    "unique_observations",
+    "exact_duplicates_removed",
+    "conflicting_observations",
+    "requested_date_start",
+    "requested_date_end",
+    "quote_time_start",
+    "quote_time_end",
+    "observations_per_requested_date",
+    "non_null_field_counts",
+    "quality_flag_counts",
+    "dataset_hash",
+    "availability_policy",
+    "limitations"
+  ],
+  "title": "HistoricalOptionDatasetSummary",
+  "type": "object"
+}

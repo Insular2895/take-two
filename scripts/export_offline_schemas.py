@@ -15,6 +15,9 @@ from take_two_options.decision.severity_gates import SeverityGateReport
 from take_two_options.empirical_calibration import EmpiricalCalibrationReport
 from take_two_options.historical_data.contracts import HistoricalDatasetManifest
 from take_two_options.historical_data.event_regimes import EventRegimeReport
+from take_two_options.historical_data.option_observations import (
+    HistoricalOptionDatasetSummary,
+)
 from take_two_options.intelligence.backtesting import WalkForwardReport
 from take_two_options.intelligence.calibration import OfflineCalibrationReport
 from take_two_options.intelligence.schemas import (
@@ -39,6 +42,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "severity_gate_report.schema.json": SeverityGateReport,
     "pre_opra_config.schema.json": PreOpraConfig,
     "historical_dataset_manifest.schema.json": HistoricalDatasetManifest,
+    "historical_option_dataset_summary.schema.json": HistoricalOptionDatasetSummary,
     "historical_surface_report.schema.json": HistoricalSurfaceReport,
     "holdout_ledger_entry.schema.json": HoldoutLedgerEntry,
     "readiness.schema.json": FeatureReadiness,

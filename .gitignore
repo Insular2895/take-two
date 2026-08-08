@@ -15,6 +15,7 @@ reports/alpaca_*
 data/marketdata/
 reports/marketdata_*
 data/treasury/
+data/pre_opra/
 
 # Python / caches
 __pycache__/

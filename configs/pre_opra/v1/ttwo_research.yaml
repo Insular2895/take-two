@@ -209,4 +209,9 @@ report_policy:
     model_agreement: pre-opra-v1
     execution_quality: pre-opra-v1
 
-extensions: {}
+extensions:
+  option_normalization:
+    cache_dir: data/marketdata/cache
+    private_output: data/pre_opra/normalized_options.jsonl
+    aggregate_summary: reports/pre_opra/option_normalization_2026-08-08.json
+    availability_delay_hours: 24
