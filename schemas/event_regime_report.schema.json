@@ -1,0 +1,336 @@
+{
+  "$defs": {
+    "EventConflict": {
+      "additionalProperties": false,
+      "properties": {
+        "event_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Event Ids",
+          "type": "array"
+        },
+        "external_id": {
+          "title": "External Id",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "external_id",
+        "event_ids",
+        "reason"
+      ],
+      "title": "EventConflict",
+      "type": "object"
+    },
+    "EventKind": {
+      "enum": [
+        "earnings",
+        "product_release",
+        "regulatory",
+        "corporate",
+        "macro"
+      ],
+      "title": "EventKind",
+      "type": "string"
+    },
+    "EventStudyRow": {
+      "additionalProperties": false,
+      "properties": {
+        "horizon_sessions": {
+          "exclusiveMinimum": 0,
+          "title": "Horizon Sessions",
+          "type": "integer"
+        },
+        "kind": {
+          "$ref": "#/$defs/EventKind"
+        },
+        "mean_return": {
+          "title": "Mean Return",
+          "type": "number"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "probability_positive": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Positive",
+          "type": "number"
+        }
+      },
+      "required": [
+        "kind",
+        "horizon_sessions",
+        "observations",
+        "mean_return",
+        "probability_positive"
+      ],
+      "title": "EventStudyRow",
+      "type": "object"
+    },
+    "PointInTimeEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "available_at": {
+          "format": "date-time",
+          "title": "Available At",
+          "type": "string"
+        },
+        "decision_cutoff": {
+          "format": "date-time",
+          "title": "Decision Cutoff",
+          "type": "string"
+        },
+        "entity": {
+          "title": "Entity",
+          "type": "string"
+        },
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "event_time": {
+          "format": "date-time",
+          "title": "Event Time",
+          "type": "string"
+        },
+        "external_id": {
+          "title": "External Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EventKind"
+        },
+        "publication_time": {
+          "format": "date-time",
+          "title": "Publication Time",
+          "type": "string"
+        },
+        "source_hash": {
+          "maxLength": 64,
+          "minLength": 64,
+          "title": "Source Hash",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "external_id",
+        "entity",
+        "kind",
+        "event_time",
+        "publication_time",
+        "available_at",
+        "decision_cutoff",
+        "source_id",
+        "source_hash",
+        "summary"
+      ],
+      "title": "PointInTimeEvent",
+      "type": "object"
+    },
+    "RegimeObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "available_at": {
+          "format": "date-time",
+          "title": "Available At",
+          "type": "string"
+        },
+        "decision_cutoff": {
+          "format": "date-time",
+          "title": "Decision Cutoff",
+          "type": "string"
+        },
+        "observation_id": {
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "realized_volatility": {
+          "minimum": 0,
+          "title": "Realized Volatility",
+          "type": "number"
+        },
+        "trailing_return": {
+          "title": "Trailing Return",
+          "type": "number"
+        },
+        "trend_regime": {
+          "enum": [
+            "bearish",
+            "neutral",
+            "bullish"
+          ],
+          "title": "Trend Regime",
+          "type": "string"
+        },
+        "volatility_regime": {
+          "enum": [
+            "normal",
+            "high"
+          ],
+          "title": "Volatility Regime",
+          "type": "string"
+        }
+      },
+      "required": [
+        "observation_id",
+        "available_at",
+        "decision_cutoff",
+        "trailing_return",
+        "realized_volatility",
+        "trend_regime",
+        "volatility_regime"
+      ],
+      "title": "RegimeObservation",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/event_regime_report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accepted_events": {
+      "items": {
+        "$ref": "#/$defs/PointInTimeEvent"
+      },
+      "title": "Accepted Events",
+      "type": "array"
+    },
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "conflicts": {
+      "items": {
+        "$ref": "#/$defs/EventConflict"
+      },
+      "title": "Conflicts",
+      "type": "array"
+    },
+    "dataset_hash": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dataset Hash"
+    },
+    "event_study": {
+      "items": {
+        "$ref": "#/$defs/EventStudyRow"
+      },
+      "title": "Event Study",
+      "type": "array"
+    },
+    "excluded_post_cutoff_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Excluded Post Cutoff Ids",
+      "type": "array"
+    },
+    "high_volatility_threshold": {
+      "exclusiveMinimum": 0,
+      "title": "High Volatility Threshold",
+      "type": "number"
+    },
+    "holdout_used": {
+      "const": false,
+      "title": "Holdout Used",
+      "type": "boolean"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "regimes": {
+      "items": {
+        "$ref": "#/$defs/RegimeObservation"
+      },
+      "title": "Regimes",
+      "type": "array"
+    },
+    "report_id": {
+      "title": "Report Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "DEVELOPMENT_DATASET_READY",
+        "FIXTURE_ONLY_NOT_VALIDATED",
+        "BLOCKED_MISSING_GOVERNED_EVENTS",
+        "BLOCKED_CONFLICTS"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "threshold_status": {
+      "enum": [
+        "draft_to_validate",
+        "validated"
+      ],
+      "title": "Threshold Status",
+      "type": "string"
+    },
+    "ticker": {
+      "title": "Ticker",
+      "type": "string"
+    },
+    "trend_threshold": {
+      "exclusiveMinimum": 0,
+      "title": "Trend Threshold",
+      "type": "number"
+    }
+  },
+  "required": [
+    "schema_version",
+    "report_id",
+    "ticker",
+    "status",
+    "accepted_events",
+    "excluded_post_cutoff_ids",
+    "conflicts",
+    "regimes",
+    "event_study",
+    "trend_threshold",
+    "high_volatility_threshold",
+    "threshold_status",
+    "blockers",
+    "holdout_used"
+  ],
+  "title": "EventRegimeReport",
+  "type": "object"
+}

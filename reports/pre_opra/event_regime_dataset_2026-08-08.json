@@ -1,0 +1,22 @@
+{
+  "accepted_events": [],
+  "blockers": [
+    "No governed point-in-time event history is available.",
+    "Event publication and availability timestamps must be acquired from source records.",
+    "Draft regime thresholds require validation on development data."
+  ],
+  "conflicts": [],
+  "dataset_hash": "0b09a9a9b1de6a9132e2f0eaf1a9cc15152d2fce59e40baefd21812c9886f556",
+  "event_study": [],
+  "excluded_post_cutoff_ids": [],
+  "high_volatility_threshold": 0.4,
+  "holdout_used": false,
+  "order_capability": "forbidden",
+  "regimes": [],
+  "report_id": "ttwo-event-regime-v1",
+  "schema_version": "1.0",
+  "status": "BLOCKED_MISSING_GOVERNED_EVENTS",
+  "threshold_status": "draft_to_validate",
+  "ticker": "TTWO",
+  "trend_threshold": 0.1
+}

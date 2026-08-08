@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from take_two_options.config.contracts import PreOpraConfig
 from take_two_options.empirical_calibration import EmpiricalCalibrationReport
 from take_two_options.historical_data.contracts import HistoricalDatasetManifest
+from take_two_options.historical_data.event_regimes import EventRegimeReport
 from take_two_options.intelligence.backtesting import WalkForwardReport
 from take_two_options.intelligence.calibration import OfflineCalibrationReport
 from take_two_options.intelligence.schemas import (
@@ -37,6 +38,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "readiness.schema.json": FeatureReadiness,
     "observation.schema.json": UnifiedObservation,
     "event.schema.json": NormalizedEvidenceEvent,
+    "event_regime_report.schema.json": EventRegimeReport,
     "calibration_report.schema.json": OfflineCalibrationReport,
     "backtest_report.schema.json": WalkForwardReport,
     "model_validation.schema.json": CandidateValidationSummary,
