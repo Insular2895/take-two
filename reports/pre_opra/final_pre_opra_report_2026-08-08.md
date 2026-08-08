@@ -106,12 +106,12 @@ Preuve : `../../docs/LIMITATIONS.md`.
 
 ## N. OPRA READINESS
 
-Statut : `CONTRACT_DEFINED_NOT_CONNECTED`. Phase M non démarrée ; aucune connexion ou simulation OPRA n'a été effectuée.
+Statut : `ADAPTER_READY_NOT_CONNECTED`. Interface read-only et registres paper prêts ; Phase M non démarrée.
 Preuve : `../../docs/validation/OPRA_FINAL_VALIDATION_PLAN.md`.
 
-- Contrat de provider live read-only prévu ; aucune méthode d'ordre autorisée.
+- Contrat de provider live read-only implémenté ; aucune méthode d'ordre autorisée.
 - Chaînes, bid/ask, timestamps, fraîcheur et spreads devront être journalisés.
-- Chaque décision paper sera gelée avant réalisation et reliée par hash.
+- Décisions paper immuables et hash-chaînées ; réalisations stockées séparément.
 - La Phase M comparera V10 aux mêmes baselines avec coûts et slippage observés.
 
 Variables attendues : OPRA_PROVIDER, OPRA_API_KEY, OPRA_API_SECRET, OPRA_ACCOUNT_OR_SESSION
@@ -120,9 +120,9 @@ Commande : `ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_res
 
 ## Reproductibilité
 
-- Commit source : `18bc7bda577e9c4d99518f7e798bde86c353dcce`
-- Hash configuration : `98eadf0c3a13322bda6dc630b7fbe0a791ebb5ec2ff99e14004ceecf29265436`
-- Hash dataset agrégé : `cd1ad376385bd7a891975637123e97d55c5f08b95fbc4895c7cf2857052514d9`
+- Commit source : `572bedd4a9dc296f2bed6b5b8cb2e5a8e573abb4`
+- Hash configuration : `49303278bf1d75d833cb4336097f730be0ad67c54fb9628e8ac16183d06c32f2`
+- Hash dataset agrégé : `38c7764dd347c2daed06b7f44711fa8cf652b64f610354e9c8a25a538cefffa7`
 - Seed : `20260808`
 - Holdout : `UNOPENED`
 - Invariants : `transmit=false`, `what_if=true`, `order_capability=forbidden`

@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "status": "MISSING_CONFIGURATION",
+  "provider": null,
+  "provider_protocol": "LiveOptionMarketDataProvider",
+  "paper_decision_contract": "PaperDecisionRecord",
+  "paper_realization_contract": "PaperRealizationRecord",
+  "required_variables": [
+    "OPRA_PROVIDER",
+    "OPRA_API_KEY",
+    "OPRA_API_SECRET",
+    "OPRA_ACCOUNT_OR_SESSION"
+  ],
+  "missing_variables": [
+    "OPRA_PROVIDER",
+    "OPRA_API_KEY",
+    "OPRA_API_SECRET",
+    "OPRA_ACCOUNT_OR_SESSION"
+  ],
+  "exact_command": "ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml",
+  "connection_attempted": false,
+  "phase_m_started": false,
+  "read_only": true,
+  "transmit": false,
+  "what_if": true,
+  "order_capability": "forbidden"
+}

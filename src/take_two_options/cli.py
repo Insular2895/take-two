@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 from datetime import date
 from pathlib import Path
 from typing import Annotated
@@ -41,6 +44,7 @@ from take_two_options.market_snapshot import (
     refresh_market_snapshot,
     snapshot_manifest,
 )
+from take_two_options.opra.contracts import assess_provider_readiness
 from take_two_options.reporting.ibkr_ticket import (
     TicketBlockedError,
     write_ibkr_preview,
@@ -66,6 +70,55 @@ app.add_typer(trade_app, name="trade")
 app.add_typer(position_app, name="position")
 app.add_typer(calibration_app, name="calibration")
 app.add_typer(legacy_app, name="legacy", hidden=True)
+
+
+@app.command("pre-opra-finalize")
+def pre_opra_finalize(
+    config: Annotated[
+        Path,
+        typer.Option("--config", exists=True, dir_okay=False, readable=True),
+    ] = Path("configs/pre_opra/v1/ttwo_research.yaml"),
+) -> None:
+    """Rebuild final aggregate evidence and inspect OPRA config without connecting."""
+
+    repository = Path(__file__).resolve().parents[2]
+    readiness = assess_provider_readiness(os.environ)
+    try:
+        subprocess.run(
+            [
+                sys.executable,
+                str(repository / "scripts" / "build_opra_readiness.py"),
+                "--output",
+                str(repository / "reports/pre_opra/opra_interface_readiness_2026-08-08.json"),
+            ],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        subprocess.run(
+            [
+                sys.executable,
+                str(repository / "scripts" / "build_pre_opra_final_report.py"),
+                "--config",
+                str(config.resolve()),
+            ],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as error:
+        typer.echo("Pre-OPRA finalization failed without attempting a market connection.", err=True)
+        if error.stderr:
+            typer.echo(error.stderr.strip(), err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(
+        "PRE_OPRA_RESEARCH_COMPLETE: "
+        "report=reports/pre_opra/final_pre_opra_report_2026-08-08.html; "
+        f"opra={readiness.status}; connection_attempted=false; phase_m_started=false; "
+        "transmit=false; what_if=true; order capability forbidden"
+    )
 
 
 def _csv_floats(value: str, *, option_name: str) -> list[float]:

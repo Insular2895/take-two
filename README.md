@@ -12,12 +12,15 @@ outcomes.
 
 ## Statut final pré-OPRA — 8 août 2026
 
-Les clôtures C1–C12 sont terminées sur les données locales réelles. Le résultat est
+Les clôtures C1–C13 sont terminées sur les données locales réelles. Le résultat est
 `PRE_OPRA_RESEARCH_COMPLETE`, la conclusion portefeuille est
 `NO_POSITION_RECOMMENDED` et le verdict dérivé est
 `ENGINE_NOT_PROVEN_SUPERIOR`. V10 perd 90,4 % en composé sur dix observations OOS de
 développement, contre +25,1 % pour buy-and-hold. Le panel reste trop court pour la
 politique formelle et le holdout reste `UNOPENED`.
+
+L'interface OPRA read-only et les registres paper immuables sont prêts, mais aucune
+connexion n'a été tentée et la Phase M n'est pas démarrée.
 
 ```bash
 ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml

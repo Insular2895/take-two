@@ -89,6 +89,7 @@ def build(generated_at: datetime, *, config_path: Path = DEFAULT_CONFIG) -> Fina
         "five_scores_2026-08-08.json",
         "severity_and_gate_sensitivity_2026-08-08.json",
         "engine_verdict_2026-08-08.json",
+        "opra_interface_readiness_2026-08-08.json",
     ]
     artifact_hashes = {name: _file_hash(REPORTS / name) for name in input_names}
     dataset_hash = hashlib.sha256(
@@ -324,8 +325,8 @@ def build(generated_at: datetime, *, config_path: Path = DEFAULT_CONFIG) -> Fina
         _section(
             "N",
             "OPRA READINESS",
-            "CONTRACT_DEFINED_NOT_CONNECTED",
-            "Phase M non démarrée ; aucune connexion ou simulation OPRA n'a été effectuée.",
+            "ADAPTER_READY_NOT_CONNECTED",
+            "Interface read-only et registres paper prêts ; Phase M non démarrée.",
             "../../docs/validation/OPRA_FINAL_VALIDATION_PLAN.md",
         ),
     ]
@@ -423,9 +424,9 @@ def build(generated_at: datetime, *, config_path: Path = DEFAULT_CONFIG) -> Fina
         best_blocked_candidate=cast(dict[str, object], severity["best_blocked_candidate"]),
         remaining_blockers=remaining_blockers,
         opra_readiness=[
-            "Contrat de provider live read-only prévu ; aucune méthode d'ordre autorisée.",
+            "Contrat de provider live read-only implémenté ; aucune méthode d'ordre autorisée.",
             "Chaînes, bid/ask, timestamps, fraîcheur et spreads devront être journalisés.",
-            "Chaque décision paper sera gelée avant réalisation et reliée par hash.",
+            "Décisions paper immuables et hash-chaînées ; réalisations stockées séparément.",
             "La Phase M comparera V10 aux mêmes baselines avec coûts et slippage observés.",
         ],
         exact_opra_variables=[

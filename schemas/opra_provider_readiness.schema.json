@@ -1,0 +1,114 @@
+{
+  "$id": "https://schemas.take-two-options.invalid/v11.1/opra_provider_readiness.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "connection_attempted": {
+      "const": false,
+      "default": false,
+      "title": "Connection Attempted",
+      "type": "boolean"
+    },
+    "exact_command": {
+      "const": "ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml",
+      "default": "ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml",
+      "title": "Exact Command",
+      "type": "string"
+    },
+    "missing_variables": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Missing Variables",
+      "type": "array"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "paper_decision_contract": {
+      "const": "PaperDecisionRecord",
+      "default": "PaperDecisionRecord",
+      "title": "Paper Decision Contract",
+      "type": "string"
+    },
+    "paper_realization_contract": {
+      "const": "PaperRealizationRecord",
+      "default": "PaperRealizationRecord",
+      "title": "Paper Realization Contract",
+      "type": "string"
+    },
+    "phase_m_started": {
+      "const": false,
+      "default": false,
+      "title": "Phase M Started",
+      "type": "boolean"
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Provider"
+    },
+    "provider_protocol": {
+      "const": "LiveOptionMarketDataProvider",
+      "default": "LiveOptionMarketDataProvider",
+      "title": "Provider Protocol",
+      "type": "string"
+    },
+    "read_only": {
+      "const": true,
+      "default": true,
+      "title": "Read Only",
+      "type": "boolean"
+    },
+    "required_variables": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Required Variables",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "ADAPTER_READY_NOT_CONNECTED",
+        "MISSING_CONFIGURATION"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    },
+    "what_if": {
+      "const": true,
+      "default": true,
+      "title": "What If",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "status",
+    "provider",
+    "required_variables",
+    "missing_variables"
+  ],
+  "title": "ProviderReadinessReport",
+  "type": "object"
+}

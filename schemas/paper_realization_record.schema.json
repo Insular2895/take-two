@@ -1,0 +1,124 @@
+{
+  "$id": "https://schemas.take-two-options.invalid/v11.1/paper_realization_record.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "decision_id": {
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "decision_record_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Decision Record Hash",
+      "type": "string"
+    },
+    "fees_eur": {
+      "minimum": 0,
+      "title": "Fees Eur",
+      "type": "number"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "paper_entry_price": {
+      "minimum": 0,
+      "title": "Paper Entry Price",
+      "type": "number"
+    },
+    "paper_entry_timestamp": {
+      "format": "date-time",
+      "title": "Paper Entry Timestamp",
+      "type": "string"
+    },
+    "paper_exit_price": {
+      "minimum": 0,
+      "title": "Paper Exit Price",
+      "type": "number"
+    },
+    "paper_exit_timestamp": {
+      "format": "date-time",
+      "title": "Paper Exit Timestamp",
+      "type": "string"
+    },
+    "pnl_eur": {
+      "title": "Pnl Eur",
+      "type": "number"
+    },
+    "postmortem": {
+      "title": "Postmortem",
+      "type": "string"
+    },
+    "realization_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Realization Hash",
+      "type": "string"
+    },
+    "realization_id": {
+      "title": "Realization Id",
+      "type": "string"
+    },
+    "realized_path_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Realized Path Hash",
+      "type": "string"
+    },
+    "record_kind": {
+      "const": "paper_realization",
+      "default": "paper_realization",
+      "title": "Record Kind",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "simulated_only": {
+      "const": true,
+      "default": true,
+      "title": "Simulated Only",
+      "type": "boolean"
+    },
+    "slippage_eur": {
+      "minimum": 0,
+      "title": "Slippage Eur",
+      "type": "number"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "realization_id",
+    "decision_id",
+    "decision_record_hash",
+    "observed_at",
+    "realized_path_hash",
+    "paper_entry_timestamp",
+    "paper_exit_timestamp",
+    "paper_entry_price",
+    "paper_exit_price",
+    "slippage_eur",
+    "fees_eur",
+    "pnl_eur",
+    "postmortem",
+    "realization_hash"
+  ],
+  "title": "PaperRealizationRecord",
+  "type": "object"
+}

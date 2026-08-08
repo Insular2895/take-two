@@ -320,3 +320,18 @@ extensions:
       - PROMISING_BUT_NOT_PROVEN
       - BLOCKED_BY_DATA
       - VALIDATION_FAILED
+  opra_interface:
+    provider_protocol: LiveOptionMarketDataProvider
+    required_environment_variables:
+      - OPRA_PROVIDER
+      - OPRA_API_KEY
+      - OPRA_API_SECRET
+      - OPRA_ACCOUNT_OR_SESSION
+    readiness_report: reports/pre_opra/opra_interface_readiness_2026-08-08.json
+    paper_decision_ledger: data/opra/paper_decisions.jsonl
+    paper_realization_ledger: data/opra/paper_realizations.jsonl
+    connection_enabled: false
+    phase_m_started: false
+    transmit: false
+    what_if: true
+    order_capability: forbidden

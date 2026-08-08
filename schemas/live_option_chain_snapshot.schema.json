@@ -1,0 +1,300 @@
+{
+  "$defs": {
+    "LiveOptionQuote": {
+      "additionalProperties": false,
+      "properties": {
+        "ask": {
+          "minimum": 0,
+          "title": "Ask",
+          "type": "number"
+        },
+        "ask_size": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ask Size"
+        },
+        "bid": {
+          "minimum": 0,
+          "title": "Bid",
+          "type": "number"
+        },
+        "bid_size": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bid Size"
+        },
+        "delta": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Delta"
+        },
+        "exchange": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exchange"
+        },
+        "expiration": {
+          "format": "date",
+          "title": "Expiration",
+          "type": "string"
+        },
+        "gamma": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gamma"
+        },
+        "implied_volatility": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 5,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Implied Volatility"
+        },
+        "multiplier": {
+          "exclusiveMinimum": 0,
+          "title": "Multiplier",
+          "type": "number"
+        },
+        "open_interest": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Open Interest"
+        },
+        "option_symbol": {
+          "minLength": 15,
+          "title": "Option Symbol",
+          "type": "string"
+        },
+        "option_type": {
+          "$ref": "#/$defs/OptionType"
+        },
+        "quote_timestamp": {
+          "format": "date-time",
+          "title": "Quote Timestamp",
+          "type": "string"
+        },
+        "received_at": {
+          "format": "date-time",
+          "title": "Received At",
+          "type": "string"
+        },
+        "strike": {
+          "exclusiveMinimum": 0,
+          "title": "Strike",
+          "type": "number"
+        },
+        "theta": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Theta"
+        },
+        "ticker": {
+          "minLength": 1,
+          "title": "Ticker",
+          "type": "string"
+        },
+        "vega": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vega"
+        },
+        "volume": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Volume"
+        }
+      },
+      "required": [
+        "option_symbol",
+        "ticker",
+        "option_type",
+        "strike",
+        "expiration",
+        "quote_timestamp",
+        "received_at",
+        "bid",
+        "ask",
+        "multiplier"
+      ],
+      "title": "LiveOptionQuote",
+      "type": "object"
+    },
+    "OptionType": {
+      "enum": [
+        "call",
+        "put"
+      ],
+      "title": "OptionType",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/live_option_chain_snapshot.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "provider": {
+      "title": "Provider",
+      "type": "string"
+    },
+    "provider_metadata_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Provider Metadata Hash",
+      "type": "string"
+    },
+    "quotes": {
+      "items": {
+        "$ref": "#/$defs/LiveOptionQuote"
+      },
+      "minItems": 1,
+      "title": "Quotes",
+      "type": "array"
+    },
+    "raw_snapshot_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Raw Snapshot Hash",
+      "type": "string"
+    },
+    "read_only": {
+      "const": true,
+      "default": true,
+      "title": "Read Only",
+      "type": "boolean"
+    },
+    "received_at": {
+      "format": "date-time",
+      "title": "Received At",
+      "type": "string"
+    },
+    "requested_at": {
+      "format": "date-time",
+      "title": "Requested At",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "source_latency_milliseconds": {
+      "minimum": 0,
+      "title": "Source Latency Milliseconds",
+      "type": "number"
+    },
+    "ticker": {
+      "title": "Ticker",
+      "type": "string"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    },
+    "underlying_price": {
+      "exclusiveMinimum": 0,
+      "title": "Underlying Price",
+      "type": "number"
+    },
+    "what_if": {
+      "const": true,
+      "default": true,
+      "title": "What If",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "snapshot_id",
+    "provider",
+    "ticker",
+    "requested_at",
+    "received_at",
+    "underlying_price",
+    "quotes",
+    "provider_metadata_hash",
+    "raw_snapshot_hash",
+    "source_latency_milliseconds"
+  ],
+  "title": "LiveOptionChainSnapshot",
+  "type": "object"
+}

@@ -300,9 +300,9 @@
   "holdout_state": "UNOPENED",
   "holdout_used": false,
   "opra_readiness": [
-    "Contrat de provider live read-only pr\u00e9vu ; aucune m\u00e9thode d'ordre autoris\u00e9e.",
+    "Contrat de provider live read-only impl\u00e9ment\u00e9 ; aucune m\u00e9thode d'ordre autoris\u00e9e.",
     "Cha\u00eenes, bid/ask, timestamps, fra\u00eecheur et spreads devront \u00eatre journalis\u00e9s.",
-    "Chaque d\u00e9cision paper sera gel\u00e9e avant r\u00e9alisation et reli\u00e9e par hash.",
+    "D\u00e9cisions paper immuables et hash-cha\u00een\u00e9es ; r\u00e9alisations stock\u00e9es s\u00e9par\u00e9ment.",
     "La Phase M comparera V10 aux m\u00eames baselines avec co\u00fbts et slippage observ\u00e9s."
   ],
   "order_capability": "forbidden",
@@ -335,14 +335,15 @@
       "five_scores_2026-08-08.json": "a09cbb759c4b9a05961fbb75966e074a54aa01f7556eb153918d5b40d068a5f4",
       "historical_surfaces_2026-08-08.json": "72362db6ffb1cce23dd0f03673395a954ad6d3593a2b33dfd0a33c27a975469e",
       "market_context_2026-08-08.json": "2ea4a59df535ac2bfce368eda5799c95dcf506d15062efdccf46b47e45629a8e",
+      "opra_interface_readiness_2026-08-08.json": "155ebdc601aca7ab2eead70e7863c2ff6a1f109074728cbb540b78c776d1722a",
       "option_normalization_2026-08-08.json": "adbd0df20a04fc5a2b9804d58658f00ddca3dd1626dc0a8139ef58b4cc2d0f72",
       "severity_and_gate_sensitivity_2026-08-08.json": "268b0c665d75de66f5135fbff585fb4236f0de72063dc60321074737c0ab2104",
       "walk_forward_protocol_2026-08-08.json": "a4652afde0ef94e5ac2a86b1dd581ea96d6a8329f3f837007afee09892168534"
     },
-    "code_commit": "18bc7bda577e9c4d99518f7e798bde86c353dcce",
+    "code_commit": "572bedd4a9dc296f2bed6b5b8cb2e5a8e573abb4",
     "command": "ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml",
-    "configuration_hash": "98eadf0c3a13322bda6dc630b7fbe0a791ebb5ec2ff99e14004ceecf29265436",
-    "dataset_hash": "cd1ad376385bd7a891975637123e97d55c5f08b95fbc4895c7cf2857052514d9",
+    "configuration_hash": "49303278bf1d75d833cb4336097f730be0ad67c54fb9628e8ac16183d06c32f2",
+    "dataset_hash": "38c7764dd347c2daed06b7f44711fa8cf652b64f610354e9c8a25a538cefffa7",
     "dependencies": {
       "PyYAML": "6.0.3",
       "QuantLib": "1.43",
@@ -470,8 +471,8 @@
     {
       "artifact": "../../docs/validation/OPRA_FINAL_VALIDATION_PLAN.md",
       "section_id": "N",
-      "status": "CONTRACT_DEFINED_NOT_CONNECTED",
-      "summary": "Phase M non d\u00e9marr\u00e9e ; aucune connexion ou simulation OPRA n'a \u00e9t\u00e9 effectu\u00e9e.",
+      "status": "ADAPTER_READY_NOT_CONNECTED",
+      "summary": "Interface read-only et registres paper pr\u00eats ; Phase M non d\u00e9marr\u00e9e.",
       "title": "OPRA READINESS"
     }
   ],

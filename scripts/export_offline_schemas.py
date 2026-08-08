@@ -17,10 +17,10 @@ from take_two_options.empirical_calibration import EmpiricalCalibrationReport
 from take_two_options.historical_data.contracts import HistoricalDatasetManifest
 from take_two_options.historical_data.data_rights import DataUsageRightsReport
 from take_two_options.historical_data.event_regimes import EventRegimeReport
+from take_two_options.historical_data.market_context import MarketContextSummary
 from take_two_options.historical_data.option_observations import (
     HistoricalOptionDatasetSummary,
 )
-from take_two_options.historical_data.market_context import MarketContextSummary
 from take_two_options.intelligence.backtesting import WalkForwardReport
 from take_two_options.intelligence.calibration import OfflineCalibrationReport
 from take_two_options.intelligence.schemas import (
@@ -28,6 +28,14 @@ from take_two_options.intelligence.schemas import (
     FeatureReadiness,
     NormalizedEvidenceEvent,
     UnifiedObservation,
+)
+from take_two_options.opra.contracts import (
+    LiveOptionChainSnapshot,
+    ProviderReadinessReport,
+)
+from take_two_options.opra.paper_decisions import (
+    PaperDecisionRecord,
+    PaperRealizationRecord,
 )
 from take_two_options.quantitative.historical_surfaces import HistoricalSurfaceReport
 from take_two_options.reporting.pre_opra_final import FinalPreOpraReport
@@ -51,6 +59,10 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "historical_dataset_manifest.schema.json": HistoricalDatasetManifest,
     "historical_option_dataset_summary.schema.json": HistoricalOptionDatasetSummary,
     "market_context_summary.schema.json": MarketContextSummary,
+    "live_option_chain_snapshot.schema.json": LiveOptionChainSnapshot,
+    "opra_provider_readiness.schema.json": ProviderReadinessReport,
+    "paper_decision_record.schema.json": PaperDecisionRecord,
+    "paper_realization_record.schema.json": PaperRealizationRecord,
     "historical_surface_report.schema.json": HistoricalSurfaceReport,
     "holdout_ledger_entry.schema.json": HoldoutLedgerEntry,
     "readiness.schema.json": FeatureReadiness,
