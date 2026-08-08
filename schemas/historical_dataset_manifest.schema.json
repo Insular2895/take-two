@@ -1,0 +1,335 @@
+{
+  "$defs": {
+    "DatasetQualityStatus": {
+      "enum": [
+        "ready",
+        "partial",
+        "blocked",
+        "fixture_only"
+      ],
+      "title": "DatasetQualityStatus",
+      "type": "string"
+    },
+    "LicenseStatus": {
+      "enum": [
+        "public",
+        "authorized_internal",
+        "redistribution_forbidden",
+        "to_review",
+        "unknown"
+      ],
+      "title": "LicenseStatus",
+      "type": "string"
+    },
+    "PointInTimeStatus": {
+      "enum": [
+        "verified",
+        "partial",
+        "failed",
+        "to_review"
+      ],
+      "title": "PointInTimeStatus",
+      "type": "string"
+    },
+    "SourceComponentManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "adjustment_policy": {
+          "minLength": 1,
+          "title": "Adjustment Policy",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "content_hash": {
+          "maxLength": 64,
+          "minLength": 64,
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "coverage_end": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Coverage End"
+        },
+        "coverage_start": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Coverage Start"
+        },
+        "data_class": {
+          "enum": [
+            "underlying",
+            "options",
+            "macro",
+            "events",
+            "corporate_actions",
+            "market_calendar"
+          ],
+          "title": "Data Class",
+          "type": "string"
+        },
+        "derived_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Derived Fields",
+          "type": "array"
+        },
+        "imputed_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Imputed Fields",
+          "type": "array"
+        },
+        "license_notes": {
+          "minLength": 1,
+          "title": "License Notes",
+          "type": "string"
+        },
+        "license_status": {
+          "$ref": "#/$defs/LicenseStatus"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "missing_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Fields",
+          "type": "array"
+        },
+        "observed_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Observed Fields",
+          "type": "array"
+        },
+        "point_in_time_status": {
+          "$ref": "#/$defs/PointInTimeStatus"
+        },
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "quality_status": {
+          "$ref": "#/$defs/DatasetQualityStatus"
+        },
+        "raw_data_committed": {
+          "const": false,
+          "title": "Raw Data Committed",
+          "type": "boolean"
+        },
+        "raw_location": {
+          "enum": [
+            "local_private",
+            "public_committable",
+            "not_acquired"
+          ],
+          "title": "Raw Location",
+          "type": "string"
+        },
+        "record_count": {
+          "minimum": 0,
+          "title": "Record Count",
+          "type": "integer"
+        },
+        "retrieved_end": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Retrieved End"
+        },
+        "retrieved_start": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Retrieved Start"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "terms_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Terms Uri"
+        },
+        "unavailable_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unavailable Fields",
+          "type": "array"
+        }
+      },
+      "required": [
+        "component_id",
+        "provider",
+        "source_ids",
+        "data_class",
+        "record_count",
+        "coverage_start",
+        "coverage_end",
+        "retrieved_start",
+        "retrieved_end",
+        "content_hash",
+        "license_status",
+        "license_notes",
+        "point_in_time_status",
+        "quality_status",
+        "raw_location",
+        "raw_data_committed",
+        "adjustment_policy"
+      ],
+      "title": "SourceComponentManifest",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/historical_dataset_manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "components": {
+      "items": {
+        "$ref": "#/$defs/SourceComponentManifest"
+      },
+      "minItems": 1,
+      "title": "Components",
+      "type": "array"
+    },
+    "contradictions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Contradictions",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "dataset_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Dataset Hash",
+      "type": "string"
+    },
+    "dataset_id": {
+      "minLength": 1,
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "decision_cutoff": {
+      "format": "date-time",
+      "title": "Decision Cutoff",
+      "type": "string"
+    },
+    "decision_eligible": {
+      "title": "Decision Eligible",
+      "type": "boolean"
+    },
+    "license_status": {
+      "$ref": "#/$defs/LicenseStatus"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "point_in_time_status": {
+      "$ref": "#/$defs/PointInTimeStatus"
+    },
+    "quality_status": {
+      "$ref": "#/$defs/DatasetQualityStatus"
+    },
+    "raw_data_committed": {
+      "const": false,
+      "title": "Raw Data Committed",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "ticker": {
+      "minLength": 1,
+      "title": "Ticker",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "dataset_id",
+    "ticker",
+    "created_at",
+    "decision_cutoff",
+    "dataset_hash",
+    "components",
+    "license_status",
+    "point_in_time_status",
+    "quality_status",
+    "decision_eligible",
+    "raw_data_committed",
+    "order_capability"
+  ],
+  "title": "HistoricalDatasetManifest",
+  "type": "object"
+}
