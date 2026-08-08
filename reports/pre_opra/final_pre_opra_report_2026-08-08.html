@@ -1,29 +1,68 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>TTWO — validation finale pré-OPRA</title>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TTWO — validation quantitative finale pré-OPRA</title>
 <style>
-body{font:16px/1.5 system-ui,sans-serif;margin:auto;max-width:1180px;
-padding:32px;color:#172033;background:#f6f8fb}
-h1,h2{color:#11264d} .banner{padding:20px;border-left:6px solid #b42318;background:#fff0ee}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
-article{background:white;padding:16px;border-radius:8px}
-table{width:100%;border-collapse:collapse;background:white}
-th,td{padding:9px;border:1px solid #d7dfeb;text-align:left}
-code{word-break:break-all}
-</style></head><body>
-<h1>Validation quantitative finale pré-OPRA — TTWO</h1>
-<section class="banner"><strong>BLOCKED_BY_DATA — NO_POSITION_RECOMMENDED</strong><br>
-Logiciel testé, preuve financière insuffisante. Recherche uniquement,
-aucun ordre possible.</section>
-<h2>Phases A–L</h2><table><thead><tr><th>Phase</th><th>Objet</th>
-<th>Statut</th><th>Livrable</th></tr></thead><tbody><tr><td>A</td><td>audit des gaps</td><td><code>READY_RESEARCH_ONLY</code></td><td>../../docs/audits/PRE_OPRA_GAP_ANALYSIS.md</td></tr><tr><td>B</td><td>configuration</td><td><code>CONFIG_READY</code></td><td>../../docs/config/PRE_OPRA_CONFIG.md</td></tr><tr><td>C</td><td>données PIT</td><td><code>BLOCKED</code></td><td>data_inventory_2026-08-08.json</td></tr><tr><td>D</td><td>calibration</td><td><code>DIAGNOSTIC_ONLY_LICENSE_REVIEW</code></td><td>empirical_calibration_2026-08-08.json</td></tr><tr><td>E</td><td>walk-forward</td><td><code>DIAGNOSTIC_ONLY_LICENSE_REVIEW</code></td><td>walk_forward_protocol_2026-08-08.json</td></tr><tr><td>F</td><td>holdout final</td><td><code>UNOPENED</code></td><td>../../validation/final_holdout_ledger.jsonl</td></tr><tr><td>G</td><td>baselines</td><td><code>BLOCKED_INCOMPARABLE_DATA</code></td><td>baseline_comparison_2026-08-08.json</td></tr><tr><td>H</td><td>surfaces</td><td><code>BLOCKED_MISSING_GOVERNED_INPUTS</code></td><td>historical_surfaces_2026-08-08.json</td></tr><tr><td>I</td><td>événements/régimes</td><td><code>BLOCKED_MISSING_GOVERNED_EVENTS</code></td><td>event_regime_dataset_2026-08-08.json</td></tr><tr><td>J</td><td>cinq scores</td><td><code>BLOCKED_VALIDATION</code></td><td>five_scores_2026-08-08.json</td></tr><tr><td>K</td><td>sévérité/gates</td><td><code>BLOCKED_NO_CANDIDATE_DISTRIBUTION</code></td><td>severity_and_gate_sensitivity_2026-08-08.json</td></tr><tr><td>L</td><td>rapport final</td><td><code>BLOCKED_BY_DATA</code></td><td>final_pre_opra_report_2026-08-08.html</td></tr></tbody></table>
-<h2>Métriques réellement calculées</h2><ul><li><code>private_option_envelopes</code>: 1998</li><li><code>private_option_rows</code>: 46413</li><li><code>option_dates</code>: 250</li><li><code>price_observations</code>: 616</li><li><code>return_observations</code>: 615</li><li><code>annualized_realized_volatility</code>: 0.2965765</li><li><code>excess_kurtosis</code>: 6.96457</li><li><code>maximum_drawdown</code>: 0.27664</li><li><code>walk_forward_windows</code>: 7</li><li><code>comparable_strategy_panels</code>: 0</li><li><code>validated_surface_dates</code>: 0</li><li><code>governed_events</code>: 0</li></ul>
-<h2>Cinq scores distincts</h2><div class="grid"><article><h3>opportunity</h3><p>unavailable</p></article><article><h3>risk</h3><p>unavailable</p></article><article><h3>evidence</h3><p>unavailable</p></article><article><h3>model_agreement</h3><p>unavailable</p></article><article><h3>execution_quality</h3><p>unavailable</p></article></div>
-<h2>Meilleur candidat bloqué</h2><p><code>UNAVAILABLE</code></p>
-<h2>Bloqueurs</h2><ul><li>Historical option-data licensing remains to_review.</li><li>No aligned comparable panel exists for all nine mandatory strategies.</li><li>Historical IV/delta, governed rates and dividends are incomplete.</li><li>No governed point-in-time event history exists.</li><li>The five score formulas and thresholds remain draft_to_validate.</li><li>The final holdout is unprovisioned and intentionally UNOPENED.</li></ul>
-<h2>Préparation OPRA future — phase M non démarrée</h2><ul><li>Obtain authorized OPRA access and document storage/redistribution rights.</li><li>Ingest append-only raw snapshots with checksums and point-in-time timestamps.</li><li>Run shadow/paper validation; do not add order capability.</li><li>Keep Phase M separate and require explicit user validation before starting it.</li></ul>
-<h2>Reproductibilité</h2><ul><li>commit <code>44ad47cb42e1ee6f1854e22b8678786cfe54dca6</code></li>
-<li>config <code>629e654b6192f84d681f9e974c6b55934e873bd6df1c7d34554c4983775d6a49</code></li>
-<li>dataset <code>0b09a9a9b1de6a9132e2f0eaf1a9cc15152d2fce59e40baefd21812c9886f556</code></li>
-<li>holdout UNOPENED, inutilisé</li><li>order_capability forbidden</li></ul>
-</body></html>
+:root{--ink:#17233d;--muted:#61708a;--paper:#f4f7fb;--card:#fff;--line:#dce4ef;
+--blue:#2f6fed;--navy:#0d1f3c;--red:#b42318;--amber:#b96d00;--green:#16794d}
+*{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);
+font:15px/1.55 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:1240px;margin:auto;padding:44px 28px 80px} h1{font-size:clamp(34px,5vw,66px);
+line-height:1.02;letter-spacing:-.045em;margin:14px 0 18px;max-width:900px} h2{font-size:26px;
+letter-spacing:-.02em;margin:56px 0 18px} h3{margin:5px 0 8px} p{color:var(--muted)}
+.eyebrow{font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:800;color:var(--blue)}
+.hero{background:linear-gradient(135deg,#0d1f3c,#163d7b);color:#fff;border-radius:24px;padding:42px;
+box-shadow:0 22px 60px #17305a22} .hero p{color:#c7d6ef;max-width:760px;font-size:17px}
+.verdict{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px} .pill,.verdict span{display:inline-block;
+padding:7px 11px;border-radius:999px;background:#eef3fb;color:#274467;font-size:12px;font-weight:750}
+.verdict span{background:#ffffff16;color:#fff;border:1px solid #ffffff2c}
+.decision{border-left:5px solid #f3b44e;background:#fff7e6;padding:18px 20px;border-radius:12px;margin-top:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.score-card,.candidate{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;
+box-shadow:0 8px 24px #17305a0a} .score{font-size:38px;font-weight:850;letter-spacing:-.04em}
+.score span{font-size:14px;color:var(--muted);font-weight:600} .score-card p{margin-bottom:4px}
+.score-card small{color:var(--muted)} .bar{height:7px;background:#e6edf7;border-radius:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#235ecf,#61a0ff)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:#fff}
+table{border-collapse:collapse;width:100%;min-width:840px} th{background:#eef3f9;color:#475974;font-size:11px;
+text-transform:uppercase;letter-spacing:.06em} th,td{padding:12px 13px;border-bottom:1px solid var(--line);
+text-align:right;white-space:nowrap} th:first-child,td:first-child{text-align:left}
+.section-row{display:grid;grid-template-columns:42px 1fr auto;gap:14px;align-items:center;padding:15px 0;
+border-bottom:1px solid var(--line)} .section-row>b{display:grid;place-items:center;width:34px;height:34px;
+border-radius:10px;background:#e8effb;color:#245ec4} .section-row h3,.section-row p{margin:0}
+.status{font-size:11px;font-weight:800;color:#43526c} .warning{background:#fff;border:1px solid #f0c7c2;
+border-left:6px solid var(--red);padding:24px;border-radius:16px} .warning li{margin:8px 0}
+.ready{background:#eaf8f1;border-left:6px solid var(--green);padding:24px;border-radius:16px}
+code{background:#eaf0f8;padding:2px 6px;border-radius:6px;overflow-wrap:anywhere} footer{margin-top:58px;
+padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+@media(max-width:700px){main{padding:22px 15px 60px}.hero{padding:26px 22px}.section-row{grid-template-columns:38px 1fr}
+.section-row .status{grid-column:2}}
+</style></head><body><main>
+<section class="hero"><div class="eyebrow">TTWO · Research engine · 08 août 2026</div>
+<h1>Validation quantitative finale pré‑OPRA</h1>
+<p>Les données historiques accessibles ont été normalisées, calibrées et testées chronologiquement.
+Le résultat financier du moteur est défavorable et l'incertitude reste élevée.</p>
+<div class="verdict"><span>PRE_OPRA_RESEARCH_COMPLETE</span><span>ENGINE_NOT_PROVEN_SUPERIOR</span>
+<span>HOLDOUT UNOPENED</span><span>ORDER CAPABILITY FORBIDDEN</span></div></section>
+<div class="decision"><strong>NO_POSITION_RECOMMENDED</strong> — le meilleur résultat de développement
+ne justifie pas une position. Le meilleur candidat bloqué reste visible ci-dessous.</div>
+
+<h2>Top candidates</h2><div class="grid"><article class='candidate'><div class='eyebrow'>BEST_RISK_ADJUSTED</div><h3>buy_and_hold</h3><span class='pill'>DEVELOPMENT_LEADER</span><p>Meilleur compromis OOS observé : +25,1% composé, CVaR 7,9%.</p></article><article class='candidate'><div class='eyebrow'>HIGHEST_UPSIDE</div><h3>atm_long_call</h3><span class='pill'>HIGH_RISK</span><p>E[R] OOS la plus haute, mais -65,5% composé et CVaR 64,7%.</p></article><article class='candidate'><div class='eyebrow'>LOWEST_RISK</div><h3>no_position</h3><span class='pill'>LOWEST_RISK</span><p>Rendement et perte nuls dans le panel ; aucune exposition optionnelle.</p></article><article class='candidate'><div class='eyebrow'>BEST_BLOCKED_CANDIDATE</div><h3>engine_candidate</h3><span class='pill'>AVOID</span><p>Meilleur candidat moteur visible ; échoue le gate central d&#x27;opportunité.</p></article><article class='candidate'><div class='eyebrow'>BEST_SIMPLE_BASELINE</div><h3>buy_and_hold</h3><span class='pill'>BASELINE</span><p>Baseline simple supérieure à V10 sur développement complet et OOS.</p></article></div>
+<h2>Cinq scores indépendants</h2><div class="grid"><article class='score-card'><div class='eyebrow'>opportunity</div><div class='score'>37.1<span>/100</span></div><div class='bar'><i style='width:37.1%'></i></div><p>Couverture <strong>100%</strong> · confiance LOW</p><small>Manquants : aucun</small></article><article class='score-card'><div class='eyebrow'>risk</div><div class='score'>49.5<span>/100</span></div><div class='bar'><i style='width:49.5%'></i></div><p>Couverture <strong>100%</strong> · confiance LOW</p><small>Manquants : aucun</small></article><article class='score-card'><div class='eyebrow'>evidence</div><div class='score'>40.3<span>/100</span></div><div class='bar'><i style='width:40.3%'></i></div><p>Couverture <strong>80%</strong> · confiance LOW</p><small>Manquants : holdout_validation, rights_confirmation</small></article><article class='score-card'><div class='eyebrow'>model_agreement</div><div class='score'>31.5<span>/100</span></div><div class='bar'><i style='width:31.5%'></i></div><p>Couverture <strong>50%</strong> · confiance VERY_LOW</p><small>Manquants : option_expected_return_agreement, candidate_ranking_agreement</small></article><article class='score-card'><div class='eyebrow'>execution_quality</div><div class='score'>50.5<span>/100</span></div><div class='bar'><i style='width:50.5%'></i></div><p>Couverture <strong>75%</strong> · confiance LOW</p><small>Manquants : live_execution_component</small></article></div>
+<h2>V10 vs baselines — walk-forward OOS</h2><div class="table-wrap"><table><thead><tr>
+<th>Stratégie</th><th>Total</th><th>E[R]</th><th>Médiane</th><th>CVaR95</th><th>Max DD</th>
+<th>P(profit)</th><th>P(perte&gt;50%)</th><th>Coûts</th></tr></thead><tbody><tr><td><strong>cash</strong></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>€0</td></tr><tr><td><strong>no_position</strong></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>€0</td></tr><tr><td><strong>underlying</strong></td><td>22.8%</td><td>2.3%</td><td>3.0%</td><td>8.1%</td><td>12.8%</td><td>60.0%</td><td>0.0%</td><td>€20</td></tr><tr><td><strong>buy_and_hold</strong></td><td>25.1%</td><td>2.4%</td><td>3.2%</td><td>7.9%</td><td>12.4%</td><td>60.0%</td><td>0.0%</td><td>€1</td></tr><tr><td><strong>atm_long_call</strong></td><td>-65.5%</td><td>10.9%</td><td>-1.3%</td><td>64.7%</td><td>92.0%</td><td>50.0%</td><td>30.0%</td><td>€1787</td></tr><tr><td><strong>fixed_delta_long_call</strong></td><td>-99.6%</td><td>-3.5%</td><td>-36.7%</td><td>84.7%</td><td>99.9%</td><td>30.0%</td><td>50.0%</td><td>€3474</td></tr><tr><td><strong>standard_bull_call_spread</strong></td><td>-100.0%</td><td>-17.5%</td><td>-8.2%</td><td>100.0%</td><td>100.0%</td><td>50.0%</td><td>40.0%</td><td>€4414</td></tr><tr><td><strong>random_admissible</strong></td><td>-93.7%</td><td>-0.3%</td><td>-3.3%</td><td>74.6%</td><td>98.4%</td><td>40.0%</td><td>40.0%</td><td>€3078</td></tr><tr><td><strong>engine_candidate</strong></td><td>-90.4%</td><td>-1.3%</td><td>-7.2%</td><td>84.7%</td><td>97.5%</td><td>20.0%</td><td>20.0%</td><td>€1683</td></tr></tbody></table></div>
+<h2>Severe-loss ladder — engine candidate</h2><div class="table-wrap"><table><thead><tr>
+<th>Seuil de perte</th><th>Probabilité</th><th>Wilson 95%</th><th>Bootstrap 95%</th>
+</tr></thead><tbody><tr><td>&gt; 10%</td><td><strong>50%</strong></td><td>23.7% – 76.3%</td><td>20.0% – 80.0%</td></tr><tr><td>&gt; 25%</td><td><strong>30%</strong></td><td>10.8% – 60.3%</td><td>0.0% – 60.0%</td></tr><tr><td>&gt; 50%</td><td><strong>20%</strong></td><td>5.7% – 51.0%</td><td>0.0% – 50.0%</td></tr><tr><td>&gt; 70%</td><td><strong>10%</strong></td><td>1.8% – 40.4%</td><td>0.0% – 30.0%</td></tr><tr><td>&gt; 90%</td><td><strong>0%</strong></td><td>0.0% – 27.8%</td><td>0.0% – 0.0%</td></tr><tr><td>&gt; 99%</td><td><strong>0%</strong></td><td>0.0% – 27.8%</td><td>0.0% – 0.0%</td></tr></tbody></table></div>
+<h2>Sensibilité des gates</h2><div class="table-wrap"><table><thead><tr><th>Réglage</th>
+<th>Décision</th><th>Opp. min</th><th>Risque max</th><th>Preuve min</th><th>Exécution min</th>
+</tr></thead><tbody><tr><td>permissive-predefined</td><td>PASS</td><td>30</td><td>70</td><td>30</td><td>30</td></tr><tr><td>central-predefined</td><td>NO POSITION</td><td>45</td><td>50</td><td>40</td><td>50</td></tr><tr><td>strict-predefined</td><td>NO POSITION</td><td>60</td><td>35</td><td>60</td><td>70</td></tr></tbody></table></div>
+<h2>Sections A–N</h2><section><article class='section-row'><b>A</b><div><h3>DATA COVERAGE</h3><p>20 884 observations options uniques, 631 barres spot, taux, FX et 14 événements.</p></div><span class='status'>LOCAL_PRIVATE_DATA_USED</span></article><article class='section-row'><b>B</b><div><h3>CALIBRATION</h3><p>Empirique, EWMA, GARCH/GJR et 535 tranches SVI ; Heston reste non identifiable.</p></div><span class='status'>DEVELOPMENT_CALIBRATED_HESTON_BLOCKED</span></article><article class='section-row'><b>C</b><div><h3>WALK-FORWARD</h3><p>10 tests futurs non chevauchants ; DSR 5,7 %, PBO 77,8 %.</p></div><span class='status'>REAL_DEVELOPMENT_OOS_LIMITED</span></article><article class='section-row'><b>D</b><div><h3>HOLDOUT</h3><p>Ledger intact ; aucun holdout artificiel n&#x27;a été créé ou consulté.</p></div><span class='status'>UNOPENED</span></article><article class='section-row'><b>E</b><div><h3>BASELINES</h3><p>Même capital EUR, mêmes dates, mêmes coûts prudents et même politique FX.</p></div><span class='status'>NINE_REAL_ALIGNED_STRATEGIES</span></article><article class='section-row'><b>F</b><div><h3>TOP CANDIDATES</h3><p>Le no-position ne masque ni l&#x27;upside mesuré ni le meilleur candidat bloqué.</p></div><span class='status'>EXPOSED_WITH_NO_POSITION</span></article><article class='section-row'><b>G</b><div><h3>FIVE SCORES</h3><p>Cinq dimensions calculées sans redistribuer les poids manquants.</p></div><span class='status'>CALCULATED_PARTIAL_AWARE</span></article><article class='section-row'><b>H</b><div><h3>RAW METRICS</h3><p>Rendements, coûts, CVaR, drawdown, DSR, PBO et diagnostics sont conservés.</p></div><span class='status'>DISPLAYED</span></article><article class='section-row'><b>I</b><div><h3>SEVERE-LOSS LADDER</h3><p>Six seuils avec intervalles Wilson et bootstrap ; dix observations seulement.</p></div><span class='status'>CALCULATED_WITH_INTERVALS</span></article><article class='section-row'><b>J</b><div><h3>GATE SENSITIVITY</h3><p>Le candidat passe le réglage permissif mais échoue central et strict.</p></div><span class='status'>GATE_INSTABILITY</span></article><article class='section-row'><b>K</b><div><h3>V10 VS BASELINES</h3><p>V10 perd sur le panel complet et OOS ; aucune supériorité ajustée Holm.</p></div><span class='status'>V10_UNDERPERFORMS</span></article><article class='section-row'><b>L</b><div><h3>ENGINE VERDICT</h3><p>Verdict mécanique ; aucun retuning après observation du résultat.</p></div><span class='status'>ENGINE_NOT_PROVEN_SUPERIOR</span></article><article class='section-row'><b>M</b><div><h3>REMAINING BLOCKERS</h3><p>Droits humains, nouvel échantillon/holdout et OPRA restent irréductibles localement.</p></div><span class='status'>THREE_EXTERNAL_OR_FUTURE_DEPENDENCIES</span></article><article class='section-row'><b>N</b><div><h3>OPRA READINESS</h3><p>Phase M non démarrée ; aucune connexion ou simulation OPRA n&#x27;a été effectuée.</p></div><span class='status'>CONTRACT_DEFINED_NOT_CONNECTED</span></article></section>
+<h2>Remaining blockers</h2><section class="warning"><ul><li>Confirmation humaine du type d&#x27;abonnement et des droits de recherche/stockage des fournisseurs historiques.</li><li>Échantillon options formel et holdout réellement futur : 25 observations disponibles contre 41 requises ; il ne peut pas être fabriqué sans fuite.</li><li>Entitlement et identifiants OPRA live requis pour la future Phase M prospective read-only/paper.</li></ul></section>
+<h2>OPRA readiness</h2><section class="ready"><ul><li>Contrat de provider live read-only prévu ; aucune méthode d&#x27;ordre autorisée.</li><li>Chaînes, bid/ask, timestamps, fraîcheur et spreads devront être journalisés.</li><li>Chaque décision paper sera gelée avant réalisation et reliée par hash.</li><li>La Phase M comparera V10 aux mêmes baselines avec coûts et slippage observés.</li></ul>
+<p>Variables : <code>OPRA_PROVIDER, OPRA_API_KEY, OPRA_API_SECRET, OPRA_ACCOUNT_OR_SESSION</code></p>
+<p>Commande : <code>ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml</code></p></section>
+<footer>Recherche uniquement — pas un conseil en investissement. <code>transmit=false</code> ·
+<code>what_if=true</code> · <code>order_capability=forbidden</code><br>
+Commit source 18bc7bda577e9c4d99518f7e798bde86c353dcce · config 98eadf0c3a13322bda6dc630b7fbe0a791ebb5ec2ff99e14004ceecf29265436</footer>
+</main></body></html>

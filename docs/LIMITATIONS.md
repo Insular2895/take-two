@@ -1,5 +1,20 @@
 # Limitations
 
+- Le panel options réel contient 25 observations alignées et seulement 10 tests OOS
+  non chevauchants, contre 41 observations requises par la politique formelle. Les
+  intervalles sont larges et le holdout futur reste `UNOPENED`.
+- Les droits de recherche/stockage dépendent du type d'abonnement et des accords du
+  compte utilisateur. Le code documente les restrictions, mais ne peut confirmer ces
+  faits contractuels à la place du titulaire.
+- 130 dates de surface passent les diagnostics, 50 présentent un arbitrage calendrier
+  et 21 échouent. Heston n'est pas calibré : l'optimiseur multi-start, l'identifiabilité
+  et la stabilité OOS ne passent pas les gates.
+- V10 sous-performe cash et buy-and-hold sur le développement complet et le segment OOS.
+  `ENGINE_NOT_PROVEN_SUPERIOR` est un constat de développement, pas une preuve que toute
+  stratégie future échouera.
+- Les quotes MarketData.app sont EOD et par jambe ; elles ne prouvent ni NBBO intraday,
+  ni fill simultané d'un combo. La composante d'exécution live reste `pending_opra`.
+
 - Quantitative conventions are now centralized as Actual/365 Fixed for calendar time and 252
   sessions for empirical annualisation. These product conventions are explicit, not universal.
 - Active forecast path sets are tagged `P` and pricing path sets are tagged `Q`; historical

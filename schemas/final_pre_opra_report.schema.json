@@ -1,13 +1,280 @@
 {
   "$defs": {
-    "PhaseResult": {
+    "FinalBaselineRow": {
+      "additionalProperties": false,
+      "properties": {
+        "cvar_95": {
+          "minimum": 0,
+          "title": "Cvar 95",
+          "type": "number"
+        },
+        "evidence": {
+          "title": "Evidence",
+          "type": "string"
+        },
+        "expected_return": {
+          "title": "Expected Return",
+          "type": "number"
+        },
+        "maximum_drawdown": {
+          "minimum": 0,
+          "title": "Maximum Drawdown",
+          "type": "number"
+        },
+        "median_return": {
+          "title": "Median Return",
+          "type": "number"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "probability_loss_50": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Loss 50",
+          "type": "number"
+        },
+        "probability_loss_70": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Loss 70",
+          "type": "number"
+        },
+        "probability_loss_90": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Loss 90",
+          "type": "number"
+        },
+        "probability_profit": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Profit",
+          "type": "number"
+        },
+        "probability_target": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Target",
+          "type": "number"
+        },
+        "sharpe": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sharpe"
+        },
+        "sortino": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sortino"
+        },
+        "strategy": {
+          "title": "Strategy",
+          "type": "string"
+        },
+        "total_return": {
+          "title": "Total Return",
+          "type": "number"
+        },
+        "transaction_costs_eur": {
+          "minimum": 0,
+          "title": "Transaction Costs Eur",
+          "type": "number"
+        }
+      },
+      "required": [
+        "strategy",
+        "observations",
+        "total_return",
+        "expected_return",
+        "median_return",
+        "cvar_95",
+        "maximum_drawdown",
+        "probability_profit",
+        "probability_target",
+        "probability_loss_50",
+        "probability_loss_70",
+        "probability_loss_90",
+        "sharpe",
+        "sortino",
+        "transaction_costs_eur",
+        "evidence"
+      ],
+      "title": "FinalBaselineRow",
+      "type": "object"
+    },
+    "FinalGateRow": {
+      "additionalProperties": false,
+      "properties": {
+        "best_candidate_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Best Candidate Id"
+        },
+        "maximum_risk": {
+          "title": "Maximum Risk",
+          "type": "number"
+        },
+        "minimum_evidence": {
+          "title": "Minimum Evidence",
+          "type": "number"
+        },
+        "minimum_execution_quality": {
+          "title": "Minimum Execution Quality",
+          "type": "number"
+        },
+        "minimum_opportunity": {
+          "title": "Minimum Opportunity",
+          "type": "number"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "setting_id": {
+          "title": "Setting Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "setting_id",
+        "passed",
+        "best_candidate_id",
+        "minimum_opportunity",
+        "maximum_risk",
+        "minimum_evidence",
+        "minimum_execution_quality"
+      ],
+      "title": "FinalGateRow",
+      "type": "object"
+    },
+    "FinalLossPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "bootstrap_interval_95": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Bootstrap Interval 95",
+          "type": "array"
+        },
+        "probability": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability",
+          "type": "number"
+        },
+        "threshold": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Threshold",
+          "type": "number"
+        },
+        "wilson_interval_95": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Wilson Interval 95",
+          "type": "array"
+        }
+      },
+      "required": [
+        "threshold",
+        "probability",
+        "wilson_interval_95",
+        "bootstrap_interval_95"
+      ],
+      "title": "FinalLossPoint",
+      "type": "object"
+    },
+    "FinalScoreSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "title": "Confidence",
+          "type": "string"
+        },
+        "formula_version": {
+          "title": "Formula Version",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "missing_components": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Components",
+          "type": "array"
+        },
+        "score_coverage": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Score Coverage",
+          "type": "number"
+        },
+        "score_value": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Score Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "kind",
+        "score_value",
+        "score_coverage",
+        "missing_components",
+        "confidence",
+        "formula_version"
+      ],
+      "title": "FinalScoreSummary",
+      "type": "object"
+    },
+    "ReportSection": {
       "additionalProperties": false,
       "properties": {
         "artifact": {
           "title": "Artifact",
           "type": "string"
         },
-        "phase": {
+        "section_id": {
           "enum": [
             "A",
             "B",
@@ -20,48 +287,46 @@
             "I",
             "J",
             "K",
-            "L"
+            "L",
+            "M",
+            "N"
           ],
-          "title": "Phase",
+          "title": "Section Id",
           "type": "string"
-        },
-        "remaining": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Remaining",
-          "type": "array"
         },
         "status": {
           "title": "Status",
           "type": "string"
         },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
         "title": {
           "title": "Title",
           "type": "string"
-        },
-        "validated": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Validated",
-          "type": "array"
         }
       },
       "required": [
-        "phase",
+        "section_id",
         "title",
         "status",
-        "artifact",
-        "validated",
-        "remaining"
+        "summary",
+        "artifact"
       ],
-      "title": "PhaseResult",
+      "title": "ReportSection",
       "type": "object"
     },
     "RunManifest": {
       "additionalProperties": false,
       "properties": {
+        "artifact_hashes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Artifact Hashes",
+          "type": "object"
+        },
         "code_commit": {
           "maxLength": 40,
           "minLength": 7,
@@ -116,9 +381,23 @@
           "type": "string"
         },
         "schema_version": {
-          "const": "1.0",
+          "const": "2.0",
           "title": "Schema Version",
           "type": "string"
+        },
+        "schema_versions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Schema Versions",
+          "type": "object"
+        },
+        "score_versions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Score Versions",
+          "type": "object"
         },
         "seed": {
           "title": "Seed",
@@ -135,10 +414,49 @@
         "python_version",
         "platform",
         "dependencies",
+        "schema_versions",
+        "score_versions",
+        "artifact_hashes",
         "command",
         "holdout_used"
       ],
       "title": "RunManifest",
+      "type": "object"
+    },
+    "TopCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "classification": {
+          "title": "Classification",
+          "type": "string"
+        },
+        "label": {
+          "enum": [
+            "BEST_RISK_ADJUSTED",
+            "HIGHEST_UPSIDE",
+            "LOWEST_RISK",
+            "BEST_BLOCKED_CANDIDATE",
+            "BEST_SIMPLE_BASELINE"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "candidate_id",
+        "rationale",
+        "classification"
+      ],
+      "title": "TopCandidate",
       "type": "object"
     }
   },
@@ -146,56 +464,21 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "baseline_table": {
+      "items": {
+        "$ref": "#/$defs/FinalBaselineRow"
+      },
+      "maxItems": 9,
+      "minItems": 9,
+      "title": "Baseline Table",
+      "type": "array"
+    },
     "best_blocked_candidate": {
+      "additionalProperties": true,
       "title": "Best Blocked Candidate",
-      "type": "string"
+      "type": "object"
     },
-    "blockers": {
-      "items": {
-        "type": "string"
-      },
-      "minItems": 1,
-      "title": "Blockers",
-      "type": "array"
-    },
-    "decision": {
-      "const": "NO_POSITION_RECOMMENDED",
-      "title": "Decision",
-      "type": "string"
-    },
-    "decision_scope": {
-      "const": "research_only_not_investment_advice",
-      "title": "Decision Scope",
-      "type": "string"
-    },
-    "evidence_grade": {
-      "enum": [
-        "software_tested_only",
-        "numerically_validated",
-        "historically_validated",
-        "forward_validated"
-      ],
-      "title": "Evidence Grade",
-      "type": "string"
-    },
-    "external_source_ids": {
-      "items": {
-        "type": "string"
-      },
-      "title": "External Source Ids",
-      "type": "array"
-    },
-    "holdout_state": {
-      "const": "UNOPENED",
-      "title": "Holdout State",
-      "type": "string"
-    },
-    "holdout_used": {
-      "const": false,
-      "title": "Holdout Used",
-      "type": "boolean"
-    },
-    "key_metrics": {
+    "calibration_status": {
       "additionalProperties": {
         "anyOf": [
           {
@@ -212,13 +495,104 @@
           }
         ]
       },
-      "title": "Key Metrics",
+      "title": "Calibration Status",
       "type": "object"
+    },
+    "data_coverage": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "title": "Data Coverage",
+      "type": "object"
+    },
+    "decision": {
+      "const": "NO_POSITION_RECOMMENDED",
+      "title": "Decision",
+      "type": "string"
+    },
+    "decision_scope": {
+      "const": "research_only_not_investment_advice",
+      "title": "Decision Scope",
+      "type": "string"
+    },
+    "engine_verdict": {
+      "const": "ENGINE_NOT_PROVEN_SUPERIOR",
+      "title": "Engine Verdict",
+      "type": "string"
+    },
+    "evidence_grade": {
+      "const": "development_oos_limited",
+      "title": "Evidence Grade",
+      "type": "string"
+    },
+    "exact_command_after_opra": {
+      "title": "Exact Command After Opra",
+      "type": "string"
+    },
+    "exact_opra_variables": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Exact Opra Variables",
+      "type": "array"
+    },
+    "external_source_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "External Source Ids",
+      "type": "array"
+    },
+    "five_scores": {
+      "items": {
+        "$ref": "#/$defs/FinalScoreSummary"
+      },
+      "maxItems": 5,
+      "minItems": 5,
+      "title": "Five Scores",
+      "type": "array"
+    },
+    "gate_sensitivity": {
+      "items": {
+        "$ref": "#/$defs/FinalGateRow"
+      },
+      "minItems": 3,
+      "title": "Gate Sensitivity",
+      "type": "array"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "holdout_state": {
+      "const": "UNOPENED",
+      "title": "Holdout State",
+      "type": "string"
+    },
+    "holdout_used": {
+      "const": false,
+      "title": "Holdout Used",
+      "type": "boolean"
     },
     "opra_readiness": {
       "items": {
         "type": "string"
       },
+      "minItems": 1,
       "title": "Opra Readiness",
       "type": "array"
     },
@@ -229,10 +603,7 @@
       "type": "string"
     },
     "overall_status": {
-      "enum": [
-        "READY_RESEARCH_ONLY",
-        "BLOCKED_BY_DATA"
-      ],
+      "const": "PRE_OPRA_RESEARCH_COMPLETE",
       "title": "Overall Status",
       "type": "string"
     },
@@ -241,13 +612,32 @@
       "title": "Phase M Started",
       "type": "boolean"
     },
-    "phase_results": {
-      "items": {
-        "$ref": "#/$defs/PhaseResult"
+    "raw_metrics": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
       },
-      "maxItems": 12,
-      "minItems": 12,
-      "title": "Phase Results",
+      "title": "Raw Metrics",
+      "type": "object"
+    },
+    "remaining_blockers": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Remaining Blockers",
       "type": "array"
     },
     "report_id": {
@@ -258,41 +648,104 @@
       "$ref": "#/$defs/RunManifest"
     },
     "schema_version": {
-      "const": "1.0",
+      "const": "2.0",
       "title": "Schema Version",
       "type": "string"
     },
-    "score_status": {
-      "additionalProperties": {
-        "enum": [
-          "unavailable",
-          "computed"
-        ],
-        "type": "string"
+    "sections": {
+      "items": {
+        "$ref": "#/$defs/ReportSection"
       },
-      "title": "Score Status",
-      "type": "object"
+      "maxItems": 14,
+      "minItems": 14,
+      "title": "Sections",
+      "type": "array"
+    },
+    "severe_loss_ladder": {
+      "items": {
+        "$ref": "#/$defs/FinalLossPoint"
+      },
+      "maxItems": 6,
+      "minItems": 6,
+      "title": "Severe Loss Ladder",
+      "type": "array"
     },
     "ticker": {
+      "const": "TTWO",
       "title": "Ticker",
       "type": "string"
+    },
+    "top_candidates": {
+      "items": {
+        "$ref": "#/$defs/TopCandidate"
+      },
+      "maxItems": 5,
+      "minItems": 5,
+      "title": "Top Candidates",
+      "type": "array"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    },
+    "walk_forward_status": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "title": "Walk Forward Status",
+      "type": "object"
+    },
+    "what_if": {
+      "const": true,
+      "default": true,
+      "title": "What If",
+      "type": "boolean"
     }
   },
   "required": [
     "schema_version",
     "report_id",
     "ticker",
+    "generated_at",
     "overall_status",
     "evidence_grade",
     "decision",
     "decision_scope",
+    "engine_verdict",
     "run_manifest",
-    "phase_results",
-    "key_metrics",
-    "score_status",
+    "sections",
+    "data_coverage",
+    "calibration_status",
+    "walk_forward_status",
+    "baseline_table",
+    "top_candidates",
+    "five_scores",
+    "raw_metrics",
+    "severe_loss_ladder",
+    "gate_sensitivity",
     "best_blocked_candidate",
-    "blockers",
+    "remaining_blockers",
     "opra_readiness",
+    "exact_opra_variables",
+    "exact_command_after_opra",
     "external_source_ids",
     "holdout_state",
     "holdout_used",

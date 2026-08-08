@@ -10,6 +10,24 @@ constraints, runs separate conditional simulations, validates hard gates, then
 uses Pareto ranking. `NO_TRADE` and `BLOCKED_INSUFFICIENT_DATA` are first-class
 outcomes.
 
+## Statut final pré-OPRA — 8 août 2026
+
+Les clôtures C1–C12 sont terminées sur les données locales réelles. Le résultat est
+`PRE_OPRA_RESEARCH_COMPLETE`, la conclusion portefeuille est
+`NO_POSITION_RECOMMENDED` et le verdict dérivé est
+`ENGINE_NOT_PROVEN_SUPERIOR`. V10 perd 90,4 % en composé sur dix observations OOS de
+développement, contre +25,1 % pour buy-and-hold. Le panel reste trop court pour la
+politique formelle et le holdout reste `UNOPENED`.
+
+```bash
+ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml
+```
+
+Le dashboard autonome est dans
+[`reports/pre_opra/final_pre_opra_report_2026-08-08.html`](reports/pre_opra/final_pre_opra_report_2026-08-08.html).
+Les données options brutes/normalisées restent privées et ignorées par Git ; seuls les
+hashes, paramètres de calibration et résultats agrégés sont publiés.
+
 ```bash
 ttwo-options knowledge validate --knowledge-dir research/knowledge_items
 ttwo-options knowledge compile \
@@ -156,20 +174,18 @@ Il ne qualifie ni une probabilité de marché, ni une stratégie, ni un rendemen
 Ces éléments portent `experimental_offline` ou `fixture_only`. Ils ne peuvent pas
 être promus par un rang, un score ou un résultat in-sample.
 
-## C. Ce qui nécessite des données historiques réelles
+## C. Ce qui est maintenant calculé sur données historiques réelles
 
-- calibration des probabilités, likelihoods, régimes et modèles ;
-- historique point-in-time des contrats, surfaces, quotes bid/ask, spot, taux,
-  dividendes, FX, événements et coûts ;
-- splits rolling/expanding, embargo, backtests walk-forward et holdout non
-  contaminé ;
-- Brier score, log-loss, ECE, courbes de calibration et pouvoir prédictif ;
-- comparaison hors échantillon à cash, sous-jacent, call ATM, call à delta
-  fixe, spread standard, aléatoire admissible et `NO_TRADE`.
+- historique point-in-time privé des contrats, bid/ask, spot, taux, dividende nul
+  vérifié, FX, événements et coûts ;
+- 6 946 inversions IV, 535 tranches SVI et diagnostics d'arbitrage sur 201 dates ;
+- empirique, EWMA, GARCH/GJR et comparaison chronologique sur 210 rendements ;
+- panel aligné cash/actions/options/V10, purge, embargo, DSR, PBO, bootstrap,
+  permutations et correction de Holm ;
+- cinq scores partiels, severe-loss ladder, gates, frontière et verdict V10.
 
-Le framework JSON/CSV/Parquet optionnel est implémenté. Sans dataset réel
-autorisé, il renvoie `BLOCKED_MISSING_CALIBRATION_DATA`. Une fixture reste
-`FIXTURE_ONLY_NOT_CALIBRATED` ou `FIXTURE_ONLY_NOT_VALIDATED`.
+Restent nécessaires : davantage d'observations options autorisées, un holdout réellement
+futur, la confirmation humaine des droits du compte et la validation prospective OPRA.
 
 ## D. Ce qui nécessite une API live
 

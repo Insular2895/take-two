@@ -16,7 +16,7 @@ does not open the final holdout, and keeps licensed observations outside Git.
 | C9 | Five quality scores | CLOSED_DIAGNOSTIC | `reports/pre_opra/five_scores_2026-08-08.json` | Low confidence; holdout/rights/live execution remain missing |
 | C10 | Severity, gates and frontier | CLOSED_DIAGNOSTIC | `reports/pre_opra/severity_and_gate_sensitivity_2026-08-08.json` | Wide intervals; thresholds remain draft; OPRA execution pending |
 | C11 | Engine-vs-baseline verdict | CLOSED_DERIVED | `reports/pre_opra/engine_verdict_2026-08-08.json` | `ENGINE_NOT_PROVEN_SUPERIOR`; formal sample and holdout still pending |
-| C12 | Final dashboard and report | PENDING | — | Final artifacts not rebuilt |
+| C12 | Final dashboard and report | CLOSED | `reports/pre_opra/final_pre_opra_report_2026-08-08.{json,md,html}` | Research-only; three external/future dependencies remain explicit |
 | C13 | OPRA interface and paper record | PENDING | — | Live OPRA intentionally unavailable |
 
 Invariants: `order_capability=forbidden`; `transmit=false`; `what_if=true`; final holdout

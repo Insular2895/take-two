@@ -26,12 +26,12 @@ capacité, jamais une promesse de rendement.
 | Normalisation déterministe des événements | `experimental_offline` | Revue humaine et calibration des règles requises. |
 | Bayes auditable | `experimental_offline` | Priors et likelihoods non calibrés historiquement. |
 | GBM, local vol, Heston, Heston+jumps | `fixture_only` ou `experimental_offline` | Calibration, convergence et validation hors échantillon manquantes. |
-| Import/calibration historique | `requires_historical_calibration` | Aucun dataset réel autorisé n’est livré. |
-| Walk-forward | `requires_historical_calibration` | Les fixtures ne constituent pas une preuve financière. |
+| Import/calibration historique | `experimental_offline` | Dataset privé réel exploité ; droits du compte et surfaces imparfaites restent à confirmer. |
+| Walk-forward | `experimental_offline` | 25 observations alignées et 10 OOS, sous le minimum formel de 41. |
 | Robustesse, stress et allocation entière | `experimental_offline` | Les entrées probabilistes restent expérimentales. |
 | Surveillance par snapshots et replay | `experimental_offline` | Aucune campagne paper/live terminée. |
 | Rapports autonomes | `production_ready_offline` | Les résultats héritent du statut de leurs données. |
-| Port IBKR/OPRA read-only | `adapter_ready_not_connected` | Session, droits et quotes combo absents. |
+| Port IBKR/OPRA read-only | `adapter_ready_not_connected` | Contrat logiciel prêt ; session, entitlement et quotes combo absents. |
 | Exécution | `blocked_for_execution` | `transmit=false`, `what_if=true`, confirmation humaine. |
 
 ## Gates de promotion
