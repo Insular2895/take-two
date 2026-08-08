@@ -114,7 +114,8 @@
       "title": "Duplicate Cluster Id"
     },
     "entity": {
-      "default": "TTWO",
+      "default": "UNSPECIFIED",
+      "minLength": 1,
       "title": "Entity",
       "type": "string"
     },

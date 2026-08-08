@@ -1,0 +1,212 @@
+schema_version: "1.0"
+
+research_request:
+  request_id: ttwo-pre-opra-2026-08-08
+  ticker: TTWO
+  as_of: 2026-08-08
+  directional_thesis: bullish
+  thesis_summary: >-
+    Research the bounded-risk TTWO option opportunity without presuming that a
+    catalyst implies a positive stock or option return.
+  invalidation_conditions:
+    - No listed bounded-risk candidate passes the evidence and data gates.
+    - The relevant catalyst moves outside the configured horizon.
+  source_ids: []
+
+market_context:
+  decision_cutoff: 2026-08-08T20:00:00Z
+  base_currency: EUR
+  historical_dataset_id: null
+  data_providers: [marketdata_cache]
+  maximum_data_age_days:
+    value: 7
+    origin: user_assumption
+    status: draft_to_validate
+    source_ids: []
+    rationale: Research freshness limit; not a validated trading threshold.
+  allow_cache_fallback: true
+  sources: []
+
+capital_constraints:
+  amount: 1000
+  currency: EUR
+  maximum_loss: 1000
+  maximum_contracts: 4
+  safety_reserve_fraction:
+    value: 0.05
+    origin: user_assumption
+    status: draft_to_validate
+    source_ids: []
+    rationale: Research scenario only; not a recommendation.
+  fx_rate_to_usd: null
+  fx_rate_as_of: null
+
+risk_profile:
+  bounded_risk_only: true
+  loss_ladder_thresholds: [0.10, 0.25, 0.50, 0.70, 0.90, 0.99]
+  large_loss_threshold:
+    value: 0.70
+    origin: user_assumption
+    status: draft_to_validate
+    source_ids: []
+    rationale: Requested diagnostic threshold; it is not calibrated.
+  target_return:
+    value: 0.90
+    origin: user_assumption
+    status: draft_to_validate
+    source_ids: []
+    rationale: Requested research target; it is not a promised return.
+  maximum_relative_spread:
+    value: 0.30
+    origin: estimate
+    status: calibration_required
+    source_ids: []
+    rationale: Legacy screen threshold awaiting historical execution validation.
+  minimum_open_interest:
+    value: 20
+    origin: estimate
+    status: calibration_required
+    source_ids: []
+    rationale: Legacy screen threshold awaiting validation.
+  minimum_volume:
+    value: 0
+    origin: estimate
+    status: calibration_required
+    source_ids: []
+    rationale: Missing historical volume is permitted only as an explicit limitation.
+  allow_missing_volume: true
+
+strategy_universe:
+  allowed_structures:
+    - long_call
+    - long_put
+    - bull_call_spread
+    - bear_put_spread
+    - call_butterfly
+    - put_butterfly
+    - call_broken_wing_butterfly
+    - put_broken_wing_butterfly
+    - call_calendar
+    - put_calendar
+    - call_diagonal
+    - put_diagonal
+    - long_straddle
+    - long_strangle
+    - iron_condor
+  forbidden_structures: [uncovered_short_option, unbounded_ratio_spread]
+  horizon_min_days: 365
+  horizon_max_days: 548
+  strike_source: listed_chain
+  expiration_source: listed_chain
+  recipe_catalog_path: research/knowledge_items/strategy_recipes
+
+model_universe:
+  models:
+    - model_id: empirical-bootstrap
+      family: empirical
+      status: calibration_required
+      parameters: {}
+    - model_id: garch-family
+      family: conditional_volatility
+      status: calibration_required
+      parameters: {}
+    - model_id: svi-surface
+      family: implied_volatility_surface
+      status: calibration_required
+      parameters: {}
+    - model_id: heston
+      family: stochastic_volatility
+      status: blocked
+      parameters: {}
+  selection_policy: walk_forward_only
+  model_addition_policy: deficiency_and_validation_required
+
+scenario_set:
+  scenario_set_id: ttwo-pre-opra-unweighted-v1
+  probability_measure: none
+  scenarios:
+    - scenario_id: adverse
+      label: Adverse catalyst and liquidity outcome
+      probability: null
+      inputs: {}
+    - scenario_id: base
+      label: Base research scenario
+      probability: null
+      inputs: {}
+    - scenario_id: favorable
+      label: Favorable catalyst outcome
+      probability: null
+      inputs: {}
+
+execution_assumptions:
+  scenario: conservative
+  long_entry_side: ask
+  short_entry_side: bid
+  long_exit_side: bid
+  short_exit_side: ask
+  commission_per_contract_side:
+    value: 0.65
+    origin: estimate
+    status: draft_to_validate
+    source_ids: []
+    rationale: Account-specific commission must be confirmed before paper validation.
+  slippage_per_contract_side:
+    value: 0.05
+    origin: estimate
+    status: calibration_required
+    source_ids: []
+    rationale: Placeholder until historical combo-fill evidence is available.
+  quote_quality_required: eod_bid_ask
+  preview_only: true
+  order_capability: forbidden
+
+validation_policy:
+  require_oos: true
+  walk_forward_method: expanding
+  minimum_train_observations: 20
+  minimum_validation_observations: 8
+  minimum_test_observations: 8
+  minimum_holdout_observations: 4
+  purge_days: 0
+  embargo_days: 5
+  final_holdout_id: null
+  holdout_must_be_unopened: true
+  multiple_testing_method: holm
+  significance_level:
+    value: 0.05
+    origin: user_assumption
+    status: draft_to_validate
+    source_ids: []
+    rationale: Pre-registered research convention; subject to sensitivity analysis.
+  minimum_economic_materiality:
+    value: 0.02
+    origin: user_assumption
+    status: draft_to_validate
+    source_ids: []
+    rationale: Candidate threshold for sensitivity reporting, not a validated cutoff.
+
+optimization_objective:
+  objective_type: pareto_multi_objective
+  primary_metrics:
+    - expected_return
+    - probability_profit
+    - cvar_95
+    - maximum_loss
+    - execution_cost
+  secondary_ranking_weights: {}
+  no_single_magic_score: true
+
+report_policy:
+  formats: [json, markdown, html]
+  display_raw_metrics: true
+  display_score_components: true
+  maximum_candidates: 5
+  language: fr
+  score_versions:
+    opportunity: pre-opra-v1
+    risk: pre-opra-v1
+    evidence: pre-opra-v1
+    model_agreement: pre-opra-v1
+    execution_quality: pre-opra-v1
+
+extensions: {}

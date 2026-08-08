@@ -33,6 +33,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
         "event.schema.json",
         "model_validation.schema.json",
         "observation.schema.json",
+        "pre_opra_config.schema.json",
         "readiness.schema.json",
     }
     for path in schema_paths:

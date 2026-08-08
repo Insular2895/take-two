@@ -79,8 +79,6 @@ def _historical_path(ticker: str) -> Path:
     candidates = sorted(
         Path("data/alpaca").glob(f"{ticker.lower()}_calibration_dataset_*.json")
     )
-    if not candidates and ticker.upper() == "TTWO":
-        candidates = sorted(Path("data/alpaca").glob("ttwo_calibration_dataset_*.json"))
     if not candidates:
         raise FileNotFoundError(f"no historical calibration dataset for {ticker}")
     return candidates[-1]
@@ -91,48 +89,19 @@ def _sources(catalog: StrategyCatalog, snapshot: MarketSnapshot) -> list[SourceR
     for recipe in catalog.recipes:
         for source in recipe.sources:
             source_by_id[source.source_id] = source
-    source_by_id["take-two-q2-fy2026"] = SourceReference(
-        source_id="take-two-q2-fy2026",
-        author="Take-Two Interactive",
-        title="Fiscal second quarter 2026 results and GTA VI release timing",
-        edition_or_date="2025-11-06",
-        chapter=None,
-        page=None,
-        accessed_at=datetime.now(UTC).date(),
-        source_type="company",
-        uri=(
-            "https://www.take2games.com/ir/news/"
-            "take-two-interactive-software-inc-reports-results-fiscal-3"
-        ),
-        confidence="high",
-        excerpt_hash=None,
-    )
-    source_by_id["ecb-eurusd-2026-07-17"] = SourceReference(
-        source_id="ecb-eurusd-2026-07-17",
-        author="European Central Bank",
-        title="Dated EUR/USD reference rate used for budget normalization",
-        edition_or_date="2026-07-17",
-        chapter=None,
-        page=None,
-        accessed_at=datetime.now(UTC).date(),
-        source_type="official",
-        uri="https://data.ecb.europa.eu/currency-converter",
-        confidence="high",
-        excerpt_hash=None,
-    )
     for source_id in snapshot.source_ids:
         source_by_id.setdefault(
             source_id,
             SourceReference(
                 source_id=source_id,
-                author="MarketData.app",
-                title="Timestamped historical option-chain response",
+                author=None,
+                title="Configured timestamped option-chain source",
                 edition_or_date=snapshot.as_of.date().isoformat(),
                 chapter=None,
                 page=None,
                 accessed_at=datetime.now(UTC).date(),
                 source_type="data_provider",
-                uri="https://www.marketdata.app/docs/api/options/chain/",
+                uri=None,
                 confidence="medium",
                 excerpt_hash=None,
             ),

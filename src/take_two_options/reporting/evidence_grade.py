@@ -243,7 +243,7 @@ class ProbabilityWithUncertainty(StrictModel):
 class FinalDecisionEvidenceReport(StrictModel):
     schema_version: Literal["1.0"] = "1.0"
     report_id: str = Field(min_length=1)
-    ticker: Literal["TTWO"] = "TTWO"
+    ticker: str = Field(min_length=1)
     as_of: datetime
     decision_status: Literal["NO_TRADE", "BLOCKED", "RESEARCH_CANDIDATE", "PAPER_REVIEW"]
     selected_candidate_id: str
@@ -292,7 +292,7 @@ def _display_probability(probability: ProbabilityWithUncertainty) -> str:
 def final_decision_markdown(report: FinalDecisionEvidenceReport) -> str:
     """Render every mandatory decision section in a stable order."""
     lines = [
-        "# TTWO final research-decision evidence",
+        f"# {report.ticker} final research-decision evidence",
         "",
         f"- Status: `{report.decision_status}`",
         f"- Selected reference: `{report.selected_candidate_id}`",
@@ -352,12 +352,12 @@ def final_decision_html(report: FinalDecisionEvidenceReport) -> str:
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport"
 content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
-<title>TTWO final research-decision evidence</title><style>
+<title>{esc(report.ticker)} final research-decision evidence</title><style>
 body{{margin:auto;max-width:1100px;padding:2rem;font:15px/1.5 system-ui;background:#f5f1e8;
 color:#172019}}h1,h2{{font-family:Georgia,serif}}.gate{{border:2px solid #8a2d2d;padding:1rem}}
 table{{width:100%;border-collapse:collapse;background:#fffdf8}}th,td{{padding:.6rem;
 border:1px solid #d9d2c3;text-align:left;vertical-align:top}}code{{font-weight:700}}
-</style></head><body><h1>TTWO final research-decision evidence</h1>
+</style></head><body><h1>{esc(report.ticker)} final research-decision evidence</h1>
 <section class="gate"><p>Status: <code>{esc(report.decision_status)}</code> · candidate:
 <code>{esc(report.selected_candidate_id)}</code></p><p>Evidence grade:
 <code>{esc(report.evidence_grade.overall_grade.value)}</code> · claim cap:

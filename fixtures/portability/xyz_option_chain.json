@@ -1,0 +1,62 @@
+{
+  "snapshot_id": "xyz-synthetic-portability-v1",
+  "ticker": "XYZ",
+  "as_of": "2026-01-02T20:00:00Z",
+  "spot": 100.0,
+  "spot_timestamp": "2026-01-02T20:00:00Z",
+  "quote_quality": "indicative",
+  "source_ids": ["xyz-synthetic-fixture"],
+  "quotes": [
+    {
+      "symbol": "XYZ261218C00090000",
+      "expiration": "2026-12-18",
+      "option_type": "call",
+      "strike": 90.0,
+      "bid": 14.0,
+      "ask": 14.2,
+      "volume": 40,
+      "open_interest": 200,
+      "implied_volatility": 0.30,
+      "delta": 0.70,
+      "quote_timestamp": "2026-01-02T20:00:00Z",
+      "multiplier": 100,
+      "price_quality": "indicative",
+      "source_id": "xyz-synthetic-fixture"
+    },
+    {
+      "symbol": "XYZ261218C00100000",
+      "expiration": "2026-12-18",
+      "option_type": "call",
+      "strike": 100.0,
+      "bid": 8.0,
+      "ask": 8.2,
+      "volume": 50,
+      "open_interest": 250,
+      "implied_volatility": 0.28,
+      "delta": 0.52,
+      "quote_timestamp": "2026-01-02T20:00:00Z",
+      "multiplier": 100,
+      "price_quality": "indicative",
+      "source_id": "xyz-synthetic-fixture"
+    },
+    {
+      "symbol": "XYZ261218C00110000",
+      "expiration": "2026-12-18",
+      "option_type": "call",
+      "strike": 110.0,
+      "bid": 4.0,
+      "ask": 4.2,
+      "volume": 45,
+      "open_interest": 225,
+      "implied_volatility": 0.29,
+      "delta": 0.35,
+      "quote_timestamp": "2026-01-02T20:00:00Z",
+      "multiplier": 100,
+      "price_quality": "indicative",
+      "source_id": "xyz-synthetic-fixture"
+    }
+  ],
+  "available_expirations": ["2026-12-18"],
+  "data_warnings": ["Synthetic portability fixture; never valid empirical evidence."],
+  "cache_path": null
+}

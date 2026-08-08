@@ -237,7 +237,7 @@ class NormalizedEvidenceEvent(StrictModel):
     source_family: EvidenceFamily | None = None
     confidence: float = Field(ge=0, le=1)
     direction: Literal["supports", "contradicts", "neutral"] = "supports"
-    entity: str = "TTWO"
+    entity: str = Field(default="UNSPECIFIED", min_length=1)
     severity: float = Field(default=0.5, ge=0, le=1)
     novelty: float = Field(default=1.0, ge=0, le=1)
     duplicate_cluster_id: str | None = None
@@ -280,7 +280,7 @@ class EventNormalizationRule(StrictModel):
     series_pattern: str = Field(min_length=1)
     event_type: NormalizedEventType
     family: EvidenceFamily
-    entity: str = "TTWO"
+    entity: str = Field(default="UNSPECIFIED", min_length=1)
     operator: Literal[
         "greater_than",
         "less_than",

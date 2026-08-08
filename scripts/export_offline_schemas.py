@@ -9,6 +9,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from take_two_options.config.contracts import PreOpraConfig
 from take_two_options.intelligence.backtesting import WalkForwardReport
 from take_two_options.intelligence.calibration import OfflineCalibrationReport
 from take_two_options.intelligence.schemas import (
@@ -21,6 +22,7 @@ from take_two_options.intelligence.schemas import (
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_DIRECTORY = ROOT / "schemas"
 SCHEMAS: dict[str, type[BaseModel]] = {
+    "pre_opra_config.schema.json": PreOpraConfig,
     "readiness.schema.json": FeatureReadiness,
     "observation.schema.json": UnifiedObservation,
     "event.schema.json": NormalizedEvidenceEvent,

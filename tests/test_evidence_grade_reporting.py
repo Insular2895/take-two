@@ -94,6 +94,7 @@ def _report() -> FinalDecisionEvidenceReport:
     )
     return FinalDecisionEvidenceReport(
         report_id="phase9-synthetic-no-trade",
+        ticker="TTWO",
         as_of=NOW,
         decision_status="NO_TRADE",
         selected_candidate_id="NO_TRADE",
