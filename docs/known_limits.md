@@ -11,6 +11,8 @@
   discounts and probability ranges are sensitivity assumptions.
 - The final evidence grade is a software/research lineage grade, not a recommendation confidence
   score. Scanner results remain capped by missing real OOS, holdout and paper evidence.
+- Phase 10 found no active experiment manifest to replay and no authorized aligned dataset for a
+  predictive-accuracy comparison. Its release status is research-only, never a trading claim.
 - The American model uses a flat configured rate/dividend yield and one IV per
   leg stressed by fixed multipliers. It is not a calibrated future IV-surface
   forecast.

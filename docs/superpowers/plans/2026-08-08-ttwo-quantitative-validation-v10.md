@@ -292,9 +292,9 @@ Commit proposé : `feat(decision): make event updates sequential and evidence gr
 
 ## Phase 9 — Rapport final, dashboard et documentation
 
-État : grade de preuve monotone, sidecar final obligatoire, dashboard statique, matrice de lignée,
-registre d'errata et audit de validité implémentés ; gate complet vert (191 tests) ; commit atomique
-à créer.
+État : terminé au commit `3b5a0c2` ; grade de preuve monotone, sidecar final obligatoire,
+dashboard statique, matrice de lignée, registre d'errata et audit de validité implémentés ; gate
+complet vert (191 tests).
 
 ### Documentary Research
 
@@ -326,6 +326,32 @@ Commit proposé : `docs(reporting): publish evidence grades formula lineage and 
 
 ## Phase 10 — Validation intégrale et revue des limites
 
+État : revue déterministe implémentée ; aucun manifest actif ni holdout final n'existe, donc zéro
+expérience réelle a pu être rejouée et aucune comparaison de précision prédictive n'est possible.
+Release recherche : `READY_RESEARCH_ONLY`. Promotion financière :
+`BLOCKED_MISSING_REAL_EVIDENCE`. Gate complète verte : 192 tests, Ruff, mypy, dépendances,
+6 schémas, artefacts offline, lignée documentaire, revue déterministe et sécurité.
+
+### Documentary Research
+
+- Questions : claims réellement soutenus, expériences rejouables, régression logicielle et
+  blockers empiriques.
+- Principal : registres de formules/sources, manifeste contaminé V7–V9, statut du holdout final,
+  exemple d'évidence Phase 9 et historique Git Phase 0.
+- Risques : transformer plus de tests en meilleure précision, fabriquer un manifest, promouvoir
+  un holdout déjà inspecté ou présenter un timing unique comme benchmark.
+- Validation : audit JSON déterministe, suite complète, comparaison smoke Phase 0/Phase 10,
+  inventaire des manifests et contrôle de la frontière d'exécution.
+- Concepts : faible maillon de preuve, reproductibilité structurelle, absence comme blocker.
+- Formules : les 25 Formula IDs sont audités ; aucune nouvelle formule quantitative.
+- Hypothèses : même machine/environnement pour le smoke timing ; Git comme point de comparaison.
+- Alternatives refusées : fixtures promues en données, mesure de précision sans observations,
+  réouverture d'un holdout contaminé.
+- Contradiction : composants numériquement validés mais décision complète seulement
+  `software_tested_only`.
+- Fichiers : `validation/release_audit.py`, `phase10_release_audit.py`, revue JSON et rapport.
+- Test : `tests/test_phase10_release_audit.py` plus gate offline complète.
+
 ### Exécution proposée
 
 1. Rejouer unit/property/integration/golden/offline/security.
@@ -343,6 +369,8 @@ Commandes minimales :
 .venv/bin/pip check
 .venv/bin/python scripts/export_offline_schemas.py --check
 .venv/bin/python scripts/validate_offline_artifacts.py
+.venv/bin/python scripts/validate_research_registry.py
+.venv/bin/python scripts/phase10_release_audit.py --check
 .venv/bin/python scripts/security_gate.py
 ```
 

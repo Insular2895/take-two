@@ -1193,6 +1193,44 @@ sources:
     verified_on: "2026-08-08"
     notes: null
 
+  - source_id: internal-phase10-validation-evidence
+    source_type: repository_validation_evidence
+    author:
+      - Take Two quantitative validation project
+    title: Phase 10 integral validation and release evidence review
+    edition: "1.0"
+    year: 2026
+    volume: null
+    chapter: null
+    section: "full gate, claim audit, replay inventory, release blockers"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: null
+    concept:
+      - deterministic release audit
+      - claim promotion cap
+      - experiment manifest inventory
+      - research-only release decision
+    formula_id: []
+    formula: null
+    assumptions: "Repository tests establish software behavior only; no predictive-accuracy claim is inferred."
+    measure: not_applicable
+    units: not_applicable
+    alternatives:
+      - external independent model validation after real data exists
+    limitations:
+      - local timing comparison is a single-run smoke check
+      - no active real-data experiment manifest exists to replay
+    implementation_file:
+      - src/take_two_options/validation/release_audit.py
+      - scripts/phase10_release_audit.py
+    implementation_symbol:
+      - build_release_evidence_review
+    test_file: tests/test_phase10_release_audit.py
+    validation_status: tested
+    notes: "Internal evidence artifact; not an external methodological authority."
+
 formula_links:
   - formula_id: FORM-MEASURE-CHANGE-001
     name: Explicit P/Q measure boundary

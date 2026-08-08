@@ -42,6 +42,10 @@
   weakest-link grade. Hashes establish artifact identity, not correctness; grade inputs still need
   independent review, and the current chain remains `software_tested_only` because real OOS,
   fresh holdout and paper evidence are absent. Static reporting is not financial validation.
+- The Phase-10 deterministic audit finds no active experiment manifest and no fresh holdout.
+  Its `READY_RESEARCH_ONLY` status validates the repository's guarded research workflow only;
+  financial promotion remains `BLOCKED_MISSING_REAL_EVIDENCE`, and no predictive-accuracy gain is
+  claimed from the larger test suite.
 - MarketData.app historical chains are EOD bid/ask, not intraday NBBO or
   simultaneous combo fills.
 - Alpaca indicative snapshots do not supply the open-interest/underlying fields

@@ -1938,6 +1938,8 @@ La livraison V11 est contrôlée par :
 .venv/bin/mypy src scripts
 .venv/bin/python scripts/export_offline_schemas.py --check
 .venv/bin/python scripts/validate_offline_artifacts.py
+.venv/bin/python scripts/validate_research_registry.py
+.venv/bin/python scripts/phase10_release_audit.py --check
 .venv/bin/python scripts/security_gate.py
 .venv/bin/pip check
 ```

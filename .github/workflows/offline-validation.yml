@@ -46,6 +46,9 @@ jobs:
       - name: Validate documentary lineage
         run: python scripts/validate_research_registry.py
 
+      - name: Validate release evidence review
+        run: python scripts/phase10_release_audit.py --check
+
       - name: Enforce security boundary
         run: python scripts/security_gate.py
 
