@@ -1,0 +1,409 @@
+{
+  "$defs": {
+    "BestBlockedCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "failed_gates": {
+          "items": {
+            "$ref": "#/$defs/FailedGate"
+          },
+          "minItems": 1,
+          "title": "Failed Gates",
+          "type": "array"
+        },
+        "opportunity_score": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Opportunity Score"
+        },
+        "selection_basis": {
+          "title": "Selection Basis",
+          "type": "string"
+        },
+        "selection_status": {
+          "enum": [
+            "identified",
+            "unavailable"
+          ],
+          "title": "Selection Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "selection_status",
+        "selection_basis",
+        "failed_gates"
+      ],
+      "title": "BestBlockedCandidate",
+      "type": "object"
+    },
+    "FailedGate": {
+      "additionalProperties": false,
+      "properties": {
+        "actual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual"
+        },
+        "direction": {
+          "enum": [
+            "minimum",
+            "maximum",
+            "availability"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "distance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Distance"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "required": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Required"
+        },
+        "status": {
+          "enum": [
+            "failed",
+            "unavailable"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "actual",
+        "required",
+        "direction",
+        "distance",
+        "status"
+      ],
+      "title": "FailedGate",
+      "type": "object"
+    },
+    "GateSensitivityRow": {
+      "additionalProperties": false,
+      "properties": {
+        "best_candidate_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Best Candidate Id"
+        },
+        "no_position_recommended": {
+          "title": "No Position Recommended",
+          "type": "boolean"
+        },
+        "passing_candidate_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Passing Candidate Ids",
+          "type": "array"
+        },
+        "setting": {
+          "$ref": "#/$defs/GateSetting"
+        }
+      },
+      "required": [
+        "setting",
+        "passing_candidate_ids",
+        "best_candidate_id",
+        "no_position_recommended"
+      ],
+      "title": "GateSensitivityRow",
+      "type": "object"
+    },
+    "GateSetting": {
+      "additionalProperties": false,
+      "properties": {
+        "maximum_risk": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Maximum Risk",
+          "type": "number"
+        },
+        "minimum_evidence": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Minimum Evidence",
+          "type": "number"
+        },
+        "minimum_execution_quality": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Minimum Execution Quality",
+          "type": "number"
+        },
+        "minimum_opportunity": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Minimum Opportunity",
+          "type": "number"
+        },
+        "setting_id": {
+          "title": "Setting Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "draft_to_validate",
+            "validated"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "setting_id",
+        "minimum_opportunity",
+        "maximum_risk",
+        "minimum_evidence",
+        "minimum_execution_quality",
+        "status"
+      ],
+      "title": "GateSetting",
+      "type": "object"
+    },
+    "PayoffSeverity": {
+      "additionalProperties": false,
+      "properties": {
+        "cvar_95_loss": {
+          "minimum": 0,
+          "title": "Cvar 95 Loss",
+          "type": "number"
+        },
+        "mean_return": {
+          "title": "Mean Return",
+          "type": "number"
+        },
+        "median_return": {
+          "title": "Median Return",
+          "type": "number"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "probability_profit": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Profit",
+          "type": "number"
+        },
+        "severe_loss_ladder": {
+          "items": {
+            "$ref": "#/$defs/SevereLossPoint"
+          },
+          "maxItems": 6,
+          "minItems": 6,
+          "title": "Severe Loss Ladder",
+          "type": "array"
+        },
+        "worst_return": {
+          "minimum": -1,
+          "title": "Worst Return",
+          "type": "number"
+        }
+      },
+      "required": [
+        "observations",
+        "mean_return",
+        "median_return",
+        "worst_return",
+        "cvar_95_loss",
+        "probability_profit",
+        "severe_loss_ladder"
+      ],
+      "title": "PayoffSeverity",
+      "type": "object"
+    },
+    "SevereLossPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "loss_threshold": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Loss Threshold",
+          "type": "number"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "probability": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability",
+          "type": "number"
+        }
+      },
+      "required": [
+        "loss_threshold",
+        "probability",
+        "observations"
+      ],
+      "title": "SevereLossPoint",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/severity_gate_report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "best_blocked_candidate": {
+      "$ref": "#/$defs/BestBlockedCandidate"
+    },
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "candidate_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Candidate Id"
+    },
+    "gate_sensitivity": {
+      "items": {
+        "$ref": "#/$defs/GateSensitivityRow"
+      },
+      "title": "Gate Sensitivity",
+      "type": "array"
+    },
+    "holdout_used": {
+      "const": false,
+      "title": "Holdout Used",
+      "type": "boolean"
+    },
+    "no_position_frequency": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "No Position Frequency"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "payoff_severity": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PayoffSeverity"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "report_id": {
+      "title": "Report Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sensitivity_interpretation": {
+      "enum": [
+        "candidate_pool_evaluated",
+        "pipeline_blocked_empty_candidate_pool"
+      ],
+      "title": "Sensitivity Interpretation",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "DEVELOPMENT_ANALYSIS_READY",
+        "FIXTURE_ONLY_NOT_VALIDATED",
+        "BLOCKED_NO_CANDIDATE_DISTRIBUTION"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "ticker": {
+      "title": "Ticker",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "report_id",
+    "ticker",
+    "status",
+    "candidate_id",
+    "payoff_severity",
+    "best_blocked_candidate",
+    "gate_sensitivity",
+    "sensitivity_interpretation",
+    "blockers",
+    "holdout_used"
+  ],
+  "title": "SeverityGateReport",
+  "type": "object"
+}

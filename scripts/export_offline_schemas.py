@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from take_two_options.config.contracts import PreOpraConfig
 from take_two_options.decision.quality_scores import FiveScoreReport
+from take_two_options.decision.severity_gates import SeverityGateReport
 from take_two_options.empirical_calibration import EmpiricalCalibrationReport
 from take_two_options.historical_data.contracts import HistoricalDatasetManifest
 from take_two_options.historical_data.event_regimes import EventRegimeReport
@@ -33,6 +34,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "baseline_comparison.schema.json": BaselineComparisonReport,
     "empirical_calibration.schema.json": EmpiricalCalibrationReport,
     "five_score_report.schema.json": FiveScoreReport,
+    "severity_gate_report.schema.json": SeverityGateReport,
     "pre_opra_config.schema.json": PreOpraConfig,
     "historical_dataset_manifest.schema.json": HistoricalDatasetManifest,
     "historical_surface_report.schema.json": HistoricalSurfaceReport,

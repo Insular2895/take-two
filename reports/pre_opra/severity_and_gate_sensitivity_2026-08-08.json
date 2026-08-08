@@ -1,0 +1,47 @@
+{
+  "best_blocked_candidate": {
+    "candidate_id": "UNAVAILABLE",
+    "failed_gates": [
+      {"actual": null, "direction": "availability", "distance": null, "name": "comparable_return_distribution", "required": null, "status": "unavailable"},
+      {"actual": null, "direction": "availability", "distance": null, "name": "five_quality_scores", "required": null, "status": "unavailable"}
+    ],
+    "opportunity_score": null,
+    "selection_basis": "No governed candidate distribution exists; old fixture candidates are excluded.",
+    "selection_status": "unavailable"
+  },
+  "blockers": [
+    "No governed comparable candidate return distribution exists.",
+    "Five TTWO quality scores are unavailable.",
+    "A severe-loss ladder cannot be inferred from close-only or fixture data."
+  ],
+  "candidate_id": null,
+  "gate_sensitivity": [
+    {
+      "best_candidate_id": null,
+      "no_position_recommended": true,
+      "passing_candidate_ids": [],
+      "setting": {"maximum_risk": 80, "minimum_evidence": 30, "minimum_execution_quality": 30, "minimum_opportunity": 40, "setting_id": "loose-draft", "status": "draft_to_validate"}
+    },
+    {
+      "best_candidate_id": null,
+      "no_position_recommended": true,
+      "passing_candidate_ids": [],
+      "setting": {"maximum_risk": 60, "minimum_evidence": 50, "minimum_execution_quality": 50, "minimum_opportunity": 60, "setting_id": "central-draft", "status": "draft_to_validate"}
+    },
+    {
+      "best_candidate_id": null,
+      "no_position_recommended": true,
+      "passing_candidate_ids": [],
+      "setting": {"maximum_risk": 40, "minimum_evidence": 70, "minimum_execution_quality": 70, "minimum_opportunity": 75, "setting_id": "strict-draft", "status": "draft_to_validate"}
+    }
+  ],
+  "holdout_used": false,
+  "no_position_frequency": 1.0,
+  "order_capability": "forbidden",
+  "payoff_severity": null,
+  "report_id": "ttwo-severity-gates-v1",
+  "schema_version": "1.0",
+  "sensitivity_interpretation": "pipeline_blocked_empty_candidate_pool",
+  "status": "BLOCKED_NO_CANDIDATE_DISTRIBUTION",
+  "ticker": "TTWO"
+}
