@@ -1,0 +1,290 @@
+{
+  "$defs": {
+    "QualityScore": {
+      "additionalProperties": false,
+      "properties": {
+        "contributions": {
+          "items": {
+            "$ref": "#/$defs/ScoreContribution"
+          },
+          "title": "Contributions",
+          "type": "array"
+        },
+        "formula_status": {
+          "enum": [
+            "draft_to_validate",
+            "validated",
+            "unavailable"
+          ],
+          "title": "Formula Status",
+          "type": "string"
+        },
+        "formula_version": {
+          "title": "Formula Version",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ScoreKind"
+        },
+        "raw_metrics": {
+          "items": {
+            "$ref": "#/$defs/RawScoreMetric"
+          },
+          "title": "Raw Metrics",
+          "type": "array"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score"
+        },
+        "sensitivity_interval": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sensitivity Interval"
+        },
+        "unavailable_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unavailable Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "formula_version",
+        "formula_status",
+        "raw_metrics",
+        "contributions",
+        "sensitivity_interval",
+        "unavailable_reasons"
+      ],
+      "title": "QualityScore",
+      "type": "object"
+    },
+    "RawScoreMetric": {
+      "additionalProperties": false,
+      "properties": {
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "unit",
+        "source_id",
+        "available"
+      ],
+      "title": "RawScoreMetric",
+      "type": "object"
+    },
+    "ScoreContribution": {
+      "additionalProperties": false,
+      "properties": {
+        "metric_name": {
+          "title": "Metric Name",
+          "type": "string"
+        },
+        "normalized_value": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Normalized Value",
+          "type": "number"
+        },
+        "points": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Points",
+          "type": "number"
+        },
+        "raw_value": {
+          "title": "Raw Value",
+          "type": "number"
+        },
+        "weight": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "metric_name",
+        "raw_value",
+        "normalized_value",
+        "weight",
+        "points"
+      ],
+      "title": "ScoreContribution",
+      "type": "object"
+    },
+    "ScoreKind": {
+      "enum": [
+        "opportunity",
+        "risk",
+        "evidence",
+        "model_agreement",
+        "execution_quality"
+      ],
+      "title": "ScoreKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/five_score_report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "candidate_id": {
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "classification": {
+      "enum": [
+        "STRONG_CANDIDATE",
+        "CANDIDATE",
+        "SPECULATIVE",
+        "HIGH_RISK",
+        "AVOID",
+        "BLOCKED_INSUFFICIENT_DATA",
+        "BLOCKED_CALIBRATION",
+        "BLOCKED_EXECUTION",
+        "BLOCKED_VALIDATION"
+      ],
+      "title": "Classification",
+      "type": "string"
+    },
+    "classification_rule_version": {
+      "title": "Classification Rule Version",
+      "type": "string"
+    },
+    "classification_status": {
+      "enum": [
+        "draft_to_validate",
+        "validated"
+      ],
+      "title": "Classification Status",
+      "type": "string"
+    },
+    "composite_score": {
+      "const": null,
+      "default": null,
+      "title": "Composite Score",
+      "type": "null"
+    },
+    "evidence": {
+      "$ref": "#/$defs/QualityScore"
+    },
+    "execution_quality": {
+      "$ref": "#/$defs/QualityScore"
+    },
+    "failed_constraints": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Failed Constraints",
+      "type": "array"
+    },
+    "holdout_used": {
+      "const": false,
+      "title": "Holdout Used",
+      "type": "boolean"
+    },
+    "model_agreement": {
+      "$ref": "#/$defs/QualityScore"
+    },
+    "opportunity": {
+      "$ref": "#/$defs/QualityScore"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "report_id": {
+      "title": "Report Id",
+      "type": "string"
+    },
+    "risk": {
+      "$ref": "#/$defs/QualityScore"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "ticker": {
+      "title": "Ticker",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "report_id",
+    "ticker",
+    "candidate_id",
+    "opportunity",
+    "risk",
+    "evidence",
+    "model_agreement",
+    "execution_quality",
+    "classification",
+    "classification_rule_version",
+    "classification_status",
+    "failed_constraints",
+    "holdout_used"
+  ],
+  "title": "FiveScoreReport",
+  "type": "object"
+}

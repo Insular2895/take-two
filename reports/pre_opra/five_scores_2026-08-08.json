@@ -1,0 +1,84 @@
+{
+  "candidate_id": "best-candidate-unavailable",
+  "classification": "BLOCKED_VALIDATION",
+  "classification_rule_version": "pre-opra-v1",
+  "classification_status": "draft_to_validate",
+  "composite_score": null,
+  "evidence": {
+    "contributions": [],
+    "formula_status": "unavailable",
+    "formula_version": "pre-opra-v1",
+    "kind": "evidence",
+    "raw_metrics": [
+      {"available": false, "name": "real_oos_observations", "source_id": "walk-forward-phase-E", "unit": "count", "value": null},
+      {"available": false, "name": "holdout_result", "source_id": "holdout-ledger-phase-F", "unit": "status", "value": null}
+    ],
+    "score": null,
+    "sensitivity_interval": null,
+    "unavailable_reasons": ["Comparable real OOS strategy results do not exist.", "The final holdout is intentionally unopened."]
+  },
+  "execution_quality": {
+    "contributions": [],
+    "formula_status": "unavailable",
+    "formula_version": "pre-opra-v1",
+    "kind": "execution_quality",
+    "raw_metrics": [
+      {"available": false, "name": "reproducible_relative_spread", "source_id": "historical-data-phase-C", "unit": "ratio", "value": null},
+      {"available": false, "name": "fill_uncertainty", "source_id": "historical-data-phase-C", "unit": "ratio", "value": null}
+    ],
+    "score": null,
+    "sensitivity_interval": null,
+    "unavailable_reasons": ["No governed historical execution panel exists."]
+  },
+  "failed_constraints": [
+    "baseline comparison unavailable",
+    "historical surface validation unavailable",
+    "event/regime dataset unavailable",
+    "holdout unopened",
+    "score weights and classification thresholds remain draft_to_validate"
+  ],
+  "holdout_used": false,
+  "model_agreement": {
+    "contributions": [],
+    "formula_status": "unavailable",
+    "formula_version": "pre-opra-v1",
+    "kind": "model_agreement",
+    "raw_metrics": [
+      {"available": false, "name": "expected_return_dispersion", "source_id": "surface-phase-H", "unit": "ratio", "value": null},
+      {"available": false, "name": "ranking_agreement", "source_id": "baseline-phase-G", "unit": "ratio", "value": null}
+    ],
+    "score": null,
+    "sensitivity_interval": null,
+    "unavailable_reasons": ["Legitimate models lack comparable calibrated predictions."]
+  },
+  "opportunity": {
+    "contributions": [],
+    "formula_status": "unavailable",
+    "formula_version": "pre-opra-v1",
+    "kind": "opportunity",
+    "raw_metrics": [
+      {"available": false, "name": "expected_return", "source_id": "baseline-phase-G", "unit": "ratio", "value": null},
+      {"available": false, "name": "probability_profit", "source_id": "baseline-phase-G", "unit": "probability", "value": null}
+    ],
+    "score": null,
+    "sensitivity_interval": null,
+    "unavailable_reasons": ["No comparable candidate return distribution exists."]
+  },
+  "order_capability": "forbidden",
+  "report_id": "ttwo-five-scores-v1",
+  "risk": {
+    "contributions": [],
+    "formula_status": "unavailable",
+    "formula_version": "pre-opra-v1",
+    "kind": "risk",
+    "raw_metrics": [
+      {"available": false, "name": "cvar_95", "source_id": "baseline-phase-G", "unit": "ratio", "value": null},
+      {"available": false, "name": "near_total_loss_probability", "source_id": "severity-phase-K-pending", "unit": "probability", "value": null}
+    ],
+    "score": null,
+    "sensitivity_interval": null,
+    "unavailable_reasons": ["No validated candidate downside distribution exists."]
+  },
+  "schema_version": "1.0",
+  "ticker": "TTWO"
+}
