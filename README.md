@@ -841,7 +841,7 @@ et ainsi de suite. Les doublons sont retirés jusqu’à atteindre la taille
 configurée, six candidats par défaut. Cette sélection round-robin évite qu’un
 seul profil fournisse tout le pool.
 
-## 8. Mise à jour bayésienne V11
+## 8. Mise à jour séquentielle des croyances configurées V11
 
 Les scénarios par défaut sont :
 
@@ -876,7 +876,7 @@ w_{effective}=
 \end{cases}
 $$
 
-La mise à jour bayésienne fractionnelle est :
+La mise à jour fractionnelle configurée est :
 
 $$
 \widetilde p_s =
@@ -928,7 +928,33 @@ Le schéma accepte aussi d’autres types d’événements, mais un événement 
 règle dans cette table n’affecte pas le posterior.
 
 Les priors, likelihoods et caps sont des entrées `calibration_required`, pas
-des fréquences historiques validées.
+des fréquences historiques validées. Malgré les noms de schémas historiques
+`Bayesian*`, cette distribution porte la sémantique `configured_heuristic_belief` : elle n'est
+pas le posterior d'un modèle statistique ajusté.
+
+La couche séquentielle ajoute un contrat point-in-time à chaque événement. Les dépendances sont
+déclarées comme `same_fact`, `derived_from`, `shared_driver` ou `contradicts`. Un même fait ou une
+dérivation reçoit zéro nouveauté ; un driver partagé exige une décote explicite. Le graphe doit
+être acyclique et chaque parent doit être disponible avant son enfant.
+
+Les probabilités sont transportées dans un `ScenarioProbabilitySet` avec une origine exclusive :
+`user_assumption`, `configured_heuristic`, `historical_estimate`, `market_implied` ou
+`empirically_calibrated`. Cette dernière origine exige les hashes dataset, manifest et calibration,
+la taille d'échantillon et une partition OOS. Chaque valeur centrale est accompagnée d'un intervalle
+ou diagnostic d'incertitude.
+
+Les scénarios événementiels déclarent séparément les chocs de spot, niveau d'IV, skew, courbure et
+liquidité, leur durée/récupération, leur source, leur statut et leur mesure `P/Q`. Le mélange
+conditionnel est :
+
+$$
+E_P[\mathrm{PnL}]=\sum_s p_s E_P[\mathrm{PnL}\mid s].
+$$
+
+Le moteur propage les bornes de croyance, calcule les probabilités de cible et de grosse perte,
+et conserve `NO_TRADE`. Les plans `research_eligible_now`, `wait`, `revalue_*`, `exit_review_*` et
+`roll_review` sont des règles humaines point-in-time ; toutes les sorties gardent
+`order_capability=forbidden`.
 
 ## 9. Volatilité locale Dupire
 

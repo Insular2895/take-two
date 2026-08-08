@@ -240,8 +240,8 @@ Commit proposé : `feat(uncertainty): separate heuristic belief from calibrated 
 ## Phase 7 — Optimisation budget et frontière de Pareto
 
 État : contrats d'objectif versionnés, oracle entier conservé et frontière exhaustive
-non dominée avec cash/NO_TRADE implémentés ; gate complet vert (180 tests) ; commit atomique à
-créer.
+non dominée avec cash/NO_TRADE implémentés ; gate complet vert (180 tests) ; commit atomique
+`a35fa52`.
 
 ### Documentary Research
 
@@ -261,6 +261,10 @@ Commit proposé : `feat(optimization): expose robust integer objectives and pare
 
 ## Phase 8 — Scénarios événementiels et décision séquentielle
 
+État : contrats point-in-time, dépendances déclarées, origines de probabilités, scénarios de chocs,
+sensibilité des croyances et règles advisory implémentés ; tests ciblés verts ; commit atomique à
+créer.
+
 ### Documentary Research
 
 - Questions : mise à jour conditionnelle, dépendance entre sources, état latent, causalité vs association.
@@ -268,6 +272,15 @@ Commit proposé : `feat(optimization): expose robust integer objectives and pare
 - Secondaires : Blitzstein/Hwang ; Särkkä.
 - Risques : double comptage, probabilités narratives, très petit n GTA6.
 - Validation : séquences synthétiques, calibration, ordre des événements et contradictions.
+- PDF : Blitzstein/Hwang ch. 2 pp. 45–79 ; McElreath ch. 5–6 pp. 132–193 ciblées.
+- Concepts : indépendance conditionnelle, mise à jour séquentielle, DAG/confounding, mélange de
+  scénarios, seuil d'indifférence.
+- Formules : `FORM-SCENARIO-MIXTURE-001`, `FORM-BELIEF-SWITCH-001`.
+- Hypothèses : graphe acyclique point-in-time, dépendances et remises déclarées, P/Q inchangée.
+- Alternatives refusées : naive Bayes, causalité GTA VI et filtre latent sans données identifiantes.
+- Limitations : aucune probabilité/choc TTWO réel calibré ; intervalles utilisateur = sensibilité.
+- Fichiers : `intelligence/sequential_decision.py`, `intelligence/event_scenarios.py`.
+- Tests : `tests/test_sequential_event_decision.py`.
 
 ### Implémentation proposée
 

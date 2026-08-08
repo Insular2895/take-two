@@ -363,6 +363,51 @@ formulas:
           - test_calibration_stays_insufficient_and_holdout_identity_is_mandatory
     validation_status: tested
 
+  - formula_id: FORM-SCENARIO-MIXTURE-001
+    name: Conditional event-scenario mixture and bounded belief sensitivity
+    statement: "For exhaustive scenarios, E[X] is the sum of p_s times the conditional scenario outcome; lower and upper values optimize this linear mixture over normalized probability vectors inside declared bounds."
+    measure: P
+    units: outcome_unit_or_probability
+    assumptions:
+      - scenarios are mutually exclusive and exhaustive for the configured decision set
+      - central probabilities sum to one
+      - interval bounds admit at least one normalized probability vector
+      - conditional outcomes are priced upstream and remain fixed during belief sensitivity
+      - user/configured ranges are not confidence intervals
+    sources:
+      - source_id: book-blitzstein-hwang-introduction-probability
+        chapter: "2.3-2.4"
+        page: "54-60"
+    implementation:
+      - file: src/take_two_options/intelligence/event_scenarios.py
+        symbols: [evaluate_event_scenarios]
+    tests:
+      - file: tests/test_sequential_event_decision.py
+        symbols: [test_event_scenario_evaluation_propagates_belief_bounds_and_no_trade]
+    validation_status: tested
+
+  - formula_id: FORM-BELIEF-SWITCH-001
+    name: One-scenario expected-PnL preference threshold
+    statement: "Solve the linear expected-PnL difference for one scenario probability while preserving the central relative proportions of every residual scenario."
+    measure: P
+    units: probability
+    assumptions:
+      - the selected scenario probability is the only varied belief
+      - residual beliefs retain their central relative proportions
+      - conditional candidate PnLs remain fixed
+      - the threshold is reported only when the root lies in zero to one
+    sources:
+      - source_id: book-blitzstein-hwang-introduction-probability
+        chapter: "2.3-2.4"
+        page: "54-60"
+    implementation:
+      - file: src/take_two_options/intelligence/event_scenarios.py
+        symbols: [scenario_probability_switch_threshold]
+    tests:
+      - file: tests/test_sequential_event_decision.py
+        symbols: [test_belief_switch_threshold_is_analytic_and_explicit]
+    validation_status: tested
+
   - formula_id: FORM-PARETO-DOMINANCE-001
     name: Non-compensatory allocation Pareto dominance
     statement: "Allocation A dominates B only when A is no worse on both return objectives and every risk/cost objective, and is strictly better on at least one."

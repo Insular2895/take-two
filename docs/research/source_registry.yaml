@@ -484,8 +484,8 @@ sources:
     edition: Second Edition
     year: 2019
     volume: null
-    chapter: "2, 3 and 7"
-    section: "small/large worlds; posterior predictive simulation; predictive accuracy and model comparison"
+    chapter: "2, 3, 5, 6 and 7"
+    section: "small/large worlds; prediction; DAGs, confounding and association versus causation"
     page_start: 19
     page_end: 239
     pdf_file: Statistical Rethinking 2nd Edition.pdf
@@ -496,6 +496,8 @@ sources:
       - prior predictive checks
       - predictive scoring
       - model comparison and overfitting
+      - directed acyclic graph assumptions
+      - confounding and conditional association
     formula_id:
       - FORM-PREDICTIVE-MIXTURE-001
       - FORM-PROBABILITY-CALIBRATION-001
@@ -512,15 +514,63 @@ sources:
       - src/take_two_options/quantitative/model_uncertainty.py
       - src/take_two_options/quantitative/probability_calibration.py
       - src/take_two_options/intelligence/bayesian.py
+      - src/take_two_options/intelligence/sequential_decision.py
     implementation_symbol:
       - summarize_model_ensemble
       - evaluate_binary_calibration
       - update_heuristic_scenario_beliefs
+      - update_sequential_scenario_beliefs
     test_file:
       - tests/test_model_uncertainty.py
       - tests/test_intelligence_v11.py
+      - tests/test_sequential_event_decision.py
     validation_status: tested
-    notes: "Title page, contents, chapters 2-3 and chapter 7 passages were inspected directly from the local PDF."
+    notes: "Title page, contents, chapters 2-3, 5-6 and 7 passages were inspected directly from the local PDF."
+
+  - source_id: book-blitzstein-hwang-introduction-probability
+    source_type: local_book
+    author:
+      - Joseph K. Blitzstein
+      - Jessica Hwang
+    title: Introduction to Probability
+    subtitle: null
+    edition: Second Edition
+    year: 2019
+    volume: null
+    chapter: "2"
+    section: "2.1, 2.3-2.6 and 2.9"
+    page_start: 45
+    page_end: 79
+    pdf_file: "[CRC Texts in Statistical Science] Joseph K. Blitzstein, Jessica Hwang - Introduction to Probability, Second Edition (2019, Chapman and Hall_CRC) - libgen.li.pdf"
+    url: null
+    concept:
+      - conditional probability
+      - likelihood ratio
+      - law of total probability
+      - conditional independence
+      - coherent sequential updating
+    formula_id:
+      - FORM-SCENARIO-MIXTURE-001
+      - FORM-BELIEF-SWITCH-001
+    formula: null
+    assumptions: "Sequential and simultaneous updating agree only under the declared joint conditional structure; multiple reports are not automatically conditionally independent."
+    measure: P
+    units: probability
+    alternatives:
+      - book-mcelreath-statistical-rethinking
+    limitations:
+      - textbook examples do not calibrate TTWO event probabilities
+      - conditional independence must be justified outside the probability identities
+    implementation_file:
+      - src/take_two_options/intelligence/sequential_decision.py
+      - src/take_two_options/intelligence/event_scenarios.py
+    implementation_symbol:
+      - update_sequential_scenario_beliefs
+      - evaluate_event_scenarios
+      - scenario_probability_switch_threshold
+    test_file: tests/test_sequential_event_decision.py
+    validation_status: tested
+    notes: "Title metadata and chapter 2 printed pp. 45-79 were inspected; Summarizer text transcription completed but its evidence-packet stage stalled, so direct bounded-page extraction was used."
 
   - source_id: paper-brier-probability-forecast-verification
     source_type: primary_research_article
@@ -1285,6 +1335,28 @@ formula_links:
     test_file: tests/test_model_uncertainty.py
     validation_status: tested
     notes: "Synthetic directional scoring only; no TTWO calibration or holdout claim."
+
+  - formula_id: FORM-SCENARIO-MIXTURE-001
+    name: Conditional event-scenario mixture
+    source_id:
+      - book-blitzstein-hwang-introduction-probability
+    source_location_status: inspected_chapter_2_printed_pages_45_79
+    implementation_file: src/take_two_options/intelligence/event_scenarios.py
+    implementation_symbol: evaluate_event_scenarios
+    test_file: tests/test_sequential_event_decision.py
+    validation_status: tested
+    notes: "Probability boxes are propagated as bounded sensitivity sets, not statistical confidence regions."
+
+  - formula_id: FORM-BELIEF-SWITCH-001
+    name: One-scenario belief switch threshold
+    source_id:
+      - book-blitzstein-hwang-introduction-probability
+    source_location_status: inspected_lotp_and_conditional_probability_chapter_2
+    implementation_file: src/take_two_options/intelligence/event_scenarios.py
+    implementation_symbol: scenario_probability_switch_threshold
+    test_file: tests/test_sequential_event_decision.py
+    validation_status: tested
+    notes: "Derived linear indifference root with fixed conditional PnLs and proportional residual beliefs."
 
   - formula_id: FORM-PARETO-DOMINANCE-001
     name: Allocation Pareto dominance

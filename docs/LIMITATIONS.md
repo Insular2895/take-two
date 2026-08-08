@@ -33,6 +33,11 @@
   is computed from the exhaustively enumerated whole-contract feasible set, always including
   cash/NO_TRADE. Frontier membership is conditional on the candidate universe, objective vector
   and uncalibrated regime inputs; pairwise dominance is intentionally limited to small budgets.
+- Event evidence now has point-in-time dependency contracts, and probability sets cannot claim
+  empirical calibration without dataset/experiment/calibration hashes and an OOS partition.
+  Independence, shared-driver discounts, user belief bounds and all event shock distributions are
+  still explicit assumptions; no real TTWO catalyst probability, causal effect or latent-state
+  transition is calibrated. Bounded belief ranges are sensitivity sets, not confidence regions.
 - MarketData.app historical chains are EOD bid/ask, not intraday NBBO or
   simultaneous combo fills.
 - Alpaca indicative snapshots do not supply the open-interest/underlying fields

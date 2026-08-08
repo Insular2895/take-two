@@ -6,6 +6,9 @@
   undefined-margin credit combinations, calendars, and diagonals.
 - Scenario probabilities are optional and never inferred. Without them, no
   expected P&L or probability of success is displayed.
+- Phase-8 event probabilities remain separate user, heuristic, historical or market-implied
+  inputs. The scanner has no empirically calibrated TTWO catalyst probabilities; dependency
+  discounts and probability ranges are sensitivity assumptions.
 - The American model uses a flat configured rate/dividend yield and one IV per
   leg stressed by fixed multipliers. It is not a calibrated future IV-surface
   forecast.
