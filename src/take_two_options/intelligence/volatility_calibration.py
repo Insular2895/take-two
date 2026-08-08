@@ -13,6 +13,7 @@ from take_two_options.intelligence.schemas import (
     LocalVolatilityCalibrationReport,
     LocalVolatilityNode,
 )
+from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS
 from take_two_options.thesis_scanner.schemas import ThesisChain, ThesisQuote
 
 
@@ -83,7 +84,8 @@ def calibrate_local_volatility(
         )
     times = np.asarray(
         [
-            (expiration - chain.as_of.date()).days / 365.0
+            (expiration - chain.as_of.date()).days
+            / DEFAULT_QUANT_CONVENTIONS.calendar_day_basis
             for expiration in valid_expirations
         ],
         dtype=float,

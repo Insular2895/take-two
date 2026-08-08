@@ -1,5 +1,14 @@
 # Limitations
 
+- Quantitative conventions are now centralized as Actual/365 Fixed for calendar time and 252
+  sessions for empirical annualisation. These product conventions are explicit, not universal.
+- Active forecast path sets are tagged `P` and pricing path sets are tagged `Q`; historical
+  serialized reports were not rewritten, so their documented generation-specific assumptions
+  remain authoritative.
+- Black–Scholes has an analytic/QuantLib European cross-check and the American finite-difference
+  engine has a grid-refinement test. This is numerical evidence, not market calibration evidence.
+- The V10 final-holdout protocol is sealed, but no authorized real dataset is provisioned and no
+  dataset hash exists. Empirical and holdout promotion remain blocked.
 - MarketData.app historical chains are EOD bid/ask, not intraday NBBO or
   simultaneous combo fills.
 - Alpaca indicative snapshots do not supply the open-interest/underlying fields

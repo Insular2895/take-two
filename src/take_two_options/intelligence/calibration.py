@@ -15,6 +15,7 @@ from pydantic import Field, field_validator, model_validator
 
 from take_two_options.domain import StrictModel
 from take_two_options.knowledge.provenance import stable_hash
+from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS
 
 HistoricalRecordType = Literal[
     "underlying",
@@ -484,8 +485,8 @@ def fit_offline_models(
         math.log(current / previous)
         for previous, current in zip(prices, prices[1:], strict=False)
     ]
-    annual_volatility = stdev(returns) * math.sqrt(252)
-    annual_drift = fmean(returns) * 252
+    annual_volatility = DEFAULT_QUANT_CONVENTIONS.annualize_volatility(stdev(returns))
+    annual_drift = DEFAULT_QUANT_CONVENTIONS.annualize_mean_return(fmean(returns))
     base_status: Literal[
         "calibrated_pending_validation",
         "experimental_fit",
@@ -548,7 +549,9 @@ def fit_offline_models(
         observations=len(returns),
         parameters=(
             {
-                "jump_intensity_per_year": len(jumps) / len(returns) * 252,
+                "jump_intensity_per_year": len(jumps)
+                / len(returns)
+                * DEFAULT_QUANT_CONVENTIONS.trading_session_basis,
                 "jump_log_mean": fmean(jumps),
                 "jump_log_volatility": stdev(jumps) if len(jumps) > 1 else 0.0,
             }

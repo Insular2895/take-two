@@ -7,6 +7,7 @@ import random
 from dataclasses import dataclass
 
 from take_two_options.domain import MarketDataBundle, SimulationModel
+from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS, Measure
 
 
 @dataclass(frozen=True)
@@ -15,6 +16,7 @@ class SimulationPaths:
     terminal_spots: list[float]
     terminal_variances: list[float]
     assumptions: list[str]
+    measure: Measure = Measure.RISK_NEUTRAL
 
 
 def _poisson(rng: random.Random, intensity: float) -> int:
@@ -39,7 +41,7 @@ def simulate_terminal_spots(
         SimulationModel.HESTON_FULL_TRUNCATION: 20_000,
     }
     rng = random.Random(bundle.monte_carlo_seed + offsets[model])
-    horizon = bundle.monte_carlo_horizon_days / 365.0
+    horizon = bundle.monte_carlo_horizon_days / DEFAULT_QUANT_CONVENTIONS.calendar_day_basis
     rate = bundle.risk_free_rate
     dividend_yield = bundle.continuous_dividend_yield
     spot = bundle.underlying.price

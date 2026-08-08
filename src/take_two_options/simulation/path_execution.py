@@ -8,6 +8,7 @@ from datetime import date, timedelta
 
 from take_two_options.domain import OptionType, PositionSide
 from take_two_options.knowledge.schemas import CandidateLeg, CompiledStrategyCandidate
+from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS
 
 
 @dataclass(frozen=True)
@@ -65,7 +66,7 @@ def _position_exit_value(
             leg.quote.option_type,
             spot=spot,
             strike=leg.quote.strike,
-            time_years=days / 365,
+            time_years=days / DEFAULT_QUANT_CONVENTIONS.calendar_day_basis,
             volatility=leg.quote.implied_volatility or 0.45,
         )
         half_spread = _relative_spread(leg) / 2

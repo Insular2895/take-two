@@ -18,6 +18,11 @@ from take_two_options.domain import (
     StrategyCandidate,
     StrategyKind,
 )
+from take_two_options.quantitative.contracts import (
+    DEFAULT_QUANT_CONVENTIONS,
+    Measure,
+    require_measure,
+)
 
 
 @dataclass(frozen=True)
@@ -28,6 +33,7 @@ class Greeks:
     theta: float
     vega: float
     rho: float
+    measure: Measure = Measure.RISK_NEUTRAL
 
 
 def _normal_cdf(value: float) -> float:
@@ -39,7 +45,7 @@ def _normal_pdf(value: float) -> float:
 
 
 def years_to_expiration(expiration: datetime, as_of: datetime) -> float:
-    return max((expiration - as_of).total_seconds() / (365.0 * 24 * 3600), 1e-9)
+    return max(DEFAULT_QUANT_CONVENTIONS.calendar_year_fraction(as_of, expiration), 1e-9)
 
 
 def black_scholes_price_greeks(
@@ -51,6 +57,7 @@ def black_scholes_price_greeks(
     volatility: float,
     option_type: OptionType,
     dividend_yield: float = 0.0,
+    measure: Measure = Measure.RISK_NEUTRAL,
 ) -> Greeks:
     """Return European indicative Greeks per underlying share.
 
@@ -58,6 +65,7 @@ def black_scholes_price_greeks(
     """
     if spot <= 0 or strike <= 0 or volatility <= 0 or time_years <= 0:
         raise ValueError("positive spot, strike, volatility, and time are required")
+    require_measure(measure, Measure.RISK_NEUTRAL, context="Black-Scholes pricing")
 
     sqrt_t = math.sqrt(time_years)
     d1 = (
@@ -94,7 +102,7 @@ def black_scholes_price_greeks(
         price=price,
         delta=delta,
         gamma=gamma,
-        theta=theta_annual / 365.0,
+        theta=theta_annual / DEFAULT_QUANT_CONVENTIONS.calendar_day_basis,
         vega=vega,
         rho=rho,
     )

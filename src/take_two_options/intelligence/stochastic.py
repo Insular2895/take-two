@@ -13,6 +13,7 @@ from take_two_options.intelligence.schemas import (
     SimulationRegimeConfig,
     StochasticModel,
 )
+from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS, Measure
 
 
 @dataclass(frozen=True)
@@ -25,6 +26,7 @@ class StochasticPathSet:
     variances: NDArray
     assumptions: tuple[str, ...]
     warnings: tuple[str, ...]
+    measure: Measure = Measure.REAL_WORLD
 
 
 def _seed(base: int, model: StochasticModel, regime: SimulationRegime) -> int:
@@ -106,7 +108,7 @@ def simulate_path_set(
         raise ValueError("spot must be positive")
     seed = _seed(policy.seed, model, regime.regime)
     rng = np.random.default_rng(seed)
-    horizon_years = policy.horizon_days / 365.0
+    horizon_years = policy.horizon_days / DEFAULT_QUANT_CONVENTIONS.calendar_day_basis
     dt = horizon_years / policy.steps
     sqrt_dt = math.sqrt(dt)
     times = np.linspace(0.0, horizon_years, policy.steps + 1)

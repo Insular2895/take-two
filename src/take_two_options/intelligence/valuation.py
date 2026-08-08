@@ -19,6 +19,7 @@ from take_two_options.intelligence.schemas import (
     StrategyModelMetrics,
 )
 from take_two_options.intelligence.stochastic import StochasticPathSet
+from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS
 from take_two_options.thesis_scanner.schemas import ThesisCandidate, ThesisScanReport
 
 
@@ -283,7 +284,7 @@ def _position_values(
             option_value = _black_scholes(
                 spot=path_set.spots[:, step],
                 strike=leg.quote.strike,
-                time_years=remaining_days / 365.0,
+                time_years=remaining_days / DEFAULT_QUANT_CONVENTIONS.calendar_day_basis,
                 volatility=volatility,
                 rate=rate,
                 dividend_yield=dividend_yield,

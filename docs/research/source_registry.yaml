@@ -17,7 +17,7 @@ policy:
     - empirically_validated
     - holdout_validated
     - production_ready
-  current_maximum_claim: sourced
+  current_maximum_claim: numerically_validated
 
 sources:
   - source_id: book-bergomi-stochastic-volatility-modeling
@@ -230,18 +230,18 @@ sources:
     notes: "Current code has deterministic seeds and a basic half/full convergence test; documentary mapping is not complete."
 
   - source_id: book-suli-mayers-numerical-analysis
-    source_type: local_book_identity_to_review
+    source_type: local_book
     author:
       - Endre Süli
       - David Mayers
     title: An Introduction to Numerical Analysis
     edition: null
-    year: null
+    year: 2003
     volume: null
-    chapter: null
-    section: null
-    page_start: null
-    page_end: null
+    chapter: "1-14"
+    section: "1.6-1.7 and 2.7 inspected for Phase 1"
+    page_start: 28
+    page_end: 71
     pdf_file: Numerical_Analysis.pdf
     concept:
       - root finding
@@ -253,24 +253,23 @@ sources:
       - FORM-IV-ROOT-001
       - FORM-FD-CONVERGENCE-001
     formula: null
-    assumptions: "Identity must be confirmed from the title pages before use."
+    assumptions: "Bisection requires a valid sign-changing bracket; tolerances remain problem-scale dependent."
     measure: not_applicable
     units: numerical_scale_dependent
     alternatives:
       - book-nocedal-wright-numerical-optimization
     limitations:
-      - file metadata does not establish author, title, edition or year
+      - generic numerical guidance does not by itself validate a financial model
     implementation_file:
       - src/take_two_options/american.py
-      - src/take_two_options/intelligence/volatility_calibration.py
+      - src/take_two_options/quantitative/numerical_validation.py
     implementation_symbol:
       - historical_option_analytics
-      - calibrate_local_volatility
+      - assess_fd_convergence
     test_file:
-      - tests/test_american.py
-      - tests/test_intelligence_v11.py
-    validation_status: proposed
-    notes: null
+      - tests/test_quantitative_foundations.py
+    validation_status: sourced
+    notes: "Title, authors, publisher, 2003 copyright and ISBNs were verified on the PDF title/copyright pages."
 
   - source_id: book-nocedal-wright-numerical-optimization
     source_type: local_book
@@ -432,10 +431,10 @@ sources:
     edition: null
     year: 2009
     volume: null
-    chapter: null
-    section: null
-    page_start: null
-    page_end: null
+    chapter: "10 and 12"
+    section: "10.2 and 12.2 inspected for Phase 1"
+    page_start: 141
+    page_end: 176
     pdf_file: Tomas Bjork Arbitrage Theory in Continuous Time (Oxford Finance)  2009.pdf
     concept:
       - absence of arbitrage
@@ -445,7 +444,7 @@ sources:
     formula_id:
       - FORM-MEASURE-CHANGE-001
     formula: null
-    assumptions: "Edition/chapter/pages must be verified."
+    assumptions: "Risk-neutral valuation applies inside the stated no-arbitrage model assumptions."
     measure: P_and_Q
     units: null
     alternatives:
@@ -454,12 +453,18 @@ sources:
     limitations:
       - local filename year is not a substitute for edition verification
     implementation_file:
+      - src/take_two_options/quantitative/contracts.py
       - src/take_two_options/simulation/legacy_models.py
       - src/take_two_options/intelligence/stochastic.py
-    implementation_symbol: null
-    test_file: null
-    validation_status: proposed
-    notes: null
+    implementation_symbol:
+      - Measure
+      - MeasureTransition
+      - StochasticPathSet
+      - SimulationPaths
+    test_file:
+      - tests/test_quantitative_foundations.py
+    validation_status: sourced
+    notes: "Equivalent martingale-measure definition and Black-Scholes risk-neutral pricing passage inspected directly."
 
   - source_id: repo-readme-v11-1
     source_type: repository_documentation
@@ -742,14 +747,13 @@ formula_links:
   - formula_id: FORM-BS-PRICE-001
     name: Black-Scholes European option value
     source_id:
-      - book-shreve-stochastic-calculus-finance-ii
-      - book-andersen-piterbarg-interest-rate-modeling
-    source_location_status: to_research
+      - book-bjork-arbitrage-theory
+    source_location_status: inspected_chapter_12_2_pages_175_176
     implementation_file: src/take_two_options/pricing.py
     implementation_symbol: black_scholes_price_greeks
-    test_file: tests/test_pricing.py
-    validation_status: implemented
-    notes: "No page is registered yet; the implementation is not upgraded to sourced by this placeholder."
+    test_file: tests/test_quantitative_foundations.py
+    validation_status: numerically_validated
+    notes: "Put-call parity and Hypothesis cross-pricer cases compare the analytic result with QuantLib European finite differences."
 
   - formula_id: FORM-IV-ROOT-001
     name: Implied-volatility root solve

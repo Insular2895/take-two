@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from datetime import UTC, date, datetime, timedelta
-from math import log, sqrt
+from math import log
 from pathlib import Path
 from statistics import stdev
 from typing import Literal
@@ -34,6 +34,7 @@ from take_two_options.marketdata_panel import (
     run_marketdata_panel,
     select_marketdata_strategies,
 )
+from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS
 from take_two_options.treasury_data import TreasuryYieldCurve
 
 
@@ -858,7 +859,9 @@ def _regime_details(
         values = [item[1] for item in history[-21:]]
         momentum = round(values[-1] / values[0] - 1, 8)
         returns = [log(current / prior) for prior, current in zip(values, values[1:], strict=False)]
-        realized_volatility = round(stdev(returns) * sqrt(252), 8)
+        realized_volatility = round(
+            DEFAULT_QUANT_CONVENTIONS.annualize_volatility(stdev(returns)), 8
+        )
     if event_regime != "ordinary":
         return event_regime, momentum, realized_volatility
     if realized_volatility is not None and realized_volatility >= config.high_volatility_threshold:

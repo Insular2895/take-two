@@ -148,6 +148,39 @@ def american_scenario_value(
     )
 
 
+def european_scenario_value(
+    *,
+    spot: float,
+    strike: float,
+    valuation_date: date,
+    expiration_date: date,
+    option_type: OptionType,
+    volatility: float,
+    rate: float,
+    dividend_yield: float = 0.0,
+    dividends: tuple[tuple[date, float], ...] = (),
+    time_grid: int = 100,
+    price_grid: int = 100,
+) -> float:
+    """Return a European finite-difference benchmark using the shared QuantLib setup."""
+    if spot <= 0 or strike <= 0 or volatility <= 0:
+        raise ValueError("spot, strike, and volatility must be positive")
+    return _quantlib_value(
+        spot=round(spot, 10),
+        strike=round(strike, 10),
+        valuation_date=valuation_date,
+        expiration_date=expiration_date,
+        rate=round(rate, 10),
+        volatility=round(volatility, 10),
+        option_type=option_type.value,
+        dividend_yield=round(dividend_yield, 10),
+        dividends=dividends,
+        american=False,
+        time_grid=time_grid,
+        price_grid=price_grid,
+    )
+
+
 def american_scenario_analytics(
     *,
     contract_symbol: str,

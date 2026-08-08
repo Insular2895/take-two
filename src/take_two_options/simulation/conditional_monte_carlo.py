@@ -14,6 +14,7 @@ from take_two_options.forecasting.regimes import (
     log_returns,
     realized_volatility,
 )
+from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS, Measure
 
 
 @dataclass(frozen=True)
@@ -23,6 +24,7 @@ class ConditionalPathSet:
     paths: list[list[float]]
     calibration_observations: int
     assumptions: tuple[str, ...]
+    measure: Measure = Measure.REAL_WORLD
 
 
 def simulate_conditional_paths(
@@ -40,7 +42,7 @@ def simulate_conditional_paths(
     conditioned = conditional_returns(returns, regime)
     volatility = realized_volatility(returns)
     assert volatility is not None
-    daily_volatility = volatility / math.sqrt(252)
+    daily_volatility = DEFAULT_QUANT_CONVENTIONS.deannualize_volatility(volatility)
     daily_mean = fmean(returns)
 
     gbm_rng = random.Random(seed)

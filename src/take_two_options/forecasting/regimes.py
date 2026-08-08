@@ -5,6 +5,8 @@ from __future__ import annotations
 import math
 from statistics import median
 
+from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS
+
 
 def log_returns(closes: list[float]) -> list[float]:
     return [
@@ -18,7 +20,7 @@ def realized_volatility(values: list[float]) -> float | None:
         return None
     mean = sum(values) / len(values)
     variance = sum((value - mean) ** 2 for value in values) / (len(values) - 1)
-    return math.sqrt(variance * 252)
+    return DEFAULT_QUANT_CONVENTIONS.annualize_volatility(math.sqrt(variance))
 
 
 def classify_regime(returns: list[float], window: int = 20) -> str:

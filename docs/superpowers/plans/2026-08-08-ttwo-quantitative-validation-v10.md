@@ -1,6 +1,6 @@
 # Plan TTWO Quantitative Validation V10
 
-Statut : `draft_to_validate`
+Statut : `in_progress_phase_1_complete`
 
 Date : 2026-08-08
 
@@ -20,7 +20,7 @@ Document de design : [2026-08-08-ttwo-quantitative-validation-v10-design.md](../
 
 ## Phase 0 — Audit, inventaire BOOK et spécification
 
-État : travaux locaux terminés, validation finale et approbation utilisateur en attente.
+État : terminé et validé par l'utilisateur le 2026-08-08.
 
 ### Documentary Research
 
@@ -48,7 +48,7 @@ Document de design : [2026-08-08-ttwo-quantitative-validation-v10-design.md](../
 - [x] Valider les formats structurés et les références de fichiers.
 - [x] Rejouer la baseline après documentation.
 - [x] Faire le commit atomique de Phase 0.
-- [ ] Obtenir la validation utilisateur et s'arrêter.
+- [x] Obtenir la validation utilisateur et s'arrêter.
 
 ### Acceptation
 
@@ -67,6 +67,8 @@ Livrables proposés après validation :
 - preuve que les hashes V7–V9 restent contaminés et inéligibles.
 
 ## Phase 1 — Conventions, P/Q et audit numérique
+
+État : implémenté ; gate complet vert (146 tests) ; commit atomique à créer.
 
 ### Documentary Research
 

@@ -1,0 +1,31 @@
+schema_version: "1.0"
+protocol_id: ttwo-v10-final-holdout-protocol
+sealed_on: "2026-08-08"
+status: awaiting_authorized_dataset
+descriptor:
+  holdout_id: ttwo-v10-final-holdout
+  canonical_descriptor: "ttwo-v10-final-holdout|unprovisioned|point-in-time-eod-options|never-open-before-phase4|2026-08-08"
+  descriptor_sha256: 7ed9f08337b8a3e6d62927dd20d0bc40242746014aa6e3d29e5194c643b1a715
+  dataset_sha256: null
+  dataset_uri: null
+  synthetic: false
+policy:
+  required_data:
+    - timestamped TTWO underlying observations with availability timestamps
+    - timestamped option-chain bid/ask observations with availability timestamps
+    - contract adjustments and source/entitlement metadata
+  split_order: [train, validation, test, final_holdout]
+  tuning_allowed_on: [train, validation]
+  reporting_only_on: [test]
+  one_time_evaluation_only_on: [final_holdout]
+  purge_required: true
+  embargo_required: true
+  access_ledger_required: true
+  tuning_after_final_holdout_access_forbidden: true
+  contaminated_holdout_ids: [v7, v8, v9]
+gate:
+  data_provisioned: false
+  hash_verified: false
+  content_opened: false
+  empirical_promotion_allowed: false
+blocking_reason: "No authorized real point-in-time option dataset is present; no dataset hash can be truthfully sealed."

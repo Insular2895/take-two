@@ -1,0 +1,109 @@
+schema_version: "1.0"
+updated_on: "2026-08-08"
+policy:
+  summary_is_not_evidence: true
+  source_page_is_printed_page_unless_prefixed_pdf: true
+  p_q_transition_must_be_explicit: true
+  maximum_registry_claim: numerically_validated
+
+formulas:
+  - formula_id: FORM-MEASURE-CHANGE-001
+    name: Equivalent martingale measure and risk-neutral valuation boundary
+    statement: "Pricing expectations use Q; empirical forecasts remain under P unless an explicit sourced transition is supplied."
+    measure: P_and_Q
+    units: not_applicable
+    assumptions:
+      - equivalent probability measures on the relevant sigma algebra
+      - discounted traded assets are martingales under Q
+      - no-arbitrage model boundary
+    sources:
+      - source_id: book-bjork-arbitrage-theory
+        chapter: "10.2 and 12.2"
+        page: "141 and 175-176"
+      - source_id: book-andersen-piterbarg-interest-rate-modeling
+        chapter: "1.3 and 4.2.1"
+        page: "8 and 170"
+    implementation:
+      - file: src/take_two_options/quantitative/contracts.py
+        symbols: [Measure, MeasureTaggedSeries, MeasureTransition, require_measure]
+      - file: src/take_two_options/intelligence/stochastic.py
+        symbols: [StochasticPathSet]
+      - file: src/take_two_options/simulation/legacy_models.py
+        symbols: [SimulationPaths]
+    tests:
+      - file: tests/test_quantitative_foundations.py
+        symbols: [test_observed_value_and_measure_boundaries_are_fail_closed]
+    validation_status: tested
+
+  - formula_id: FORM-DISCOUNT-FACTOR-001
+    name: Continuous discount factor
+    statement: "D(t,T)=exp(-r*(T-t)) for a flat continuously compounded annual rate."
+    measure: Q_for_pricing
+    units: annual_decimal_rate_and_years
+    assumptions:
+      - flat rate over the interval
+      - continuous compounding
+      - Actual/365 Fixed year fraction in the current engine
+    sources:
+      - source_id: book-bjork-arbitrage-theory
+        chapter: "12.2"
+        page: "175"
+      - source_id: book-andersen-piterbarg-interest-rate-modeling
+        chapter: "4.2.1 and 5.A"
+        page: "170 and 221-223"
+    implementation:
+      - file: src/take_two_options/quantitative/contracts.py
+        symbols: [QuantConventionSet.discount_factor]
+    tests:
+      - file: tests/test_quantitative_foundations.py
+        symbols: [test_conventions_separate_calendar_days_and_trading_sessions]
+    validation_status: tested
+
+  - formula_id: FORM-BS-PRICE-001
+    name: Black-Scholes European option value and first-order Greeks
+    statement: "European call/put value under lognormal Q dynamics with flat rate, dividend yield, and volatility."
+    measure: Q
+    units: price_per_share
+    assumptions:
+      - positive spot, strike, volatility, and time
+      - constant volatility, rate, and continuous dividend yield
+      - European exercise
+    sources:
+      - source_id: book-bjork-arbitrage-theory
+        chapter: "12.2"
+        page: "175-176"
+    implementation:
+      - file: src/take_two_options/pricing.py
+        symbols: [black_scholes_price_greeks]
+      - file: src/take_two_options/american.py
+        symbols: [european_scenario_value]
+    tests:
+      - file: tests/test_quantitative_foundations.py
+        symbols:
+          - test_black_scholes_matches_quantlib_european
+          - test_put_call_parity_and_finite_difference_convergence_report
+    validation_status: numerically_validated
+
+  - formula_id: FORM-FD-CONVERGENCE-001
+    name: Finite-difference refinement diagnostic
+    statement: "A numerical value is accepted only after strict grid refinement and a final successive difference within an explicit tolerance."
+    measure: not_applicable
+    units: output_dependent
+    assumptions:
+      - finite outputs
+      - strict non-decreasing time and price grids
+      - tolerance chosen in the same unit as the output
+    sources:
+      - source_id: book-suli-mayers-numerical-analysis
+        chapter: "1.6, 1.7, 2.7"
+        page: "28-29 and 58-71"
+      - source_id: book-andersen-piterbarg-interest-rate-modeling
+        chapter: "2.3 and 3.2.2"
+        page: "52 and 106"
+    implementation:
+      - file: src/take_two_options/quantitative/numerical_validation.py
+        symbols: [compare_values, assess_fd_convergence]
+    tests:
+      - file: tests/test_quantitative_foundations.py
+        symbols: [test_put_call_parity_and_finite_difference_convergence_report]
+    validation_status: tested
