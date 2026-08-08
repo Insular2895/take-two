@@ -1,0 +1,491 @@
+{
+  "$defs": {
+    "CalendarArbitrageReport": {
+      "additionalProperties": false,
+      "properties": {
+        "calendar_arbitrage_free": {
+          "title": "Calendar Arbitrage Free",
+          "type": "boolean"
+        },
+        "grid_points": {
+          "exclusiveMinimum": 0,
+          "title": "Grid Points",
+          "type": "integer"
+        },
+        "maturities": {
+          "minimum": 0,
+          "title": "Maturities",
+          "type": "integer"
+        },
+        "minimum_forward_variance_increment": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum Forward Variance Increment"
+        },
+        "violations": {
+          "minimum": 0,
+          "title": "Violations",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "maturities",
+        "grid_points",
+        "violations",
+        "calendar_arbitrage_free"
+      ],
+      "title": "CalendarArbitrageReport",
+      "type": "object"
+    },
+    "HestonCalibrationGate": {
+      "additionalProperties": false,
+      "properties": {
+        "eligible": {
+          "title": "Eligible",
+          "type": "boolean"
+        },
+        "expirations_per_date": {
+          "minimum": 0,
+          "title": "Expirations Per Date",
+          "type": "integer"
+        },
+        "reasons": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "strikes_per_expiration": {
+          "minimum": 0,
+          "title": "Strikes Per Expiration",
+          "type": "integer"
+        },
+        "surface_dates": {
+          "minimum": 0,
+          "title": "Surface Dates",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "eligible",
+        "surface_dates",
+        "expirations_per_date",
+        "strikes_per_expiration"
+      ],
+      "title": "HestonCalibrationGate",
+      "type": "object"
+    },
+    "SVIArbitrageReport": {
+      "additionalProperties": false,
+      "properties": {
+        "butterfly_arbitrage_free": {
+          "title": "Butterfly Arbitrage Free",
+          "type": "boolean"
+        },
+        "butterfly_violations": {
+          "minimum": 0,
+          "title": "Butterfly Violations",
+          "type": "integer"
+        },
+        "grid_points": {
+          "exclusiveMinimum": 0,
+          "title": "Grid Points",
+          "type": "integer"
+        },
+        "minimum_density_condition": {
+          "title": "Minimum Density Condition",
+          "type": "number"
+        },
+        "minimum_total_variance": {
+          "title": "Minimum Total Variance",
+          "type": "number"
+        }
+      },
+      "required": [
+        "minimum_total_variance",
+        "minimum_density_condition",
+        "butterfly_violations",
+        "grid_points",
+        "butterfly_arbitrage_free"
+      ],
+      "title": "SVIArbitrageReport",
+      "type": "object"
+    },
+    "SVIFitReport": {
+      "additionalProperties": false,
+      "properties": {
+        "arbitrage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SVIArbitrageReport"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "maximum_absolute_error": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Absolute Error"
+        },
+        "observations": {
+          "minimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "parameters": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SVIParameters"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_ids": {
+          "default": [
+            "FORM-SVI-RAW-001",
+            "FORM-SVI-ARBITRAGE-001"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "starts_evaluated": {
+          "minimum": 0,
+          "title": "Starts Evaluated",
+          "type": "integer"
+        },
+        "status": {
+          "$ref": "#/$defs/SVIFitStatus"
+        },
+        "warnings": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "weighted_rmse": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weighted Rmse"
+        }
+      },
+      "required": [
+        "status",
+        "observations",
+        "starts_evaluated"
+      ],
+      "title": "SVIFitReport",
+      "type": "object"
+    },
+    "SVIFitStatus": {
+      "enum": [
+        "fitted",
+        "insufficient_data",
+        "arbitrage_violation",
+        "failed"
+      ],
+      "title": "SVIFitStatus",
+      "type": "string"
+    },
+    "SVIParameters": {
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "title": "A",
+          "type": "number"
+        },
+        "b": {
+          "exclusiveMinimum": 0,
+          "title": "B",
+          "type": "number"
+        },
+        "m": {
+          "title": "M",
+          "type": "number"
+        },
+        "rho": {
+          "exclusiveMaximum": 1,
+          "exclusiveMinimum": -1,
+          "title": "Rho",
+          "type": "number"
+        },
+        "sigma": {
+          "exclusiveMinimum": 0,
+          "title": "Sigma",
+          "type": "number"
+        }
+      },
+      "required": [
+        "a",
+        "b",
+        "rho",
+        "m",
+        "sigma"
+      ],
+      "title": "SVIParameters",
+      "type": "object"
+    },
+    "SurfaceSliceDiagnostic": {
+      "additionalProperties": false,
+      "properties": {
+        "expiration_id": {
+          "title": "Expiration Id",
+          "type": "string"
+        },
+        "fit": {
+          "$ref": "#/$defs/SVIFitReport"
+        },
+        "maturity_years": {
+          "exclusiveMinimum": 0,
+          "title": "Maturity Years",
+          "type": "number"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "snapshot_id",
+        "expiration_id",
+        "maturity_years",
+        "fit"
+      ],
+      "title": "SurfaceSliceDiagnostic",
+      "type": "object"
+    },
+    "SurfaceSnapshotDiagnostic": {
+      "additionalProperties": false,
+      "properties": {
+        "calendar_arbitrage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CalendarArbitrageReport"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "extrapolated_quotes": {
+          "minimum": 0,
+          "title": "Extrapolated Quotes",
+          "type": "integer"
+        },
+        "interpolated_quotes": {
+          "minimum": 0,
+          "title": "Interpolated Quotes",
+          "type": "integer"
+        },
+        "post_cutoff_quotes_excluded": {
+          "minimum": 0,
+          "title": "Post Cutoff Quotes Excluded",
+          "type": "integer"
+        },
+        "slices": {
+          "items": {
+            "$ref": "#/$defs/SurfaceSliceDiagnostic"
+          },
+          "title": "Slices",
+          "type": "array"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "FITTED",
+            "BLOCKED_INSUFFICIENT_DATA",
+            "ARBITRAGE_VIOLATION"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "snapshot_id",
+        "slices",
+        "calendar_arbitrage",
+        "post_cutoff_quotes_excluded",
+        "interpolated_quotes",
+        "extrapolated_quotes",
+        "status"
+      ],
+      "title": "SurfaceSnapshotDiagnostic",
+      "type": "object"
+    },
+    "SurfaceStability": {
+      "additionalProperties": false,
+      "properties": {
+        "fitted_snapshots": {
+          "minimum": 0,
+          "title": "Fitted Snapshots",
+          "type": "integer"
+        },
+        "mean_absolute_parameter_change": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mean Absolute Parameter Change"
+        },
+        "parameter_transitions": {
+          "minimum": 0,
+          "title": "Parameter Transitions",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "fitted_snapshots",
+        "parameter_transitions"
+      ],
+      "title": "SurfaceStability",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/historical_surface_report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "dataset_hash": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dataset Hash"
+    },
+    "extrapolation_policy": {
+      "title": "Extrapolation Policy",
+      "type": "string"
+    },
+    "heston_gate": {
+      "$ref": "#/$defs/HestonCalibrationGate"
+    },
+    "holdout_used": {
+      "const": false,
+      "title": "Holdout Used",
+      "type": "boolean"
+    },
+    "interpolation_policy": {
+      "title": "Interpolation Policy",
+      "type": "string"
+    },
+    "missing_inputs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Missing Inputs",
+      "type": "array"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "report_id": {
+      "title": "Report Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "snapshots": {
+      "items": {
+        "$ref": "#/$defs/SurfaceSnapshotDiagnostic"
+      },
+      "title": "Snapshots",
+      "type": "array"
+    },
+    "stability": {
+      "$ref": "#/$defs/SurfaceStability"
+    },
+    "status": {
+      "enum": [
+        "VALIDATED_DEVELOPMENT_ONLY",
+        "FIXTURE_ONLY_NOT_VALIDATED",
+        "BLOCKED_MISSING_GOVERNED_INPUTS"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "ticker": {
+      "title": "Ticker",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "report_id",
+    "ticker",
+    "status",
+    "snapshots",
+    "stability",
+    "heston_gate",
+    "interpolation_policy",
+    "extrapolation_policy",
+    "missing_inputs",
+    "blockers",
+    "holdout_used"
+  ],
+  "title": "HistoricalSurfaceReport",
+  "type": "object"
+}

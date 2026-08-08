@@ -20,6 +20,7 @@ from take_two_options.intelligence.schemas import (
     NormalizedEvidenceEvent,
     UnifiedObservation,
 )
+from take_two_options.quantitative.historical_surfaces import HistoricalSurfaceReport
 from take_two_options.validation.baseline_comparison import BaselineComparisonReport
 from take_two_options.validation.final_holdout import HoldoutLedgerEntry
 from take_two_options.validation.walk_forward_protocol import WalkForwardProtocolReport
@@ -31,6 +32,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "empirical_calibration.schema.json": EmpiricalCalibrationReport,
     "pre_opra_config.schema.json": PreOpraConfig,
     "historical_dataset_manifest.schema.json": HistoricalDatasetManifest,
+    "historical_surface_report.schema.json": HistoricalSurfaceReport,
     "holdout_ledger_entry.schema.json": HoldoutLedgerEntry,
     "readiness.schema.json": FeatureReadiness,
     "observation.schema.json": UnifiedObservation,
@@ -72,8 +74,7 @@ def main() -> int:
         print("Schema drift: " + ", ".join(failures))
         return 1
     print(
-        ("Verified" if arguments.check else "Exported")
-        + f" {len(SCHEMAS)} offline JSON Schemas."
+        ("Verified" if arguments.check else "Exported") + f" {len(SCHEMAS)} offline JSON Schemas."
     )
     return 0
 

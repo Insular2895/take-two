@@ -1,0 +1,41 @@
+{
+  "blockers": [
+    "Reliable point-in-time implied-volatility reconstruction is not possible from the governed inputs.",
+    "Historical option-data licensing remains to_review.",
+    "No real SVI or Heston parameter is inferred from missing evidence."
+  ],
+  "dataset_hash": "0b09a9a9b1de6a9132e2f0eaf1a9cc15152d2fce59e40baefd21812c9886f556",
+  "extrapolation_policy": "diagnostic only; never decision-eligible",
+  "heston_gate": {
+    "eligible": false,
+    "expirations_per_date": 0,
+    "reasons": [
+      "at least 20 point-in-time surface dates are required",
+      "at least four expirations per date are required",
+      "at least five strikes per expiration are required",
+      "point-in-time bid/ask provenance is required",
+      "constrained multi-start optimization diagnostics are required"
+    ],
+    "strikes_per_expiration": 0,
+    "surface_dates": 0
+  },
+  "holdout_used": false,
+  "interpolation_policy": "flag every interpolated quote; never conceal it as observed",
+  "missing_inputs": [
+    "governed point-in-time risk-free curve",
+    "governed dividends and corporate actions",
+    "reproducible forward convention",
+    "historical IV/delta or sufficient licensed full-chain quotes"
+  ],
+  "order_capability": "forbidden",
+  "report_id": "ttwo-historical-surfaces-v1",
+  "schema_version": "1.0",
+  "snapshots": [],
+  "stability": {
+    "fitted_snapshots": 0,
+    "mean_absolute_parameter_change": null,
+    "parameter_transitions": 0
+  },
+  "status": "BLOCKED_MISSING_GOVERNED_INPUTS",
+  "ticker": "TTWO"
+}
