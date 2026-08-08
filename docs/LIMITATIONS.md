@@ -9,6 +9,9 @@
   engine has a grid-refinement test. This is numerical evidence, not market calibration evidence.
 - The V10 final-holdout protocol is sealed, but no authorized real dataset is provisioned and no
   dataset hash exists. Empirical and holdout promotion remain blocked.
+- The diagnosed IV solver and raw-SVI fitter expose failures and synthetic recovery, but no real
+  point-in-time TTWO surface has validated fit quality. Butterfly/calendar checks are finite-grid
+  diagnostics; eSSVI remains unimplemented behind explicit data and arbitrage gates.
 - MarketData.app historical chains are EOD bid/ask, not intraday NBBO or
   simultaneous combo fills.
 - Alpaca indicative snapshots do not supply the open-interest/underlying fields

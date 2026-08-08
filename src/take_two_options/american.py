@@ -22,6 +22,10 @@ from take_two_options.domain import (
     StrategyCandidate,
     StrictModel,
 )
+from take_two_options.quantitative.implied_volatility import (
+    ImpliedVolStatus,
+    solve_implied_volatility,
+)
 from take_two_options.vol_surface import effective_volatility
 
 
@@ -336,24 +340,22 @@ def historical_option_analytics(
             price_grid=price_grid,
         )
 
-    lower = 0.0001
-    upper = 5.0
-    lower_price = value(lower)
-    upper_price = value(upper)
-    tolerance = 1e-6
-    if target_price < lower_price - 0.01 or target_price > upper_price + 0.01:
+    iv_result = solve_implied_volatility(
+        value,
+        target_price=target_price,
+        bracket=(0.0001, 5.0),
+        price_tolerance=1e-6,
+        volatility_tolerance=1e-8,
+        max_iterations=100,
+    )
+    if iv_result.status in {
+        ImpliedVolStatus.BELOW_BRACKET,
+        ImpliedVolStatus.ABOVE_BRACKET,
+    }:
         raise ValueError("target option price is outside the supported IV range")
-
-    implied_volatility = lower
-    for _ in range(100):
-        implied_volatility = (lower + upper) / 2.0
-        candidate = value(implied_volatility)
-        if abs(candidate - target_price) <= tolerance:
-            break
-        if candidate < target_price:
-            lower = implied_volatility
-        else:
-            upper = implied_volatility
+    if not iv_result.converged or iv_result.volatility is None:
+        raise ValueError(f"implied-volatility solve failed: {iv_result.status.value}")
+    implied_volatility = iv_result.volatility
 
     base = value(implied_volatility)
     spot_step = max(spot * 0.001, 0.01)

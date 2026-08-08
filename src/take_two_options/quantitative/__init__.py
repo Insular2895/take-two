@@ -13,6 +13,11 @@ from take_two_options.quantitative.contracts import (
     QuantConventionSet,
     require_measure,
 )
+from take_two_options.quantitative.implied_volatility import (
+    ImpliedVolResult,
+    ImpliedVolStatus,
+    solve_implied_volatility,
+)
 
 __all__ = [
     "CALENDAR_DAYS_PER_YEAR",
@@ -25,5 +30,8 @@ __all__ = [
     "MeasureTransition",
     "ObservedValue",
     "QuantConventionSet",
+    "ImpliedVolResult",
+    "ImpliedVolStatus",
     "require_measure",
+    "solve_implied_volatility",
 ]

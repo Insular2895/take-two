@@ -466,6 +466,109 @@ sources:
     validation_status: sourced
     notes: "Equivalent martingale-measure definition and Black-Scholes risk-neutral pricing passage inspected directly."
 
+  - source_id: paper-gatheral-jacquier-svi
+    source_type: external_primary_paper
+    author:
+      - Jim Gatheral
+      - Antoine Jacquier
+    title: Arbitrage-free SVI volatility surfaces
+    edition: arXiv:1204.0646v4
+    year: 2013
+    volume: null
+    chapter: "2-5"
+    section: "2.1, 2.2 and 3.1 inspected"
+    page_start: 3
+    page_end: 5
+    pdf_file: null
+    url: https://arxiv.org/abs/1204.0646
+    concept:
+      - raw SVI total variance
+      - butterfly arbitrage
+      - calendar-spread arbitrage
+    formula_id:
+      - FORM-SVI-RAW-001
+      - FORM-SVI-ARBITRAGE-001
+    formula: "Raw SVI equation 3.1; density condition equation 2.1; calendar monotonicity Lemma 2.1."
+    assumptions: "The finite-grid implementation records but cannot prove the paper's full asymptotic condition."
+    measure: Q
+    units: total_variance_and_log_forward_moneyness
+    alternatives:
+      - SSVI
+      - eSSVI behind data gate
+    limitations:
+      - article illustrates SPX rather than TTWO
+      - raw SVI parameters alone do not guarantee absence of arbitrage
+    implementation_file: src/take_two_options/quantitative/svi.py
+    implementation_symbol:
+      - raw_svi_total_variance
+      - svi_arbitrage_report
+      - calendar_arbitrage_report
+    test_file: tests/test_implied_volatility_svi.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "arXiv abstract and v4 PDF inspected directly."
+
+  - source_id: paper-cohort-corbetta-martini-laachir-ssvi
+    source_type: external_primary_paper
+    author:
+      - Pierre Cohort
+      - Jacopo Corbetta
+      - Claude Martini
+      - Ismail Laachir
+    title: Robust calibration and arbitrage-free interpolation of SSVI slices
+    edition: arXiv:1804.04924v2
+    year: 2019
+    volume: null
+    chapter: null
+    section: "abstract inspected"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://arxiv.org/abs/1804.04924
+    concept: [SSVI calibration, butterfly arbitrage, calendar-spread arbitrage]
+    formula_id: []
+    formula: null
+    assumptions: "SSVI needs consistent parameters across expirations."
+    measure: Q
+    units: total_variance_and_log_forward_moneyness
+    alternatives: [raw SVI per slice]
+    limitations: [not implemented in this phase]
+    implementation_file: src/take_two_options/quantitative/svi.py
+    implementation_symbol: evaluate_essvi_gate
+    test_file: tests/test_implied_volatility_svi.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Used to define a conservative cross-expiry gate, not an implementation claim."
+
+  - source_id: paper-mingone-essvi
+    source_type: external_primary_paper
+    author:
+      - Arianna Mingone
+    title: No arbitrage global parametrization for the eSSVI volatility surface
+    edition: arXiv:2204.00312v1
+    year: 2022
+    volume: null
+    chapter: null
+    section: "abstract inspected"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://arxiv.org/abs/2204.00312
+    concept: [eSSVI, global calibration, static arbitrage]
+    formula_id: []
+    formula: null
+    assumptions: "Global eSSVI is evaluated only after point-in-time SVI slice diagnostics."
+    measure: Q
+    units: total_variance_and_log_forward_moneyness
+    alternatives: [SSVI, raw SVI]
+    limitations: [not implemented in this phase, no TTWO materiality evidence]
+    implementation_file: src/take_two_options/quantitative/svi.py
+    implementation_symbol: evaluate_essvi_gate
+    test_file: tests/test_implied_volatility_svi.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Used only to justify treating eSSVI as a separate gated calibration problem."
+
   - source_id: repo-readme-v11-1
     source_type: repository_documentation
     author:
@@ -759,12 +862,36 @@ formula_links:
     name: Implied-volatility root solve
     source_id:
       - book-suli-mayers-numerical-analysis
-    source_location_status: to_research
-    implementation_file: src/take_two_options/american.py
-    implementation_symbol: historical_option_analytics
-    test_file: tests/test_american.py
-    validation_status: implemented
-    notes: "Current bisection lacks a structured convergence/residual/bracket diagnostic result."
+    source_location_status: inspected_section_1_6_pages_28_29
+    implementation_file: src/take_two_options/quantitative/implied_volatility.py
+    implementation_symbol: solve_implied_volatility
+    test_file: tests/test_implied_volatility_svi.py
+    validation_status: numerically_validated
+    notes: "Structured status, bracket, residual, iterations and two tolerances are retained."
+
+  - formula_id: FORM-SVI-RAW-001
+    name: Raw SVI total implied variance
+    source_id:
+      - paper-gatheral-jacquier-svi
+    source_location_status: inspected_equation_3_1_page_5
+    implementation_file: src/take_two_options/quantitative/svi.py
+    implementation_symbol: raw_svi_total_variance
+    test_file: tests/test_implied_volatility_svi.py
+    validation_status: tested
+    notes: "Synthetic known-parameter reconstruction only; no TTWO empirical promotion."
+
+  - formula_id: FORM-SVI-ARBITRAGE-001
+    name: Butterfly-density and calendar-spread checks
+    source_id:
+      - paper-gatheral-jacquier-svi
+    source_location_status: inspected_equation_2_1_and_lemmas_2_1_2_2_pages_3_4
+    implementation_file: src/take_two_options/quantitative/svi.py
+    implementation_symbol:
+      - svi_arbitrage_report
+      - calendar_arbitrage_report
+    test_file: tests/test_implied_volatility_svi.py
+    validation_status: tested
+    notes: "Finite-grid diagnostic; continuous asymptotic proof is not claimed."
 
   - formula_id: FORM-WILSON-001
     name: Wilson binomial confidence interval

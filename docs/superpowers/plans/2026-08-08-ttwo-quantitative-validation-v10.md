@@ -102,6 +102,9 @@ Commit proposé : `feat(quant): centralize conventions measures and numerical au
 
 ## Phase 2 — Solveur IV et surface SVI/eSSVI
 
+État : implémenté ; eSSVI différé derrière le gate ; gate complet vert (152 tests) ; commit
+atomique à créer.
+
 ### Documentary Research
 
 - Questions : bornes d'arbitrage, root finding à vega faible, choix SVI, contraintes calendar/butterfly, extrapolation.

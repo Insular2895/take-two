@@ -107,3 +107,71 @@ formulas:
       - file: tests/test_quantitative_foundations.py
         symbols: [test_put_call_parity_and_finite_difference_convergence_report]
     validation_status: tested
+
+  - formula_id: FORM-IV-ROOT-001
+    name: Diagnosed implied-volatility bisection
+    statement: "Solve model_price(volatility)-target_price=0 inside a verified positive bracket."
+    measure: Q
+    units: annual_decimal_volatility_and_price_per_share
+    assumptions:
+      - model price is finite and non-decreasing over the bracket
+      - target price lies inside the bracket prices
+      - price and volatility tolerances are explicit
+    sources:
+      - source_id: book-suli-mayers-numerical-analysis
+        chapter: "1.6"
+        page: "28-29"
+    implementation:
+      - file: src/take_two_options/quantitative/implied_volatility.py
+        symbols: [ImpliedVolResult, solve_implied_volatility]
+      - file: src/take_two_options/american.py
+        symbols: [historical_option_analytics]
+    tests:
+      - file: tests/test_implied_volatility_svi.py
+        symbols:
+          - test_diagnosed_iv_solver_recovers_black_scholes_volatility
+          - test_iv_solver_reports_bracket_failures_instead_of_returning_a_number
+          - test_diagnosed_iv_solver_handles_quantlib_european_short_maturity
+    validation_status: numerically_validated
+
+  - formula_id: FORM-SVI-RAW-001
+    name: Raw SVI total implied variance
+    statement: "w(k)=a+b*(rho*(k-m)+sqrt((k-m)^2+sigma^2))."
+    measure: Q
+    units: total_variance
+    assumptions:
+      - b is positive, absolute rho is below one, sigma is positive
+      - a+b*sigma*sqrt(1-rho^2) is non-negative
+      - k is log-forward-moneyness
+    sources:
+      - source_id: paper-gatheral-jacquier-svi
+        chapter: "3.1"
+        page: "5, equation 3.1"
+    implementation:
+      - file: src/take_two_options/quantitative/svi.py
+        symbols: [SVIParameters, raw_svi_total_variance, fit_svi_slice]
+    tests:
+      - file: tests/test_implied_volatility_svi.py
+        symbols: [test_svi_synthetic_slice_is_reconstructed_and_arbitrage_checked]
+    validation_status: tested
+
+  - formula_id: FORM-SVI-ARBITRAGE-001
+    name: SVI butterfly-density and calendar-spread checks
+    statement: "Each slice requires g(k)>=0 and total variance must not decrease across maturity."
+    measure: Q
+    units: dimensionless_density_condition_and_total_variance
+    assumptions:
+      - twice differentiable positive total-variance slice
+      - proportional-dividend setting for the calendar equivalence
+      - finite-grid diagnostics do not replace asymptotic proof
+    sources:
+      - source_id: paper-gatheral-jacquier-svi
+        chapter: "2.1-2.2"
+        page: "3-4, equation 2.1 and Lemmas 2.1-2.2"
+    implementation:
+      - file: src/take_two_options/quantitative/svi.py
+        symbols: [svi_arbitrage_report, calendar_arbitrage_report]
+    tests:
+      - file: tests/test_implied_volatility_svi.py
+        symbols: [test_svi_detects_known_butterfly_violation_and_calendar_crossing]
+    validation_status: tested

@@ -61,13 +61,18 @@ def _position_exit_value(
 ) -> float:
     value = 0.0
     for leg in candidate.legs:
+        if leg.quote.implied_volatility is None:
+            raise ValueError(
+                f"path repricing requires explicit IV for {leg.quote.symbol}; "
+                "silent volatility imputation is forbidden"
+            )
         days = max((leg.quote.expiration - valuation_date).days, 0)
         theoretical = _option_value(
             leg.quote.option_type,
             spot=spot,
             strike=leg.quote.strike,
             time_years=days / DEFAULT_QUANT_CONVENTIONS.calendar_day_basis,
-            volatility=leg.quote.implied_volatility or 0.45,
+            volatility=leg.quote.implied_volatility,
         )
         half_spread = _relative_spread(leg) / 2
         executable = (
