@@ -163,6 +163,9 @@ Commit proposé : `feat(quant): add calibration diagnostics and volatility basel
 
 ## Phase 4 — Protocole de backtest et nouveau holdout
 
+État : protocole, manifests, split point-in-time, placebo corrigé, ex æquo PBO et ledger
+implémentés ; holdout réel absent/non ouvert ; gate complet vert (164 tests) ; commit à créer.
+
 ### Documentary Research
 
 - Questions : split point-in-time, purge/embargo, CSCV/PBO/DSR, placebo, accès holdout.

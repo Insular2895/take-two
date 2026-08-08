@@ -15,6 +15,10 @@
 - EWMA and stationary Gaussian GARCH baselines now have likelihood, residual and chronological
   forecast diagnostics. Their committed evidence is synthetic; heavy tails, leverage, structural
   breaks and real TTWO OOS superiority remain unvalidated. Heston calibration remains blocked.
+- Experiment manifests, availability-time checks, purge/embargo, order-invariant PBO ties,
+  signal-alignment placebo and a one-time hash-chained holdout ledger are implemented. The real
+  holdout is absent and unopened; permutation exchangeability and full primary-paper PBO
+  conformance remain limitations.
 - MarketData.app historical chains are EOD bid/ask, not intraday NBBO or
   simultaneous combo fills.
 - Alpaca indicative snapshots do not supply the open-interest/underlying fields

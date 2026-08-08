@@ -219,3 +219,68 @@ formulas:
           - test_garch_recovers_stationary_synthetic_parameters_with_diagnostics
           - test_rolling_forecast_comparison_is_reproducible_and_labeled_synthetic
     validation_status: tested
+
+  - formula_id: FORM-PBO-001
+    name: Combinatorially symmetric probability of backtest overfitting diagnostic
+    statement: "Across symmetric train/test fold combinations, measure how often the in-sample winner ranks below the OOS median."
+    measure: not_applicable
+    units: probability
+    assumptions:
+      - strategies share the same even number of folds
+      - fold performance is comparable across strategies
+      - ties use order-invariant midranks and tied-winner averaging
+    sources:
+      - source_id: paper-bailey-borwein-lopez-zhu-pbo
+        chapter: "primary article metadata and method"
+        page: null
+    implementation:
+      - file: src/take_two_options/validation/pbo.py
+        symbols: [probability_of_backtest_overfitting]
+    tests:
+      - file: tests/test_validation_protocol_v10.py
+        symbols: [test_pbo_ties_are_order_invariant_and_midranked]
+    validation_status: tested
+
+  - formula_id: FORM-PLACEBO-001
+    name: Signal-alignment permutation placebo
+    statement: "Permute signal labels against fixed realized returns and compare the observed aligned statistic with the null distribution."
+    measure: P
+    units: return_per_observation
+    assumptions:
+      - signals and returns are aligned and equal length
+      - permutation exchangeability is defensible
+      - the full tested signal history is supplied
+    sources:
+      - source_id: book-wasserman-all-statistics
+        chapter: "resampling and hypothesis testing"
+        page: null
+    implementation:
+      - file: src/take_two_options/validation/placebo.py
+        symbols: [placebo_diagnostics]
+    tests:
+      - file: tests/test_validation_protocol_v10.py
+        symbols:
+          - test_placebo_uses_signal_alignment_and_has_power_on_synthetic_signal
+          - test_placebo_null_is_deterministic_and_not_forced_to_pass
+    validation_status: tested
+
+  - formula_id: FORM-DSR-001
+    name: Approximate deflated Sharpe probability
+    statement: "Adjust an observed Sharpe statistic for the number of trials, skewness and kurtosis."
+    measure: P
+    units: probability
+    assumptions:
+      - complete trial count
+      - at least three observed returns
+      - approximation documented by the implementation
+    sources:
+      - source_id: paper-bailey-lopez-deflated-sharpe
+        chapter: "primary article"
+        page: null
+    implementation:
+      - file: src/take_two_options/research_statistics.py
+        symbols: [deflated_sharpe_probability]
+    tests:
+      - file: tests/test_research_statistics.py
+        symbols: [test_win_rate_and_multiple_testing_diagnostics_are_bounded]
+    validation_status: tested

@@ -573,6 +573,72 @@ sources:
     verified_on: "2026-08-08"
     notes: "Used only to justify treating eSSVI as a separate gated calibration problem."
 
+  - source_id: paper-bailey-borwein-lopez-zhu-pbo
+    source_type: external_primary_paper
+    author:
+      - David H. Bailey
+      - Jonathan Borwein
+      - Marcos López de Prado
+      - Qiji Jim Zhu
+    title: The Probability of Backtest Overfitting
+    edition: SSRN 2326253
+    year: 2015
+    volume: null
+    chapter: null
+    section: "bibliographic record and abstract inspected"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://papers.ssrn.com/sol3/Papers.cfm?abstract_id=2326253
+    concept: [CSCV, probability of backtest overfitting, selection bias]
+    formula_id: [FORM-PBO-001]
+    formula: null
+    assumptions: "All tried configurations and comparable fold outcomes must be retained."
+    measure: not_applicable
+    units: probability
+    alternatives: [locked holdout, nested purged walk-forward]
+    limitations:
+      - automated full-text access returned HTTP 403 during Phase 4
+      - tie policy is an explicit implementation choice and is tested for order invariance
+    implementation_file: src/take_two_options/validation/pbo.py
+    implementation_symbol: probability_of_backtest_overfitting
+    test_file: tests/test_validation_protocol_v10.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "No page-specific claim is made without full-text inspection."
+
+  - source_id: paper-bailey-lopez-deflated-sharpe
+    source_type: external_primary_paper
+    author:
+      - David H. Bailey
+      - Marcos López de Prado
+    title: "The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting and Non-Normality"
+    edition: SSRN 2460551
+    year: 2014
+    volume: "Journal of Portfolio Management 40(5)"
+    chapter: null
+    section: "bibliographic record and publisher metadata inspected"
+    page_start: 94
+    page_end: 107
+    pdf_file: null
+    url:
+      - https://papers.ssrn.com/sol3/Papers.cfm?abstract_id=2460551
+      - https://doi.org/10.3905/jpm.2014.40.5.094
+    concept: [deflated Sharpe ratio, selection bias, non-normal returns]
+    formula_id: [FORM-DSR-001]
+    formula: null
+    assumptions: "The implementation is labeled approximate and requires the complete trial count."
+    measure: P
+    units: probability
+    alternatives: [PBO, locked holdout]
+    limitations: [diagnostic does not replace point-in-time validation]
+    implementation_file: src/take_two_options/research_statistics.py
+    implementation_symbol: deflated_sharpe_probability
+    test_file: tests/test_research_statistics.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: null
+
   - source_id: repo-readme-v11-1
     source_type: repository_documentation
     author:
@@ -934,20 +1000,33 @@ formula_links:
 
   - formula_id: FORM-PBO-001
     name: Probability of backtest overfitting diagnostic
-    source_id: null
-    source_location_status: primary_source_missing
+    source_id:
+      - paper-bailey-borwein-lopez-zhu-pbo
+    source_location_status: primary_metadata_inspected_full_text_access_blocked
     implementation_file: src/take_two_options/validation/pbo.py
     implementation_symbol: probability_of_backtest_overfitting
     test_file: tests/test_knowledge_optimizer.py
     validation_status: tested
-    notes: "Tie handling and CSCV conformance need review against a primary paper before numerical validation."
+    notes: "Tie handling now uses midranks and tied-winner averaging; full-text conformance remains to_review."
 
   - formula_id: FORM-PLACEBO-001
     name: Strategy placebo diagnostic
-    source_id: null
-    source_location_status: primary_source_missing
+    source_id:
+      - book-wasserman-all-statistics
+    source_location_status: general_permutation_basis_page_to_research
     implementation_file: src/take_two_options/validation/placebo.py
     implementation_symbol: placebo_diagnostics
     test_file: tests/test_knowledge_optimizer.py
     validation_status: tested
-    notes: "Shuffling a return vector preserves its mean, so the present randomized-mean comparator is not a valid signal placebo."
+    notes: "Corrected to permute signals relative to returns, compute a p-value, and test delayed signals."
+
+  - formula_id: FORM-DSR-001
+    name: Approximate deflated Sharpe probability
+    source_id:
+      - paper-bailey-lopez-deflated-sharpe
+    source_location_status: primary_metadata_and_publisher_pages_inspected
+    implementation_file: src/take_two_options/research_statistics.py
+    implementation_symbol: deflated_sharpe_probability
+    test_file: tests/test_research_statistics.py
+    validation_status: tested
+    notes: "Approximate implementation; complete trial count is mandatory."

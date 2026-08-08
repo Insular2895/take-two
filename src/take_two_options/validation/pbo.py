@@ -7,6 +7,12 @@ import math
 from statistics import fmean
 
 
+def _midrank(value: float, values: list[float]) -> float:
+    lower = sum(candidate < value and not math.isclose(candidate, value) for candidate in values)
+    equal = sum(math.isclose(candidate, value) for candidate in values)
+    return lower + (equal + 1) / 2.0
+
+
 def probability_of_backtest_overfitting(
     performance_by_strategy_and_fold: list[list[float]],
 ) -> float | None:
@@ -28,13 +34,18 @@ def probability_of_backtest_overfitting(
             fmean(values[index] for index in training_indices)
             for values in performance_by_strategy_and_fold
         ]
-        selected = max(range(len(train_means)), key=train_means.__getitem__)
+        maximum_train = max(train_means)
+        selected = [
+            index
+            for index, train_mean in enumerate(train_means)
+            if math.isclose(train_mean, maximum_train)
+        ]
         test_means = [
             fmean(values[index] for index in test_indices)
             for values in performance_by_strategy_and_fold
         ]
-        ordered = sorted(test_means)
-        rank = ordered.index(test_means[selected]) + 1
-        relative_rank = rank / (len(ordered) + 1)
+        relative_rank = fmean(
+            _midrank(test_means[index], test_means) / (len(test_means) + 1) for index in selected
+        )
         logits.append(math.log(relative_rank / (1 - relative_rank)))
     return sum(value <= 0 for value in logits) / len(logits)
