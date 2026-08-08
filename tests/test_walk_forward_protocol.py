@@ -89,14 +89,28 @@ def test_insufficient_history_fails_closed_without_a_fixture_result() -> None:
     assert report.windows == []
 
 
-def test_committed_walk_forward_manifest_has_seven_untouched_windows() -> None:
+def test_committed_walk_forward_manifest_uses_real_panel_and_keeps_holdout_closed() -> None:
     report = WalkForwardProtocolReport.model_validate_json(
         (ROOT / "reports/pre_opra/walk_forward_protocol_2026-08-08.json").read_text(
             encoding="utf-8"
         )
     )
-    assert len(report.windows) == 7
-    assert report.status == "DIAGNOSTIC_ONLY_LICENSE_REVIEW"
-    assert all(window.train_observations >= 252 for window in report.windows)
-    assert all(window.recalibrated_after_test is False for window in report.windows)
+    assert report.windows == []
+    assert len(report.strategy_windows) == 10
+    assert report.status == "DEVELOPMENT_ONLY_INSUFFICIENT_FINAL_SAMPLE"
+    assert all(window.train_observations >= 12 for window in report.strategy_windows)
+    assert all(
+        window.recalibrated_after_test is False for window in report.strategy_windows
+    )
+    assert report.sample_adequacy is not None
+    assert report.sample_adequacy.formal_policy_satisfied is False
+    assert report.oos_strategy_comparison is not None
+    candidate = next(
+        row
+        for row in report.oos_strategy_comparison.rows
+        if row.strategy.value == "engine_candidate"
+    )
+    assert candidate.total_return < 0
+    assert report.oos_strategy_comparison.multiple_testing is not None
+    assert report.oos_strategy_comparison.multiple_testing.correction == "holm"
     assert report.holdout_touched is False

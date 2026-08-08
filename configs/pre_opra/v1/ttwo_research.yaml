@@ -288,3 +288,15 @@ extensions:
     chronological_train_fraction: 0.6666666667
     historical_volatility_window: 40
     final_holdout_used: false
+  strategy_walk_forward:
+    panel_input: data/pre_opra/comparable_panel.json
+    aggregate_report: reports/pre_opra/walk_forward_protocol_2026-08-08.json
+    development_train_observations: 12
+    development_validation_observations: 1
+    development_test_observations: 1
+    development_purge_observations: 1
+    development_embargo_observations: 1
+    step_observations: 1
+    formal_policy: {train: 20, validation: 8, embargo: 5, test: 8}
+    multiple_testing: holm
+    final_holdout_used: false
