@@ -19,6 +19,7 @@ from take_two_options.historical_data.event_regimes import EventRegimeReport
 from take_two_options.historical_data.option_observations import (
     HistoricalOptionDatasetSummary,
 )
+from take_two_options.historical_data.market_context import MarketContextSummary
 from take_two_options.intelligence.backtesting import WalkForwardReport
 from take_two_options.intelligence.calibration import OfflineCalibrationReport
 from take_two_options.intelligence.schemas import (
@@ -45,6 +46,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "pre_opra_config.schema.json": PreOpraConfig,
     "historical_dataset_manifest.schema.json": HistoricalDatasetManifest,
     "historical_option_dataset_summary.schema.json": HistoricalOptionDatasetSummary,
+    "market_context_summary.schema.json": MarketContextSummary,
     "historical_surface_report.schema.json": HistoricalSurfaceReport,
     "holdout_ledger_entry.schema.json": HoldoutLedgerEntry,
     "readiness.schema.json": FeatureReadiness,

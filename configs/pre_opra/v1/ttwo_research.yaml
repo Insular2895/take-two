@@ -215,3 +215,11 @@ extensions:
     private_output: data/pre_opra/normalized_options.jsonl
     aggregate_summary: reports/pre_opra/option_normalization_2026-08-08.json
     availability_delay_hours: 24
+  market_context:
+    start: 2024-02-01T00:00:00+00:00
+    stock_feed: iex
+    treasury_files:
+      - data/treasury/daily_treasury_yield_curve_2025.csv
+      - data/treasury/daily_treasury_yield_curve_2026.csv
+    private_output: data/pre_opra/market_context.json
+    aggregate_summary: reports/pre_opra/market_context_2026-08-08.json

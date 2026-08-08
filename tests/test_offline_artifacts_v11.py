@@ -40,6 +40,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
         "historical_dataset_manifest.schema.json",
         "historical_option_dataset_summary.schema.json",
         "historical_surface_report.schema.json",
+        "market_context_summary.schema.json",
         "holdout_ledger_entry.schema.json",
         "model_validation.schema.json",
         "observation.schema.json",
