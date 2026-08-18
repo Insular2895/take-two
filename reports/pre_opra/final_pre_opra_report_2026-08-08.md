@@ -114,15 +114,15 @@ Preuve : `../../docs/validation/OPRA_FINAL_VALIDATION_PLAN.md`.
 - Décisions paper immuables et hash-chaînées ; réalisations stockées séparément.
 - La Phase M comparera V10 aux mêmes baselines avec coûts et slippage observés.
 
-Variables attendues : OPRA_PROVIDER, OPRA_API_KEY, OPRA_API_SECRET, OPRA_ACCOUNT_OR_SESSION
+Variables attendues : OPRA_PROVIDER, IBKR_HOST, IBKR_PORT, IBKR_CLIENT_ID, IBKR_SESSION_MODE, IBKR_MARKET_DATA_TYPE, OPRA_ENTITLEMENT_CONFIRMED, OPRA_LICENSE_REVIEWED
 
 Commande : `ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml`
 
 ## Reproductibilité
 
-- Commit source : `572bedd4a9dc296f2bed6b5b8cb2e5a8e573abb4`
-- Hash configuration : `49303278bf1d75d833cb4336097f730be0ad67c54fb9628e8ac16183d06c32f2`
-- Hash dataset agrégé : `38c7764dd347c2daed06b7f44711fa8cf652b64f610354e9c8a25a538cefffa7`
+- Commit source : `1fac9b2b84a398a27ba318cf5e3db03f70ece5b4`
+- Hash configuration : `6311544557a89b9845993dcacac70c0b9e48a7007bf29176a48826188e4461cb`
+- Hash dataset agrégé : `9f9e7d57f34b9c75402e843e4acc01a44ad1b434d324d884fda2e237404250c2`
 - Seed : `20260808`
 - Holdout : `UNOPENED`
 - Invariants : `transmit=false`, `what_if=true`, `order_capability=forbidden`
