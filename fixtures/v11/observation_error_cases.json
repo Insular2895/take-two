@@ -1,0 +1,150 @@
+{
+  "fixture_type": "data_hub_error_cases",
+  "synthetic": true,
+  "cutoff": "2026-07-28T12:00:00Z",
+  "source": {
+    "source_id": "fixture-source",
+    "provider": "fixture",
+    "uri": "fixture://offline/error-cases",
+    "retrieved_at": "2026-07-28T12:00:00Z",
+    "data_domain": "market",
+    "quality": "synthetic",
+    "license_or_terms": "Synthetic error fixture only.",
+    "content_hash": "fixture-error-suite"
+  },
+  "cases": [
+    {
+      "case_id": "future_timestamp",
+      "expected_diagnostic": "future timestamp",
+      "observations": [
+        {
+          "observation_id": "future",
+          "series": "TTWO.SPOT",
+          "timestamp": "2026-07-29T12:00:00Z",
+          "value": 200.0,
+          "unit": "USD/share",
+          "source_id": "fixture-source",
+          "domain": "market",
+          "quality": "synthetic"
+        }
+      ]
+    },
+    {
+      "case_id": "post_cutoff",
+      "expected_diagnostic": "post-cutoff",
+      "observations": [
+        {
+          "observation_id": "post-cutoff",
+          "series": "TTWO.SPOT",
+          "timestamp": "2026-07-28T12:01:00Z",
+          "value": 199.0,
+          "unit": "USD/share",
+          "source_id": "fixture-source",
+          "domain": "market",
+          "quality": "synthetic"
+        }
+      ]
+    },
+    {
+      "case_id": "quote_missing_timestamp",
+      "expected_diagnostic": "timestamp is required",
+      "raw_observations": [
+        {
+          "observation_id": "missing-time",
+          "series": "TTWO.OPTION.BID",
+          "value": 4.8,
+          "unit": "USD/contract-unit",
+          "source_id": "fixture-source",
+          "domain": "options",
+          "quality": "synthetic"
+        }
+      ]
+    },
+    {
+      "case_id": "unit_mismatch",
+      "expected_diagnostic": "unit mismatch",
+      "observations": [
+        {
+          "observation_id": "unit-1",
+          "series": "TTWO.SPOT",
+          "timestamp": "2026-07-28T11:00:00Z",
+          "value": 195.0,
+          "unit": "USD/share",
+          "source_id": "fixture-source",
+          "domain": "market",
+          "quality": "synthetic"
+        },
+        {
+          "observation_id": "unit-2",
+          "series": "TTWO.SPOT",
+          "timestamp": "2026-07-28T11:30:00Z",
+          "value": 180.0,
+          "unit": "EUR/share",
+          "source_id": "fixture-source",
+          "domain": "market",
+          "quality": "synthetic"
+        }
+      ]
+    },
+    {
+      "case_id": "duplicate",
+      "expected_diagnostic": "duplicate",
+      "observations": [
+        {
+          "observation_id": "duplicate-1",
+          "series": "TTWO.SPOT",
+          "timestamp": "2026-07-28T11:00:00Z",
+          "value": 195.0,
+          "unit": "USD/share",
+          "source_id": "fixture-source",
+          "domain": "market",
+          "quality": "synthetic",
+          "raw_hash": "same-content"
+        },
+        {
+          "observation_id": "duplicate-2",
+          "series": "TTWO.SPOT",
+          "timestamp": "2026-07-28T11:00:00Z",
+          "value": 195.0,
+          "unit": "USD/share",
+          "source_id": "fixture-source",
+          "domain": "market",
+          "quality": "synthetic",
+          "raw_hash": "same-content"
+        }
+      ]
+    },
+    {
+      "case_id": "unknown_source",
+      "expected_diagnostic": "unknown source",
+      "observations": [
+        {
+          "observation_id": "unknown-source",
+          "series": "TTWO.SPOT",
+          "timestamp": "2026-07-28T11:00:00Z",
+          "value": 195.0,
+          "unit": "USD/share",
+          "source_id": "not-registered",
+          "domain": "market",
+          "quality": "unknown"
+        }
+      ]
+    },
+    {
+      "case_id": "stale",
+      "expected_diagnostic": "stale",
+      "observations": [
+        {
+          "observation_id": "stale",
+          "series": "TTWO.SPOT",
+          "timestamp": "2026-07-20T11:00:00Z",
+          "value": 190.0,
+          "unit": "USD/share",
+          "source_id": "fixture-source",
+          "domain": "market",
+          "quality": "synthetic"
+        }
+      ]
+    }
+  ]
+}

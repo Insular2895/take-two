@@ -23,8 +23,50 @@ family_weight_caps:
   news: 0.25
   social: 0.15
 
+# Deterministic rules only. Text/catalyst matches remain pending human review and
+# cannot update Bayes until an approved normalized event is supplied.
+event_normalization_rules:
+  - rule_id: trends-attention-up-v1
+    series_pattern: "GOOGLE_TRENDS.*"
+    event_type: EVENT_SEARCH_INTEREST_UP
+    family: attention
+    operator: greater_than
+    threshold: 60
+    expected_unit: consistently_scaled_search_interest
+    direction: supports
+    severity: 0.35
+    confidence: 0.40
+    ttl_days: 14
+    requires_human_review: false
+  - rule_id: option-iv-spike-v1
+    series_pattern: "option.*.implied_volatility"
+    event_type: EVENT_IV_SPIKE
+    family: options
+    operator: greater_than
+    threshold: 0.60
+    expected_unit: annual_decimal
+    direction: supports
+    severity: 0.55
+    confidence: 0.45
+    ttl_days: 5
+    requires_human_review: false
+  - rule_id: official-delay-text-v1
+    series_pattern: "TTWO.official_news"
+    event_type: EVENT_GTA_DELAY_CONFIRMED
+    family: company_primary
+    operator: contains_all_tokens
+    threshold: "Grand Theft Auto delay"
+    expected_unit: headline
+    direction: supports
+    severity: 1.0
+    confidence: 0.80
+    ttl_days: 90
+    requires_human_review: true
+    contradiction_group: gta_release_timing
+
 likelihood_rules:
-  - event_type: EVENT_GTA_DELAY_CONFIRMED
+  - rule_id: likelihood-gta-delay-company-v1
+    event_type: EVENT_GTA_DELAY_CONFIRMED
     family: company_primary
     base_weight: 1.0
     likelihood_by_scenario:
@@ -32,7 +74,8 @@ likelihood_rules:
       gta_success: 0.01
       delay_or_guidance_down: 0.90
       rupture: 0.35
-  - event_type: EVENT_RELEASE_DATE_MAINTAINED
+  - rule_id: likelihood-release-maintained-company-v1
+    event_type: EVENT_RELEASE_DATE_MAINTAINED
     family: company_primary
     base_weight: 0.8
     likelihood_by_scenario:
@@ -40,7 +83,8 @@ likelihood_rules:
       gta_success: 0.80
       delay_or_guidance_down: 0.15
       rupture: 0.30
-  - event_type: EVENT_GUIDANCE_UP
+  - rule_id: likelihood-guidance-up-fundamentals-v1
+    event_type: EVENT_GUIDANCE_UP
     family: fundamentals
     base_weight: 0.8
     likelihood_by_scenario:
@@ -48,7 +92,8 @@ likelihood_rules:
       gta_success: 0.80
       delay_or_guidance_down: 0.10
       rupture: 0.35
-  - event_type: EVENT_GUIDANCE_DOWN
+  - rule_id: likelihood-guidance-down-fundamentals-v1
+    event_type: EVENT_GUIDANCE_DOWN
     family: fundamentals
     base_weight: 0.8
     likelihood_by_scenario:
@@ -56,7 +101,8 @@ likelihood_rules:
       gta_success: 0.08
       delay_or_guidance_down: 0.80
       rupture: 0.50
-  - event_type: EVENT_INSIDER_BUY
+  - rule_id: likelihood-insider-buy-regulatory-v1
+    event_type: EVENT_INSIDER_BUY
     family: regulatory
     base_weight: 0.4
     likelihood_by_scenario:
@@ -64,7 +110,8 @@ likelihood_rules:
       gta_success: 0.65
       delay_or_guidance_down: 0.25
       rupture: 0.35
-  - event_type: EVENT_SEARCH_INTEREST_UP
+  - rule_id: likelihood-search-interest-attention-v1
+    event_type: EVENT_SEARCH_INTEREST_UP
     family: attention
     base_weight: 0.25
     likelihood_by_scenario:
@@ -72,7 +119,8 @@ likelihood_rules:
       gta_success: 0.65
       delay_or_guidance_down: 0.35
       rupture: 0.50
-  - event_type: EVENT_IV_SPIKE
+  - rule_id: likelihood-iv-spike-options-v1
+    event_type: EVENT_IV_SPIKE
     family: options
     base_weight: 0.35
     likelihood_by_scenario:
@@ -80,7 +128,8 @@ likelihood_rules:
       gta_success: 0.55
       delay_or_guidance_down: 0.50
       rupture: 0.80
-  - event_type: EVENT_OPTIONS_FLOW_BULLISH
+  - rule_id: likelihood-options-flow-options-v1
+    event_type: EVENT_OPTIONS_FLOW_BULLISH
     family: options
     base_weight: 0.30
     likelihood_by_scenario:
@@ -166,6 +215,15 @@ covariance_shrinkage: 0.25
 budget_eur: 1000
 maximum_loss_eur: 1000
 maximum_contracts: 4
+maximum_positions: 2
+maximum_concentration: 1.0
+minimum_liquidity_score: 0.05
+maximum_relative_spread: 0.45
+delta_exposure_range: [-1000, 1000]
+gamma_exposure_range: [-1000, 1000]
+vega_exposure_range: [-5000, 5000]
+theta_exposure_range: [-5000, 1000]
+allow_multiple_strategies: true
 candidate_pool_size: 6
 optimizer_profiles:
   prudent:
@@ -194,6 +252,13 @@ exit_policy:
   exit_days_before_expiration: 60
   iv_crush_threshold: 0.35
   trailing_drawdown: 0.30
+  maximum_theta_loss_per_day_usd: 200
+  minimum_liquidity_score: 0.05
+  maximum_cvar_fraction: 0.80
+  exit_if_expected_value_negative: true
+  exit_if_data_insufficient: true
+  exit_before_catalyst_days: 5
+  exit_after_catalyst_days: 3
 
 required_series:
   - TTWO.spot
@@ -201,3 +266,12 @@ required_series:
   - USD.risk_free_rate
   - TTWO.dividend_yield
   - US.market_calendar
+
+freshness_hours_by_domain:
+  market: 24
+  options: 24
+  execution: 1
+  attention: 168
+  catalyst: 720
+  fundamental: 2880
+  macro: 336

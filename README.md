@@ -44,9 +44,17 @@ ttwo-options intelligence-run \
   --base-report reports/examples/v10_thesis_scan.json \
   --policy configs/intelligence/v11.yaml \
   --events fixtures/v11/events_empty.json \
+  --profile fast_fixture \
   --json-out reports/v11/latest.json \
   --markdown-out reports/v11/latest.md \
   --html-out reports/v11/latest.html
+ttwo-options calibration report \
+  --dataset fixtures/v11/historical_calibration.example.json \
+  --walk-forward fixtures/v11/walk_forward.example.json \
+  --output reports/v11/calibration/offline_validation.json
+ttwo-options position replay \
+  --trajectory fixtures/v11/position_trajectory.example.json \
+  --output reports/v11/position_trajectory.json
 ```
 
 The package contains no live-order submission, modification, cancellation, or
@@ -97,8 +105,128 @@ See [product contract](docs/product/PRODUCT_CONTRACT.md),
 [current architecture](docs/architecture/CURRENT_ARCHITECTURE.md),
 [V10.1 architecture](docs/architecture/V10_BULLISH_THESIS_SCANNER.md),
 [V11 architecture](docs/architecture/V11_PROBABILISTIC_STRATEGY_INTELLIGENCE.md),
+[readiness](docs/READINESS.md),
+[validation plan](docs/VALIDATION_PLAN.md),
+[calibration](docs/CALIBRATION.md),
+[backtesting](docs/BACKTESTING.md),
+[model risk](docs/MODEL_RISK.md),
+[data provenance](docs/DATA_PROVENANCE.md),
+[security](docs/SECURITY.md),
 [V10.1 data guide](docs/thesis_scanner_data_guide.md),
 [migration](docs/MIGRATION.md), and [limitations](docs/LIMITATIONS.md).
+
+## A. Ce qui fonctionne aujourd’hui hors ligne
+
+- construction exhaustive V10.1 des calls, bull call spreads et butterflies
+  configurés sur les contrats fournis ;
+- coût prudent au bid/ask, payoff exact, perte maximale et contrôle américain
+  QuantLib ;
+- ingestion point-in-time avec provenance, cutoff, fraîcheur, unités, hashes,
+  doublons et états de connecteur ;
+- normalisation déterministe des événements avec preuve de règle, expiration,
+  revue humaine, clusters de doublons et contradictions ;
+- waterfall bayésien auditable, caps par famille et sensibilité du posterior ;
+- simulations multi-modèles reproductibles, diagnostics de convergence,
+  comparaison de robustesse et stress explicites ;
+- allocation entière avec budget, perte, concentration, liquidité, Greeks,
+  cash et `NO_TRADE` ;
+- surveillance advisory à partir de snapshots et replay d’une trajectoire
+  synthétique multi-date ;
+- rapports JSON, Markdown et HTML autonome avec résumé machine, hashes et
+  statuts de readiness ;
+- preview strictement non transmissible : `transmit=false`, `what_if=true`,
+  confirmation humaine et `order_capability=forbidden`.
+
+`production_ready_offline` décrit uniquement un invariant logiciel déterministe.
+Il ne qualifie ni une probabilité de marché, ni une stratégie, ni un rendement.
+
+## B. Ce qui est expérimental
+
+- priors, likelihoods, probabilités et scores de confiance ;
+- paramètres Heston, paramètres de sauts et hypothèses de régimes ;
+- surface de volatilité locale construite depuis une entrée synthétique ou
+  partielle ;
+- simulations, robustesse et allocation alimentées par des fixtures ;
+- seuils de sortie, stress, profil de risque et prévisions issues de fixtures.
+
+Ces éléments portent `experimental_offline` ou `fixture_only`. Ils ne peuvent pas
+être promus par un rang, un score ou un résultat in-sample.
+
+## C. Ce qui nécessite des données historiques réelles
+
+- calibration des probabilités, likelihoods, régimes et modèles ;
+- historique point-in-time des contrats, surfaces, quotes bid/ask, spot, taux,
+  dividendes, FX, événements et coûts ;
+- splits rolling/expanding, embargo, backtests walk-forward et holdout non
+  contaminé ;
+- Brier score, log-loss, ECE, courbes de calibration et pouvoir prédictif ;
+- comparaison hors échantillon à cash, sous-jacent, call ATM, call à delta
+  fixe, spread standard, aléatoire admissible et `NO_TRADE`.
+
+Le framework JSON/CSV/Parquet optionnel est implémenté. Sans dataset réel
+autorisé, il renvoie `BLOCKED_MISSING_CALIBRATION_DATA`. Une fixture reste
+`FIXTURE_ONLY_NOT_CALIBRATED` ou `FIXTURE_ONLY_NOT_VALIDATED`.
+
+## D. Ce qui nécessite une API live
+
+- chaîne OPRA, spot et quotes horodatées ;
+- bid/ask, open interest, volume, surface d’IV et Greeks live ou recalculés ;
+- découverte et qualification des contrats ;
+- quotes combo IBKR, marge et commissions what-if ;
+- fraîcheur, reconnexion, rate limits, état des ordres et surveillance
+  intraday.
+
+Le port IBKR/OPRA est `adapter_ready_not_connected`. Le CLI par défaut n’ouvre
+aucune session. La roadmap est détaillée dans
+[LIVE_DATA_ROADMAP.md](docs/LIVE_DATA_ROADMAP.md) et
+[IBKR_OPRA_ROADMAP.md](docs/IBKR_OPRA_ROADMAP.md).
+
+## E. Ce qui doit être terminé avant commercialisation
+
+- [ ] licence et droits de redistribution des données ;
+- [ ] données historiques autorisées ;
+- [ ] calibration sur données réelles ;
+- [ ] backtest walk-forward ;
+- [ ] holdout non contaminé ;
+- [ ] probabilités correctement calibrées ;
+- [ ] paper trading ;
+- [ ] combo quotes IBKR ;
+- [ ] contrôle des coûts réels ;
+- [ ] surveillance live ;
+- [ ] tests de charge ;
+- [ ] sécurité ;
+- [ ] audit externe ;
+- [ ] mentions réglementaires ;
+- [ ] conditions d’utilisation ;
+- [ ] politique de confidentialité ;
+- [ ] gestion des abonnements ;
+- [ ] monitoring de production ;
+- [ ] support utilisateur ;
+- [ ] plan de reprise ;
+- [ ] aucune promesse de rendement.
+
+La checklist probante et la frontière réglementaire sont dans
+[COMMERCIALIZATION_CHECKLIST.md](docs/COMMERCIALIZATION_CHECKLIST.md) et
+[REGULATORY_BOUNDARY.md](docs/REGULATORY_BOUNDARY.md).
+
+## F. Conditions de promotion
+
+Les gates autorisés, sans aucun gate d’exécution automatique, sont :
+
+1. `RESEARCH_ONLY`
+2. `OFFLINE_VALIDATED`
+3. `HISTORICALLY_CALIBRATED`
+4. `WALK_FORWARD_PASSED`
+5. `PAPER_TRADING`
+6. `LIVE_DATA_READ_ONLY`
+7. `HUMAN_CONFIRMED_PREVIEW`
+8. `COMMERCIAL_RESEARCH_PRODUCT`
+
+Chaque gate exige critères d’entrée et de sortie, métriques minimales, données,
+responsable humain et preuves archivées. Les seuils non encore approuvés restent
+`draft_to_validate`. La matrice complète se trouve dans
+[READINESS.md](docs/READINESS.md) ; le paper trading dans
+[PAPER_TRADING_PLAN.md](docs/PAPER_TRADING_PLAN.md).
 
 ## Comment le bot raisonne
 
@@ -178,7 +306,9 @@ Le taux FX est daté et audité. Ce n’est pas un taux d’exécution garanti.
 Une observation unifiée contient au minimum :
 
 ```text
-series, timestamp, value, unit, source_id, domain, quality, metadata
+series, timestamp, retrieved_at, cutoff, value, unit, provider,
+source_uri ou source_id, domain, quality, freshness_status,
+point_in_time_valid, raw_hash, license_or_usage_notes, metadata
 ```
 
 Une source contient :
@@ -195,7 +325,8 @@ $$
 
 RSS, Google Trends, calendrier de marché, facteurs historiques et quotes IBKR
 postérieurs au cutoff sont exclus. Une quote IBKR sans timestamp est exclue.
-Les statuts `not_configured`, `partial`, `failed` et `ready` restent distincts.
+Les statuts `not_configured`, `unavailable`, `failed`, `partial` et `ready`
+restent distincts.
 
 Connecteurs disponibles :
 
@@ -1518,8 +1649,16 @@ promotion_eligible=false
 car :
 
 - les holdouts V7–V9 ont déjà été inspectés et sont contaminés ;
-- aucun nouveau nested walk-forward/holdout verrouillé n’accompagne V11 ;
+- le contrat walk-forward et le holdout verrouillé existent, mais aucun dataset
+  historique réel autorisé ne les a encore validés ;
 - le paper monitoring n’a pas été exécuté.
+
+V11.1 ajoute aussi une suite de stress déterministe : retard de catalyseur,
+IV crush, sell-off, taux, EUR/USD, bid/ask ×2, dégradation OI/volume, gaps,
+midpoint indisponible, liquidation prudente, slippage ×2, frais ×2 et sortie
+anticipée. Lorsqu’un historique requis n’existe pas, le stress porte
+`data_insufficient` avec sa méthode, ses hypothèses et son blocker ; il
+n’invente pas de P&L.
 
 ## 19. Posture du rapport
 
@@ -1612,17 +1751,19 @@ $$
 \Delta p_s=p_{s,current}-p_{s,initial}.
 $$
 
-Priorité des règles :
+Les règles peuvent déclencher invalidation fondamentale, données insuffisantes
+ou périmées, stop prudent, sortie temporelle, objectif complet ou partiel,
+IV crush, liquidité détériorée, espérance restante négative et dépassement
+CVaR. L’action finale suit la priorité :
 
-1. invalidation fondamentale → `these_invalidee` ;
-2. \(ROC\leq-stop\) → `sortir` ;
-3. fenêtre de sortie avant échéance atteinte → `sortir` ;
-4. objectif de profit atteint → `sortir` ;
-5. objectif partiel atteint → `reduire` ;
-6. IV crush atteint → `reduire` ;
-7. baisse d’au moins 20 points d’un scénario → `surveiller` ;
-8. changement de régime → `surveiller` ;
-9. sinon → `conserver`.
+```text
+HOLD < WATCH < REDUCE < EXIT_REVIEW < DATA_STALE
+     < BLOCKED_INSUFFICIENT_DATA < THESIS_INVALIDATED
+```
+
+Une baisse d’au moins 20 points d’un scénario ou un changement de régime
+transforme aussi `HOLD` en `WATCH`. Chaque trigger conserve valeur observée,
+seuil, date, sévérité, action suggérée, données requises et confiance.
 
 La divergence thèse/marché est classée :
 
@@ -1648,10 +1789,15 @@ ttwo-options position assess \
   --dossier <DOSSIER_INITIAL.json> \
   --current <SNAPSHOT_ACTUEL.json> \
   --output reports/v11/position_monitor.json
+
+ttwo-options position replay \
+  --trajectory fixtures/v11/position_trajectory.example.json \
+  --output reports/v11/position_trajectory.json
 ```
 
-évalue un snapshot fourni. Il n’existe pas encore de daemon, de polling continu
-ou de suivi automatique des états d’ordres.
+La première commande évalue un snapshot fourni ; la seconde rejoue la fixture
+chronologique par le même moteur. Il n’existe pas encore de daemon, de polling
+continu ou de suivi automatique des états d’ordres.
 
 ## 21. Ce qui est réellement relié dans V11
 
@@ -1664,7 +1810,10 @@ ou de suivi automatique des états d’ordres.
 | règles de sortie → P&L simulés | utilisé |
 | P&L multi-modèles → allocation entière | utilisé |
 | stress/holdout/paper → promotion | utilisé, promotion forcée à `false` |
-| observations API → événements bayésiens | normalisation explicite encore requise |
+| observations → règles déterministes → événements | utilisé avec preuve et revue |
+| événements approuvés → Bayes | utilisé ; pending/rejected/expired ignorés |
+| calibration historique | interface utilisée ; données réelles absentes |
+| walk-forward | interface utilisée ; fixture non validante |
 | covariance factorielle → SDE | diagnostic seulement |
 | combo quotes IBKR → previews | utilisé si connecteur injecté par code |
 | connecteurs live → CLI par défaut | non configurés |
@@ -1718,7 +1867,7 @@ Les paramètres sont versionnés dans :
 - `configs/thesis_scanner/default.yaml` pour V10.1 ;
 - `configs/intelligence/v11.yaml` pour V11.
 
-Le run V11 de démonstration utilise :
+Le profil `fast_fixture` V11 de démonstration utilise notamment :
 
 ```text
 paths=1000
@@ -1734,6 +1883,10 @@ candidate_pool_size=6
 Une identité stable est calculée à partir des inputs principaux. Les seeds
 séparent les modèles et régimes. Un même jeu d’inputs et une même date de
 création injectée dans les tests donnent les mêmes trajectoires et résultats.
+Le manifeste conserve `run_id`, hash de configuration, hash de données, hash
+d’inputs, versions, durées par étape, mémoire mesurée, cache déterministe et
+statut de reprise. Les profils autorisés sont `fast_fixture`, `research`,
+`validation` et `exhaustive` ; aucun profil `production_live` n’existe.
 
 ## 24. Validation logicielle
 
@@ -1741,25 +1894,33 @@ La livraison V11 est contrôlée par :
 
 ```bash
 .venv/bin/python -m pytest -q
-.venv/bin/ruff check src tests
-.venv/bin/mypy src
+.venv/bin/ruff check .
+.venv/bin/mypy src scripts
+.venv/bin/python scripts/export_offline_schemas.py --check
+.venv/bin/python scripts/validate_offline_artifacts.py
+.venv/bin/python scripts/security_gate.py
 .venv/bin/pip check
 ```
 
 La validation actuelle couvre :
 
-- 119 tests ;
 - schémas et policies ;
-- Bayes, déduplication et caps ;
+- cutoff, fraîcheur, unités, provenance, doublons et contradictions ;
+- Bayes, waterfall, caps, sensibilités et probabilités valides ;
 - covariance PSD ;
-- reproductibilité des quatre modèles ;
-- Dupire et fallbacks ;
-- métriques et règles de sortie ;
-- allocation entière et `NO_TRADE` ;
+- reproductibilité, convergence et diagnostics des quatre modèles ;
+- Dupire, arbitrage, Heston, sauts et fallbacks ;
+- métriques, stress et règles de sortie ;
+- allocation entière, concentration, Greeks, cash et `NO_TRADE` ;
 - connecteurs point-in-time mockés ;
+- calibration et walk-forward fail-closed sans look-ahead ;
 - rejet des adaptateurs capables d’ordonner ;
-- monitoring et invalidation ;
-- pipeline et rapports complets.
+- monitoring, invalidation et replay multi-date ;
+- property tests, pipeline, rapports autonomes et schémas exportés ;
+- scan de secrets et frontière globale d’exécution.
+
+Le workflow `.github/workflows/offline-validation.yml` exécute ces contrôles et
+génère les rapports fixtures sans connexion live.
 
 Cette validation prouve le comportement du logiciel sur les cas testés. Elle
 ne valide pas une stratégie TTWO.
@@ -1779,7 +1940,8 @@ ne valide pas une stratégie TTWO.
 - Les droits OPRA, `conId`, livrables, combo quotes, commissions et marge
   restent à vérifier.
 - Les holdouts V7–V9 sont contaminés.
-- Aucun nouveau holdout, walk-forward imbriqué ou paper trading n’est terminé.
+- Le framework de holdout/walk-forward existe, mais aucun résultat réel
+  autorisé ni paper trading n’est terminé.
 - Le suivi de position est un calcul sur snapshot, pas une surveillance
   autonome.
 

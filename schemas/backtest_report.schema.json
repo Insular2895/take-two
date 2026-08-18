@@ -1,0 +1,407 @@
+{
+  "$defs": {
+    "WalkForwardCaseResult": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "costs_usd": {
+          "minimum": 0,
+          "title": "Costs Usd",
+          "type": "number"
+        },
+        "pnl_usd": {
+          "title": "Pnl Usd",
+          "type": "number"
+        },
+        "profitable": {
+          "title": "Profitable",
+          "type": "boolean"
+        },
+        "rejected_for_insufficient_data": {
+          "title": "Rejected For Insufficient Data",
+          "type": "boolean"
+        },
+        "return_fraction": {
+          "title": "Return Fraction",
+          "type": "number"
+        },
+        "split": {
+          "enum": [
+            "train",
+            "validation",
+            "test",
+            "holdout"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "strategy": {
+          "enum": [
+            "cash",
+            "underlying",
+            "long_call_atm",
+            "long_call_fixed_delta",
+            "bull_call_spread_standard",
+            "random_admissible",
+            "oracle_hindsight",
+            "model_candidate",
+            "NO_TRADE"
+          ],
+          "title": "Strategy",
+          "type": "string"
+        },
+        "total_loss": {
+          "title": "Total Loss",
+          "type": "boolean"
+        },
+        "window_id": {
+          "title": "Window Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "window_id",
+        "split",
+        "strategy",
+        "pnl_usd",
+        "return_fraction",
+        "costs_usd",
+        "profitable",
+        "total_loss",
+        "rejected_for_insufficient_data"
+      ],
+      "title": "WalkForwardCaseResult",
+      "type": "object"
+    },
+    "WalkForwardMetrics": {
+      "additionalProperties": false,
+      "properties": {
+        "brier_score": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Brier Score"
+        },
+        "cvar_95_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cvar 95 Usd"
+        },
+        "execution_costs_usd": {
+          "minimum": 0,
+          "title": "Execution Costs Usd",
+          "type": "number"
+        },
+        "expected_calibration_error": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Calibration Error"
+        },
+        "insufficient_data_rejection_rate": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Insufficient Data Rejection Rate",
+          "type": "number"
+        },
+        "log_loss": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Log Loss"
+        },
+        "maximum_drawdown_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Drawdown Usd"
+        },
+        "mean_return": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mean Return"
+        },
+        "median_return": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Median Return"
+        },
+        "no_trade_rate": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "No Trade Rate",
+          "type": "number"
+        },
+        "observations": {
+          "minimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "probability_profit": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Profit"
+        },
+        "split": {
+          "enum": [
+            "train",
+            "validation",
+            "test",
+            "holdout"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "strategy": {
+          "enum": [
+            "cash",
+            "underlying",
+            "long_call_atm",
+            "long_call_fixed_delta",
+            "bull_call_spread_standard",
+            "random_admissible",
+            "oracle_hindsight",
+            "model_candidate",
+            "NO_TRADE"
+          ],
+          "title": "Strategy",
+          "type": "string"
+        },
+        "total_loss_rate": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Total Loss Rate"
+        },
+        "turnover": {
+          "minimum": 0,
+          "title": "Turnover",
+          "type": "number"
+        },
+        "var_95_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Var 95 Usd"
+        }
+      },
+      "required": [
+        "split",
+        "strategy",
+        "observations",
+        "turnover",
+        "execution_costs_usd",
+        "no_trade_rate",
+        "insufficient_data_rejection_rate"
+      ],
+      "title": "WalkForwardMetrics",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/backtest_report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "baselines_present": {
+      "items": {
+        "enum": [
+          "cash",
+          "underlying",
+          "long_call_atm",
+          "long_call_fixed_delta",
+          "bull_call_spread_standard",
+          "random_admissible",
+          "oracle_hindsight",
+          "model_candidate",
+          "NO_TRADE"
+        ],
+        "type": "string"
+      },
+      "title": "Baselines Present",
+      "type": "array"
+    },
+    "dataset_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dataset Id"
+    },
+    "final_holdout_used_for_tuning": {
+      "const": false,
+      "default": false,
+      "title": "Final Holdout Used For Tuning",
+      "type": "boolean"
+    },
+    "metrics": {
+      "items": {
+        "$ref": "#/$defs/WalkForwardMetrics"
+      },
+      "title": "Metrics",
+      "type": "array"
+    },
+    "missing_baselines": {
+      "items": {
+        "enum": [
+          "cash",
+          "underlying",
+          "long_call_atm",
+          "long_call_fixed_delta",
+          "bull_call_spread_standard",
+          "random_admissible",
+          "oracle_hindsight",
+          "model_candidate",
+          "NO_TRADE"
+        ],
+        "type": "string"
+      },
+      "title": "Missing Baselines",
+      "type": "array"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "ranking_stability": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ranking Stability"
+    },
+    "regret_vs_best_exploitable_baseline_usd": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Regret Vs Best Exploitable Baseline Usd"
+    },
+    "results": {
+      "items": {
+        "$ref": "#/$defs/WalkForwardCaseResult"
+      },
+      "title": "Results",
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "WALK_FORWARD_EVALUATED",
+        "BLOCKED_MISSING_CALIBRATION_DATA",
+        "BLOCKED_INVALID_BACKTEST_DATA",
+        "FIXTURE_ONLY_NOT_VALIDATED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "status"
+  ],
+  "title": "WalkForwardReport",
+  "type": "object"
+}

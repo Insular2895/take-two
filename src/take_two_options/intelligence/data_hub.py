@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -20,6 +21,7 @@ from take_two_options.intelligence.schemas import (
     ConnectorStatus,
     DataDomain,
     DataQuality,
+    FreshnessStatus,
     SourceProvenance,
     UnifiedDataSnapshot,
     UnifiedObservation,
@@ -30,6 +32,34 @@ from take_two_options.thesis_scanner.schemas import ThesisScanReport
 
 class ConnectorError(RuntimeError):
     """Raised when a configured external connector cannot produce valid data."""
+
+
+def _redacted_url(url: str) -> str:
+    parsed = urllib.parse.urlsplit(url)
+    query = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
+    redacted = [
+        (key, "[REDACTED]" if key.lower() in {"api_key", "token", "access_token"} else value)
+        for key, value in query
+    ]
+    return urllib.parse.urlunsplit(
+        (
+            parsed.scheme,
+            parsed.netloc,
+            parsed.path,
+            urllib.parse.urlencode(redacted),
+            parsed.fragment,
+        )
+    )
+
+
+def _redacted_error(error: Exception) -> str:
+    message = str(error)
+    message = re.sub(
+        r"(?i)(api[_-]?key|token|secret|authorization)(\s*[:=]\s*)[^\s,;&]+",
+        r"\1\2[REDACTED]",
+        message,
+    )
+    return message
 
 
 def _parse_utc_timestamp(value: Any, *, field: str) -> datetime:
@@ -106,8 +136,67 @@ class MarketCalendarDataPort(Protocol):
 class UnifiedDataHub:
     """Collect connector outputs while preserving failures and provenance."""
 
-    def __init__(self, required_series: Iterable[str] = ()) -> None:
+    def __init__(
+        self,
+        required_series: Iterable[str] = (),
+        *,
+        freshness_hours_by_domain: dict[DataDomain, float] | None = None,
+    ) -> None:
         self.required_series = tuple(required_series)
+        self.freshness_hours_by_domain = freshness_hours_by_domain or {
+            DataDomain.MARKET: 24.0,
+            DataDomain.OPTIONS: 24.0,
+            DataDomain.EXECUTION: 1.0,
+            DataDomain.ATTENTION: 24.0 * 7,
+            DataDomain.CATALYST: 24.0 * 30,
+            DataDomain.FUNDAMENTAL: 24.0 * 120,
+            DataDomain.MACRO: 24.0 * 14,
+        }
+
+    def _enrich_observation(
+        self,
+        observation: UnifiedObservation,
+        *,
+        source: SourceProvenance,
+        cutoff: datetime,
+    ) -> UnifiedObservation:
+        age_hours = max(
+            (cutoff - observation.timestamp).total_seconds() / 3_600,
+            0.0,
+        )
+        maximum_age = self.freshness_hours_by_domain.get(observation.domain)
+        freshness = (
+            FreshnessStatus.UNKNOWN
+            if maximum_age is None
+            else FreshnessStatus.STALE
+            if age_hours > maximum_age
+            else FreshnessStatus.FRESH
+        )
+        raw_payload = observation.model_dump(
+            mode="json",
+            exclude={
+                "retrieved_at",
+                "cutoff",
+                "provider",
+                "source_uri",
+                "freshness_status",
+                "point_in_time_valid",
+                "raw_hash",
+                "license_or_usage_notes",
+            },
+        )
+        return observation.model_copy(
+            update={
+                "retrieved_at": source.retrieved_at,
+                "cutoff": cutoff,
+                "provider": source.provider,
+                "source_uri": source.uri,
+                "freshness_status": freshness,
+                "point_in_time_valid": observation.timestamp <= cutoff,
+                "raw_hash": stable_hash(raw_payload),
+                "license_or_usage_notes": source.license_or_terms,
+            }
+        )
 
     def collect(
         self,
@@ -117,55 +206,126 @@ class UnifiedDataHub:
         connectors: Iterable[DataConnector],
         seed_sources: Iterable[SourceProvenance] = (),
         seed_observations: Iterable[UnifiedObservation] = (),
+        checked_at: datetime | None = None,
     ) -> UnifiedDataSnapshot:
+        collection_time = checked_at or datetime.now(UTC)
         sources = {item.source_id: item for item in seed_sources}
-        observations = {item.observation_id: item for item in seed_observations}
+        observations: dict[str, UnifiedObservation] = {}
+        semantic_keys: set[tuple[str, datetime, str, str]] = set()
+        series_units: dict[str, str] = {}
         statuses: list[ConnectorStatus] = []
-        if observations:
+        warnings: list[str] = []
+
+        def accept(observation: UnifiedObservation, *, connector_id: str) -> bool:
+            source = sources.get(observation.source_id)
+            if source is None:
+                warnings.append(
+                    f"{connector_id}: observation {observation.observation_id} references "
+                    f"unknown source {observation.source_id} and was blocked."
+                )
+                return False
+            if observation.timestamp > as_of:
+                warnings.append(
+                    f"{connector_id}: future/post-cutoff observation "
+                    f"{observation.observation_id} was excluded."
+                )
+                return False
+            expected_unit = series_units.setdefault(observation.series, observation.unit)
+            if observation.unit != expected_unit:
+                warnings.append(
+                    f"{connector_id}: unit mismatch for {observation.series}; expected "
+                    f"{expected_unit}, received {observation.unit}; observation was blocked."
+                )
+                return False
+            key = (
+                observation.series,
+                observation.timestamp,
+                json.dumps(observation.value, sort_keys=True),
+                observation.unit,
+            )
+            if key in semantic_keys or observation.observation_id in observations:
+                warnings.append(
+                    f"{connector_id}: duplicate observation "
+                    f"{observation.observation_id} was excluded."
+                )
+                return False
+            semantic_keys.add(key)
+            observations[observation.observation_id] = self._enrich_observation(
+                observation,
+                source=source,
+                cutoff=as_of,
+            )
+            return True
+
+        seed_count = 0
+        for observation in seed_observations:
+            seed_count += int(accept(observation, connector_id="v10_normalized_seed"))
+        if seed_count:
             statuses.append(
                 ConnectorStatus(
                     connector_id="v10_normalized_seed",
                     state=ConnectorState.READY,
-                    checked_at=datetime.now(UTC),
-                    observations=len(observations),
+                    checked_at=collection_time,
+                    observations=seed_count,
                 )
             )
-        warnings: list[str] = []
         for connector in connectors:
-            checked_at = datetime.now(UTC)
+            connector_checked_at = collection_time
             try:
                 result = connector.fetch(ticker=ticker, as_of=as_of)
-            except ConnectorError as error:
+            except Exception as error:
+                safe_error = _redacted_error(error)
                 statuses.append(
                     ConnectorStatus(
                         connector_id=connector.connector_id,
                         state=ConnectorState.FAILED,
-                        checked_at=checked_at,
+                        checked_at=connector_checked_at,
                         observations=0,
-                        error=str(error),
+                        error=f"{type(error).__name__}: {safe_error}",
                     )
                 )
-                warnings.append(f"{connector.connector_id}: {error}")
+                warnings.append(
+                    f"{connector.connector_id}: fail-closed after "
+                    f"{type(error).__name__}: {safe_error}"
+                )
                 continue
             sources[result.source.source_id] = result.source
+            accepted_count = 0
             for observation in result.observations:
-                observations[observation.observation_id] = observation
+                accepted_count += int(
+                    accept(observation, connector_id=connector.connector_id)
+                )
             statuses.append(
                 ConnectorStatus(
                     connector_id=connector.connector_id,
                     state=(
                         ConnectorState.READY
-                        if result.observations
+                        if accepted_count and accepted_count == len(result.observations)
+                        else ConnectorState.PARTIAL
+                        if accepted_count
                         else ConnectorState.PARTIAL
                     ),
-                    checked_at=checked_at,
-                    observations=len(result.observations),
+                    checked_at=connector_checked_at,
+                    observations=accepted_count,
                     warnings=result.warnings,
                 )
             )
             warnings.extend(f"{connector.connector_id}: {item}" for item in result.warnings)
         present = {item.series for item in observations.values()}
         missing = sorted(set(self.required_series) - present)
+        stale_required = sorted(
+            {
+                item.series
+                for item in observations.values()
+                if item.series in self.required_series
+                and item.freshness_status is FreshnessStatus.STALE
+            }
+        )
+        if stale_required:
+            warnings.append(
+                "Required series are stale under the configured policy: "
+                + ", ".join(stale_required)
+            )
         identity = {
             "ticker": ticker,
             "as_of": as_of,
@@ -397,9 +557,13 @@ class HttpJsonConnector:
             with self._opener(request, timeout=self.timeout_seconds) as response:
                 payload = json.loads(response.read().decode("utf-8"))
         except (OSError, ValueError) as error:
-            raise ConnectorError(f"GET failed for {url}: {error}") from error
+            raise ConnectorError(
+                f"GET failed for {_redacted_url(url)}: {error}"
+            ) from error
         if not isinstance(payload, dict):
-            raise ConnectorError(f"GET {url} did not return a JSON object")
+            raise ConnectorError(
+                f"GET {_redacted_url(url)} did not return a JSON object"
+            )
         return cast(dict[str, Any], payload)
 
 
@@ -877,6 +1041,7 @@ class IBKROpraConnector:
         *,
         candidate_id: str,
         legs: list[dict[str, Any]],
+        as_of: datetime | None = None,
     ) -> ComboQuote:
         try:
             payload = self.port.combo_quote(candidate_id, legs)
@@ -886,16 +1051,25 @@ class IBKROpraConnector:
                 warnings=[f"IBKR combo quote unavailable: {error}"],
             )
         timestamp = payload.get("timestamp")
+        parsed_timestamp = (
+            _parse_utc_timestamp(timestamp, field="broker combo timestamp")
+            if timestamp
+            else None
+        )
+        warnings = list(payload.get("warnings", []))
+        executable = bool(payload.get("executable", False))
+        if parsed_timestamp is None:
+            executable = False
+            warnings.append("Combo quote lacked a timestamp and is non-executable.")
+        elif as_of is not None and parsed_timestamp > as_of:
+            executable = False
+            warnings.append("Post-cutoff combo quote is non-executable.")
         return ComboQuote(
             candidate_id=candidate_id,
             bid=payload.get("bid"),
             ask=payload.get("ask"),
-            timestamp=(
-                _parse_utc_timestamp(timestamp, field="broker combo timestamp")
-                if timestamp
-                else None
-            ),
+            timestamp=parsed_timestamp,
             source_id=payload.get("source_id"),
-            executable=bool(payload.get("executable", False)),
-            warnings=list(payload.get("warnings", [])),
+            executable=executable,
+            warnings=warnings,
         )

@@ -1,0 +1,261 @@
+{
+  "$defs": {
+    "EvidenceFamily": {
+      "enum": [
+        "company_primary",
+        "regulatory",
+        "fundamentals",
+        "market",
+        "options",
+        "attention",
+        "news",
+        "social"
+      ],
+      "title": "EvidenceFamily",
+      "type": "string"
+    },
+    "HumanReviewStatus": {
+      "enum": [
+        "not_required",
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "title": "HumanReviewStatus",
+      "type": "string"
+    },
+    "NormalizedEventType": {
+      "enum": [
+        "GTA_RELEASE_DATE_CONFIRMED",
+        "EVENT_GTA_DELAY_CONFIRMED",
+        "EVENT_RELEASE_DATE_MAINTAINED",
+        "GUIDANCE_RAISED",
+        "GUIDANCE_LOWERED",
+        "EVENT_GUIDANCE_UP",
+        "EVENT_GUIDANCE_DOWN",
+        "EVENT_INSIDER_BUY",
+        "INSIDER_SELL",
+        "EVENT_SEARCH_INTEREST_UP",
+        "SEARCH_ATTENTION_UP",
+        "SEARCH_ATTENTION_DOWN",
+        "EVENT_IV_SPIKE",
+        "IMPLIED_VOLATILITY_SPIKE",
+        "IMPLIED_VOLATILITY_CRUSH",
+        "EVENT_OPTIONS_FLOW_BULLISH",
+        "EVENT_EARNINGS_BEAT",
+        "EVENT_EARNINGS_MISS",
+        "MATERIAL_8K",
+        "MACRO_RISK_UP",
+        "MACRO_RISK_DOWN",
+        "LIQUIDITY_DETERIORATION",
+        "LIQUIDITY_IMPROVEMENT",
+        "EVENT_LAUNCH_EXCEPTIONAL",
+        "EVENT_LAUNCH_DISAPPOINTING"
+      ],
+      "title": "NormalizedEventType",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/event.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "canonical_fact_id": {
+      "description": "Stable deduplication key shared by reports of the same underlying fact.",
+      "minLength": 1,
+      "title": "Canonical Fact Id",
+      "type": "string"
+    },
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "contradiction_cluster_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Contradiction Cluster Id"
+    },
+    "contradictory_source_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Contradictory Source Ids",
+      "type": "array"
+    },
+    "direction": {
+      "default": "supports",
+      "enum": [
+        "supports",
+        "contradicts",
+        "neutral"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "duplicate_cluster_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Duplicate Cluster Id"
+    },
+    "entity": {
+      "default": "TTWO",
+      "title": "Entity",
+      "type": "string"
+    },
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_time": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Event Time"
+    },
+    "event_type": {
+      "$ref": "#/$defs/NormalizedEventType"
+    },
+    "expires_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expires At"
+    },
+    "family": {
+      "$ref": "#/$defs/EvidenceFamily"
+    },
+    "first_seen_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "First Seen At"
+    },
+    "freshness_multiplier": {
+      "default": 1.0,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Freshness Multiplier",
+      "type": "number"
+    },
+    "human_review_status": {
+      "$ref": "#/$defs/HumanReviewStatus",
+      "default": "approved"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    },
+    "normalization_rule_id": {
+      "default": "explicit_normalized_input",
+      "title": "Normalization Rule Id",
+      "type": "string"
+    },
+    "notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Notes",
+      "type": "array"
+    },
+    "novelty": {
+      "default": 1.0,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Novelty",
+      "type": "number"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "title": "Occurred At",
+      "type": "string"
+    },
+    "quality_multiplier": {
+      "default": 1.0,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Quality Multiplier",
+      "type": "number"
+    },
+    "severity": {
+      "default": 0.5,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Severity",
+      "type": "number"
+    },
+    "source_family": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvidenceFamily"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "source_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Source Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type",
+    "family",
+    "occurred_at",
+    "observed_at",
+    "canonical_fact_id",
+    "source_ids",
+    "confidence"
+  ],
+  "title": "NormalizedEvidenceEvent",
+  "type": "object"
+}

@@ -54,27 +54,28 @@ V11 is a modular intelligence overlay. It consumes the immutable V10.1 report
 and does not replace structure construction:
 
 ```text
-V10.1 report + V11 policy + normalized events + optional factor history
+V10.1 report + V11.1 policy + observations/events + optional histories
                                 |
-             provenance-aware data hub and connector status
+   provenance/cutoff/freshness -> deterministic event normalization
                                 |
-      deduplicated/capped Bayesian scenarios -> four regime weights
+ audited Bayes + sensitivity -> four regime weights and confidence
                                 |
   GBM / Dupire local vol / Heston / Heston+jumps path ensembles
                                 |
- conditional option repricing + exits + multi-model robustness
+ convergence/arbitrage checks + repricing + exits + robustness/stress
                                 |
-       cost/adverse/rupture/CVaR/holdout/paper promotion gates
+ historical calibration + point-in-time walk-forward (fail-closed)
                                 |
- exact integer allocation under budget/loss/contracts/liquidity
+ exact integer allocation under budget/loss/concentration/liquidity/Greeks
                                 |
-      cash/no-trade baseline + explainable position monitoring
+ cash/no-trade + advisory snapshots/trajectory replay + readiness inventory
                                 |
- JSON + Markdown + HTML + blocked preview-only IBKR artifacts
+ JSON + Markdown + network-free HTML + blocked preview-only artifacts
 ```
 
 The V11 package is `intelligence`. Its modules separate schemas, data
-connectors, Bayesian updates, covariance, stochastic paths, local-volatility
-calibration, valuation, validation, optimization, execution previews,
-monitoring, and reporting. See
+connectors, event normalization, Bayesian updates, historical calibration,
+walk-forward backtesting, covariance, stochastic paths, local-volatility
+diagnostics, valuation, validation, robustness, optimization, exit rules,
+execution previews, monitoring, readiness, and reporting. See
 [`V11_PROBABILISTIC_STRATEGY_INTELLIGENCE.md`](V11_PROBABILISTIC_STRATEGY_INTELLIGENCE.md).

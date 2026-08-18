@@ -6,6 +6,7 @@ QuantLib<1.44,>=1.43
 typer<1,>=0.15
 
 [dev]
+hypothesis<7,>=6.130
 mypy<2,>=1.14
 pytest<9,>=8.3
 ruff<1,>=0.9

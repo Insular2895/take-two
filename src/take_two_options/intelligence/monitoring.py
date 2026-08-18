@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from take_two_options.intelligence.exit_rules import evaluate_exit_rules
 from take_two_options.intelligence.schemas import (
     MonitorAction,
     PositionDossier,
     PositionMonitorInput,
     PositionMonitorReport,
+    PositionTrajectoryFixture,
+    PositionTrajectoryReplay,
 )
 
 
@@ -40,57 +43,40 @@ def monitor_position(
     }
     unrealized = current.market_value_usd - dossier.actual_cost_usd
     total_pnl = unrealized + current.realized_pnl_usd
-    return_on_cost = total_pnl / max(dossier.actual_cost_usd, 1e-9)
     changes = _probability_changes(
         dossier.initial_scenario_probabilities,
         current.current_scenario_probabilities,
     )
     largest_probability_drop = min(changes.values(), default=0.0)
-    plan = dossier.exit_plan
-    triggers: list[str] = []
+    prudent_liquidation_pnl = (
+        current.prudent_liquidation_value_usd - dossier.actual_cost_usd
+        if current.prudent_liquidation_value_usd is not None
+        else None
+    )
+    action, rule_triggers = evaluate_exit_rules(
+        dossier,
+        current,
+        total_pnl_usd=total_pnl,
+        prudent_liquidation_pnl_usd=prudent_liquidation_pnl,
+    )
+    triggers = [trigger.rule_id for trigger in rule_triggers]
     explanation: list[str] = []
-    action = MonitorAction.KEEP
-    if current.thesis_invalidated:
-        action = MonitorAction.THESIS_INVALIDATED
-        triggers.append("fundamental_invalidation")
-        explanation.append("A preserved fundamental invalidation condition is now true.")
-    elif return_on_cost <= -plan.operational_stop_loss:
-        action = MonitorAction.EXIT
-        triggers.append("operational_stop_loss")
-        explanation.append(
-            f"Total return {return_on_cost:.1%} breached the "
-            f"-{plan.operational_stop_loss:.1%} operational stop."
-        )
-    elif current.days_to_expiration <= plan.exit_days_before_expiration:
-        action = MonitorAction.EXIT
-        triggers.append("time_exit")
-        explanation.append("The pre-expiration time-exit window has been reached.")
-    elif return_on_cost >= plan.profit_target:
-        action = MonitorAction.EXIT
-        triggers.append("profit_target")
-        explanation.append("The full profit target has been reached.")
-    elif return_on_cost >= plan.partial_profit_target:
-        action = MonitorAction.REDUCE
-        triggers.append("partial_profit_target")
-        explanation.append("The partial-profit threshold calls for a human scale-out review.")
-    elif iv_change / dossier.initial_iv <= -plan.iv_crush_threshold:
-        action = MonitorAction.REDUCE
-        triggers.append("iv_crush")
-        explanation.append(
-            f"Implied volatility has fallen by at least {plan.iv_crush_threshold:.0%} "
-            "from entry."
-        )
-    elif largest_probability_drop <= -0.20:
+    explanation.extend(
+        f"{trigger.rule_id}: observed={trigger.observed_value}; "
+        f"threshold={trigger.threshold}; suggested={trigger.suggested_action.value}."
+        for trigger in rule_triggers
+    )
+    if action is MonitorAction.HOLD and largest_probability_drop <= -0.20:
         action = MonitorAction.WATCH
         triggers.append("scenario_probability_drop")
         explanation.append("At least one preserved scenario probability fell by 20 points.")
-    elif current.regime != dossier.initial_regime:
+    elif action is MonitorAction.HOLD and current.regime != dossier.initial_regime:
         action = MonitorAction.WATCH
         triggers.append("regime_change")
         explanation.append(
             f"Regime changed from {dossier.initial_regime} to {current.regime}."
         )
-    else:
+    elif action is MonitorAction.HOLD:
         explanation.append("No configured profit, loss, time, IV, or thesis trigger fired.")
     divergence = (
         "thesis_weaker_than_market"
@@ -104,7 +90,19 @@ def monitor_position(
         as_of=current.as_of,
         action=action,
         unrealized_pnl_usd=unrealized,
+        prudent_liquidation_pnl_usd=prudent_liquidation_pnl,
         total_pnl_usd=total_pnl,
+        expected_remaining_pnl_usd=current.expected_remaining_pnl_usd,
+        remaining_cvar_95_usd=current.remaining_cvar_95_usd,
+        current_greeks=current.current_greeks,
+        liquidity_status=(
+            "unknown"
+            if current.liquidity_score is None
+            else "degraded"
+            if current.liquidity_score < 0.5
+            else "acceptable"
+        ),
+        thesis_change=current.thesis_change,
         probability_changes=changes,
         greek_attribution=attribution,
         iv_change=iv_change,
@@ -112,5 +110,20 @@ def monitor_position(
         regime_change=f"{dossier.initial_regime}->{current.regime}",
         thesis_market_divergence=divergence,
         triggered_rules=triggers,
+        rule_triggers=rule_triggers,
         explanation=explanation,
+    )
+
+
+def replay_position_trajectory(
+    fixture: PositionTrajectoryFixture,
+) -> PositionTrajectoryReplay:
+    """Replay an immutable synthetic trajectory through the same advisory monitor."""
+    return PositionTrajectoryReplay(
+        fixture_id=fixture.fixture_id,
+        status="FIXTURE_ONLY_REPLAY",
+        reports=[
+            monitor_position(fixture.dossier, snapshot)
+            for snapshot in fixture.snapshots
+        ],
     )

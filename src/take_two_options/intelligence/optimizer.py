@@ -137,6 +137,15 @@ def optimize_allocations(
     maximum_loss_eur: float,
     maximum_contracts: int,
     eur_usd_rate: float,
+    maximum_positions: int = 4,
+    maximum_concentration: float = 1.0,
+    minimum_liquidity_score: float = 0.0,
+    maximum_relative_spread: float = 1.0,
+    delta_exposure_range: tuple[float, float] = (-1_000_000.0, 1_000_000.0),
+    gamma_exposure_range: tuple[float, float] = (-1_000_000.0, 1_000_000.0),
+    vega_exposure_range: tuple[float, float] = (-1_000_000.0, 1_000_000.0),
+    theta_exposure_range: tuple[float, float] = (-1_000_000.0, 1_000_000.0),
+    allow_multiple_strategies: bool = True,
 ) -> list[AllocationResult]:
     """Enumerate the finite integer set; retaining cash and no-trade are explicit choices."""
     if not candidates:
@@ -168,6 +177,69 @@ def optimize_allocations(
         cost_eur = sum(count * cost for count, cost in zip(counts, costs_eur, strict=True))
         loss_eur = sum(count * loss for count, loss in zip(counts, losses_eur, strict=True))
         if cost_eur > budget_eur + 1e-9 or loss_eur > maximum_loss_eur + 1e-9:
+            continue
+        selected_positions = sum(count > 0 for count in counts)
+        if selected_positions > maximum_positions:
+            continue
+        if not allow_multiple_strategies and selected_positions > 1:
+            continue
+        if cost_eur > 0 and any(
+            count * cost / cost_eur > maximum_concentration + 1e-9
+            for count, cost in zip(counts, costs_eur, strict=True)
+            if count > 0
+        ):
+            continue
+        selected_candidates = [
+            candidate
+            for count, candidate in zip(counts, candidates, strict=True)
+            if count > 0
+        ]
+        if any(
+            candidate.decision_metrics.maximum_leg_relative_spread
+            > maximum_relative_spread + 1e-12
+            for candidate in selected_candidates
+        ):
+            continue
+        liquidity_scores = [
+            max(
+                0.0,
+                1.0
+                - candidate.decision_metrics.maximum_leg_relative_spread
+                / max(maximum_relative_spread, 1e-12),
+            )
+            for candidate in selected_candidates
+        ]
+        if any(score + 1e-12 < minimum_liquidity_score for score in liquidity_scores):
+            continue
+        exposures = {
+            "delta": sum(
+                count * candidate.net_greeks.delta
+                for count, candidate in zip(counts, candidates, strict=True)
+            ),
+            "gamma": sum(
+                count * candidate.net_greeks.gamma
+                for count, candidate in zip(counts, candidates, strict=True)
+            ),
+            "vega": sum(
+                count * candidate.net_greeks.vega
+                for count, candidate in zip(counts, candidates, strict=True)
+            ),
+            "theta": sum(
+                count * candidate.net_greeks.theta
+                for count, candidate in zip(counts, candidates, strict=True)
+            ),
+        }
+        exposure_ranges = {
+            "delta": delta_exposure_range,
+            "gamma": gamma_exposure_range,
+            "vega": vega_exposure_range,
+            "theta": theta_exposure_range,
+        }
+        if any(
+            value < exposure_ranges[name][0] - 1e-12
+            or value > exposure_ranges[name][1] + 1e-12
+            for name, value in exposures.items()
+        ):
             continue
         group_pnls: dict[str, NDArray] = {}
         for model_key in model_keys:
@@ -281,6 +353,51 @@ def optimize_allocations(
         total_cost = sum(line.cost_eur for line in lines)
         total_loss = sum(line.maximum_loss_eur for line in lines)
         total_contracts = sum(line.option_contracts for line in lines)
+        selected_positions = len(lines)
+        concentration = (
+            max((line.cost_eur / total_cost for line in lines), default=0.0)
+            if total_cost > 0
+            else 0.0
+        )
+        aggregate_greeks = {
+            "delta": sum(
+                count * candidate.net_greeks.delta
+                for count, candidate in zip(item.counts, candidates, strict=True)
+            ),
+            "gamma": sum(
+                count * candidate.net_greeks.gamma
+                for count, candidate in zip(item.counts, candidates, strict=True)
+            ),
+            "vega": sum(
+                count * candidate.net_greeks.vega
+                for count, candidate in zip(item.counts, candidates, strict=True)
+            ),
+            "theta": sum(
+                count * candidate.net_greeks.theta
+                for count, candidate in zip(item.counts, candidates, strict=True)
+            ),
+        }
+        active_constraints = [
+            name
+            for name, used, limit in (
+                ("budget", total_cost, budget_eur),
+                ("maximum_loss", total_loss, maximum_loss_eur),
+                ("maximum_contracts", float(total_contracts), float(maximum_contracts)),
+                ("maximum_positions", float(selected_positions), float(maximum_positions)),
+                ("maximum_concentration", concentration, maximum_concentration),
+            )
+            if limit > 0 and used >= 0.95 * limit
+        ]
+        for name, value in aggregate_greeks.items():
+            lower, upper = {
+                "delta": delta_exposure_range,
+                "gamma": gamma_exposure_range,
+                "vega": vega_exposure_range,
+                "theta": theta_exposure_range,
+            }[name]
+            span = max(upper - lower, 1e-9)
+            if value - lower <= 0.05 * span or upper - value <= 0.05 * span:
+                active_constraints.append(f"{name}_exposure")
         no_trade = not lines
         identity = {
             "profile": profile_name,
@@ -304,6 +421,31 @@ def optimize_allocations(
                     "budget": total_cost <= budget_eur + 1e-9,
                     "maximum_loss": total_loss <= maximum_loss_eur + 1e-9,
                     "maximum_contracts": total_contracts <= maximum_contracts,
+                    "maximum_positions": selected_positions <= maximum_positions,
+                    "maximum_concentration": concentration <= maximum_concentration + 1e-9,
+                    "multiple_strategies_policy": (
+                        allow_multiple_strategies or selected_positions <= 1
+                    ),
+                    "delta_exposure": (
+                        delta_exposure_range[0]
+                        <= aggregate_greeks["delta"]
+                        <= delta_exposure_range[1]
+                    ),
+                    "gamma_exposure": (
+                        gamma_exposure_range[0]
+                        <= aggregate_greeks["gamma"]
+                        <= gamma_exposure_range[1]
+                    ),
+                    "vega_exposure": (
+                        vega_exposure_range[0]
+                        <= aggregate_greeks["vega"]
+                        <= vega_exposure_range[1]
+                    ),
+                    "theta_exposure": (
+                        theta_exposure_range[0]
+                        <= aggregate_greeks["theta"]
+                        <= theta_exposure_range[1]
+                    ),
                     "whole_contracts": all(
                         isinstance(value, int) and value >= 0 for value in item.counts
                     ),
@@ -327,6 +469,28 @@ def optimize_allocations(
                     budget_usd=budget_usd,
                 ),
                 no_trade=no_trade,
+                active_constraints=active_constraints,
+                near_miss_allocations=[
+                    f"Global feasible rank {other_rank}: objective={other.objective:.6f}"
+                    for other_rank, other in ranked
+                    if other_rank > rank
+                ][:3],
+                constraint_sensitivity=[
+                    (
+                        "No allocation is forced; relaxing a hard constraint requires "
+                        "an explicit policy change and a full rerun."
+                    ),
+                    (
+                        "The selected solution may change if budget, loss, contracts, "
+                        "positions, concentration, liquidity, or Greek ranges change."
+                    ),
+                ],
+                cash_reason=(
+                    "Cash/NO_TRADE has objective zero and dominates feasible risky allocations."
+                    if no_trade
+                    else "Unused cash is retained because whole contracts and hard constraints "
+                    "make the residual budget non-deployable without weakening policy."
+                ),
                 reasons=(
                     [
                         "Holding cash dominates all enumerated allocations under this profile."

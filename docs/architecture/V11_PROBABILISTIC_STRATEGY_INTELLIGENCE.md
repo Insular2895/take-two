@@ -1,4 +1,4 @@
-# V11 — Probabilistic Strategy Intelligence & Execution Monitor
+# V11.1 — Offline Reliability & Probabilistic Strategy Intelligence
 
 ## Status and boundary
 
@@ -22,6 +22,8 @@ Required inputs:
 
 - a strict V10.1 `ThesisScanReport`;
 - a dated V11 YAML policy;
+- optionally, an authorized historical calibration dataset;
+- optionally, a point-in-time walk-forward dataset;
 - optionally, normalized evidence events;
 - optionally, aligned point-in-time factor history;
 - optionally, explicitly configured read-only data connectors.
@@ -31,6 +33,8 @@ Outputs:
 - one strict JSON report;
 - one Markdown review report;
 - one responsive standalone HTML report;
+- one machine summary and readiness inventory;
+- offline calibration/backtest reports with explicit blocked or fixture status;
 - advisory position-monitor reports when a stored dossier and a current
   snapshot are supplied.
 
@@ -52,24 +56,30 @@ ttwo-options intelligence-run \
 | --- | --- | --- |
 | `schemas` | Strict versioned contracts | Data inference |
 | `data_hub` | Provenance, normalization, deduplication, connector status | Orders |
+| `event_normalization` | Deterministic observation-to-event rules and proof map | Headline sentiment as probability |
 | `bayesian` | Scenario posterior and complete update audit | Calibrating priors |
+| `calibration` | Historical import, data quality, splits and identifiable fits | Promoting in-sample parameters |
+| `backtesting` | Point-in-time walk-forward, baselines and calibration metrics | Look-ahead or oracle promotion |
 | `covariance` | Rolling/event/regime covariance, shrinkage, PSD repair | Inventing missing factors |
 | `volatility_calibration` | Point-in-time Dupire finite-difference nodes | Global arbitrage-free calibration |
 | `stochastic` | Seeded regime/model path ensembles | Claiming causal forecasts |
 | `valuation` | Conditional option repricing, exits, path metrics | Replacing V10.1 American controls |
 | `validation` | Cost, crisis, CVaR, holdout, and paper gates | Laundering old holdouts |
+| `robustness` | Model disagreement and explicit stress proxies/blockers | Hiding invalid or missing models |
 | `optimizer` | Exact finite integer allocation | Continuous relaxation as final answer |
+| `exit_rules` | Configurable advisory exit triggers | Automatic exits |
 | `execution` | Read-only combo quote envelope and blocked preview | Broker mutation |
-| `monitoring` | Explainable advisory actions and Greek attribution | Automatic exits |
+| `monitoring` | Advisory actions, Greek attribution and fixture replay | Automatic exits |
+| `readiness` | Feature status and promotion blockers | Product approval |
 | `reporting` | JSON, Markdown, standalone HTML | Recomputing risk in JavaScript |
 | `pipeline` | Deterministic orchestration | Weakening downstream gates |
 
 ## Data hub and connectors
 
-Every observation names its series, timestamp, unit, domain, source, and
-quality. Every source records provider, retrieval time, URI when available,
-terms note, and content hash when available. Required series are checked rather
-than silently filled.
+Every final observation names series, timestamp, retrieval time, cutoff, value,
+unit, provider, source, domain, quality, freshness, point-in-time validity, raw
+hash, usage notes and metadata. Required series are checked rather than
+silently filled.
 
 Implemented connector boundaries:
 
@@ -93,14 +103,18 @@ deduplicates several reports of the same underlying fact. Evidence families
 have cumulative weight caps so several correlated articles cannot manufacture
 confidence. A contradictory event reverses the configured likelihood signal.
 
-For every accepted or deduplicated event, the report retains:
+Deterministic normalization records exact rule, observed value, source, expiry,
+duplicate cluster, contradiction cluster and human-review status. Text or
+catalyst matches remain pending until explicit review. For every accepted or
+deduplicated event, the Bayesian report retains:
 
 - prior distribution;
 - scenario likelihoods;
-- requested and effective evidence weights;
+- requested/raw, quality-adjusted, freshness-adjusted, deduplicated,
+  family-capped and effective evidence weights;
 - confidence and evidence family;
 - contradiction source identifiers;
-- posterior distribution;
+- unnormalized and normalized posterior, probability deltas and sensitivity;
 - whether deduplication or a family cap applied.
 
 The default priors and likelihood tables are hypotheses in
@@ -117,8 +131,10 @@ models:
 3. Heston stochastic volatility with full truncation;
 4. Heston with compensated compound-lognormal jumps.
 
-All paths are seeded and reproducible. Regime IV transitions are gradual from
-the current observed IV rather than instant time-zero gains. Each
+All paths are seeded and reproducible. Metrics retain seed, path/step counts,
+standard error, 95% interval, convergence delta, model validity and calibration
+status. Regime IV transitions are gradual from the current observed IV rather
+than instant time-zero gains. Each
 candidate/model/regime group reports expected and median P&L, profit and total
 loss probabilities, ×2/×3/×5 probabilities, VaR/CVaR, drawdown, percentiles,
 time-to-profit, and early-exit rates.
@@ -165,6 +181,9 @@ aggressive profiles alter only declared coefficients. Cash reserve and the
 all-zero `NO_TRADE` vector are always legitimate; capital deployment is never
 forced.
 
+Budget, loss, position count, concentration, liquidity, relative spread and
+delta/gamma/vega/theta exposure are exact hard constraints.
+
 Gradient, Hessian, and eigenvalue diagnostics describe only the smooth
 mean-variance surrogate. CVaR, execution penalties, and integer feasibility
 are evaluated by exact enumeration.
@@ -180,6 +199,12 @@ is favorable. The report evaluates:
 - walk-forward and holdout status;
 - paper-monitoring status.
 
+The generic historical layer uses timezone-aware `timestamp` and
+`available_at`, rolling/expanding splits, embargo and a locked final holdout.
+The walk-forward contract verifies contract existence, prudent bid/ask,
+commissions, slippage, whole quantities and explicit cash/underlying/option
+baselines. Missing data return blocked statuses; fixtures are never substituted.
+
 V7–V9 inspected holdouts remain contaminated and are preserved as such.
 Promotion stays false until a fresh nested walk-forward sample, untouched
 holdout, and paper-trading campaign exist.
@@ -188,17 +213,13 @@ holdout, and paper-trading campaign exist.
 
 The dossier freezes the initial thesis, invalidation rules, entry economics,
 planned partial/full exits, and reference Greeks. A current snapshot produces
-one advisory action:
+one advisory action: `HOLD`, `WATCH`, `REDUCE`, `EXIT_REVIEW`,
+`THESIS_INVALIDATED`, `DATA_STALE` or `BLOCKED_INSUFFICIENT_DATA`.
 
-- `conserver`;
-- `surveiller`;
-- `reduire`;
-- `sortir`;
-- `these_invalidee`.
-
-The report explains P&L, probability changes, regime change, thesis/market
-divergence, and delta/gamma/theta/vega/rho attribution. It never mutates the
-broker position.
+The report explains current and prudent-liquidation P&L, remaining EV/CVaR,
+liquidity, probability changes, regime change, thesis/market divergence, and
+delta/gamma/theta/vega/rho attribution. A synthetic multi-date fixture can be
+replayed through the same rules. It never mutates the broker position.
 
 ## Required validation before operational use
 

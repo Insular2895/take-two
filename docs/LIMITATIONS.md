@@ -4,8 +4,9 @@
   simultaneous combo fills.
 - Alpaca indicative snapshots do not supply the open-interest/underlying fields
   required by the active liquidity and budget gates.
-- V7, V8, and V9 were inspected and are contaminated. No fresh locked
-  option-strategy holdout exists yet.
+- V7, V8, and V9 were inspected and are contaminated. The V11.1 split contract
+  can lock a fresh holdout, but no authorized historical option dataset has
+  populated one yet.
 - The accessible option history is too short for robust multi-regime,
   catalyst-specific nested validation.
 - Conditional GBM and historical bootstrap are screen-grade distributions, not
@@ -43,8 +44,10 @@
 - Exact integer enumeration solves only the configured finite candidate pool
   and contract cap. Gradient/Hessian diagnostics describe the smooth
   mean-variance surrogate, not CVaR or discrete constraints.
-- Existing V7–V9 holdouts remain contaminated. V11 cannot promote a candidate
-  without a new nested walk-forward sample, untouched holdout, and paper run.
+- Existing V7–V9 holdouts remain contaminated. V11.1 implements a point-in-time
+  walk-forward interface and explicit baselines, but its committed example is
+  synthetic and non-validating. Promotion still requires a new real sample,
+  untouched holdout, and paper run.
 - SEC, FRED, Take-Two RSS, Google Trends alpha, and IBKR/OPRA connectors are
   opt-in read-only ports. The exchange-calendar port is also unconfigured by
   default and therefore reported as a missing required series. The default run
@@ -54,7 +57,8 @@
 - A leg-level quote is not an executable combo quote. Some IBKR smart combo
   orders do not support a what-if check, so the absence of a broker what-if
   response must block promotion rather than weaken the gate.
-- Position monitoring emits human-readable advice only. It cannot submit,
-  modify, cancel, roll, exercise, or partially close a position.
+- Position monitoring and multi-date fixture replay emit human-readable advice
+  only. They cannot submit, modify, cancel, roll, exercise, or partially close
+  a position.
 
 See [V10 known limits](known_limits.md) for scanner-specific details.
