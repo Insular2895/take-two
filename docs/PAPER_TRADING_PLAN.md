@@ -1,6 +1,11 @@
 # Plan de paper trading
 
-Statut : `draft_to_validate`. Aucune campagne paper n’a été réalisée.
+Statut au 18 août 2026 : `blocked_before_start`. Aucune campagne paper n’a été
+réalisée. Le plan reste `draft_to_validate` jusqu'à validation du responsable risque.
+
+Blocage actuel : session IBKR paper non connectée, abonnement/licence OPRA non
+confirmés, échantillon historique sous le minimum formel et gate walk-forward non
+franchi. La campagne ne doit pas être simulée à partir des mêmes données historiques.
 
 ## Prérequis
 

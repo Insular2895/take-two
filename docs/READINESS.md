@@ -12,6 +12,7 @@ capacité, jamais une promesse de rendement.
 | `experimental_offline` | Implémenté et testable, mais non calibré ou non validé hors échantillon. |
 | `fixture_only` | Valide uniquement les mécanismes avec des données synthétiques identifiées. |
 | `adapter_ready_not_connected` | Port logiciel présent ; aucune session ni entitlement actif. |
+| `configured_not_entitled` | Paramètres non secrets valides ; licence/abonnement non confirmés et aucune connexion tentée. |
 | `requires_live_market_data` | Nécessite des observations live autorisées et fraîches. |
 | `requires_historical_calibration` | Nécessite un historique réel, licencié et point-in-time. |
 | `requires_paper_trading` | Nécessite une campagne paper définie et archivée. |
@@ -31,7 +32,7 @@ capacité, jamais une promesse de rendement.
 | Robustesse, stress et allocation entière | `experimental_offline` | Les entrées probabilistes restent expérimentales. |
 | Surveillance par snapshots et replay | `experimental_offline` | Aucune campagne paper/live terminée. |
 | Rapports autonomes | `production_ready_offline` | Les résultats héritent du statut de leurs données. |
-| Port IBKR/OPRA read-only | `adapter_ready_not_connected` | Contrat logiciel prêt ; session, entitlement et quotes combo absents. |
+| Port IBKR/OPRA read-only | `configured_not_entitled` | Socket TWS paper paramétré sans clé API ; session, entitlement et quotes combo absents. |
 | Exécution | `blocked_for_execution` | `transmit=false`, `what_if=true`, confirmation humaine. |
 
 ## Gates de promotion

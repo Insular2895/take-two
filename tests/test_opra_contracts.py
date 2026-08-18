@@ -6,6 +6,8 @@ import pytest
 from pydantic import ValidationError
 
 from take_two_options.opra.contracts import (
+    IBKR_TWS_ENVIRONMENT_VARIABLES,
+    IbkrTwsProviderConfig,
     LiveChainRequest,
     LiveOptionChainSnapshot,
     LiveOptionMarketDataProvider,
@@ -92,10 +94,62 @@ def test_readiness_never_attempts_connection_or_phase_m() -> None:
             "OPRA_API_KEY": "x",
             "OPRA_API_SECRET": "y",
             "OPRA_ACCOUNT_OR_SESSION": "z",
+            "OPRA_ENTITLEMENT_CONFIRMED": "true",
+            "OPRA_LICENSE_REVIEWED": "true",
         }
     )
     assert complete.status == "ADAPTER_READY_NOT_CONNECTED"
     assert complete.missing_variables == []
+
+
+def test_ibkr_tws_configuration_requires_no_api_key_and_stays_disconnected() -> None:
+    environment = {
+        "OPRA_PROVIDER": "ibkr_tws",
+        "IBKR_HOST": "127.0.0.1",
+        "IBKR_PORT": "7497",
+        "IBKR_CLIENT_ID": "17",
+        "IBKR_SESSION_MODE": "paper",
+        "IBKR_MARKET_DATA_TYPE": "delayed",
+        "OPRA_ENTITLEMENT_CONFIRMED": "false",
+        "OPRA_LICENSE_REVIEWED": "false",
+    }
+    config = IbkrTwsProviderConfig.from_environment(environment)
+    report = assess_provider_readiness(environment)
+
+    assert "OPRA_API_KEY" not in IBKR_TWS_ENVIRONMENT_VARIABLES
+    assert config.authentication_mode == "tws_session"
+    assert config.read_only_api is True
+    assert config.transmit is False
+    assert report.status == "CONFIGURED_NOT_ENTITLED"
+    assert report.credentials_required is False
+    assert report.credentials_present is False
+    assert report.connection_attempted is False
+
+    environment["OPRA_ENTITLEMENT_CONFIRMED"] = "true"
+    environment["OPRA_LICENSE_REVIEWED"] = "true"
+    ready = assess_provider_readiness(environment)
+    assert ready.status == "ADAPTER_READY_NOT_CONNECTED"
+    assert ready.phase_m_started is False
+
+
+def test_ibkr_tws_invalid_port_fails_closed() -> None:
+    report = assess_provider_readiness(
+        {
+            "OPRA_PROVIDER": "ibkr_tws",
+            "IBKR_HOST": "127.0.0.1",
+            "IBKR_PORT": "not-a-port",
+            "IBKR_CLIENT_ID": "17",
+            "IBKR_SESSION_MODE": "paper",
+            "IBKR_MARKET_DATA_TYPE": "delayed",
+            "OPRA_ENTITLEMENT_CONFIRMED": "false",
+            "OPRA_LICENSE_REVIEWED": "false",
+        }
+    )
+    assert report.status == "MISSING_CONFIGURATION"
+    assert report.configuration_errors == [
+        "IBKR_PORT and IBKR_CLIENT_ID must be integers"
+    ]
+    assert report.connection_attempted is False
 
 
 def test_live_quote_rejects_crossed_market() -> None:

@@ -322,11 +322,28 @@ extensions:
       - VALIDATION_FAILED
   opra_interface:
     provider_protocol: LiveOptionMarketDataProvider
-    required_environment_variables:
-      - OPRA_PROVIDER
-      - OPRA_API_KEY
-      - OPRA_API_SECRET
-      - OPRA_ACCOUNT_OR_SESSION
+    provider_profiles:
+      ibkr_tws:
+        authentication_mode: tws_session
+        required_environment_variables:
+          - OPRA_PROVIDER
+          - IBKR_HOST
+          - IBKR_PORT
+          - IBKR_CLIENT_ID
+          - IBKR_SESSION_MODE
+          - IBKR_MARKET_DATA_TYPE
+          - OPRA_ENTITLEMENT_CONFIRMED
+          - OPRA_LICENSE_REVIEWED
+        api_key_required: false
+      token_api:
+        authentication_mode: api_credentials
+        required_environment_variables:
+          - OPRA_PROVIDER
+          - OPRA_API_KEY
+          - OPRA_API_SECRET
+          - OPRA_ACCOUNT_OR_SESSION
+          - OPRA_ENTITLEMENT_CONFIRMED
+          - OPRA_LICENSE_REVIEWED
     readiness_report: reports/pre_opra/opra_interface_readiness_2026-08-08.json
     paper_decision_ledger: data/opra/paper_decisions.jsonl
     paper_realization_ledger: data/opra/paper_realizations.jsonl

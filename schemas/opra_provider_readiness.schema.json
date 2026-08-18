@@ -3,10 +3,44 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "authentication_mode": {
+      "anyOf": [
+        {
+          "enum": [
+            "tws_session",
+            "api_credentials"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Authentication Mode"
+    },
+    "configuration_errors": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Configuration Errors",
+      "type": "array"
+    },
     "connection_attempted": {
       "const": false,
       "default": false,
       "title": "Connection Attempted",
+      "type": "boolean"
+    },
+    "credentials_present": {
+      "title": "Credentials Present",
+      "type": "boolean"
+    },
+    "credentials_required": {
+      "title": "Credentials Required",
+      "type": "boolean"
+    },
+    "entitlement_confirmed": {
+      "title": "Entitlement Confirmed",
       "type": "boolean"
     },
     "exact_command": {
@@ -15,11 +49,22 @@
       "title": "Exact Command",
       "type": "string"
     },
+    "license_reviewed": {
+      "title": "License Reviewed",
+      "type": "boolean"
+    },
     "missing_variables": {
       "items": {
         "type": "string"
       },
       "title": "Missing Variables",
+      "type": "array"
+    },
+    "notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Notes",
       "type": "array"
     },
     "order_capability": {
@@ -77,14 +122,15 @@
       "type": "array"
     },
     "schema_version": {
-      "const": "1.0",
-      "default": "1.0",
+      "const": "1.1",
+      "default": "1.1",
       "title": "Schema Version",
       "type": "string"
     },
     "status": {
       "enum": [
         "ADAPTER_READY_NOT_CONNECTED",
+        "CONFIGURED_NOT_ENTITLED",
         "MISSING_CONFIGURATION"
       ],
       "title": "Status",
@@ -106,8 +152,15 @@
   "required": [
     "status",
     "provider",
+    "authentication_mode",
     "required_variables",
-    "missing_variables"
+    "missing_variables",
+    "configuration_errors",
+    "credentials_required",
+    "credentials_present",
+    "entitlement_confirmed",
+    "license_reviewed",
+    "notes"
   ],
   "title": "ProviderReadinessReport",
   "type": "object"

@@ -30,6 +30,7 @@ neutre ni renormalisation n'est appliquée.
 
 Limites irréductibles actuelles : confirmation humaine des droits du compte historique,
 nouvel échantillon réellement futur pour atteindre le minimum formel et conserver un
-holdout intact, puis entitlement/identifiants OPRA pour la Phase M. Le holdout reste
-`UNOPENED`, la Phase M n'est pas démarrée et les invariants sont
+holdout intact, puis entitlement OPRA et session paper IBKR pour la Phase M. La
+configuration socket non secrète est documentée ; IBKR TWS/IB Gateway ne requiert pas
+de clé API. Le holdout reste `UNOPENED`, la Phase M n'est pas démarrée et les invariants sont
 `transmit=false`, `what_if=true`, `order_capability=forbidden`.

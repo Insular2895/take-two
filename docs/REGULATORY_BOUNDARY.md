@@ -16,3 +16,8 @@ commercialisation :
 
 Ce document n’est pas un avis juridique. Les décisions de périmètre réglementaire
 restent `draft_to_validate` jusqu’à validation explicite d’un conseil compétent.
+
+Au 18 août 2026, aucune juridiction de lancement, catégorie de client ou utilisation
+display/non-display n'est sélectionnée. Les accords OPRA et les droits IBKR du compte
+restent à confirmer avant la première connexion ; l'exemple technique ne constitue pas
+une acceptation contractuelle.

@@ -25,7 +25,7 @@ The repository currently reports:
 - `ENGINE_NOT_PROVEN_SUPERIOR`;
 - final holdout `UNOPENED`;
 - Phase M not started;
-- OPRA provider interface ready but not connected;
+- IBKR TWS paper socket configured without an API key, but entitlement/licence unconfirmed and not connected;
 - `transmit=false`, `what_if=true`, and `order_capability=forbidden`.
 
 `FINAL_PROJECT_VALIDATION.md` does not currently exist. Therefore:

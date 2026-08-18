@@ -22,17 +22,18 @@
   remain authoritative.
 - Black–Scholes has an analytic/QuantLib European cross-check and the American finite-difference
   engine has a grid-refinement test. This is numerical evidence, not market calibration evidence.
-- The V10 final-holdout protocol is sealed, but no authorized real dataset is provisioned and no
-  dataset hash exists. Empirical and holdout promotion remain blocked.
-- The diagnosed IV solver and raw-SVI fitter expose failures and synthetic recovery, but no real
-  point-in-time TTWO surface has validated fit quality. Butterfly/calendar checks are finite-grid
-  diagnostics; eSSVI remains unimplemented behind explicit data and arbitrage gates.
+- The V10 final-holdout protocol is sealed. Private real development data and hashes exist under
+  conditional account rights, but no sufficiently large, rights-confirmed final sample has been
+  provisioned. Holdout promotion remains blocked and the final holdout stays unopened.
+- The diagnosed IV solver and raw-SVI fitter expose failures on real point-in-time development
+  surfaces, including failed and calendar-arbitrage snapshots. This diagnostic has not validated
+  promoted OOS fit quality; eSSVI remains unimplemented behind explicit data and arbitrage gates.
 - EWMA and stationary Gaussian GARCH baselines now have likelihood, residual and chronological
-  forecast diagnostics. Their committed evidence is synthetic; heavy tails, leverage, structural
-  breaks and real TTWO OOS superiority remain unvalidated. Heston calibration remains blocked.
+  forecast diagnostics on private real development returns. Heavy tails, leverage, structural
+  breaks and TTWO OOS superiority remain unvalidated. Heston calibration remains blocked.
 - Experiment manifests, availability-time checks, purge/embargo, order-invariant PBO ties,
-  signal-alignment placebo and a one-time hash-chained holdout ledger are implemented. The real
-  holdout is absent and unopened; permutation exchangeability and full primary-paper PBO
+  signal-alignment placebo and a one-time hash-chained holdout ledger are implemented. The final
+  holdout content is deliberately absent and unopened; permutation exchangeability and primary-paper PBO
   conformance remain limitations.
 - Simulated exits now use a serializable chronological state machine, and canonical path
   probabilities have Wilson/ESS/minimum-path sidecars. Daily checkpoints still miss intraday
@@ -110,15 +111,16 @@
   and contract cap. Gradient/Hessian diagnostics describe the smooth
   mean-variance surrogate, not CVaR or discrete constraints.
 - Existing V7–V9 holdouts remain contaminated. V11.1 implements a point-in-time
-  walk-forward interface and explicit baselines, but its committed example is
-  synthetic and non-validating. Promotion still requires a new real sample,
+  walk-forward interface and explicit baselines, and the private pre-OPRA development
+  run remains sample-limited and non-promoting. Promotion still requires a new real sample,
   untouched holdout, and paper run.
 - SEC, FRED, Take-Two RSS, Google Trends alpha, and IBKR/OPRA connectors are
   opt-in read-only ports. The exchange-calendar port is also unconfigured by
   default and therefore reported as a missing required series. The default run
   does not contact external providers. Credentials, fair-access limits, data
   entitlements, terms, and production retry policies remain deployment
-  responsibilities.
+  responsibilities. IBKR TWS/IB Gateway uses a locally authenticated socket rather than an API
+  key; the current configuration stops before entitlement confirmation or connection.
 - A leg-level quote is not an executable combo quote. Some IBKR smart combo
   orders do not support a what-if check, so the absence of a broker what-if
   response must block promotion rather than weaken the gate.

@@ -20,7 +20,9 @@ développement, contre +25,1 % pour buy-and-hold. Le panel reste trop court pour
 politique formelle et le holdout reste `UNOPENED`.
 
 L'interface OPRA read-only et les registres paper immuables sont prêts, mais aucune
-connexion n'a été tentée et la Phase M n'est pas démarrée.
+connexion n'a été tentée et la Phase M n'est pas démarrée. Le socket IBKR TWS paper
+est désormais documenté jusqu'au statut `CONFIGURED_NOT_ENTITLED` : cette voie utilise
+`host`, `port` et `clientId`, pas une clé API IBKR.
 
 ```bash
 ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml
@@ -30,6 +32,10 @@ Le dashboard autonome est dans
 [`reports/pre_opra/final_pre_opra_report_2026-08-08.html`](reports/pre_opra/final_pre_opra_report_2026-08-08.html).
 Les données options brutes/normalisées restent privées et ignorées par Git ; seuls les
 hashes, paramètres de calibration et résultats agrégés sont publiés.
+
+Le prompt de reprise commerciale demandé est conservé dans
+[`docs/commercial/COMMERCIALIZATION_RESUME_PROMPT.md`](docs/commercial/COMMERCIALIZATION_RESUME_PROMPT.md).
+Il reste dormant tant que Phase M, le paper et la validation finale ne sont pas terminés.
 
 ```bash
 ttwo-options knowledge validate --knowledge-dir research/knowledge_items
@@ -190,7 +196,7 @@ Ces éléments portent `experimental_offline` ou `fixture_only`. Ils ne peuvent 
 Restent nécessaires : davantage d'observations options autorisées, un holdout réellement
 futur, la confirmation humaine des droits du compte et la validation prospective OPRA.
 
-## D. Ce qui nécessite une API live
+## D. Ce qui nécessite une session IBKR/OPRA autorisée
 
 - chaîne OPRA, spot et quotes horodatées ;
 - bid/ask, open interest, volume, surface d’IV et Greeks live ou recalculés ;
@@ -199,8 +205,9 @@ futur, la confirmation humaine des droits du compte et la validation prospective
 - fraîcheur, reconnexion, rate limits, état des ordres et surveillance
   intraday.
 
-Le port IBKR/OPRA est `adapter_ready_not_connected`. Le CLI par défaut n’ouvre
-aucune session. La roadmap est détaillée dans
+Le port IBKR/OPRA est `configured_not_entitled`. L'exemple `.env.example` configure
+le socket paper non secret, mais le CLI par défaut n’ouvre aucune session. Les droits
+et abonnements restent à confirmer. La roadmap est détaillée dans
 [LIVE_DATA_ROADMAP.md](docs/LIVE_DATA_ROADMAP.md) et
 [IBKR_OPRA_ROADMAP.md](docs/IBKR_OPRA_ROADMAP.md).
 
@@ -1875,8 +1882,8 @@ continu ou de suivi automatique des états d’ordres.
 | stress/holdout/paper → promotion | utilisé, promotion forcée à `false` |
 | observations → règles déterministes → événements | utilisé avec preuve et revue |
 | événements approuvés → Bayes | utilisé ; pending/rejected/expired ignorés |
-| calibration historique | interface utilisée ; données réelles absentes |
-| walk-forward | interface utilisée ; fixture non validante |
+| calibration historique | diagnostics privés réels utilisés ; droits et promotion encore bloqués |
+| walk-forward | développement réel limité : 25 observations alignées, 10 OOS |
 | covariance factorielle → SDE | diagnostic seulement |
 | combo quotes IBKR → previews | utilisé si connecteur injecté par code |
 | connecteurs live → CLI par défaut | non configurés |
@@ -2006,8 +2013,8 @@ ne valide pas une stratégie TTWO.
 - Les droits OPRA, `conId`, livrables, combo quotes, commissions et marge
   restent à vérifier.
 - Les holdouts V7–V9 sont contaminés.
-- Le framework de holdout/walk-forward existe, mais aucun résultat réel
-  autorisé ni paper trading n’est terminé.
+- Le framework de holdout/walk-forward a produit un diagnostic réel sous droits
+  conditionnels, mais le minimum formel, le holdout et le paper trading ne sont pas terminés.
 - Le suivi de position est un calcul sur snapshot, pas une surveillance
   autonome.
 
@@ -2031,15 +2038,15 @@ Les liens primaires et limites d’intégration sont détaillés dans
 - OPRA est le flux de données temps réel des options américaines ; OPRA
   n’exécute aucun ordre.
 - Le port V11 sait recevoir des cotations options et combo en lecture seule via
-  un adaptateur TWS/IB Gateway injecté. Le dépôt n’embarque ni session IBKR
-  configurée, ni identifiant, ni abonnement de marché.
+  un adaptateur TWS/IB Gateway injecté. Le socket paper non secret est documenté ;
+  le dépôt n’embarque ni authentification IBKR ni abonnement de marché.
 - Les quotes combo IBKR doivent valider les spreads et butterflies, car une
   construction bid/ask jambe par jambe ne prouve pas un prix combo exécutable.
 - Les droits de marché, abonnements, `conId`, livrables, commissions et marges
   du compte IBKR restent à vérifier sur une session réelle.
-- Les secrets et identifiants resteront exclusivement dans l’environnement et
-  ne devront jamais être enregistrés dans le dépôt, les fixtures ou les
-  rapports.
+- Les éventuels secrets d'un fournisseur à jeton resteront exclusivement dans
+  l’environnement et ne devront jamais être enregistrés dans le dépôt, les fixtures
+  ou les rapports. IBKR TWS utilise une session locale, pas une clé API.
 - Le mode fixture/offline restera disponible pour les tests reproductibles.
 - Une donnée périmée devra bloquer la création d’un ticket exploitable.
 - Une éventuelle exécution automatique constituerait un projet distinct,

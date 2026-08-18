@@ -431,9 +431,13 @@ def build(generated_at: datetime, *, config_path: Path = DEFAULT_CONFIG) -> Fina
         ],
         exact_opra_variables=[
             "OPRA_PROVIDER",
-            "OPRA_API_KEY",
-            "OPRA_API_SECRET",
-            "OPRA_ACCOUNT_OR_SESSION",
+            "IBKR_HOST",
+            "IBKR_PORT",
+            "IBKR_CLIENT_ID",
+            "IBKR_SESSION_MODE",
+            "IBKR_MARKET_DATA_TYPE",
+            "OPRA_ENTITLEMENT_CONFIRMED",
+            "OPRA_LICENSE_REVIEWED",
         ],
         exact_command_after_opra=(
             "ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml"
@@ -444,6 +448,10 @@ def build(generated_at: datetime, *, config_path: Path = DEFAULT_CONFIG) -> Fina
             "https://home.treasury.gov/policy-issues/financing-the-government/interest-rate-statistics/interest-rate-xml-files",
             "https://www.ecb.europa.eu/services/using-our-site/disclaimer/html/index.en.html",
             "https://www.sec.gov/Archives/edgar/data/946581/000162828026037434/ttwo-20260331.htm",
+            "https://ibkrcampus.com/campus/ibkr-api-page/twsapi-doc/",
+            "https://ibkrcampus.com/docs/general/market-data-subscriptions/introduction",
+            "https://cdn.opraplan.com/documents/OPRA_Fee_Schedule.pdf",
+            "https://cdn.opraplan.com/documents/OPRA_Exhibit_A.pdf",
         ],
         holdout_state="UNOPENED",
         holdout_used=False,

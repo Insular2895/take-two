@@ -1,20 +1,34 @@
 # Phase M future — plan de validation finale OPRA
 
-Statut actuel : `ADAPTER_READY_NOT_CONNECTED`. La Phase M n'est pas démarrée. Ce plan
-n'autorise ni connexion aujourd'hui, ni ordre réel, ni création d'un faux holdout.
+Statut actuel au 18 août 2026 : `CONFIGURED_NOT_ENTITLED`. La Phase M n'est pas
+démarrée. Ce plan n'autorise ni connexion aujourd'hui, ni ordre réel, ni création
+d'un faux holdout.
 
-## Configuration à fournir
+## Configuration IBKR retenue jusqu'au point d'arrêt
 
 ```text
-OPRA_PROVIDER=...
-OPRA_API_KEY=...
-OPRA_API_SECRET=...
-OPRA_ACCOUNT_OR_SESSION=...
+OPRA_PROVIDER=ibkr_tws
+IBKR_HOST=127.0.0.1
+IBKR_PORT=7497
+IBKR_CLIENT_ID=17
+IBKR_SESSION_MODE=paper
+IBKR_MARKET_DATA_TYPE=delayed
+OPRA_ENTITLEMENT_CONFIRMED=false
+OPRA_LICENSE_REVIEWED=false
 ```
 
-`OPRA_ENDPOINT` est facultatif si le provider sélectionné exige un endpoint distinct.
-Les secrets sont chargés comme `SecretStr`, ne sont jamais sérialisés dans un rapport et
-ne doivent pas être commités.
+IBKR TWS/IB Gateway n'utilise pas de clé API OPRA : l'utilisateur s'authentifie dans
+l'application locale, puis le client se connecte au socket avec `host`, `port` et
+`clientId`. `7497` est le port paper TWS par défaut ; `4002` est le port paper IB
+Gateway par défaut. Les valeurs doivent être vérifiées dans
+`Global Configuration > API > Settings`. Pour ce port de recherche, **Read-Only API
+reste activé**.
+
+Les deux confirmations restent volontairement à `false` tant que le titulaire du
+compte n'a pas vérifié l'abonnement de marché, les accords OPRA, le stockage et
+l'usage prévu. Un futur fournisseur à jeton utiliserait séparément
+`OPRA_API_KEY`, `OPRA_API_SECRET` et `OPRA_ACCOUNT_OR_SESSION`, chargés comme
+`SecretStr` et jamais sérialisés.
 
 Commande de finalisation/contrôle du contrat :
 
@@ -23,7 +37,7 @@ ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml
 ```
 
 Cette commande ne se connecte pas et ne démarre pas la Phase M. Elle reconstruit les
-preuves agrégées et indique si les variables attendues sont présentes. Le provider réel
+preuves agrégées et valide uniquement la forme de la configuration. Le provider réel
 implémentera `LiveOptionMarketDataProvider`, limité à `health()` et
 `get_option_chain()`.
 
@@ -67,3 +81,14 @@ order_capability=forbidden
 
 Le preview IBKR peut vérifier contrat, combo, commission et marge what-if si disponible.
 Il ne constitue jamais une autorisation de transmission.
+
+## Sources officielles vérifiées le 18 août 2026
+
+- [IBKR — TWS API documentation](https://ibkrcampus.com/campus/ibkr-api-page/twsapi-doc/)
+- [IBKR — market data permissions](https://ibkrcampus.com/campus/trading-lessons/trade-permissions-mkt/)
+- [IBKR — market data subscriptions](https://ibkrcampus.com/docs/general/market-data-subscriptions/introduction)
+- [OPRA — fee schedule](https://cdn.opraplan.com/documents/OPRA_Fee_Schedule.pdf)
+- [OPRA — subscriber agreement, Exhibit A](https://cdn.opraplan.com/documents/OPRA_Exhibit_A.pdf)
+
+Ces sources décrivent le mécanisme et les accords publics. Elles ne confirment pas les
+droits, frais ou permissions du compte de l'utilisateur.

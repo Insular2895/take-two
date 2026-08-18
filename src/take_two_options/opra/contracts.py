@@ -1,21 +1,41 @@
-"""Provider-neutral, strictly read-only live option-market-data contracts."""
+"""Provider-neutral, strictly read-only live option-market-data contracts.
+
+IBKR TWS and IB Gateway authenticate the human user in the host application and
+then expose a local socket identified by host, port, and client ID. They do not
+use an ``OPRA_API_KEY``. Token credentials remain supported for a future
+non-IBKR data vendor, but the two authentication modes are deliberately kept
+separate so an absent subscription cannot be mistaken for an absent API key.
+"""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import UTC, date, datetime
-from typing import Literal, Protocol, runtime_checkable
+from typing import Literal, Protocol, cast, runtime_checkable
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 
 from take_two_options.domain import OptionType, StrictModel
 
-OPRA_ENVIRONMENT_VARIABLES = (
+TOKEN_OPRA_ENVIRONMENT_VARIABLES = (
     "OPRA_PROVIDER",
     "OPRA_API_KEY",
     "OPRA_API_SECRET",
     "OPRA_ACCOUNT_OR_SESSION",
 )
+IBKR_TWS_ENVIRONMENT_VARIABLES = (
+    "OPRA_PROVIDER",
+    "IBKR_HOST",
+    "IBKR_PORT",
+    "IBKR_CLIENT_ID",
+    "IBKR_SESSION_MODE",
+    "IBKR_MARKET_DATA_TYPE",
+)
+OPRA_GOVERNANCE_VARIABLES = (
+    "OPRA_ENTITLEMENT_CONFIRMED",
+    "OPRA_LICENSE_REVIEWED",
+)
+IBKR_TWS_PROVIDERS = frozenset({"ibkr_tws", "ibkr_gateway"})
 
 
 class OpraConfigurationError(ValueError):
@@ -23,7 +43,10 @@ class OpraConfigurationError(ValueError):
 
 
 class OpraProviderConfig(StrictModel):
+    """Credential-bearing configuration for a non-IBKR OPRA data vendor."""
+
     provider: str = Field(min_length=1)
+    authentication_mode: Literal["api_credentials"] = "api_credentials"
     api_key: SecretStr
     api_secret: SecretStr
     account_or_session: SecretStr
@@ -35,7 +58,9 @@ class OpraProviderConfig(StrictModel):
 
     @classmethod
     def from_environment(cls, environment: Mapping[str, str]) -> OpraProviderConfig:
-        missing = [name for name in OPRA_ENVIRONMENT_VARIABLES if not environment.get(name)]
+        missing = [
+            name for name in TOKEN_OPRA_ENVIRONMENT_VARIABLES if not environment.get(name)
+        ]
         if missing:
             raise OpraConfigurationError(
                 "Missing OPRA configuration variables: " + ", ".join(missing)
@@ -46,6 +71,59 @@ class OpraProviderConfig(StrictModel):
             api_secret=SecretStr(environment["OPRA_API_SECRET"]),
             account_or_session=SecretStr(environment["OPRA_ACCOUNT_OR_SESSION"]),
             endpoint=environment.get("OPRA_ENDPOINT"),
+        )
+
+
+class IbkrTwsProviderConfig(StrictModel):
+    """Local read-only TWS/IB Gateway socket configuration without API secrets."""
+
+    provider: Literal["ibkr_tws", "ibkr_gateway"]
+    authentication_mode: Literal["tws_session"] = "tws_session"
+    host: str = Field(min_length=1)
+    port: int = Field(gt=0, le=65535)
+    client_id: int = Field(ge=0)
+    session_mode: Literal["paper", "live"]
+    market_data_type: Literal["live", "frozen", "delayed", "delayed_frozen"]
+    read_only_api: Literal[True] = True
+    transmit: Literal[False] = False
+    what_if: Literal[True] = True
+    order_capability: Literal["forbidden"] = "forbidden"
+
+    @classmethod
+    def from_environment(cls, environment: Mapping[str, str]) -> IbkrTwsProviderConfig:
+        missing = [
+            name for name in IBKR_TWS_ENVIRONMENT_VARIABLES if not environment.get(name)
+        ]
+        if missing:
+            raise OpraConfigurationError(
+                "Missing IBKR TWS configuration variables: " + ", ".join(missing)
+            )
+        provider = environment["OPRA_PROVIDER"].strip().lower()
+        if provider not in IBKR_TWS_PROVIDERS:
+            raise OpraConfigurationError(
+                "IBKR TWS configuration requires OPRA_PROVIDER=ibkr_tws or "
+                "ibkr_gateway"
+            )
+        try:
+            port = int(environment["IBKR_PORT"])
+            client_id = int(environment["IBKR_CLIENT_ID"])
+        except ValueError as error:
+            raise OpraConfigurationError(
+                "IBKR_PORT and IBKR_CLIENT_ID must be integers"
+            ) from error
+        return cls(
+            provider=cast(Literal["ibkr_tws", "ibkr_gateway"], provider),
+            host=environment["IBKR_HOST"],
+            port=port,
+            client_id=client_id,
+            session_mode=cast(
+                Literal["paper", "live"],
+                environment["IBKR_SESSION_MODE"].strip().lower(),
+            ),
+            market_data_type=cast(
+                Literal["live", "frozen", "delayed", "delayed_frozen"],
+                environment["IBKR_MARKET_DATA_TYPE"].strip().lower(),
+            ),
         )
 
 
@@ -160,9 +238,14 @@ class LiveOptionMarketDataProvider(Protocol):
 
 
 class ProviderReadinessReport(StrictModel):
-    schema_version: Literal["1.0"] = "1.0"
-    status: Literal["ADAPTER_READY_NOT_CONNECTED", "MISSING_CONFIGURATION"]
+    schema_version: Literal["1.1"] = "1.1"
+    status: Literal[
+        "ADAPTER_READY_NOT_CONNECTED",
+        "CONFIGURED_NOT_ENTITLED",
+        "MISSING_CONFIGURATION",
+    ]
     provider: str | None
+    authentication_mode: Literal["tws_session", "api_credentials"] | None
     provider_protocol: Literal["LiveOptionMarketDataProvider"] = (
         "LiveOptionMarketDataProvider"
     )
@@ -172,6 +255,12 @@ class ProviderReadinessReport(StrictModel):
     )
     required_variables: list[str]
     missing_variables: list[str]
+    configuration_errors: list[str]
+    credentials_required: bool
+    credentials_present: bool
+    entitlement_confirmed: bool
+    license_reviewed: bool
+    notes: list[str]
     exact_command: Literal[
         "ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml"
     ] = "ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml"
@@ -183,15 +272,94 @@ class ProviderReadinessReport(StrictModel):
     order_capability: Literal["forbidden"] = "forbidden"
 
 
+def _confirmed(environment: Mapping[str, str], name: str) -> bool:
+    return environment.get(name, "").strip().lower() in {"1", "true", "yes"}
+
+
 def assess_provider_readiness(environment: Mapping[str, str]) -> ProviderReadinessReport:
-    missing = [name for name in OPRA_ENVIRONMENT_VARIABLES if not environment.get(name)]
+    provider_value = environment.get("OPRA_PROVIDER", "").strip()
+    if not provider_value:
+        return ProviderReadinessReport(
+            status="MISSING_CONFIGURATION",
+            provider=None,
+            authentication_mode=None,
+            required_variables=["OPRA_PROVIDER"],
+            missing_variables=["OPRA_PROVIDER"],
+            configuration_errors=[],
+            credentials_required=False,
+            credentials_present=False,
+            entitlement_confirmed=False,
+            license_reviewed=False,
+            notes=[
+                "Choose ibkr_tws/ibkr_gateway for a local IBKR session, or a "
+                "credential-bearing data vendor."
+            ],
+        )
+
+    provider = provider_value.lower()
+    ibkr = provider in IBKR_TWS_PROVIDERS
+    authentication_mode: Literal["tws_session", "api_credentials"] = (
+        "tws_session" if ibkr else "api_credentials"
+    )
+    provider_variables = (
+        IBKR_TWS_ENVIRONMENT_VARIABLES if ibkr else TOKEN_OPRA_ENVIRONMENT_VARIABLES
+    )
+    required = [*provider_variables, *OPRA_GOVERNANCE_VARIABLES]
+    missing = [name for name in required if not environment.get(name)]
+    errors: list[str] = []
+    if not any(name in missing for name in provider_variables):
+        try:
+            if ibkr:
+                IbkrTwsProviderConfig.from_environment(environment)
+            else:
+                OpraProviderConfig.from_environment(environment)
+        except (OpraConfigurationError, ValueError) as error:
+            errors.append(str(error))
+
+    entitlement_confirmed = _confirmed(environment, "OPRA_ENTITLEMENT_CONFIRMED")
+    license_reviewed = _confirmed(environment, "OPRA_LICENSE_REVIEWED")
+    credentials_required = not ibkr
+    credentials_present = (
+        all(environment.get(name) for name in TOKEN_OPRA_ENVIRONMENT_VARIABLES[1:])
+        if credentials_required
+        else False
+    )
+    status: Literal[
+        "ADAPTER_READY_NOT_CONNECTED",
+        "CONFIGURED_NOT_ENTITLED",
+        "MISSING_CONFIGURATION",
+    ]
+    if missing or errors:
+        status = "MISSING_CONFIGURATION"
+    elif not entitlement_confirmed or not license_reviewed:
+        status = "CONFIGURED_NOT_ENTITLED"
+    else:
+        status = "ADAPTER_READY_NOT_CONNECTED"
+
+    notes = (
+        [
+            "IBKR TWS/IB Gateway uses a locally authenticated socket session; "
+            "no OPRA_API_KEY or OPRA_API_SECRET is expected.",
+            "Keep the TWS Read-Only API setting enabled for this research-only port.",
+        ]
+        if ibkr
+        else [
+            "API credentials are loaded only for the selected data vendor and are "
+            "never serialized."
+        ]
+    )
     return ProviderReadinessReport(
-        status=(
-            "MISSING_CONFIGURATION" if missing else "ADAPTER_READY_NOT_CONNECTED"
-        ),
-        provider=environment.get("OPRA_PROVIDER"),
-        required_variables=list(OPRA_ENVIRONMENT_VARIABLES),
+        status=status,
+        provider=provider,
+        authentication_mode=authentication_mode,
+        required_variables=required,
         missing_variables=missing,
+        configuration_errors=errors,
+        credentials_required=credentials_required,
+        credentials_present=credentials_present,
+        entitlement_confirmed=entitlement_confirmed,
+        license_reviewed=license_reviewed,
+        notes=notes,
         connection_attempted=False,
         phase_m_started=False,
     )
