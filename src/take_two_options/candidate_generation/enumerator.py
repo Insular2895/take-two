@@ -47,6 +47,8 @@ class _BudgetContext:
     fx_cost: FXExecutionCost | None
     broker: BrokerCapitalContext | None
     mixed_expiry_lifecycle: MixedExpiryLifecycleConfiguration
+    phase_m_context_id: str | None
+    phase_m_context_hash: str | None
 
 
 def _width_allowed(width: float, search_space: StrategySearchSpace) -> bool:
@@ -108,6 +110,8 @@ def _emit(
             fx_cost=budget_context.fx_cost,
             broker_context=budget_context.broker,
             mixed_expiry_lifecycle=budget_context.mixed_expiry_lifecycle,
+            phase_m_context_id=budget_context.phase_m_context_id,
+            phase_m_context_hash=budget_context.phase_m_context_hash,
         )
         target[candidate.candidate_id] = candidate
 
@@ -375,7 +379,13 @@ def enumerate_candidates(
     fx_cost: FXExecutionCost | None = None,
     broker_context: BrokerCapitalContext | None = None,
     mixed_expiry_lifecycle: MixedExpiryLifecycleConfiguration | None = None,
+    phase_m_context_id: str | None = None,
+    phase_m_context_hash: str | None = None,
 ) -> EnumerationResult:
+    if (phase_m_context_id is None) != (phase_m_context_hash is None):
+        raise ValueError("PHASE_M_CONTEXT_PROVENANCE_INCOMPLETE")
+    if phase_m_context_id is not None and mixed_expiry_lifecycle is None:
+        raise ValueError("PHASE_M_LIFECYCLE_CONTEXT_MISSING")
     candidates: dict[str, CompiledStrategyCandidate] = {}
     spaces: list[StrategySearchSpace] = []
     warnings: list[str] = []
@@ -386,6 +396,8 @@ def enumerate_candidates(
         fx_cost,
         broker_context,
         mixed_expiry_lifecycle or MixedExpiryLifecycleConfiguration(),
+        phase_m_context_id,
+        phase_m_context_hash,
     )
     for recipe in catalog.recipes:
         if recipe.architecture not in request.allowed_structures:

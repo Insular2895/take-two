@@ -7,6 +7,7 @@ from collections.abc import Mapping, Sequence
 from take_two_options.candidates import generate_candidates
 from take_two_options.decision.quality_scores import FiveScoreReport
 from take_two_options.domain import DecisionReport, MarketDataBundle, ModelReadiness
+from take_two_options.phase_m_context import PhaseMDecisionContext
 from take_two_options.pricing import analyze_risk
 from take_two_options.quantitative.trade_economics import build_trade_economics_ticket
 from take_two_options.scenarios import deterministic_scenarios, monte_carlo_scenarios
@@ -22,6 +23,7 @@ def analyze_bundle(
     canonical_five_score_reports: Mapping[str, FiveScoreReport] | None = None,
     canonical_ranked_candidate_ids: Sequence[str] | None = None,
     run_global_five_score_report: FiveScoreReport | None = None,
+    phase_m_context: PhaseMDecisionContext | None = None,
 ) -> DecisionReport:
     candidates = generate_candidates(bundle)
     for candidate in candidates:
@@ -67,6 +69,7 @@ def analyze_bundle(
                 candidate_by_id[candidate_id],
                 bundle,
                 canonical_five_score_report=score_report or run_global_five_score_report,
+                phase_m_context=phase_m_context,
             )
 
     data_issues: list[str] = []

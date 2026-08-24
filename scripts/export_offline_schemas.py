@@ -38,6 +38,7 @@ from take_two_options.opra.paper_decisions import (
     PaperDecisionRecord,
     PaperRealizationRecord,
 )
+from take_two_options.phase_m_context import PhaseMDecisionContext
 from take_two_options.quantitative.historical_surfaces import HistoricalSurfaceReport
 from take_two_options.reporting.pre_opra_final import FinalPreOpraReport
 from take_two_options.trade_economics_models import TradeEconomicsTicket
@@ -59,6 +60,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "severity_gate_report.schema.json": SeverityGateReport,
     "pre_opra_config.schema.json": PreOpraConfig,
     "prospective_budget_config.schema.json": ProspectiveBudgetConfig,
+    "phase_m_decision_context.schema.json": PhaseMDecisionContext,
     "cloud_position_dossier.schema.json": CloudPositionDossier,
     "trade_economics_ticket.schema.json": TradeEconomicsTicket,
     "historical_dataset_manifest.schema.json": HistoricalDatasetManifest,

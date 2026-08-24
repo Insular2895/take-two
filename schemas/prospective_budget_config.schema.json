@@ -204,7 +204,8 @@
     }
   },
   "required": [
-    "budget_policy"
+    "budget_policy",
+    "mixed_expiry_lifecycle"
   ],
   "title": "ProspectiveBudgetConfig",
   "type": "object"

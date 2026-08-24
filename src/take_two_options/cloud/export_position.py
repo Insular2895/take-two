@@ -269,6 +269,8 @@ def build_cloud_position_dossier(
         exit_plan=CloudExitPlan(status="NOT_CONFIGURED"),
         trade_economics_ticket_hash=ticket_hash,
         trade_economics_schema_version=ticket.schema_version,
+        phase_m_context_id=ticket.phase_m_context_id,
+        phase_m_context_hash=ticket.phase_m_context_hash,
         git_commit=_git_commit(repository_root),
         config_hash=config_hash,
         config_hash_source=(

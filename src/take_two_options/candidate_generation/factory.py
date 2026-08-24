@@ -115,7 +115,13 @@ def build_candidate(
     fx_cost: FXExecutionCost | None = None,
     broker_context: BrokerCapitalContext | None = None,
     mixed_expiry_lifecycle: MixedExpiryLifecycleConfiguration | None = None,
+    phase_m_context_id: str | None = None,
+    phase_m_context_hash: str | None = None,
 ) -> CompiledStrategyCandidate:
+    if (phase_m_context_id is None) != (phase_m_context_hash is None):
+        raise ValueError("PHASE_M_CONTEXT_PROVENANCE_INCOMPLETE")
+    if phase_m_context_id is not None and mixed_expiry_lifecycle is None:
+        raise ValueError("PHASE_M_LIFECYCLE_CONTEXT_MISSING")
     legs = [
         CandidateLeg(
             side=side,
@@ -206,7 +212,11 @@ def build_candidate(
         )
         if mixed_expiry:
             identity["mixed_expiry_lifecycle"] = lifecycle_configuration.model_dump(mode="json")
-        if fx is None and budget_policy.currency == request.currency:
+        if (
+            phase_m_context_id is None
+            and fx is None
+            and budget_policy.currency == request.currency
+        ):
             if budget_policy.currency == "USD":
                 fx = None
             elif request.fx_rate_to_usd is not None and request.fx_rate_as_of is not None:
@@ -312,6 +322,8 @@ def build_candidate(
         research_restrictions=research_restrictions,
         budget_diagnostics=budget_diagnostics,
         lifecycle_capital_requirement=lifecycle_capital_requirement,
+        phase_m_context_id=phase_m_context_id,
+        phase_m_context_hash=phase_m_context_hash,
     )
 
 

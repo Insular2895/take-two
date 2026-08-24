@@ -41,6 +41,7 @@ from take_two_options.domain import (
     PositionSide,
     StrategyCandidate,
 )
+from take_two_options.phase_m_context import PhaseMDecisionContext
 from take_two_options.pricing import analyze_risk, black_scholes_price_greeks
 from take_two_options.quantitative.contracts import Measure
 from take_two_options.research_statistics import wilson_interval
@@ -120,6 +121,26 @@ _CONFIDENCE_ORDER = {
     GreekConfidenceLevel.LOW: 2,
     GreekConfidenceLevel.UNRELIABLE: 3,
 }
+
+
+def _bundle_with_phase_m_lifecycle(
+    bundle: MarketDataBundle,
+    context: PhaseMDecisionContext,
+) -> MarketDataBundle:
+    """Project the governed lifecycle into calculations without mutating the input bundle."""
+
+    lifecycle = context.prospective_config.mixed_expiry_lifecycle
+    trade_economics = bundle.trade_economics.model_copy(
+        update={
+            "mixed_expiry_lifecycle_policy": MixedExpiryLifecyclePolicy(lifecycle.policy),
+            "mixed_expiry_close_buffer_calendar_days": (
+                lifecycle.close_buffer_calendar_days
+            ),
+            "mixed_expiry_lifecycle_config_source": lifecycle.source,
+            "mixed_expiry_lifecycle_config_version": lifecycle.version,
+        }
+    )
+    return bundle.model_copy(update={"trade_economics": trade_economics})
 
 
 @dataclass(frozen=True)
@@ -2603,8 +2624,25 @@ def build_trade_economics_ticket(
     budget_fx: FXRate | None = None,
     budget_fx_cost: FXExecutionCost | None = None,
     broker_context: BrokerCapitalContext | None = None,
+    phase_m_context: PhaseMDecisionContext | None = None,
 ) -> TradeEconomicsTicket:
     """Build one reconciled M0 ticket without creating any execution capability."""
+    phase_m_mode = phase_m_context is not None
+    if phase_m_context is not None:
+        if any(
+            value is not None
+            for value in (budget_policy, budget_fx, budget_fx_cost, broker_context)
+        ):
+            raise ValueError("PHASE_M_CONTEXT_CANNOT_MIX_WITH_LOOSE_EVIDENCE")
+        phase_m_context.validate_for_candidate(
+            candidate_currency=bundle.underlying.currency,
+            cutoff=bundle.analysis_timestamp,
+        )
+        budget_policy = phase_m_context.prospective_config.budget_policy
+        budget_fx = phase_m_context.fx_rate
+        budget_fx_cost = phase_m_context.fx_execution_cost
+        broker_context = phase_m_context.broker_capital_context
+        bundle = _bundle_with_phase_m_lifecycle(bundle, phase_m_context)
     validate_dividend_treatment(bundle)
     if candidate.risk_metrics is None or candidate.execution_estimate is None:
         analyze_risk(candidate, bundle)
@@ -2869,7 +2907,8 @@ def build_trade_economics_ticket(
         leg.option_quote is not None and leg.side is PositionSide.SHORT for leg in candidate.legs
     )
     if (
-        broker_context is None
+        not phase_m_mode
+        and broker_context is None
         and margin.status is MarginStatus.KNOWN_BROKER
         and margin.buying_power_usage is not None
     ):
@@ -2890,7 +2929,7 @@ def build_trade_economics_ticket(
         and candidate.execution_estimate.fx_conversion_cost is not None
     ):
         native_budget_entry_cash -= candidate.execution_estimate.fx_conversion_cost
-        if budget_fx_cost is None and budget_fx is not None:
+        if not phase_m_mode and budget_fx_cost is None and budget_fx is not None:
             budget_fx_cost = FXExecutionCost(
                 mode=FXAccountMode.CONVERT_AT_ENTRY_AND_EXIT,
                 status=FXExecutionCostStatus.ESTIMATED,
@@ -3026,6 +3065,8 @@ def build_trade_economics_ticket(
     ticket = TradeEconomicsTicket(
         fixture_status=fixture_status,
         candidate_id=candidate.id,
+        phase_m_context_id=(phase_m_context.context_id if phase_m_context else None),
+        phase_m_context_hash=(phase_m_context.context_hash if phase_m_context else None),
         underlying=bundle.underlying.ticker,
         underlying_spot=bundle.underlying.price,
         strategy_name=candidate.name,

@@ -239,6 +239,11 @@ class CloudPositionDossier(StrictModel):
     last_imported_snapshot: CloudImportedMonitoringSnapshot | None = None
     trade_economics_ticket_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
     trade_economics_schema_version: str = Field(min_length=1)
+    phase_m_context_id: str | None = Field(
+        default=None,
+        pattern=r"^phase-m-context-[a-f0-9]{16}$",
+    )
+    phase_m_context_hash: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     git_commit: str = Field(pattern=r"^[a-f0-9]{7,40}$")
     config_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
     config_hash_source: str = Field(min_length=1)

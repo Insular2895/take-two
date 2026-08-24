@@ -512,6 +512,11 @@ class CompiledStrategyCandidate(StrictModel):
     research_restrictions: list[str] = Field(default_factory=list)
     budget_diagnostics: BudgetDiagnostics | None = None
     lifecycle_capital_requirement: LifecycleCapitalRequirement | None = None
+    phase_m_context_id: str | None = Field(
+        default=None,
+        pattern=r"^phase-m-context-[a-f0-9]{16}$",
+    )
+    phase_m_context_hash: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     evaluation: CandidateEvaluation = Field(default_factory=CandidateEvaluation)
     pareto_rank: int | None = Field(default=None, ge=1)
     explanatory_score: float | None = Field(default=None, ge=0, le=100)
@@ -582,6 +587,11 @@ class DecisionReport(StrictModel):
     report_id: str
     created_at: datetime
     budget_policy: FlexibleBudgetPolicyV2 | None = None
+    phase_m_context_id: str | None = Field(
+        default=None,
+        pattern=r"^phase-m-context-[a-f0-9]{16}$",
+    )
+    phase_m_context_hash: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     analysis: ReportAnalysis
     verdict: Verdict
     request: TradeRequest

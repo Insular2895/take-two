@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.12.6 — 2026-08-24
+
+### Phase M governed context propagation
+
+- Added one immutable, serializable `PhaseMDecisionContext` combining the canonical prospective
+  policy with optional point-in-time FX, FX-cost, and broker-capital evidence plus deterministic
+  config/context hashes and explicit provenance.
+- Propagated that context through `analyze_trade`, candidate enumeration/factory, deep
+  trade-economics tickets, decision reports, and optional Cloud position dossier identifiers while
+  preserving the context-free legacy path.
+- Removed Phase M lifecycle/FX fallback behavior, retained explicit unknown FX cost and broker
+  capital semantics, and made the prospective lifecycle field required.
+- Added a provider-free `trade phase-m-context` CLI, a generated context schema, end-to-end context
+  tests, and pre/post implementation audits without changing historical artifacts or five scores.
+- Preserved `HOLDOUT=UNOPENED`, `OPRA=NOT_STARTED`, `transmit=false`, `what_if=true`, and
+  `order_capability=forbidden`.
+
 ## 0.12.5 — 2026-08-24
 
 ### Sensitive-action password

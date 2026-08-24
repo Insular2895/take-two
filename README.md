@@ -39,6 +39,26 @@ domain is optional later. See the
 [`zero-cost deployment guide`](docs/cloudflare/ZERO_COST_DEPLOYMENT.md) and
 [`CF0 architecture`](docs/cloudflare/ARCHITECTURE.md).
 
+## Phase M — Governed prospective context
+
+Phase M prospective decisions now use one `PhaseMDecisionContext`. It loads the canonical static
+budget/lifecycle policy once and keeps optional point-in-time FX rate, FX execution cost, and broker
+capital evidence separate. The context carries deterministic config/context hashes and provenance;
+no credential field exists in its contract.
+
+```bash
+ttwo-options trade phase-m-context \
+  --config configs/phase_m/v2/ttwo_prospective_budget.yaml \
+  --json-out phase_m_context.json
+```
+
+This command is a dry run only: it contacts no provider, starts no paper trade, leaves the holdout
+unopened, and cannot transmit an order. When a context is supplied programmatically to the decision
+or trade-economics pipeline, its policy, lifecycle, FX-cost and broker-capital objects are propagated
+without Phase M fallbacks. See the
+[`governed-context specification`](docs/specs/PHASE_M_GOVERNED_CONTEXT_PROPAGATION.md) and
+[`implementation report`](reports/PHASE_M_CONTEXT_PROPAGATION_REPORT.md).
+
 ## M0.2.1 — Final budget semantics cleanup
 
 The pre-OPRA budget logic is now finalized and frozen. A positive account

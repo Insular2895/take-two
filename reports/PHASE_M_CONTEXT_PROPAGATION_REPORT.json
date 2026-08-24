@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-24",
+  "phase": "M",
+  "initial_finding": {
+    "classification": "CONFIRMED_PARTIAL",
+    "summary": "Lower-level candidate components accepted the governed inputs, but analyze_trade and TradeEconomicsTicket did not share one canonical context or consistently suppress evidence fallbacks."
+  },
+  "canonical_context": {
+    "model": "PhaseMDecisionContext",
+    "config_loader": "load_prospective_budget_config",
+    "builder": "build_phase_m_decision_context",
+    "loader_helper": "load_phase_m_decision_context",
+    "schema": "schemas/phase_m_decision_context.schema.json",
+    "hash_deterministic": true,
+    "created_at_excluded_from_hash": true,
+    "secret_fields": []
+  },
+  "static_policy": {
+    "source": "configs/phase_m/v2/ttwo_prospective_budget.yaml",
+    "target_budget": 1000,
+    "preferred_lower_bound": 800,
+    "hard_authorized_ceiling": 1500,
+    "minimum_spend_policy": "SOFT",
+    "maximum_loss_cap": "AUTO",
+    "buying_power_cap": "AUTO",
+    "maximum_contracts": 4,
+    "account_available_capital": null,
+    "account_liquidity_reserve": 0,
+    "mixed_expiry_policy": "CLOSE_BEFORE_FIRST_EXPIRY",
+    "mixed_expiry_buffer_calendar_days": 1
+  },
+  "runtime_evidence": {
+    "fx_rate": "EXPLICIT_OPTIONAL_POINT_IN_TIME",
+    "fx_execution_cost": "EXPLICIT_OPTIONAL_POINT_IN_TIME",
+    "broker_capital_context": "EXPLICIT_OPTIONAL_POINT_IN_TIME",
+    "stored_in_static_yaml": false
+  },
+  "propagation": [
+    "ProspectiveBudgetConfig",
+    "PhaseMDecisionContext",
+    "analyze_trade",
+    "enumerate_candidates",
+    "build_candidate",
+    "evaluate_budget_policy",
+    "LifecycleCapitalRequirement",
+    "TradeEconomicsTicket_or_prospective_record",
+    "CloudPositionDossier_context_identity"
+  ],
+  "acceptance_cases": {
+    "buffer_3_first_expiry_2027_08_20": "2027-08-17",
+    "converted_entry_cash_eur": 1497,
+    "known_fx_cost_eur": 6,
+    "required_cash_eur": 1503,
+    "hard_ceiling_eur": 1500,
+    "fx_cost_case_status": "EXCEEDS_HARD_BUDGET_CEILING",
+    "unknown_fx_cost_research_visible": true,
+    "unknown_fx_cost_paper_eligible": false,
+    "unknown_fx_cost_reason": "FX_EXECUTION_COST_UNKNOWN",
+    "validated_broker_buying_power_eur": 900,
+    "broker_lifecycle_source": "BROKER_BUYING_POWER",
+    "missing_broker_lifecycle_source": "UNKNOWN"
+  },
+  "validation": {
+    "pytest": {
+      "status": "passed",
+      "tests": 357,
+      "warnings": 1,
+      "warning_scope": "third_party_websockets_deprecation"
+    },
+    "ruff": "passed",
+    "mypy": {
+      "status": "passed",
+      "source_files": 191
+    },
+    "schemas": {
+      "status": "passed",
+      "count": 30
+    },
+    "offline_artifacts": "passed",
+    "research_registry": "passed",
+    "phase10_release_audit": "passed",
+    "phase11_extension_gate": "passed",
+    "cloudflare_tests": {
+      "status": "passed",
+      "tests": 33
+    },
+    "wrangler_dry_run": "passed",
+    "security_gate": {
+      "status": "passed",
+      "python_files_scanned": 170,
+      "forbidden_order_imports": 0,
+      "transmit_true_literals": 0
+    }
+  },
+  "historical_hashes": {
+    "M0_GREEKS_CARRY_HARDENING_REPORT.json": "unchanged",
+    "M0_1_FINAL_PRE_OPRA_CORRECTION_REPORT.json": "unchanged",
+    "M0_2_FLEXIBLE_BUDGET_REPORT.json": "unchanged",
+    "M0_2_1_FINAL_BUDGET_SEMANTICS_REPORT.json": "unchanged",
+    "five_scores_2026-08-08.json": "unchanged",
+    "m0_trade_economics_ticket.json": "unchanged"
+  },
+  "web_compatibility": "PASSED_OPTIONAL_CONTEXT_ID_HASH_ONLY",
+  "safety": {
+    "read_only": true,
+    "transmit": false,
+    "what_if": true,
+    "order_capability": "forbidden",
+    "holdout": "UNOPENED",
+    "opra": "NOT_STARTED",
+    "paper_started": false
+  },
+  "remaining_phase_m_dependencies": [
+    "live read-only market-data evidence integration",
+    "real point-in-time FX and FX execution-cost evidence",
+    "real broker-capital evidence",
+    "shadow prospective recording",
+    "separately authorized paper prospective validation"
+  ],
+  "final_status": {
+    "PHASE_M_CONTEXT_PROPAGATION": "COMPLETE",
+    "STATIC_POLICY_WIRING": "COMPLETE",
+    "RUNTIME_EVIDENCE_WIRING": "COMPLETE",
+    "MIXED_EXPIRY_CONTEXT": "SINGLE_SOURCE_OF_TRUTH",
+    "FX_CONTEXT": "EXPLICIT",
+    "BROKER_CAPITAL_CONTEXT": "EXPLICIT",
+    "PRE_OPRA_LOGIC": "FROZEN",
+    "HOLDOUT": "UNOPENED",
+    "ORDER_TRANSMISSION": "FORBIDDEN",
+    "NEXT": "PHASE M LIVE READ-ONLY DATA INTEGRATION + SHADOW/PAPER PROSPECTIVE VALIDATION"
+  }
+}

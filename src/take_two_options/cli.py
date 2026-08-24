@@ -51,6 +51,7 @@ from take_two_options.market_snapshot import (
     snapshot_manifest,
 )
 from take_two_options.opra.contracts import assess_provider_readiness
+from take_two_options.phase_m_context import load_phase_m_decision_context
 from take_two_options.reporting.ibkr_ticket import (
     TicketBlockedError,
     write_ibkr_preview,
@@ -140,6 +141,40 @@ def _csv_floats(value: str, *, option_name: str) -> list[float]:
 def _write_model_json(path: Path, payload: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(payload, encoding="utf-8")
+
+
+@trade_app.command("phase-m-context")
+def trade_phase_m_context(
+    config: Annotated[
+        Path,
+        typer.Option("--config", exists=True, dir_okay=False, readable=True),
+    ] = Path("configs/phase_m/v2/ttwo_prospective_budget.yaml"),
+    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
+) -> None:
+    """Validate and serialize governed Phase M policy without contacting any provider."""
+
+    try:
+        context = load_phase_m_decision_context(config)
+    except ValueError as error:
+        typer.echo(f"Phase M context validation failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    if json_out is not None:
+        _write_model_json(json_out, context.model_dump_json(indent=2))
+    rows = (
+        ("Budget policy", "READY"),
+        ("Mixed-expiry lifecycle", "READY"),
+        ("FX rate", "NOT PROVIDED"),
+        ("FX execution cost", "NOT PROVIDED"),
+        ("Broker buying power", "NOT PROVIDED"),
+        ("Holdout", context.prospective_config.holdout_status),
+        ("OPRA", context.prospective_config.opra_status),
+        ("Order capability", context.prospective_config.order_capability.upper()),
+    )
+    for label, status in rows:
+        typer.echo(f"{label:<30} {status}")
+    typer.echo(f"Context ID                    {context.context_id}")
+    typer.echo(f"Context hash                  {context.context_hash}")
+    typer.echo("connection_attempted=false; paper_started=false; transmit=false")
 
 
 def _capital_cap_option(value: str, *, option_name: str) -> CapitalCap:

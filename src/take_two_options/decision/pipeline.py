@@ -45,6 +45,7 @@ from take_two_options.optimization.fine_search import fine_search
 from take_two_options.optimization.parameter_stability import local_stability
 from take_two_options.optimization.pareto import pareto_rank
 from take_two_options.optimization.trial_registry import TrialRegistry
+from take_two_options.phase_m_context import PhaseMDecisionContext
 from take_two_options.reporting.decision_report import write_decision_report
 from take_two_options.reporting.ibkr_ticket import (
     write_blocked_ticket_status,
@@ -181,6 +182,7 @@ def _blocked_report(
     reason: str,
     report_dir: Path,
     budget_policy: FlexibleBudgetPolicyV2 | None = None,
+    phase_m_context: PhaseMDecisionContext | None = None,
 ) -> DecisionReport:
     report_budget = budget_policy.target_budget if budget_policy else request.budget
     report_currency = budget_policy.currency if budget_policy else request.currency
@@ -188,6 +190,8 @@ def _blocked_report(
         report_id=f"decision-{run.run_id}",
         created_at=datetime.now(UTC),
         budget_policy=budget_policy,
+        phase_m_context_id=(phase_m_context.context_id if phase_m_context else None),
+        phase_m_context_hash=(phase_m_context.context_hash if phase_m_context else None),
         analysis=ReportAnalysis(
             ticker=request.ticker,
             budget=report_budget,
@@ -221,7 +225,17 @@ def analyze_trade(
     research_config_path: Path = Path("configs/research/default.yaml"),
     refresh_data: bool = False,
     budget_policy: FlexibleBudgetPolicyV2 | None = None,
+    phase_m_context: PhaseMDecisionContext | None = None,
 ) -> DecisionReport:
+    if phase_m_context is not None and budget_policy is not None:
+        raise ValueError("PHASE_M_CONTEXT_CANNOT_MIX_WITH_LOOSE_BUDGET_POLICY")
+    if phase_m_context is not None:
+        phase_m_context.assert_integrity()
+    effective_budget_policy = (
+        phase_m_context.prospective_config.budget_policy
+        if phase_m_context is not None
+        else budget_policy
+    )
     started = datetime.now(UTC)
     request = load_trade_request(request_path)
     config = _research_config(research_config_path)
@@ -231,12 +245,16 @@ def analyze_trade(
         "research_config": config,
         "catalog": catalog.knowledge_hash,
     }
-    if budget_policy is not None:
+    if phase_m_context is not None:
+        hash_payload["phase_m_context_id"] = phase_m_context.context_id
+        hash_payload["phase_m_context_hash"] = phase_m_context.context_hash
+    elif budget_policy is not None:
         hash_payload["budget_policy"] = budget_policy
     config_hash = stable_hash(hash_payload)
     budget_fx = None
     if (
-        budget_policy is not None
+        phase_m_context is None
+        and budget_policy is not None
         and budget_policy.currency != "USD"
         and budget_policy.currency == request.currency
         and request.fx_rate_to_usd is not None
@@ -295,7 +313,8 @@ def analyze_trade(
                 run=run,
                 reason=f"market data unavailable: {fallback_error}",
                 report_dir=report_dir,
-                budget_policy=budget_policy,
+                budget_policy=effective_budget_policy,
+                phase_m_context=phase_m_context,
             )
     run.data_snapshot_id = snapshot.snapshot_id
     historical_path = _historical_path(request.ticker)
@@ -313,13 +332,33 @@ def analyze_trade(
     (report_dir / "forecast.json").write_text(
         forecast.model_dump_json(indent=2), encoding="utf-8"
     )
-    enumeration = enumerate_candidates(
-        catalog,
-        request,
-        snapshot,
-        budget_policy=budget_policy,
-        fx=budget_fx,
-    )
+    if phase_m_context is not None:
+        phase_m_context.validate_for_candidate(
+            candidate_currency="USD",
+            cutoff=snapshot.as_of,
+        )
+        enumeration = enumerate_candidates(
+            catalog,
+            request,
+            snapshot,
+            budget_policy=phase_m_context.prospective_config.budget_policy,
+            fx=phase_m_context.fx_rate,
+            fx_cost=phase_m_context.fx_execution_cost,
+            broker_context=phase_m_context.broker_capital_context,
+            mixed_expiry_lifecycle=(
+                phase_m_context.prospective_config.mixed_expiry_lifecycle
+            ),
+            phase_m_context_id=phase_m_context.context_id,
+            phase_m_context_hash=phase_m_context.context_hash,
+        )
+    else:
+        enumeration = enumerate_candidates(
+            catalog,
+            request,
+            snapshot,
+            budget_policy=budget_policy,
+            fx=budget_fx,
+        )
     for candidate in enumeration.candidates:
         registry.register(
             stage="generation",
@@ -417,11 +456,21 @@ def analyze_trade(
         report = DecisionReport(
             report_id=f"decision-{run.run_id}",
             created_at=datetime.now(UTC),
-            budget_policy=budget_policy,
+            budget_policy=effective_budget_policy,
+            phase_m_context_id=(phase_m_context.context_id if phase_m_context else None),
+            phase_m_context_hash=(phase_m_context.context_hash if phase_m_context else None),
             analysis=ReportAnalysis(
                 ticker=request.ticker,
-                budget=(budget_policy.target_budget if budget_policy else request.budget),
-                currency=(budget_policy.currency if budget_policy else request.currency),
+                budget=(
+                    effective_budget_policy.target_budget
+                    if effective_budget_policy
+                    else request.budget
+                ),
+                currency=(
+                    effective_budget_policy.currency
+                    if effective_budget_policy
+                    else request.currency
+                ),
                 thesis=request.thesis_summary,
                 horizon_days=(request.horizon_min_days, request.horizon_max_days),
                 data_date=snapshot.as_of,
@@ -435,7 +484,7 @@ def analyze_trade(
             no_trade_reasons=[
                 (
                     "NO_POSITION_RECOMMENDED: no candidate survived the configured hard gates"
-                    if budget_policy is not None
+                    if effective_budget_policy is not None
                     else "no candidate survived structural pruning"
                 ),
                 *[
@@ -652,8 +701,12 @@ def analyze_trade(
         "trial_count": len(registry.records),
         "trial_counts": registry.counts(),
         "budget_policy": (
-            budget_policy.model_dump(mode="json") if budget_policy is not None else None
+            effective_budget_policy.model_dump(mode="json")
+            if effective_budget_policy is not None
+            else None
         ),
+        "phase_m_context_id": phase_m_context.context_id if phase_m_context else None,
+        "phase_m_context_hash": phase_m_context.context_hash if phase_m_context else None,
         "order_capability": "forbidden",
     }
     audit_path.write_text(json.dumps(audit_payload, indent=2), encoding="utf-8")
@@ -680,11 +733,21 @@ def analyze_trade(
     report = DecisionReport(
         report_id=f"decision-{run.run_id}",
         created_at=datetime.now(UTC),
-        budget_policy=budget_policy,
+        budget_policy=effective_budget_policy,
+        phase_m_context_id=(phase_m_context.context_id if phase_m_context else None),
+        phase_m_context_hash=(phase_m_context.context_hash if phase_m_context else None),
         analysis=ReportAnalysis(
             ticker=request.ticker,
-            budget=(budget_policy.target_budget if budget_policy else request.budget),
-            currency=(budget_policy.currency if budget_policy else request.currency),
+            budget=(
+                effective_budget_policy.target_budget
+                if effective_budget_policy
+                else request.budget
+            ),
+            currency=(
+                effective_budget_policy.currency
+                if effective_budget_policy
+                else request.currency
+            ),
             thesis=request.thesis_summary,
             horizon_days=(request.horizon_min_days, request.horizon_max_days),
             data_date=snapshot.as_of,

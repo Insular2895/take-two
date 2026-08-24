@@ -4307,6 +4307,32 @@
       "title": "Order Capability",
       "type": "string"
     },
+    "phase_m_context_hash": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Phase M Context Hash"
+    },
+    "phase_m_context_id": {
+      "anyOf": [
+        {
+          "pattern": "^phase-m-context-[a-f0-9]{16}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Phase M Context Id"
+    },
     "pnl_attributions": {
       "items": {
         "$ref": "#/$defs/PnLAttribution"

@@ -1115,6 +1115,11 @@ class TradeEconomicsTicket(StrictModel):
     schema_version: Literal["1.0", "1.1", "1.2"] = "1.2"
     fixture_status: Literal["LIVE_INPUT", "SYNTHETIC_TEST_FIXTURE", "RESEARCH_FIXTURE"]
     candidate_id: str = Field(min_length=1)
+    phase_m_context_id: str | None = Field(
+        default=None,
+        pattern=r"^phase-m-context-[a-f0-9]{16}$",
+    )
+    phase_m_context_hash: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     underlying: str = Field(min_length=1)
     underlying_spot: float | None = Field(default=None, gt=0)
     strategy_name: str = Field(min_length=1)

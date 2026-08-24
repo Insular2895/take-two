@@ -95,6 +95,8 @@ export interface CloudPositionDossier {
   last_imported_snapshot: ProviderSnapshot | null;
   trade_economics_ticket_hash: string;
   trade_economics_schema_version: string;
+  phase_m_context_id?: string | null;
+  phase_m_context_hash?: string | null;
   git_commit: string;
   config_hash: string;
   config_hash_source: string;

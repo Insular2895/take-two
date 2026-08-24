@@ -48,6 +48,14 @@ export function validateDossier(value: unknown): CloudPositionDossier {
     "INVALID_DOSSIER: unsafe capability flags",
   );
   requireCondition(SHA256.test(dossier.trade_economics_ticket_hash), "INVALID_DOSSIER: ticket hash");
+  requireCondition(
+    (dossier.phase_m_context_id == null && dossier.phase_m_context_hash == null) ||
+      (typeof dossier.phase_m_context_id === "string" &&
+        /^phase-m-context-[a-f0-9]{16}$/.test(dossier.phase_m_context_id) &&
+        typeof dossier.phase_m_context_hash === "string" &&
+        SHA256.test(dossier.phase_m_context_hash)),
+    "INVALID_DOSSIER: Phase M context provenance",
+  );
   requireCondition(SHA256.test(dossier.config_hash), "INVALID_DOSSIER: config hash");
   requireCondition(SHA256.test(dossier.market_snapshot_hash), "INVALID_DOSSIER: market hash");
   requireCondition(GIT_COMMIT.test(dossier.git_commit), "INVALID_DOSSIER: git commit");
