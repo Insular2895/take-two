@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -29,7 +30,7 @@ from take_two_options.decision.request import load_trade_request
 from take_two_options.domain import MarketDataBundle, OptionType, PositionSide
 from take_two_options.knowledge.compiler import compile_knowledge
 from take_two_options.knowledge.loader import load_knowledge
-from take_two_options.knowledge.schemas import Architecture, QuoteSnapshot
+from take_two_options.knowledge.schemas import Architecture, MarketSnapshot, QuoteSnapshot
 from take_two_options.phase_m_context import (
     PhaseMDecisionContext,
     build_phase_m_decision_context,
@@ -157,6 +158,67 @@ def _quote(
     )
 
 
+def _market_snapshot(*, quotes: list[QuoteSnapshot] | None = None) -> MarketSnapshot:
+    selected_quotes = quotes or [
+        _quote(
+            symbol="TTWO280121C00230000",
+            expiration=date(2028, 1, 21),
+            strike=230,
+            bid=14.90,
+            ask=14.963,
+        )
+    ]
+    return MarketSnapshot(
+        snapshot_id="phase-m-test-snapshot",
+        ticker="TTWO",
+        as_of=EVIDENCE_TIME,
+        spot=230.0,
+        spot_timestamp=EVIDENCE_TIME,
+        quote_quality="eod_bid_ask",
+        source_ids=["test-chain"],
+        quotes=selected_quotes,
+        available_expirations=sorted(
+            {quote.expiration for quote in selected_quotes}
+        ),
+        data_warnings=["Synthetic Phase M test fixture"],
+    )
+
+
+def _install_pipeline_data(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    *,
+    snapshot: MarketSnapshot | None = None,
+) -> MarketSnapshot:
+    selected_snapshot = snapshot or _market_snapshot()
+    history_path = tmp_path / "phase_m_history.json"
+    history_path.write_text(
+        json.dumps(
+            {
+                "source": {"id": "phase-m-test-history"},
+                "points": [
+                    {
+                        "timestamp": (
+                            datetime(2026, 7, 1, 19, tzinfo=UTC)
+                            + timedelta(days=index)
+                        ).isoformat(),
+                        "close": 225.0 + index * 0.25 + index % 3,
+                    }
+                    for index in range(23)
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        pipeline,
+        "load_latest_market_snapshot",
+        lambda **_: selected_snapshot,
+    )
+    monkeypatch.setattr(pipeline, "_historical_path", lambda _: history_path)
+    return selected_snapshot
+
+
 def _recipe(architecture: Architecture):
     catalog = compile_knowledge(load_knowledge(KNOWLEDGE_DIR))
     return next(item for item in catalog.recipes if item.architecture is architecture)
@@ -234,7 +296,7 @@ def test_phase_m_requires_explicit_lifecycle_and_never_uses_enumerator_default()
         enumerate_candidates(
             compile_knowledge(load_knowledge(KNOWLEDGE_DIR)),
             _request(),
-            pipeline.load_latest_market_snapshot(ticker="TTWO", as_of=date(2026, 7, 25)),
+            _market_snapshot(),
             budget_policy=_prospective_config().budget_policy,
             phase_m_context_id="phase-m-context-" + "a" * 16,
             phase_m_context_hash="a" * 64,
@@ -248,6 +310,7 @@ def test_analyze_trade_propagates_exact_context_objects_without_mutating_static_
     context = _context(fx_rate=_fx_rate(), fx_cost=_fx_cost(), broker=_broker())
     static_before = context.prospective_config.model_dump(mode="json")
     captured: dict[str, Any] = {}
+    _install_pipeline_data(monkeypatch, tmp_path)
 
     def capture_enumeration(*args: Any, **kwargs: Any) -> EnumerationResult:
         captured.update(kwargs)
@@ -337,28 +400,18 @@ def test_fx_cost_cases_run_through_analyze_enumerator_and_factory(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    snapshot = pipeline.load_latest_market_snapshot(
-        ticker="TTWO",
-        as_of=date(2026, 7, 25),
-    ).model_copy(
-        deep=True,
-        update={
-            "quotes": [
-                _quote(
-                    symbol="TTWO280121C00230000",
-                    expiration=date(2028, 1, 21),
-                    strike=230,
-                    bid=14.90,
-                    ask=14.963,
-                )
-            ]
-        },
+    snapshot = _market_snapshot(
+        quotes=[
+            _quote(
+                symbol="TTWO280121C00230000",
+                expiration=date(2028, 1, 21),
+                strike=230,
+                bid=14.90,
+                ask=14.963,
+            )
+        ]
     )
-    monkeypatch.setattr(
-        pipeline,
-        "load_latest_market_snapshot",
-        lambda **_: snapshot,
-    )
+    _install_pipeline_data(monkeypatch, tmp_path, snapshot=snapshot)
     captured: list[dict[str, Any]] = []
     real_build_candidate = build_candidate
 
