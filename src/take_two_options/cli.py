@@ -12,6 +12,12 @@ from typing import Annotated
 
 import typer
 
+from take_two_options.budget import (
+    CapitalCap,
+    CapitalCapMode,
+    FlexibleBudgetPolicyV2,
+    MinimumSpendPolicy,
+)
 from take_two_options.decision.pipeline import analyze_trade
 from take_two_options.intelligence.backtesting import (
     load_walk_forward_dataset,
@@ -134,6 +140,86 @@ def _csv_floats(value: str, *, option_name: str) -> list[float]:
 def _write_model_json(path: Path, payload: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(payload, encoding="utf-8")
+
+
+def _capital_cap_option(value: str, *, option_name: str) -> CapitalCap:
+    if value.strip().lower() == "auto":
+        return CapitalCap()
+    try:
+        amount = float(value)
+    except ValueError as error:
+        raise typer.BadParameter(f"{option_name} must be auto or a positive amount") from error
+    if amount <= 0:
+        raise typer.BadParameter(f"{option_name} must be auto or a positive amount")
+    return CapitalCap(mode=CapitalCapMode.EXPLICIT, value=amount)
+
+
+def _budget_policy_from_cli(
+    *,
+    budget: float,
+    budget_currency: str,
+    allow_under: float,
+    allow_over: float,
+    minimum_spend_policy: str,
+    max_loss: str,
+    buying_power_cap: str,
+    maximum_contracts: int,
+) -> FlexibleBudgetPolicyV2:
+    return FlexibleBudgetPolicyV2(
+        currency=budget_currency,
+        target_budget=budget,
+        under_target_tolerance=allow_under,
+        max_overspend=allow_over,
+        minimum_spend_policy=MinimumSpendPolicy(minimum_spend_policy.upper()),
+        maximum_loss_cap=_capital_cap_option(max_loss, option_name="--max-loss"),
+        buying_power_cap=_capital_cap_option(
+            buying_power_cap,
+            option_name="--buying-power-cap",
+        ),
+        maximum_contracts=maximum_contracts,
+    )
+
+
+@trade_app.command("budget")
+def trade_budget(
+    budget: Annotated[float, typer.Option("--budget", min=0.01)] = 1_000,
+    budget_currency: Annotated[str, typer.Option("--budget-currency")] = "EUR",
+    allow_under: Annotated[float, typer.Option("--allow-under", min=0)] = 200,
+    allow_over: Annotated[float, typer.Option("--allow-over", min=0)] = 500,
+    minimum_spend_policy: Annotated[
+        str,
+        typer.Option("--minimum-spend-policy"),
+    ] = "soft",
+    max_loss: Annotated[str, typer.Option("--max-loss")] = "auto",
+    buying_power_cap: Annotated[
+        str,
+        typer.Option("--buying-power-cap"),
+    ] = "auto",
+    maximum_contracts: Annotated[
+        int,
+        typer.Option("--maximum-contracts", min=1),
+    ] = 4,
+    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
+) -> None:
+    """Build and display a prospective V2 budget policy; no market connection."""
+    try:
+        policy = _budget_policy_from_cli(
+            budget=budget,
+            budget_currency=budget_currency,
+            allow_under=allow_under,
+            allow_over=allow_over,
+            minimum_spend_policy=minimum_spend_policy,
+            max_loss=max_loss,
+            buying_power_cap=buying_power_cap,
+            maximum_contracts=maximum_contracts,
+        )
+    except ValueError as error:
+        raise typer.BadParameter(str(error)) from error
+    payload = policy.model_dump_json(indent=2)
+    if json_out is not None:
+        _write_model_json(json_out, payload)
+    typer.echo(payload)
+    typer.echo("read_only=true; transmit=false; order_capability=forbidden")
 
 
 @app.command("thesis-scan")
@@ -502,14 +588,47 @@ def trade_analyze(
     research_config: Annotated[Path, typer.Option("--research-config")] = Path(
         "configs/research/default.yaml"
     ),
+    budget: Annotated[float | None, typer.Option("--budget", min=0.01)] = None,
+    budget_currency: Annotated[str, typer.Option("--budget-currency")] = "EUR",
+    allow_under: Annotated[float, typer.Option("--allow-under", min=0)] = 200,
+    allow_over: Annotated[float, typer.Option("--allow-over", min=0)] = 500,
+    minimum_spend_policy: Annotated[
+        str,
+        typer.Option("--minimum-spend-policy"),
+    ] = "soft",
+    max_loss: Annotated[str, typer.Option("--max-loss")] = "auto",
+    buying_power_cap: Annotated[
+        str,
+        typer.Option("--buying-power-cap"),
+    ] = "auto",
+    maximum_contracts: Annotated[
+        int,
+        typer.Option("--maximum-contracts", min=1),
+    ] = 4,
 ) -> None:
     """Run the complete read-only decision pipeline."""
+    budget_policy = None
+    if budget is not None:
+        try:
+            budget_policy = _budget_policy_from_cli(
+                budget=budget,
+                budget_currency=budget_currency,
+                allow_under=allow_under,
+                allow_over=allow_over,
+                minimum_spend_policy=minimum_spend_policy,
+                max_loss=max_loss,
+                buying_power_cap=buying_power_cap,
+                maximum_contracts=maximum_contracts,
+            )
+        except ValueError as error:
+            raise typer.BadParameter(str(error)) from error
     report = analyze_trade(
         request_path=request,
         report_dir=report_dir,
         knowledge_dir=knowledge_dir,
         research_config_path=research_config,
         refresh_data=refresh_data,
+        budget_policy=budget_policy,
     )
     typer.echo(
         f"{report.verdict.value}: candidates={len(report.candidates)} "

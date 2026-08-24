@@ -8,6 +8,7 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
+from take_two_options.budget import BudgetDiagnostics, LifecycleCapitalRequirement
 from take_two_options.models import StrictModel
 
 
@@ -1093,7 +1094,7 @@ class LegEconomics(StrictModel):
 
 
 class TradeEconomicsTicket(StrictModel):
-    schema_version: Literal["1.0", "1.1"] = "1.1"
+    schema_version: Literal["1.0", "1.1", "1.2"] = "1.2"
     fixture_status: Literal["LIVE_INPUT", "SYNTHETIC_TEST_FIXTURE", "RESEARCH_FIXTURE"]
     candidate_id: str = Field(min_length=1)
     underlying: str = Field(min_length=1)
@@ -1113,6 +1114,8 @@ class TradeEconomicsTicket(StrictModel):
     exit_cost_estimate: ExitCostEstimate
     round_trip_cost: RoundTripCost
     margin: MarginEstimate
+    budget_diagnostics: BudgetDiagnostics | None = None
+    lifecycle_capital_requirement: LifecycleCapitalRequirement | None = None
     maximum_loss: float | None = Field(default=None, ge=0)
     maximum_profit: float | None = Field(default=None, ge=0)
     expiration_breakevens: list[float]

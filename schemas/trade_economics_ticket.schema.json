@@ -216,6 +216,292 @@
       "title": "BreakevenResult",
       "type": "object"
     },
+    "BudgetDiagnostics": {
+      "additionalProperties": false,
+      "properties": {
+        "budget_delta_percentage": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Budget Delta Percentage"
+        },
+        "budget_delta_to_target": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Budget Delta To Target"
+        },
+        "budget_guarantee_status": {
+          "$ref": "#/$defs/BudgetGuaranteeStatus"
+        },
+        "budget_policy_version": {
+          "enum": [
+            "1.0",
+            "2.0"
+          ],
+          "title": "Budget Policy Version",
+          "type": "string"
+        },
+        "budget_status": {
+          "$ref": "#/$defs/BudgetStatus"
+        },
+        "buying_power_cap_effective": {
+          "exclusiveMinimum": 0,
+          "title": "Buying Power Cap Effective",
+          "type": "number"
+        },
+        "buying_power_requirement": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Buying Power Requirement"
+        },
+        "buying_power_status": {
+          "$ref": "#/$defs/CapitalRequirementStatus"
+        },
+        "capital_utilization_of_hard_ceiling": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Capital Utilization Of Hard Ceiling"
+        },
+        "capital_utilization_of_target": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Capital Utilization Of Target"
+        },
+        "currency": {
+          "maxLength": 3,
+          "minLength": 3,
+          "title": "Currency",
+          "type": "string"
+        },
+        "effective_capital_requirement": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective Capital Requirement"
+        },
+        "eligible": {
+          "title": "Eligible",
+          "type": "boolean"
+        },
+        "fx_rate_to_policy_currency": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Rate To Policy Currency"
+        },
+        "fx_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Source"
+        },
+        "fx_timestamp": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Timestamp"
+        },
+        "hard_authorized_ceiling": {
+          "exclusiveMinimum": 0,
+          "title": "Hard Authorized Ceiling",
+          "type": "number"
+        },
+        "headroom_to_hard_ceiling": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Headroom To Hard Ceiling"
+        },
+        "maximum_loss": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Loss"
+        },
+        "maximum_loss_cap_effective": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Loss Cap Effective",
+          "type": "number"
+        },
+        "minimum_spend_policy": {
+          "$ref": "#/$defs/MinimumSpendPolicy"
+        },
+        "paper_eligible": {
+          "title": "Paper Eligible",
+          "type": "boolean"
+        },
+        "preferred_lower_bound": {
+          "minimum": 0,
+          "title": "Preferred Lower Bound",
+          "type": "number"
+        },
+        "reason_codes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reason Codes",
+          "type": "array"
+        },
+        "required_entry_cash": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Required Entry Cash"
+        },
+        "research_eligible": {
+          "title": "Research Eligible",
+          "type": "boolean"
+        },
+        "target_budget": {
+          "exclusiveMinimum": 0,
+          "title": "Target Budget",
+          "type": "number"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "currency",
+        "target_budget",
+        "preferred_lower_bound",
+        "hard_authorized_ceiling",
+        "maximum_loss_cap_effective",
+        "buying_power_cap_effective",
+        "buying_power_status",
+        "budget_status",
+        "minimum_spend_policy",
+        "budget_policy_version",
+        "eligible",
+        "research_eligible",
+        "paper_eligible",
+        "budget_guarantee_status"
+      ],
+      "title": "BudgetDiagnostics",
+      "type": "object"
+    },
+    "BudgetGuaranteeStatus": {
+      "enum": [
+        "PROVEN",
+        "UNPROVEN"
+      ],
+      "title": "BudgetGuaranteeStatus",
+      "type": "string"
+    },
+    "BudgetStatus": {
+      "enum": [
+        "BELOW_PREFERRED_RANGE",
+        "WITHIN_PREFERRED_RANGE",
+        "ABOVE_TARGET_WITHIN_TOLERANCE",
+        "AT_HARD_CEILING",
+        "EXCEEDS_HARD_BUDGET_CEILING",
+        "MAXIMUM_LOSS_EXCEEDED",
+        "BUYING_POWER_EXCEEDED",
+        "CAPITAL_REQUIREMENT_UNKNOWN",
+        "FX_REQUIRED",
+        "BLOCKED_MIXED_EXPIRY_CAPITAL_UNPROVEN"
+      ],
+      "title": "BudgetStatus",
+      "type": "string"
+    },
+    "CapitalRequirementStatus": {
+      "enum": [
+        "NOT_REQUIRED",
+        "KNOWN_BROKER",
+        "ESTIMATED_ANALYTICAL_BOUND",
+        "UNKNOWN"
+      ],
+      "title": "CapitalRequirementStatus",
+      "type": "string"
+    },
     "DistributionAvailabilityStatus": {
       "enum": [
         "AVAILABLE",
@@ -1899,6 +2185,102 @@
       "title": "LeverageDiagnostics",
       "type": "object"
     },
+    "LifecycleCapitalRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "analytical_loss_bound": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Analytical Loss Bound"
+        },
+        "broker_buying_power": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Broker Buying Power"
+        },
+        "calculation_status": {
+          "$ref": "#/$defs/LifecycleCapitalStatus"
+        },
+        "effective_budget_requirement": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective Budget Requirement"
+        },
+        "entry_cash_required": {
+          "minimum": 0,
+          "title": "Entry Cash Required",
+          "type": "number"
+        },
+        "managed_exit_deadline": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "format": "date-time",
+              "type": "string"
+            }
+          ],
+          "title": "Managed Exit Deadline"
+        },
+        "policy": {
+          "const": "CLOSE_BEFORE_FIRST_EXPIRY",
+          "title": "Policy",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "policy",
+        "managed_exit_deadline",
+        "entry_cash_required",
+        "calculation_status"
+      ],
+      "title": "LifecycleCapitalRequirement",
+      "type": "object"
+    },
+    "LifecycleCapitalStatus": {
+      "enum": [
+        "NOT_APPLICABLE",
+        "BROKER_BUYING_POWER",
+        "ESTIMATED_ANALYTICAL_BOUND",
+        "UNKNOWN",
+        "LEGACY_COMMON_EXPIRY_PROXY"
+      ],
+      "title": "LifecycleCapitalStatus",
+      "type": "string"
+    },
     "LiquidityDiagnostics": {
       "additionalProperties": false,
       "properties": {
@@ -2132,6 +2514,15 @@
         "BLOCKED"
       ],
       "title": "MarginStatus",
+      "type": "string"
+    },
+    "MinimumSpendPolicy": {
+      "enum": [
+        "SOFT",
+        "HARD",
+        "OFF"
+      ],
+      "title": "MinimumSpendPolicy",
       "type": "string"
     },
     "PnLAttribution": {
@@ -3402,6 +3793,17 @@
       ],
       "default": null
     },
+    "budget_diagnostics": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BudgetDiagnostics"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "candidate_id": {
       "minLength": 1,
       "title": "Candidate Id",
@@ -3555,6 +3957,17 @@
     "leverage": {
       "$ref": "#/$defs/LeverageDiagnostics"
     },
+    "lifecycle_capital_requirement": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LifecycleCapitalRequirement"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "lifecycle_policy": {
       "default": "SAME_EXPIRY_HOLD_TO_EXPIRY",
       "title": "Lifecycle Policy",
@@ -3649,10 +4062,11 @@
       "type": "array"
     },
     "schema_version": {
-      "default": "1.1",
+      "default": "1.2",
       "enum": [
         "1.0",
-        "1.1"
+        "1.1",
+        "1.2"
       ],
       "title": "Schema Version",
       "type": "string"

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import math
 from datetime import date, timedelta
 from pathlib import Path
@@ -10,6 +11,11 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from take_two_options.american import price_option_quote, validate_dividend_treatment
+from take_two_options.budget import (
+    BudgetStatus,
+    FlexibleBudgetPolicyV2,
+    LifecycleCapitalStatus,
+)
 from take_two_options.candidates import generate_candidates
 from take_two_options.data import FixtureDataProvider
 from take_two_options.decision.quality_scores import FiveScoreReport
@@ -428,6 +434,23 @@ def test_committed_golden_json_and_markdown_represent_the_same_ticket() -> None:
     assert markdown == render_trade_economics_markdown(ticket)
 
 
+@pytest.mark.parametrize("schema_version", ["1.0", "1.1"])
+def test_trade_economics_ticket_remains_backward_readable(schema_version: str) -> None:
+    payload = json.loads(
+        (ROOT / "reports/examples/m0_trade_economics_ticket.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    payload["schema_version"] = schema_version
+    payload.pop("budget_diagnostics", None)
+    payload.pop("lifecycle_capital_requirement", None)
+
+    ticket = TradeEconomicsTicket.model_validate(payload)
+
+    assert ticket.schema_version == schema_version
+    assert ticket.budget_diagnostics is None
+
+
 def test_engine_deep_mode_attaches_tickets_only_to_configured_top_candidates() -> None:
     bundle = _fast_bundle()
     bundle.trade_economics.analysis_mode = AnalysisMode.DEEP_ANALYSIS
@@ -535,6 +558,18 @@ def test_bear_put_expiration_breakeven_reconciles_with_contractual_payoff() -> N
         key=lambda result: result.valuation_time,
     )
     assert expiry.break_even_roots == pytest.approx(ticket.expiration_breakevens, abs=2e-4)
+
+
+def test_ticket_1_2_contains_budget_diagnostics_and_renderer_section(
+    m0_tickets: tuple[TradeEconomicsTicket, TradeEconomicsTicket],
+) -> None:
+    ticket, _ = m0_tickets
+    assert ticket.schema_version == "1.2"
+    assert ticket.budget_diagnostics is not None
+    markdown = render_trade_economics_markdown(ticket)
+    assert "## Budget" in markdown
+    assert "This trade — Budget" in markdown
+    assert ticket.budget_diagnostics.budget_status.value in markdown
 
 
 def test_renderer_exposes_full_theta_statistics_and_score_sections(
@@ -777,3 +812,44 @@ def test_mixed_expiry_calendar_and_diagonal_stop_at_managed_deadline(
         for result in ticket.breakeven_clock.results
     )
     assert "intentionally not modeled" in render_trade_economics_markdown(ticket)
+
+
+@pytest.mark.parametrize("calendar", [True, False])
+def test_v2_mixed_expiry_ticket_blocks_unproven_capital_without_false_max_loss(
+    calendar: bool,
+) -> None:
+    bundle = _fast_bundle()
+    candidate = next(
+        item for item in generate_candidates(bundle) if item.id == "ttwo-bull-call-spread"
+    ).model_copy(deep=True)
+    first_quote = candidate.legs[0].option_quote
+    second_quote = candidate.legs[1].option_quote
+    assert first_quote is not None and second_quote is not None
+    second_quote.contract.expiration = first_quote.contract.expiration + timedelta(days=90)
+    if calendar:
+        second_quote.contract.strike = first_quote.contract.strike
+    analyze_risk(candidate, bundle)
+    policy = FlexibleBudgetPolicyV2(
+        currency="USD",
+        target_budget=5_000,
+        under_target_tolerance=5_000,
+        max_overspend=0,
+        maximum_contracts=4,
+    )
+
+    ticket = build_trade_economics_ticket(candidate, bundle, budget_policy=policy)
+
+    assert ticket.maximum_loss is None
+    assert ticket.budget_diagnostics is not None
+    assert ticket.budget_diagnostics.budget_status is (
+        BudgetStatus.BLOCKED_MIXED_EXPIRY_CAPITAL_UNPROVEN
+    )
+    assert not ticket.budget_diagnostics.paper_eligible
+    assert ticket.lifecycle_capital_requirement is not None
+    assert ticket.lifecycle_capital_requirement.calculation_status is (
+        LifecycleCapitalStatus.UNKNOWN
+    )
+    assert ticket.capital_at_risk is None
+    assert ticket.leverage.capital_at_risk is None
+    assert ticket.leverage.capital_status == LifecycleCapitalStatus.UNKNOWN.value
+    assert "BLOCKED_MIXED_EXPIRY_CAPITAL_UNPROVEN" in ticket.blockers

@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "fixture_status": "SYNTHETIC_TEST_FIXTURE",
   "candidate_id": "ttwo-long-call",
   "underlying": "TTWO",
@@ -553,6 +553,39 @@
       "Real broker margin remains PENDING_BROKER until an IBKR what-if preview is available"
     ]
   },
+  "budget_diagnostics": {
+    "currency": "USD",
+    "target_budget": 5000.0,
+    "preferred_lower_bound": 0.0,
+    "hard_authorized_ceiling": 5000.0,
+    "maximum_loss_cap_effective": 5000.0,
+    "buying_power_cap_effective": 5000.0,
+    "required_entry_cash": 3002.15,
+    "maximum_loss": 3002.15,
+    "buying_power_requirement": null,
+    "buying_power_status": "NOT_REQUIRED",
+    "effective_capital_requirement": 3002.15,
+    "budget_delta_to_target": -1997.85,
+    "budget_delta_percentage": -0.39957,
+    "headroom_to_hard_ceiling": 1997.85,
+    "capital_utilization_of_target": 0.60043,
+    "capital_utilization_of_hard_ceiling": 0.60043,
+    "budget_status": "WITHIN_PREFERRED_RANGE",
+    "minimum_spend_policy": "OFF",
+    "budget_policy_version": "1.0",
+    "eligible": true,
+    "research_eligible": true,
+    "paper_eligible": true,
+    "budget_guarantee_status": "PROVEN",
+    "reason_codes": [],
+    "fx_rate_to_policy_currency": null,
+    "fx_source": null,
+    "fx_timestamp": null,
+    "warnings": [
+      "LEGACY_POLICY uses budget, maximum_loss, and safety_reserve_fraction semantics."
+    ]
+  },
+  "lifecycle_capital_requirement": null,
   "maximum_loss": 3002.15,
   "maximum_profit": null,
   "expiration_breakevens": [

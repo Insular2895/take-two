@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import date
 from itertools import product
 
 from pydantic import Field
 
+from take_two_options.budget import (
+    BrokerCapitalContext,
+    FlexibleBudgetPolicyV2,
+    FXRate,
+)
 from take_two_options.candidate_generation.factory import build_candidate
 from take_two_options.candidate_generation.search_space import (
     StrategySearchSpace,
@@ -30,6 +36,13 @@ class EnumerationResult(StrictModel):
     candidates: list[CompiledStrategyCandidate]
     combinations_by_architecture: dict[str, int] = Field(default_factory=dict)
     warnings: list[str] = Field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class _BudgetContext:
+    policy: FlexibleBudgetPolicyV2 | None
+    fx: FXRate | None
+    broker: BrokerCapitalContext | None
 
 
 def _width_allowed(width: float, search_space: StrategySearchSpace) -> bool:
@@ -67,9 +80,17 @@ def _emit(
     architecture: Architecture,
     leg_specs: list[tuple[PositionSide, int, QuoteSnapshot]],
     horizon_compatible: bool,
+    budget_context: _BudgetContext,
 ) -> None:
     total_ratio = sum(ratio for _, ratio, _ in leg_specs)
-    maximum_quantity = max(1, request.maximum_contracts // total_ratio)
+    configured_maximum = (
+        budget_context.policy.maximum_contracts
+        if budget_context.policy is not None
+        else request.maximum_contracts
+    )
+    maximum_quantity = configured_maximum // total_ratio
+    if maximum_quantity < 1:
+        return
     for quantity in range(1, maximum_quantity + 1):
         candidate = build_candidate(
             architecture=architecture,
@@ -78,6 +99,9 @@ def _emit(
             quantity=quantity,
             request=request,
             horizon_compatible=horizon_compatible,
+            budget_policy=budget_context.policy,
+            fx=budget_context.fx,
+            broker_context=budget_context.broker,
         )
         target[candidate.candidate_id] = candidate
 
@@ -88,6 +112,7 @@ def _single_and_verticals(
     recipe: StrategyRecipe,
     search_space: StrategySearchSpace,
     request: TradeRequest,
+    budget_context: _BudgetContext,
 ) -> None:
     architecture = recipe.architecture
     option_type = (
@@ -108,6 +133,7 @@ def _single_and_verticals(
                     architecture=architecture,
                     leg_specs=[(PositionSide.LONG, 1, quote)],
                     horizon_compatible=horizon_compatible,
+                    budget_context=budget_context,
                 )
             continue
         for lower_index, lower in enumerate(quotes):
@@ -132,6 +158,7 @@ def _single_and_verticals(
                     architecture=architecture,
                     leg_specs=leg_specs,
                     horizon_compatible=horizon_compatible,
+                    budget_context=budget_context,
                 )
 
 
@@ -141,12 +168,12 @@ def _butterflies(
     recipe: StrategyRecipe,
     search_space: StrategySearchSpace,
     request: TradeRequest,
+    budget_context: _BudgetContext,
 ) -> None:
     architecture = recipe.architecture
     option_type = (
         OptionType.CALL
-        if architecture
-        in {Architecture.CALL_BUTTERFLY, Architecture.CALL_BROKEN_WING_BUTTERFLY}
+        if architecture in {Architecture.CALL_BUTTERFLY, Architecture.CALL_BROKEN_WING_BUTTERFLY}
         else OptionType.PUT
     )
     broken = architecture in {
@@ -181,6 +208,7 @@ def _butterflies(
                             (PositionSide.LONG, 1, upper),
                         ],
                         horizon_compatible=horizon_compatible,
+                        budget_context=budget_context,
                     )
 
 
@@ -190,6 +218,7 @@ def _volatility_structures(
     recipe: StrategyRecipe,
     search_space: StrategySearchSpace,
     request: TradeRequest,
+    budget_context: _BudgetContext,
 ) -> None:
     architecture = recipe.architecture
     expirations = sorted({expiration for expiration, _ in grouped})
@@ -211,6 +240,7 @@ def _volatility_structures(
                         (PositionSide.LONG, 1, puts_by_strike[strike]),
                     ],
                     horizon_compatible=horizon_compatible,
+                    budget_context=budget_context,
                 )
         elif architecture is Architecture.LONG_STRANGLE:
             for put, call in product(puts, calls):
@@ -230,6 +260,7 @@ def _volatility_structures(
                         (PositionSide.LONG, 1, call),
                     ],
                     horizon_compatible=horizon_compatible,
+                    budget_context=budget_context,
                 )
         else:
             for long_put_index, long_put in enumerate(puts):
@@ -256,6 +287,7 @@ def _volatility_structures(
                                     (PositionSide.LONG, 1, long_call),
                                 ],
                                 horizon_compatible=horizon_compatible,
+                                budget_context=budget_context,
                             )
 
 
@@ -266,6 +298,7 @@ def _calendars(
     recipe: StrategyRecipe,
     search_space: StrategySearchSpace,
     request: TradeRequest,
+    budget_context: _BudgetContext,
 ) -> None:
     architecture = recipe.architecture
     option_type = (
@@ -296,8 +329,12 @@ def _calendars(
                 same_strike = abs(back_quote.strike - front_quote.strike) < 1e-8
                 if is_diagonal == same_strike:
                     continue
-                if is_diagonal and search_space.spread_widths and not _width_allowed(
-                    abs(back_quote.strike - front_quote.strike), search_space
+                if (
+                    is_diagonal
+                    and search_space.spread_widths
+                    and not _width_allowed(
+                        abs(back_quote.strike - front_quote.strike), search_space
+                    )
                 ):
                     continue
                 if architecture is Architecture.CALL_DIAGONAL and (
@@ -318,6 +355,7 @@ def _calendars(
                         (PositionSide.SHORT, 1, front_quote),
                     ],
                     horizon_compatible=horizon_compatible,
+                    budget_context=budget_context,
                 )
 
 
@@ -325,11 +363,16 @@ def enumerate_candidates(
     catalog: StrategyCatalog,
     request: TradeRequest,
     snapshot: MarketSnapshot,
+    *,
+    budget_policy: FlexibleBudgetPolicyV2 | None = None,
+    fx: FXRate | None = None,
+    broker_context: BrokerCapitalContext | None = None,
 ) -> EnumerationResult:
     candidates: dict[str, CompiledStrategyCandidate] = {}
     spaces: list[StrategySearchSpace] = []
     warnings: list[str] = []
     counts: dict[str, int] = {}
+    budget_context = _BudgetContext(budget_policy, fx, broker_context)
     for recipe in catalog.recipes:
         if recipe.architecture not in request.allowed_structures:
             continue
@@ -343,22 +386,34 @@ def enumerate_candidates(
             Architecture.BULL_CALL_SPREAD,
             Architecture.BEAR_PUT_SPREAD,
         }:
-            _single_and_verticals(candidates, grouped, recipe, search_space, request)
+            _single_and_verticals(
+                candidates, grouped, recipe, search_space, request, budget_context
+            )
         elif recipe.architecture in {
             Architecture.CALL_BUTTERFLY,
             Architecture.PUT_BUTTERFLY,
             Architecture.CALL_BROKEN_WING_BUTTERFLY,
             Architecture.PUT_BROKEN_WING_BUTTERFLY,
         }:
-            _butterflies(candidates, grouped, recipe, search_space, request)
+            _butterflies(candidates, grouped, recipe, search_space, request, budget_context)
         elif recipe.architecture in {
             Architecture.LONG_STRADDLE,
             Architecture.LONG_STRANGLE,
             Architecture.IRON_CONDOR,
         }:
-            _volatility_structures(candidates, grouped, recipe, search_space, request)
+            _volatility_structures(
+                candidates, grouped, recipe, search_space, request, budget_context
+            )
         else:
-            _calendars(candidates, snapshot, grouped, recipe, search_space, request)
+            _calendars(
+                candidates,
+                snapshot,
+                grouped,
+                recipe,
+                search_space,
+                request,
+                budget_context,
+            )
         counts[recipe.architecture.value] = len(candidates) - before
         if search_space.horizon_gap:
             warnings.append(

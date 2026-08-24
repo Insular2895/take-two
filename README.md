@@ -10,6 +10,34 @@ constraints, runs separate conditional simulations, validates hard gates, then
 uses Pareto ranking. `NO_TRADE` and `BLOCKED_INSUFFICIENT_DATA` are first-class
 outcomes.
 
+## M0.2 — Flexible budget and capital safety
+
+Prospective research can now opt into `FlexibleBudgetPolicyV2`: a target budget, an asymmetric
+under-target tolerance, and a hard overspend allowance. The canonical `1000 / 200 / 500` input
+derives exactly `800 / 1000 / 1500`. Entry cash, maximum economic loss, and buying power are
+separate gates in policy currency; unknown capital remains null and blocks paper eligibility.
+Every whole-contract quantity is evaluated independently, while budget fit stays outside the five
+scores.
+
+Calendars and diagonals no longer use a common-expiry terminal payoff to authorize V2 capital.
+Without validated broker buying power or a proven architecture-specific bound they remain visible
+for research under `BLOCKED_MIXED_EXPIRY_CAPITAL_UNPROVEN`. New tickets use schema 1.2 and show a
+standalone Budget section; 1.0 and 1.1 remain readable.
+
+```bash
+ttwo-options trade budget \
+  --budget 1000 \
+  --budget-currency EUR \
+  --allow-under 200 \
+  --allow-over 500
+```
+
+The prospective configuration is
+[`configs/phase_m/v2/ttwo_prospective_budget.yaml`](configs/phase_m/v2/ttwo_prospective_budget.yaml),
+and the full contract is
+[`M0_2_FLEXIBLE_BUDGET_POLICY.md`](docs/specs/M0_2_FLEXIBLE_BUDGET_POLICY.md). Historical V10 and
+pre-OPRA runs continue under `BudgetPolicyV1Legacy`; their artifacts and holdout were not rewritten.
+
 ## M0.1 — Final pre-OPRA trade economics corrections
 
 The offline M0.1 layer now provides a versioned 1.1 `TradeEconomicsTicket` for deep-analysis

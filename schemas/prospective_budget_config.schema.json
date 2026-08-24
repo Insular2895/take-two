@@ -1,0 +1,164 @@
+{
+  "$defs": {
+    "CapitalCap": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "$ref": "#/$defs/CapitalCapMode",
+          "default": "AUTO"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "title": "CapitalCap",
+      "type": "object"
+    },
+    "CapitalCapMode": {
+      "enum": [
+        "AUTO",
+        "EXPLICIT"
+      ],
+      "title": "CapitalCapMode",
+      "type": "string"
+    },
+    "FlexibleBudgetPolicyV2": {
+      "additionalProperties": false,
+      "description": "Explicit target budget with asymmetric lower and upper tolerances.",
+      "properties": {
+        "account_liquidity_reserve": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Account Liquidity Reserve",
+          "type": "number"
+        },
+        "buying_power_cap": {
+          "$ref": "#/$defs/CapitalCap"
+        },
+        "currency": {
+          "maxLength": 3,
+          "minLength": 3,
+          "title": "Currency",
+          "type": "string"
+        },
+        "max_overspend": {
+          "minimum": 0,
+          "title": "Max Overspend",
+          "type": "number"
+        },
+        "maximum_contracts": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Contracts",
+          "type": "integer"
+        },
+        "maximum_loss_cap": {
+          "$ref": "#/$defs/CapitalCap"
+        },
+        "minimum_spend_policy": {
+          "$ref": "#/$defs/MinimumSpendPolicy",
+          "default": "SOFT"
+        },
+        "target_budget": {
+          "exclusiveMinimum": 0,
+          "title": "Target Budget",
+          "type": "number"
+        },
+        "under_target_tolerance": {
+          "minimum": 0,
+          "title": "Under Target Tolerance",
+          "type": "number"
+        },
+        "version": {
+          "const": "2.0",
+          "default": "2.0",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "currency",
+        "target_budget",
+        "under_target_tolerance",
+        "max_overspend",
+        "maximum_contracts"
+      ],
+      "title": "FlexibleBudgetPolicyV2",
+      "type": "object"
+    },
+    "MinimumSpendPolicy": {
+      "enum": [
+        "SOFT",
+        "HARD",
+        "OFF"
+      ],
+      "title": "MinimumSpendPolicy",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/prospective_budget_config.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Phase M input prepared by M0.2 without starting OPRA or paper activity.",
+  "properties": {
+    "budget_policy": {
+      "$ref": "#/$defs/FlexibleBudgetPolicyV2"
+    },
+    "holdout_status": {
+      "const": "UNOPENED",
+      "default": "UNOPENED",
+      "title": "Holdout Status",
+      "type": "string"
+    },
+    "opra_status": {
+      "const": "NOT_STARTED",
+      "default": "NOT_STARTED",
+      "title": "Opra Status",
+      "type": "string"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "phase": {
+      "const": "M_PROSPECTIVE_NOT_STARTED",
+      "default": "M_PROSPECTIVE_NOT_STARTED",
+      "title": "Phase",
+      "type": "string"
+    },
+    "read_only": {
+      "const": true,
+      "default": true,
+      "title": "Read Only",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "2.0",
+      "default": "2.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "budget_policy"
+  ],
+  "title": "ProspectiveBudgetConfig",
+  "type": "object"
+}

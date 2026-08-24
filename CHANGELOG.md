@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.12.2 — 2026-08-24
+
+### M0.2 flexible budget configurator and capital safety
+
+- Added separate `BudgetPolicyV1Legacy` and `FlexibleBudgetPolicyV2` contracts with asymmetric
+  target tolerances, SOFT/HARD/OFF lower policy, explicit/AUTO loss and buying-power caps, and no
+  hidden V2 reserve.
+- Centralized entry-cash, maximum-loss, buying-power and point-in-time FX gates in
+  `evaluate_budget_policy`; credit cash is floored at zero and unknown capital remains null.
+- Added per-quantity V2 diagnostics to whole-contract generation without changing the five scores.
+- Removed common-expiry terminal payoff from V2 calendar/diagonal authorization and added the
+  research-only `LifecycleCapitalRequirement` fail-closed path.
+- Versioned the trade-economics ticket to 1.2 while retaining 1.0/1.1 readers, added the Budget
+  renderer, prospective Phase M config/CLI, schemas, reports, and regression coverage.
+- Preserved historical/OOS artifacts, the unopened holdout, `OPRA=NOT_STARTED`, and the no-order
+  boundary.
+
 ## 0.12.1 — 2026-08-24
 
 ### M0.1 final pre-OPRA trade economics corrections

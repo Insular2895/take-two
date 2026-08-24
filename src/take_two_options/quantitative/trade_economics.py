@@ -15,6 +15,19 @@ from take_two_options.american import (
     risk_free_rate_for_expiry,
     validate_dividend_treatment,
 )
+from take_two_options.budget import (
+    BrokerCapitalContext,
+    BudgetCandidate,
+    BudgetPolicy,
+    BudgetPolicyV1Legacy,
+    BudgetStatus,
+    CapitalRequirementStatus,
+    FlexibleBudgetPolicyV2,
+    FXRate,
+    LifecycleCapitalRequirement,
+    LifecycleCapitalStatus,
+    evaluate_budget_policy,
+)
 from take_two_options.decision.quality_scores import FiveScoreReport, QualityScore
 from take_two_options.domain import (
     ExerciseStyle,
@@ -2581,6 +2594,9 @@ def build_trade_economics_ticket(
     probability_pnl_valuation_rule: ProbabilityPnLValuationRule | None = None,
     canonical_five_score_report: FiveScoreReport | None = None,
     five_score_config_hash: str | None = None,
+    budget_policy: BudgetPolicy | None = None,
+    budget_fx: FXRate | None = None,
+    broker_context: BrokerCapitalContext | None = None,
 ) -> TradeEconomicsTicket:
     """Build one reconciled M0 ticket without creating any execution capability."""
     validate_dividend_treatment(bundle)
@@ -2757,7 +2773,7 @@ def build_trade_economics_ticket(
         valuation_time=bundle.analysis_timestamp,
     )
     option_pnl = base_value - candidate.execution_estimate.total_entry_cost
-    fx = calculate_fx_attribution(
+    fx_attribution = calculate_fx_attribution(
         option_pnl_usd=option_pnl,
         mode=bundle.trade_economics.fx_mode,
         entry_fx_rate_usd_per_base=bundle.trade_economics.entry_fx_rate_usd_per_base,
@@ -2831,8 +2847,130 @@ def build_trade_economics_ticket(
         )
         for risk in candidate.exercise_risks
     ]
-    capital, _ = _capital_at_risk(candidate)
     lifecycle = _lifecycle(candidate, bundle)
+    capital, _ = _capital_at_risk(candidate)
+    effective_budget_policy = budget_policy or BudgetPolicyV1Legacy(
+        currency=bundle.portfolio.currency,
+        budget=bundle.portfolio.max_loss_budget,
+        maximum_loss=bundle.portfolio.max_loss_budget,
+        safety_reserve_fraction=0.0,
+        maximum_contracts=max(
+            (leg.quantity for leg in candidate.legs),
+            default=1,
+        ),
+    )
+    has_short_option = any(
+        leg.option_quote is not None and leg.side is PositionSide.SHORT for leg in candidate.legs
+    )
+    if (
+        broker_context is None
+        and margin.status is MarginStatus.KNOWN_BROKER
+        and margin.buying_power_usage is not None
+    ):
+        broker_context = BrokerCapitalContext(
+            buying_power_requirement=margin.buying_power_usage,
+            currency=bundle.underlying.currency,
+            source=margin.source,
+            timestamp=bundle.portfolio.as_of,
+            validated=True,
+        )
+    uses_v2_mixed_expiry = isinstance(effective_budget_policy, FlexibleBudgetPolicyV2) and (
+        lifecycle.mixed_expiry
+    )
+    buying_power_required = (
+        has_short_option and margin.status is not MarginStatus.NOT_REQUIRED
+    ) or (
+        isinstance(effective_budget_policy, FlexibleBudgetPolicyV2)
+        and lifecycle.mixed_expiry
+    )
+    buying_power_status = (
+        CapitalRequirementStatus.ESTIMATED_ANALYTICAL_BOUND
+        if margin.status is MarginStatus.ESTIMATED and margin.buying_power_usage is not None
+        else CapitalRequirementStatus.UNKNOWN
+        if buying_power_required
+        else CapitalRequirementStatus.NOT_REQUIRED
+    )
+    budget_candidate = BudgetCandidate(
+        candidate_id=candidate.id,
+        architecture=candidate.kind.value,
+        currency=bundle.underlying.currency,
+        required_entry_cash=candidate.execution_estimate.total_entry_cash_flow or 0.0,
+        maximum_loss=(None if uses_v2_mixed_expiry else candidate.risk_metrics.max_loss),
+        buying_power_requirement=(
+            margin.buying_power_usage if margin.status is MarginStatus.ESTIMATED else None
+        ),
+        buying_power_required=buying_power_required,
+        buying_power_status=buying_power_status,
+        quantity=max((leg.quantity for leg in candidate.legs), default=0),
+        as_of=bundle.analysis_timestamp,
+        mixed_expiry=uses_v2_mixed_expiry,
+        managed_exit_deadline=(lifecycle.managed_exit_deadline if uses_v2_mixed_expiry else None),
+        legacy_common_expiry_maximum_loss=(
+            candidate.risk_metrics.max_loss if lifecycle.mixed_expiry else None
+        ),
+        is_no_position=not candidate.legs,
+    )
+    budget_evaluation = evaluate_budget_policy(
+        budget_candidate,
+        effective_budget_policy,
+        budget_fx,
+        broker_context,
+    )
+    budget_diagnostics = budget_evaluation.diagnostics
+    lifecycle_capital_requirement = budget_evaluation.lifecycle_capital_requirement
+    if lifecycle.mixed_expiry and isinstance(effective_budget_policy, BudgetPolicyV1Legacy):
+        lifecycle_capital_requirement = LifecycleCapitalRequirement(
+            policy="CLOSE_BEFORE_FIRST_EXPIRY",
+            managed_exit_deadline=lifecycle.managed_exit_deadline or lifecycle.first_expiry,
+            entry_cash_required=max(
+                candidate.execution_estimate.total_entry_cash_flow or 0.0,
+                0.0,
+            ),
+            analytical_loss_bound=None,
+            broker_buying_power=margin.buying_power_usage,
+            effective_budget_requirement=candidate.risk_metrics.max_loss,
+            calculation_status=LifecycleCapitalStatus.LEGACY_COMMON_EXPIRY_PROXY,
+            warnings=[
+                "LEGACY_COMMON_EXPIRY_PROXY is retained only for BudgetPolicyV1Legacy "
+                "reproduction and cannot authorize BudgetPolicyV2."
+            ],
+        )
+    budget_blocking_statuses = {
+        BudgetStatus.EXCEEDS_HARD_BUDGET_CEILING,
+        BudgetStatus.MAXIMUM_LOSS_EXCEEDED,
+        BudgetStatus.BUYING_POWER_EXCEEDED,
+        BudgetStatus.FX_REQUIRED,
+    }
+    if budget_diagnostics.budget_status in budget_blocking_statuses:
+        blockers.append(budget_diagnostics.budget_status.value)
+    if isinstance(effective_budget_policy, FlexibleBudgetPolicyV2) and not (
+        budget_diagnostics.paper_eligible
+    ):
+        blockers.extend(budget_diagnostics.reason_codes)
+    if uses_v2_mixed_expiry:
+        capital = (
+            lifecycle_capital_requirement.effective_budget_requirement
+            if lifecycle_capital_requirement is not None
+            else None
+        )
+        leverage = leverage.model_copy(
+            update={
+                "capital_at_risk": capital,
+                "capital_status": (
+                    lifecycle_capital_requirement.calculation_status.value
+                    if lifecycle_capital_requirement is not None
+                    else LifecycleCapitalStatus.UNKNOWN.value
+                ),
+                "delta_notional_leverage": None,
+                "gross_delta_leverage": None,
+                "warnings": [
+                    *leverage.warnings,
+                    "BudgetPolicyV2 mixed-expiry leverage is suppressed until lifecycle "
+                    "capital is proven and recalculated on that basis.",
+                ],
+            }
+        )
+    blockers = sorted(set(blockers))
     five_scores = (
         build_five_score_snapshot(
             canonical_five_score_report,
@@ -2863,7 +3001,9 @@ def build_trade_economics_ticket(
         exit_cost_estimate=exit_cost,
         round_trip_cost=round_trip,
         margin=margin,
-        maximum_loss=candidate.risk_metrics.max_loss,
+        budget_diagnostics=budget_diagnostics,
+        lifecycle_capital_requirement=lifecycle_capital_requirement,
+        maximum_loss=(None if uses_v2_mixed_expiry else candidate.risk_metrics.max_loss),
         maximum_profit=candidate.risk_metrics.max_gain,
         expiration_breakevens=(
             [] if lifecycle.mixed_expiry else candidate.risk_metrics.break_even_points
@@ -2880,7 +3020,7 @@ def build_trade_economics_ticket(
         distribution_pnl=distribution,
         five_scores=five_scores,
         pnl_attributions=attributions,
-        fx_attribution=fx,
+        fx_attribution=fx_attribution,
         liquidity=_liquidity_diagnostics(candidate, bundle),
         intensity=intensity,
         assignment_and_exercise_risks=assignment,

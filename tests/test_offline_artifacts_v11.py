@@ -51,6 +51,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
         "paper_decision_record.schema.json",
         "paper_realization_record.schema.json",
         "pre_opra_config.schema.json",
+        "prospective_budget_config.schema.json",
         "readiness.schema.json",
         "severity_gate_report.schema.json",
         "trade_economics_ticket.schema.json",

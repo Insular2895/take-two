@@ -11,6 +11,7 @@ from typing import Any
 
 import yaml
 
+from take_two_options.budget import FlexibleBudgetPolicyV2, FXRate
 from take_two_options.candidate_generation.enumerator import enumerate_candidates
 from take_two_options.candidate_generation.pruning import prune_candidate
 from take_two_options.decision.ranking import apply_explanatory_scores
@@ -179,14 +180,18 @@ def _blocked_report(
     run: ResearchRun,
     reason: str,
     report_dir: Path,
+    budget_policy: FlexibleBudgetPolicyV2 | None = None,
 ) -> DecisionReport:
+    report_budget = budget_policy.target_budget if budget_policy else request.budget
+    report_currency = budget_policy.currency if budget_policy else request.currency
     report = DecisionReport(
         report_id=f"decision-{run.run_id}",
         created_at=datetime.now(UTC),
+        budget_policy=budget_policy,
         analysis=ReportAnalysis(
             ticker=request.ticker,
-            budget=request.budget,
-            currency=request.currency,
+            budget=report_budget,
+            currency=report_currency,
             thesis=request.thesis_summary,
             horizon_days=(request.horizon_min_days, request.horizon_max_days),
             data_date=None,
@@ -215,14 +220,39 @@ def analyze_trade(
     knowledge_dir: Path = Path("research/knowledge_items"),
     research_config_path: Path = Path("configs/research/default.yaml"),
     refresh_data: bool = False,
+    budget_policy: FlexibleBudgetPolicyV2 | None = None,
 ) -> DecisionReport:
     started = datetime.now(UTC)
     request = load_trade_request(request_path)
     config = _research_config(research_config_path)
     catalog = compile_knowledge(load_knowledge(knowledge_dir))
-    config_hash = stable_hash(
-        {"request": request, "research_config": config, "catalog": catalog.knowledge_hash}
-    )
+    hash_payload: dict[str, Any] = {
+        "request": request,
+        "research_config": config,
+        "catalog": catalog.knowledge_hash,
+    }
+    if budget_policy is not None:
+        hash_payload["budget_policy"] = budget_policy
+    config_hash = stable_hash(hash_payload)
+    budget_fx = None
+    if (
+        budget_policy is not None
+        and budget_policy.currency != "USD"
+        and budget_policy.currency == request.currency
+        and request.fx_rate_to_usd is not None
+        and request.fx_rate_as_of is not None
+    ):
+        budget_fx = FXRate(
+            source_currency="USD",
+            policy_currency=budget_policy.currency,
+            rate_to_policy_currency=1 / request.fx_rate_to_usd,
+            timestamp=datetime.combine(
+                request.fx_rate_as_of,
+                datetime.min.time(),
+                tzinfo=UTC,
+            ),
+            source="TradeRequest.fx_rate_to_usd",
+        )
     seed = int(config["seed"])
     run_id = f"{request.ticker.lower()}-{started.strftime('%Y%m%dT%H%M%SZ')}-{config_hash[:8]}"
     run = ResearchRun(
@@ -265,6 +295,7 @@ def analyze_trade(
                 run=run,
                 reason=f"market data unavailable: {fallback_error}",
                 report_dir=report_dir,
+                budget_policy=budget_policy,
             )
     run.data_snapshot_id = snapshot.snapshot_id
     historical_path = _historical_path(request.ticker)
@@ -282,7 +313,13 @@ def analyze_trade(
     (report_dir / "forecast.json").write_text(
         forecast.model_dump_json(indent=2), encoding="utf-8"
     )
-    enumeration = enumerate_candidates(catalog, request, snapshot)
+    enumeration = enumerate_candidates(
+        catalog,
+        request,
+        snapshot,
+        budget_policy=budget_policy,
+        fx=budget_fx,
+    )
     for candidate in enumeration.candidates:
         registry.register(
             stage="generation",
@@ -380,10 +417,11 @@ def analyze_trade(
         report = DecisionReport(
             report_id=f"decision-{run.run_id}",
             created_at=datetime.now(UTC),
+            budget_policy=budget_policy,
             analysis=ReportAnalysis(
                 ticker=request.ticker,
-                budget=request.budget,
-                currency=request.currency,
+                budget=(budget_policy.target_budget if budget_policy else request.budget),
+                currency=(budget_policy.currency if budget_policy else request.currency),
                 thesis=request.thesis_summary,
                 horizon_days=(request.horizon_min_days, request.horizon_max_days),
                 data_date=snapshot.as_of,
@@ -395,7 +433,11 @@ def analyze_trade(
             request=request,
             research_run=run,
             no_trade_reasons=[
-                "no candidate survived structural pruning",
+                (
+                    "NO_POSITION_RECOMMENDED: no candidate survived the configured hard gates"
+                    if budget_policy is not None
+                    else "no candidate survived structural pruning"
+                ),
                 *[
                     f"{reason}: {reason_counts[reason]} of "
                     f"{len(enumeration.candidates)} generated candidates"
@@ -422,6 +464,11 @@ def analyze_trade(
                     ),
                     "hard_vetoes": candidate.hard_vetoes,
                     "uncertainties": candidate.uncertainties,
+                    "budget_diagnostics": (
+                        candidate.budget_diagnostics.model_dump(mode="json")
+                        if candidate.budget_diagnostics is not None
+                        else None
+                    ),
                     "status": "rejected_before_simulation",
                 }
                 for candidate in diagnostic_candidates
@@ -531,6 +578,10 @@ def analyze_trade(
         candidate.status = (
             "admissible"
             if candidate.evaluation.validation.status == "PASSED"
+            and (
+                candidate.budget_diagnostics is None
+                or candidate.budget_diagnostics.paper_eligible
+            )
             else "blocked"
         )
         registry.register(
@@ -600,6 +651,9 @@ def analyze_trade(
         "final_paths_per_model": final_paths,
         "trial_count": len(registry.records),
         "trial_counts": registry.counts(),
+        "budget_policy": (
+            budget_policy.model_dump(mode="json") if budget_policy is not None else None
+        ),
         "order_capability": "forbidden",
     }
     audit_path.write_text(json.dumps(audit_payload, indent=2), encoding="utf-8")
@@ -626,10 +680,11 @@ def analyze_trade(
     report = DecisionReport(
         report_id=f"decision-{run.run_id}",
         created_at=datetime.now(UTC),
+        budget_policy=budget_policy,
         analysis=ReportAnalysis(
             ticker=request.ticker,
-            budget=request.budget,
-            currency=request.currency,
+            budget=(budget_policy.target_budget if budget_policy else request.budget),
+            currency=(budget_policy.currency if budget_policy else request.currency),
             thesis=request.thesis_summary,
             horizon_days=(request.horizon_min_days, request.horizon_max_days),
             data_date=snapshot.as_of,
@@ -656,6 +711,11 @@ def analyze_trade(
                     default=None,
                 ),
                 "pareto_rank": candidate.pareto_rank,
+                "budget_diagnostics": (
+                    candidate.budget_diagnostics.model_dump(mode="json")
+                    if candidate.budget_diagnostics is not None
+                    else None
+                ),
                 "status": candidate.status,
             }
             for candidate in finalists

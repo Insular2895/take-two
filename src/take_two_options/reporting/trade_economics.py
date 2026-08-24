@@ -17,6 +17,14 @@ def _percentage(value: float | None) -> str:
     return "UNKNOWN" if value is None else f"{value * 100:.2f}%"
 
 
+def _budget_amount(value: float | None, currency: str, *, signed: bool = False) -> str:
+    if value is None:
+        return "UNKNOWN"
+    symbol = {"EUR": "€", "USD": "$"}.get(currency, f"{currency} ")
+    sign = "+" if signed and value > 0 else ""
+    return f"{sign}{symbol}{value:,.2f}"
+
+
 def _greek(measure: GreekMeasure | None) -> str:
     if measure is None:
         return "disabled"
@@ -56,6 +64,59 @@ def render_trade_economics_markdown(
             "- Calendar/diagonal lifecycle after the first leg expiry is intentionally not "
             "modeled. M0.1 assumes managed closure before first expiry."
         )
+
+    if ticket.budget_diagnostics is not None:
+        budget = ticket.budget_diagnostics
+        budget_currency = budget.currency
+        allowed_overspend = budget.hard_authorized_ceiling - budget.target_budget
+        lines.extend(
+            [
+                "",
+                f"{h2} Budget",
+                "",
+                f"- Policy version: `{budget.budget_policy_version}`",
+                f"- Currency: `{budget_currency}`",
+                f"- Target: {_budget_amount(budget.target_budget, budget_currency)}",
+                "- Preferred lower: "
+                f"{_budget_amount(budget.preferred_lower_bound, budget_currency)}",
+                f"- Allowed overspend: {_budget_amount(allowed_overspend, budget_currency)}",
+                "- Hard ceiling: "
+                f"{_budget_amount(budget.hard_authorized_ceiling, budget_currency)}",
+                "- Maximum loss cap: "
+                f"{_budget_amount(budget.maximum_loss_cap_effective, budget_currency)}",
+                "- Buying-power cap: "
+                f"{_budget_amount(budget.buying_power_cap_effective, budget_currency)}",
+                "",
+                f"{h2} This trade — Budget",
+                "",
+                f"- Entry cash: {_budget_amount(budget.required_entry_cash, budget_currency)}",
+                f"- Maximum loss: {_budget_amount(budget.maximum_loss, budget_currency)}",
+                "- Buying power: "
+                f"{_budget_amount(budget.buying_power_requirement, budget_currency)}",
+                "- Effective capital: "
+                f"{_budget_amount(budget.effective_capital_requirement, budget_currency)}",
+                "- Delta vs target: "
+                f"{_budget_amount(budget.budget_delta_to_target, budget_currency, signed=True)} "
+                f"({_percentage(budget.budget_delta_percentage)})",
+                "- Headroom: "
+                f"{_budget_amount(budget.headroom_to_hard_ceiling, budget_currency, signed=True)}",
+                f"- Status: `{budget.budget_status.value}`",
+                f"- Eligible / research / paper: `{budget.eligible}` / "
+                f"`{budget.research_eligible}` / `{budget.paper_eligible}`",
+            ]
+        )
+        if ticket.lifecycle_capital_requirement is not None:
+            lifecycle_capital = ticket.lifecycle_capital_requirement
+            lifecycle_effective = lifecycle_capital.effective_budget_requirement
+            lines.extend(
+                [
+                    "- Lifecycle capital policy / status: "
+                    f"`{lifecycle_capital.policy}` / "
+                    f"`{lifecycle_capital.calculation_status.value}`",
+                    "- Lifecycle effective requirement: "
+                    f"{_budget_amount(lifecycle_effective, budget_currency)}",
+                ]
+            )
 
     lines.extend(
         [

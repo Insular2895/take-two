@@ -11,6 +11,7 @@ from typing import Any, Literal
 
 from pydantic import Field, model_validator
 
+from take_two_options.budget import FlexibleBudgetPolicyV2
 from take_two_options.domain import StrictModel
 from take_two_options.knowledge.schemas import Architecture, SourceReference
 from take_two_options.trade_economics_models import TradeEconomicsConfiguration
@@ -102,9 +103,7 @@ class RiskProfileConfig(StrictModel):
     @model_validator(mode="after")
     def validate_thresholds(self) -> RiskProfileConfig:
         thresholds = self.loss_ladder_thresholds
-        if thresholds != sorted(set(thresholds)) or any(
-            not 0 < value <= 1 for value in thresholds
-        ):
+        if thresholds != sorted(set(thresholds)) or any(not 0 < value <= 1 for value in thresholds):
             raise ValueError("loss ladder thresholds must be unique, sorted, and in (0, 1]")
         return self
 
@@ -242,3 +241,16 @@ class PreOpraConfig(StrictModel):
         if self.market_context.decision_cutoff.date() != self.research_request.as_of:
             raise ValueError("decision cutoff date must equal the request as_of date")
         return self
+
+
+class ProspectiveBudgetConfig(StrictModel):
+    """Phase M input prepared by M0.2 without starting OPRA or paper activity."""
+
+    schema_version: Literal["2.0"] = "2.0"
+    phase: Literal["M_PROSPECTIVE_NOT_STARTED"] = "M_PROSPECTIVE_NOT_STARTED"
+    budget_policy: FlexibleBudgetPolicyV2
+    holdout_status: Literal["UNOPENED"] = "UNOPENED"
+    opra_status: Literal["NOT_STARTED"] = "NOT_STARTED"
+    read_only: Literal[True] = True
+    transmit: Literal[False] = False
+    order_capability: Literal["forbidden"] = "forbidden"

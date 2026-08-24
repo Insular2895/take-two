@@ -8,6 +8,11 @@ from typing import Any, Literal
 
 from pydantic import Field, model_validator
 
+from take_two_options.budget import (
+    BudgetDiagnostics,
+    FlexibleBudgetPolicyV2,
+    LifecycleCapitalRequirement,
+)
 from take_two_options.domain import OptionType, PositionSide, StrictModel
 
 
@@ -184,9 +189,7 @@ class StrategyRecipe(StrictModel):
     market_validity: MarketValidity
     empirical_status: EmpiricalStatus
     execution_status: ExecutionStatus
-    allowed_theses: list[Literal["bullish", "bearish", "neutral", "volatile"]] = Field(
-        min_length=1
-    )
+    allowed_theses: list[Literal["bullish", "bearish", "neutral", "volatile"]] = Field(min_length=1)
     legs: list[StrategyLegTemplate] = Field(min_length=1)
     sources: list[SourceReference] = Field(min_length=1)
     assumptions: list[str] = Field(default_factory=list)
@@ -506,6 +509,9 @@ class CompiledStrategyCandidate(StrictModel):
     assumptions: list[str] = Field(default_factory=list)
     uncertainties: list[str] = Field(default_factory=list)
     hard_vetoes: list[str] = Field(default_factory=list)
+    research_restrictions: list[str] = Field(default_factory=list)
+    budget_diagnostics: BudgetDiagnostics | None = None
+    lifecycle_capital_requirement: LifecycleCapitalRequirement | None = None
     evaluation: CandidateEvaluation = Field(default_factory=CandidateEvaluation)
     pareto_rank: int | None = Field(default=None, ge=1)
     explanatory_score: float | None = Field(default=None, ge=0, le=100)
@@ -575,6 +581,7 @@ class DecisionReport(StrictModel):
     schema_version: Literal["1.0"] = "1.0"
     report_id: str
     created_at: datetime
+    budget_policy: FlexibleBudgetPolicyV2 | None = None
     analysis: ReportAnalysis
     verdict: Verdict
     request: TradeRequest

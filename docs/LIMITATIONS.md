@@ -1,5 +1,25 @@
 # Limitations
 
+## M0.2 flexible budget and capital safety
+
+- `FlexibleBudgetPolicyV2` is an offline product/capital contract, not advice about how much a
+  user should invest. The canonical 1000/200/500 values are a configured example, not calibrated
+  limits.
+- Entry cash, maximum loss, and buying power are checked independently. The displayed effective
+  capital is their maximum relevant known value, not their sum and not an accounting cash balance.
+- Point-in-time FX must be supplied when candidate and policy currencies differ. M0.2 does not
+  fetch live FX and fails closed with `FX_REQUIRED` when conversion evidence is missing.
+- Broker buying power remains unknown unless a validated context is supplied. It is null, never
+  zero. An analytical same-expiry bound is not presented as a broker margin quote.
+- Calendar/diagonal capital is unproven without validated broker buying power or a mathematical
+  architecture-specific lifecycle bound. Scenario-grid losses are diagnostics only; they cannot
+  prove a maximum. Such candidates are research-visible but paper-blocked.
+- V2 does not subtract a hidden safety reserve. Its explicit `account_liquidity_reserve` defaults
+  to zero and does not invent account capital. V1 retains its old reserve semantics solely for
+  reproducibility.
+- Budget eligibility is a hard gate and diagnostic, not a score. No V10 parameter, five-score
+  component, OOS result, final holdout content, or paper threshold was recalibrated.
+
 ## M0 Greeks, carry and trade economics
 
 - M0 full-repricing mechanics, advanced Greeks, carry curves, scenario matrices, breakeven clocks,

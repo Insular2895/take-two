@@ -1,0 +1,122 @@
+{
+  "report_id": "m0-2-flexible-budget-2026-08-24",
+  "generated_on": "2026-08-24",
+  "scope": "offline_budget_and_capital_hardening_only",
+  "initial_state": {
+    "historical_policy": "single_budget_maximum_loss_and_safety_reserve",
+    "central_v2_evaluator_present": false,
+    "mixed_expiry_factory_risk": "common_expiry_terminal_proxy",
+    "trade_economics_ticket_schema": "1.1"
+  },
+  "policies": {
+    "legacy": {
+      "name": "BudgetPolicyV1Legacy",
+      "semantics": [
+        "budget",
+        "maximum_loss",
+        "safety_reserve_fraction",
+        "maximum_contracts"
+      ],
+      "historical_recalculation": false
+    },
+    "prospective": {
+      "name": "FlexibleBudgetPolicyV2",
+      "version": "2.0",
+      "minimum_spend_values": ["SOFT", "HARD", "OFF"],
+      "maximum_loss_cap_modes": ["AUTO", "EXPLICIT"],
+      "buying_power_cap_modes": ["AUTO", "EXPLICIT"],
+      "whole_contracts_only": true,
+      "hidden_safety_reserve": false,
+      "account_liquidity_reserve_default": 0
+    }
+  },
+  "canonical_example": {
+    "currency": "EUR",
+    "target_budget": 1000,
+    "under_target_tolerance": 200,
+    "max_overspend": 500,
+    "preferred_lower_bound": 800,
+    "hard_authorized_ceiling": 1500,
+    "maximum_loss_cap_effective": 1500,
+    "buying_power_cap_effective": 1500,
+    "inclusive_hard_ceiling": true,
+    "1500_status": "AT_HARD_CEILING",
+    "1500_01_status": "EXCEEDS_HARD_BUDGET_CEILING"
+  },
+  "central_evaluator": {
+    "function": "evaluate_budget_policy(candidate, policy, fx, broker_context)",
+    "parallel_constraints": [
+      "required_entry_cash",
+      "maximum_loss",
+      "buying_power_requirement"
+    ],
+    "constraints_summed": false,
+    "credit_cash_floored_at_zero": true,
+    "unknown_capital_remains_null": true,
+    "point_in_time_fx_required": true
+  },
+  "mixed_expiry": {
+    "architectures": [
+      "CALL_CALENDAR",
+      "PUT_CALENDAR",
+      "CALL_DIAGONAL",
+      "PUT_DIAGONAL"
+    ],
+    "policy": "CLOSE_BEFORE_FIRST_EXPIRY",
+    "v2_common_expiry_proxy_authorizes_budget": false,
+    "legacy_label": "LEGACY_COMMON_EXPIRY_PROXY",
+    "capital_priority": [
+      "BROKER_BUYING_POWER",
+      "ESTIMATED_ANALYTICAL_BOUND",
+      "UNKNOWN"
+    ],
+    "scenario_grid_is_guaranteed_bound": false,
+    "unproven_status": "BLOCKED_MIXED_EXPIRY_CAPITAL_UNPROVEN",
+    "unproven_research_visible": true,
+    "unproven_paper_eligible": false
+  },
+  "ticket": {
+    "new_schema_version": "1.2",
+    "readable_versions": ["1.0", "1.1", "1.2"],
+    "budget_diagnostics_present": true,
+    "five_scores_changed": false
+  },
+  "validation": {
+    "pytest": {"status": "passed", "tests": 320},
+    "ruff": "passed",
+    "mypy": {"status": "passed", "source_files": 187},
+    "schemas": {"status": "passed", "count": 28},
+    "offline_artifacts": "passed",
+    "research_lineage": "passed",
+    "phase10_release_audit": "passed",
+    "phase11_extension_gate": "passed",
+    "security": {
+      "status": "passed",
+      "python_files_scanned": 166,
+      "forbidden_order_imports": 0,
+      "transmit_true_literals": 0
+    },
+    "dependency_consistency": "passed",
+    "historical_artifact_hashes_unchanged": true
+  },
+  "remaining_dependencies": [
+    "authorized OPRA/NBBO and combo quotes",
+    "validated broker what-if buying power, margin, and commissions",
+    "account permissions",
+    "fresh point-in-time FX",
+    "paper fills and slippage",
+    "shadow/paper sample evidence"
+  ],
+  "safety": {
+    "holdout": "UNOPENED",
+    "opra": "NOT_STARTED",
+    "read_only": true,
+    "transmit": false,
+    "what_if": true,
+    "order_capability": "forbidden"
+  },
+  "M0_2_STATUS": "COMPLETE",
+  "FLEXIBLE_BUDGET_POLICY": "READY",
+  "PRE_OPRA_LOGIC_STATUS": "COMPLETE",
+  "NEXT_PHASE": "M — OPRA READ-ONLY + SHADOW/PAPER VALIDATION"
+}

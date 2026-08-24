@@ -22,6 +22,11 @@ def build_ibkr_preview(report: DecisionReport, candidate_id: str) -> dict[str, o
         raise TicketBlockedError(
             f"{candidate_id} is {candidate.status}; only admissible candidates get a ticket"
         )
+    if candidate.budget_diagnostics is not None and not candidate.budget_diagnostics.paper_eligible:
+        raise TicketBlockedError(
+            f"{candidate_id} is research-only under "
+            f"{candidate.budget_diagnostics.budget_status.value}"
+        )
     return {
         "mode": "preview",
         "broker": "IBKR",

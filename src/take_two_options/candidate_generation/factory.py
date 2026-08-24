@@ -3,7 +3,17 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from datetime import UTC, datetime, timedelta
 
+from take_two_options.budget import (
+    BrokerCapitalContext,
+    BudgetCandidate,
+    BudgetStatus,
+    CapitalRequirementStatus,
+    FlexibleBudgetPolicyV2,
+    FXRate,
+    evaluate_budget_policy,
+)
 from take_two_options.candidate_generation.registry import ARCHITECTURE_REGISTRY
 from take_two_options.domain import PositionSide
 from take_two_options.knowledge.provenance import stable_hash
@@ -98,6 +108,9 @@ def build_candidate(
     quantity: int,
     request: TradeRequest,
     horizon_compatible: bool,
+    budget_policy: FlexibleBudgetPolicyV2 | None = None,
+    fx: FXRate | None = None,
+    broker_context: BrokerCapitalContext | None = None,
 ) -> CompiledStrategyCandidate:
     legs = [
         CandidateLeg(
@@ -153,11 +166,7 @@ def build_candidate(
         if abs(synthetic_combo_mid) > 1e-9
         else float("inf")
     )
-    if (
-        len(legs) > 1
-        and synthetic_combo_relative_spread
-        > liquidity_policy.maximum_relative_spread
-    ):
+    if len(legs) > 1 and synthetic_combo_relative_spread > liquidity_policy.maximum_relative_spread:
         liquidity_compatible = False
     identity = {
         "architecture": architecture.value,
@@ -170,15 +179,87 @@ def build_candidate(
         "policy": policy.model_dump(mode="json"),
     }
     hard_vetoes: list[str] = []
-    fx = request.fx_rate_to_usd or (1.0 if request.currency == "USD" else None)
-    if fx is None:
-        hard_vetoes.append("FX_RATE_MISSING")
+    budget_diagnostics = None
+    lifecycle_capital_requirement = None
+    research_restrictions: list[str] = []
+    if budget_policy is None:
+        legacy_fx = request.fx_rate_to_usd or (1.0 if request.currency == "USD" else None)
+        if legacy_fx is None:
+            hard_vetoes.append("FX_RATE_MISSING")
+        else:
+            maximum_loss_request_currency = risk.maximum_loss / legacy_fx
+            if maximum_loss_request_currency > request.maximum_loss:
+                hard_vetoes.append("MAXIMUM_LOSS_EXCEEDED")
+            if maximum_loss_request_currency > request.budget * (
+                1 - request.safety_reserve_fraction
+            ):
+                hard_vetoes.append("BUDGET_EXCEEDED")
     else:
-        maximum_loss_request_currency = risk.maximum_loss / fx
-        if maximum_loss_request_currency > request.maximum_loss:
-            hard_vetoes.append("MAXIMUM_LOSS_EXCEEDED")
-        if maximum_loss_request_currency > request.budget * (1 - request.safety_reserve_fraction):
-            hard_vetoes.append("BUDGET_EXCEEDED")
+        expirations = sorted({leg.quote.expiration for leg in legs})
+        mixed_expiry = len(expirations) > 1
+        if fx is None and budget_policy.currency == request.currency:
+            if budget_policy.currency == "USD":
+                fx = None
+            elif request.fx_rate_to_usd is not None and request.fx_rate_as_of is not None:
+                fx = FXRate(
+                    source_currency="USD",
+                    policy_currency=budget_policy.currency,
+                    rate_to_policy_currency=1 / request.fx_rate_to_usd,
+                    timestamp=datetime.combine(
+                        request.fx_rate_as_of,
+                        datetime.min.time(),
+                        tzinfo=UTC,
+                    ),
+                    source="TradeRequest.fx_rate_to_usd",
+                )
+        has_short_leg = any(leg.side is PositionSide.SHORT for leg in legs)
+        credit_structure = risk.total_cost <= 0 and has_short_leg
+        buying_power_required = credit_structure or mixed_expiry
+        budget_candidate = BudgetCandidate(
+            candidate_id=f"cand-{stable_hash(identity)[:16]}",
+            architecture=architecture.value,
+            currency="USD",
+            required_entry_cash=risk.total_cost,
+            maximum_loss=None if mixed_expiry else risk.maximum_loss,
+            buying_power_requirement=(
+                risk.maximum_loss if credit_structure and not mixed_expiry else None
+            ),
+            buying_power_required=buying_power_required,
+            buying_power_status=(
+                CapitalRequirementStatus.ESTIMATED_ANALYTICAL_BOUND
+                if credit_structure and not mixed_expiry
+                else CapitalRequirementStatus.UNKNOWN
+                if buying_power_required
+                else CapitalRequirementStatus.NOT_REQUIRED
+            ),
+            quantity=quantity,
+            as_of=max(leg.quote.quote_timestamp for leg in legs),
+            mixed_expiry=mixed_expiry,
+            managed_exit_deadline=(expirations[0] - timedelta(days=1) if mixed_expiry else None),
+            analytical_loss_bound=None,
+            analytical_bound_validated=False,
+            legacy_common_expiry_maximum_loss=(risk.maximum_loss if mixed_expiry else None),
+        )
+        budget_evaluation = evaluate_budget_policy(
+            budget_candidate,
+            budget_policy,
+            fx,
+            broker_context,
+        )
+        budget_diagnostics = budget_evaluation.diagnostics
+        lifecycle_capital_requirement = budget_evaluation.lifecycle_capital_requirement
+        hard_budget_statuses = {
+            BudgetStatus.EXCEEDS_HARD_BUDGET_CEILING,
+            BudgetStatus.MAXIMUM_LOSS_EXCEEDED,
+            BudgetStatus.BUYING_POWER_EXCEEDED,
+            BudgetStatus.FX_REQUIRED,
+        }
+        if budget_diagnostics.budget_status in hard_budget_statuses:
+            hard_vetoes.append(budget_diagnostics.budget_status.value)
+        if "BELOW_HARD_MINIMUM_SPEND" in budget_diagnostics.reason_codes:
+            hard_vetoes.append("BELOW_HARD_MINIMUM_SPEND")
+        if not budget_diagnostics.paper_eligible:
+            research_restrictions.extend(budget_diagnostics.reason_codes)
     if not risk.bounded:
         hard_vetoes.append("UNBOUNDED_RISK")
     if not horizon_compatible:
@@ -187,11 +268,7 @@ def build_candidate(
         hard_vetoes.append("THESIS_INCOMPATIBLE")
     if not liquidity_compatible:
         hard_vetoes.append("LIQUIDITY_FAILED")
-    if (
-        len(legs) > 1
-        and synthetic_combo_relative_spread
-        > liquidity_policy.maximum_relative_spread
-    ):
+    if len(legs) > 1 and synthetic_combo_relative_spread > liquidity_policy.maximum_relative_spread:
         hard_vetoes.append("COMBO_SPREAD_FAILED")
     return CompiledStrategyCandidate(
         candidate_id=f"cand-{stable_hash(identity)[:16]}",
@@ -216,6 +293,9 @@ def build_candidate(
             "A timestamped broker combo quote can supersede the synthetic leg market.",
         ],
         hard_vetoes=hard_vetoes,
+        research_restrictions=research_restrictions,
+        budget_diagnostics=budget_diagnostics,
+        lifecycle_capital_requirement=lifecycle_capital_requirement,
     )
 
 

@@ -30,6 +30,8 @@ capacité, jamais une promesse de rendement.
 | M0.1 five-score bridge | `production_ready_offline` | Copie déterministe des scores canoniques et de leur scope ; leur calibration financière reste inchangée. |
 | M0.1 event-date et mixed-expiry | `production_ready_offline` | Timing et deadline testés ; lifecycle après première échéance volontairement exclu. |
 | M0 marge et FX | `experimental_offline` | Architecture explicite ; marge broker et mode FX réel restent à confirmer. |
+| M0.2 FlexibleBudgetPolicyV2 et diagnostics | `production_ready_offline` | Contrats/gates testés ; ne valide ni capital broker réel ni décision financière. |
+| M0.2 capital mixed-expiry | `experimental_offline` | Fail-closed sans what-if broker ou borne analytique validée ; scenario grids non probants. |
 | Moteur contractuel V10.1 et contrôle américain QuantLib | `production_ready_offline` | Dépend encore de la qualité des quotes d’entrée. |
 | Provenance et cutoff | `production_ready_offline` | La complétude dépend des connecteurs fournis. |
 | Normalisation déterministe des événements | `experimental_offline` | Revue humaine et calibration des règles requises. |
@@ -74,3 +76,18 @@ d'exécution prospective.
 
 `NEXT_PHASE = M — OPRA READ-ONLY LIVE DATA + SHADOW/PAPER VALIDATION`. Cette phase n'est pas
 lancée par M0.
+
+## Readiness M0.2
+
+`M0_2_STATUS = COMPLETE`, `FLEXIBLE_BUDGET_POLICY = READY` et
+`PRE_OPRA_LOGIC_STATUS = COMPLETE` signifient que le configurateur V2, les hard gates parallèles,
+les quantités entières, le FX point-in-time, le ticket 1.2 et le blocage mixed-expiry non prouvé
+sont couverts hors ligne. Les anciens runs restent V1 et leurs hashes ne changent pas. Les cinq
+scores ne sont pas retunés.
+
+Le holdout reste `UNOPENED`; OPRA et Phase M restent `NOT_STARTED`. La marge/buying power broker,
+les commissions what-if, les quotes combo/NBBO, les fills et la campagne shadow/paper restent des
+dépendances externes de promotion.
+
+`NEXT_PHASE = M — OPRA READ-ONLY + SHADOW/PAPER VALIDATION`. M0.2 prépare sa configuration mais
+ne lance aucune connexion ni activité paper.

@@ -1,6 +1,6 @@
 # TTWO — Long call
 
-- Ticket schema: `1.1`
+- Ticket schema: `1.2`
 - Fixture status: `SYNTHETIC_TEST_FIXTURE`
 - Classification: `research_candidate`
 - Market timestamp: `2026-07-18T12:00:00+00:00`
@@ -12,6 +12,28 @@
 - Managed exit deadline: `n/a`
 - Intraday precision: `APPROXIMATED_DATE_ENGINE`
 - Intraday warning: American FD engine uses date-level exercise grid; intraday exposure is approximate.
+
+## Budget
+
+- Policy version: `1.0`
+- Currency: `USD`
+- Target: $5,000.00
+- Preferred lower: $0.00
+- Allowed overspend: $0.00
+- Hard ceiling: $5,000.00
+- Maximum loss cap: $5,000.00
+- Buying-power cap: $5,000.00
+
+## This trade — Budget
+
+- Entry cash: $3,002.15
+- Maximum loss: $3,002.15
+- Buying power: UNKNOWN
+- Effective capital: $3,002.15
+- Delta vs target: $-1,997.85 (-39.96%)
+- Headroom: +$1,997.85
+- Status: `WITHIN_PREFERRED_RANGE`
+- Eligible / research / paper: `True` / `True` / `True`
 
 ## Legs
 
