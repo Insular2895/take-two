@@ -134,8 +134,10 @@ def _quote_liquidity(quote: OptionQuote) -> float:
 def estimate_execution(candidate: StrategyCandidate, bundle: MarketDataBundle) -> ExecutionEstimate:
     theoretical_mid = 0.0
     market_cost = 0.0
-    premium_paid = 0.0
-    premium_received = 0.0
+    theoretical_mid_premium_paid = 0.0
+    theoretical_mid_premium_received = 0.0
+    executable_premium_paid = 0.0
+    executable_premium_received = 0.0
     fees = 0.0
     slippage = 0.0
     liquidity_scores: list[float] = []
@@ -146,8 +148,15 @@ def estimate_execution(candidate: StrategyCandidate, bundle: MarketDataBundle) -
         side = leg.side.sign
         if leg.instrument_type == "stock":
             assert leg.stock_price is not None
-            theoretical_mid += side * leg.quantity * leg.stock_price
-            market_cost += side * leg.quantity * leg.stock_price
+            stock_cash = leg.quantity * leg.stock_price
+            theoretical_mid += side * stock_cash
+            market_cost += side * stock_cash
+            if leg.side is PositionSide.LONG:
+                theoretical_mid_premium_paid += stock_cash
+                executable_premium_paid += stock_cash
+            else:
+                theoretical_mid_premium_received += stock_cash
+                executable_premium_received += stock_cash
             if bundle.portfolio.stock_commission is not None:
                 fees += bundle.portfolio.stock_commission
             if bundle.portfolio.stock_slippage_bps is not None:
@@ -173,9 +182,11 @@ def estimate_execution(candidate: StrategyCandidate, bundle: MarketDataBundle) -
         theoretical_mid += side * leg.quantity * multiplier * mid
         market_cost += side * leg.quantity * multiplier * executable_price
         if leg.side is PositionSide.LONG:
-            premium_paid += leg.quantity * multiplier * mid
+            theoretical_mid_premium_paid += leg.quantity * multiplier * mid
+            executable_premium_paid += leg.quantity * multiplier * executable_price
         else:
-            premium_received += leg.quantity * multiplier * mid
+            theoretical_mid_premium_received += leg.quantity * multiplier * mid
+            executable_premium_received += leg.quantity * multiplier * executable_price
         if bundle.portfolio.commission_per_option_contract is not None:
             fees += leg.quantity * bundle.portfolio.commission_per_option_contract
         if bundle.portfolio.slippage_per_option_contract is not None:
@@ -187,7 +198,10 @@ def estimate_execution(candidate: StrategyCandidate, bundle: MarketDataBundle) -
     if bid_ask_cost < -1e-8:
         raise ValueError("entry bid/ask cost cannot improve on the declared midpoint")
     bid_ask_cost = max(bid_ask_cost, 0.0)
-    total_entry_cost = theoretical_mid + bid_ask_cost + fees + slippage
+    executable_net_premium = executable_premium_paid - executable_premium_received
+    if abs(executable_net_premium - market_cost) > 1e-8:
+        raise ValueError("executable leg premiums do not reconcile with market cash flow")
+    total_entry_cost = executable_net_premium + fees + slippage
     margin_requirement: float | None = None
     margin_status = MarginStatus.NOT_REQUIRED
     total_capital_required: float | None = max(total_entry_cost, 0.0)
@@ -230,6 +244,8 @@ def estimate_execution(candidate: StrategyCandidate, bundle: MarketDataBundle) -
 
     return ExecutionEstimate(
         theoretical_mid=round(theoretical_mid, 6),
+        # Preserve the historical all-in semantics of these compatibility fields.
+        # Schema 1.1 callers use executable_net_premium for premium-only economics.
         executable_debit=round(max(total_entry_cost, 0.0), 6),
         executable_credit=round(max(-total_entry_cost, 0.0), 6),
         fees=round(fees, 6),
@@ -238,8 +254,8 @@ def estimate_execution(candidate: StrategyCandidate, bundle: MarketDataBundle) -
         margin_requirement=margin_requirement,
         liquidity_score=min(liquidity_scores, default=1.0),
         notes=notes,
-        premium_paid=round(premium_paid, 6),
-        premium_received=round(premium_received, 6),
+        premium_paid=round(theoretical_mid_premium_paid, 6),
+        premium_received=round(theoretical_mid_premium_received, 6),
         net_premium=round(theoretical_mid, 6),
         bid_ask_cost=round(bid_ask_cost, 6),
         fx_conversion_cost=None,
@@ -249,6 +265,13 @@ def estimate_execution(candidate: StrategyCandidate, bundle: MarketDataBundle) -
         margin_status=margin_status,
         execution_status=ExecutionEstimateStatus.INDICATIVE,
         combo_execution_status="INDICATIVE",
+        theoretical_mid_premium_paid=round(theoretical_mid_premium_paid, 6),
+        theoretical_mid_premium_received=round(theoretical_mid_premium_received, 6),
+        theoretical_mid_net_premium=round(theoretical_mid, 6),
+        executable_premium_paid=round(executable_premium_paid, 6),
+        executable_premium_received=round(executable_premium_received, 6),
+        executable_net_premium=round(executable_net_premium, 6),
+        total_entry_cash_flow=round(total_entry_cost, 6),
     )
 
 

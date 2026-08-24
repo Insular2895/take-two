@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.12.1 — 2026-08-24
+
+### M0.1 final pre-OPRA trade economics corrections
+
+- Split theoretical midpoint premiums from executable ask-paid/bid-received premiums while
+  preserving readable ticket 1.0 compatibility fields and exact signed cost reconciliation.
+- Added explicit close, hold-to-expiry, exercise/assignment/settlement and mixed-expiry managed
+  exit paths; expiration no longer receives fictitious option-closing costs.
+- Expanded the Markdown ticket with complete carry/decay economics, net PnL distribution metrics,
+  canonical five-score snapshots, event timing and applied exit costs.
+- Enforced real-world path-state requirements for expected PnL, event-date-aware IV crush, and the
+  configurable `CLOSE_BEFORE_FIRST_EXPIRY` lifecycle policy.
+- Regenerated schema 1.1 golden/probability fixtures without opening the holdout, connecting OPRA,
+  or adding any order capability.
+
 ## 0.12.0 — 2026-08-24
 
 ### M0 Greeks, Carry & Trade Economics hardening

@@ -13,18 +13,29 @@
 - Exit spread, exit slippage and closing costs are configured estimates. Real NBBO, simultaneous
   combo execution, fill quality, market depth and prospective slippage remain `PENDING_OPRA` or
   `PENDING_PAPER_VALIDATION`.
+- Hold-to-expiry economics never charge an option-closing spread, slippage or commission. Known
+  exercise/assignment/settlement fees are applied only when relevant; unknown applicable fees
+  block the affected PnL/root. Broker-specific delivery, exercise and assignment outcomes remain
+  `PENDING_BROKER`.
 - Broker margin remains `PENDING_BROKER` unless an explicit future what-if value is supplied.
   Unknown margin is null, never zero; analytical bounded-risk estimates are visibly labeled.
-- `P(touch)` is available only from admissible full `P` paths. The M0 golden ticket has no promoted
-  real-world probability model, so probability fields remain null rather than inheriting `Q`
-  pricing simulations.
+- `P(touch)` is available only from admissible `P` paths. Distribution PnL additionally requires
+  full economic states or an explicit future-IV valuation rule. The main M0.1 golden ticket has no
+  promoted real-world probability model, so expected PnL and probabilities remain null rather than
+  inheriting `Q` pricing simulations. The separate probability fixture is synthetic only.
 - Exact Shapley attribution removes factor ordering, but attribution is still model- and
   state-definition-dependent. Taylor attribution remains a local explanation with a visible
   residual; full repricing is primary.
 - Treasury CMT inputs retain their par-yield identity. M0 provides curve metadata/interpolation
   architecture but does not claim a bootstrapped arbitrage-free zero curve.
-- Mixed-expiry carry stops at the earliest leg expiry. Post-expiry settlement, exercise and cash
-  management require a separate lifecycle model.
+- Mixed-expiry structures are forced to `CLOSE_BEFORE_FIRST_EXPIRY` at a configured buffer. The
+  engine intentionally does not model calendars/diagonals after the first leg expiry, assignment,
+  structure transformation, stock delivery or post-expiry cash management.
+- A canonical five-score snapshot may be candidate-specific or `RUN_GLOBAL_CONTEXT`. The bridge
+  copies scores but does not calibrate them, create a composite or infer candidate ownership from a
+  global artifact.
+- Dated `EVENT_IV_CRUSH` is a configured sensitivity, not an event forecast. Timing and
+  event-to-expiry bucketing are deterministic; the shift sizes remain uncalibrated configuration.
 
 - Le panel options réel contient 25 observations alignées et seulement 10 tests OOS
   non chevauchants, contre 41 observations requises par la politique formelle. Les

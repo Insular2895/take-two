@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
+
 from take_two_options.candidates import generate_candidates
+from take_two_options.decision.quality_scores import FiveScoreReport
 from take_two_options.domain import DecisionReport, MarketDataBundle, ModelReadiness
 from take_two_options.pricing import analyze_risk
 from take_two_options.quantitative.trade_economics import build_trade_economics_ticket
@@ -13,7 +16,13 @@ from take_two_options.validation import apply_vetoes, freshness_is_stale
 from take_two_options.vol_surface import surface_diagnostics
 
 
-def analyze_bundle(bundle: MarketDataBundle) -> DecisionReport:
+def analyze_bundle(
+    bundle: MarketDataBundle,
+    *,
+    canonical_five_score_reports: Mapping[str, FiveScoreReport] | None = None,
+    canonical_ranked_candidate_ids: Sequence[str] | None = None,
+    run_global_five_score_report: FiveScoreReport | None = None,
+) -> DecisionReport:
     candidates = generate_candidates(bundle)
     for candidate in candidates:
         analyze_risk(candidate, bundle)
@@ -23,6 +32,24 @@ def analyze_bundle(bundle: MarketDataBundle) -> DecisionReport:
         score_candidate(candidate, bundle)
 
     ranked_candidate_ids = rank_candidates(candidates)
+    if canonical_ranked_candidate_ids is not None:
+        canonical_rank = list(canonical_ranked_candidate_ids)
+        if canonical_five_score_reports is None:
+            raise ValueError("canonical ranking requires candidate-level five-score reports")
+        if len(canonical_rank) != len(set(canonical_rank)):
+            raise ValueError("canonical ranking cannot contain duplicate candidate IDs")
+        if set(canonical_rank) != set(ranked_candidate_ids):
+            raise ValueError("canonical ranking must cover exactly the rank-eligible candidates")
+        missing_score_reports = [
+            candidate_id
+            for candidate_id in canonical_rank
+            if candidate_id not in canonical_five_score_reports
+        ]
+        if missing_score_reports:
+            raise ValueError(
+                f"canonical ranking is missing five-score reports: {missing_score_reports}"
+            )
+        ranked_candidate_ids = canonical_rank
     if bundle.trade_economics.analysis_mode is AnalysisMode.DEEP_ANALYSIS:
         candidate_by_id = {candidate.id: candidate for candidate in candidates}
         deep_ids = [
@@ -31,7 +58,16 @@ def analyze_bundle(bundle: MarketDataBundle) -> DecisionReport:
             if candidate_by_id[candidate_id].legs
         ][: bundle.trade_economics.deep_analysis_candidate_limit]
         for candidate_id in deep_ids:
-            build_trade_economics_ticket(candidate_by_id[candidate_id], bundle)
+            score_report = (
+                canonical_five_score_reports.get(candidate_id)
+                if canonical_five_score_reports is not None
+                else None
+            )
+            build_trade_economics_ticket(
+                candidate_by_id[candidate_id],
+                bundle,
+                canonical_five_score_report=score_report or run_global_five_score_report,
+            )
 
     data_issues: list[str] = []
     if freshness_is_stale(bundle.underlying.freshness, bundle):

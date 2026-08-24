@@ -1,7 +1,7 @@
 # M0 Greeks, Carry & Trade Economics
 
-Version: `1.0`
-Status: `COMPLETE_PRE_OPRA` for offline mechanics
+Version: `1.1` (`1.0` remains readable)
+Status: `PRE_OPRA_LOGIC_COMPLETE` for offline mechanics
 Scope: read-only research; no order or position mutation capability
 
 ## Purpose
@@ -30,6 +30,24 @@ every rejected candidate:
 The committed pre-OPRA configuration selects `deep_analysis` with a candidate limit. Library
 fixtures default to `screen` so legacy pipelines remain fast.
 
+## M0.1 corrective contract
+
+M0.1 hardens seven existing trade-economics surfaces without adding a model family or live-data
+path:
+
+- theoretical midpoint premiums and executable bid/ask premiums are separate and reconcile without
+  counting spread twice;
+- scenario and breakeven rows carry an explicit exit path, and expiration never inherits a
+  fictitious option-closing spread, slippage or commission;
+- the human renderer exposes theta/capital, all configured carry percentages, interval decay rates
+  and acceleration;
+- `DistributionPnLMetrics` is available only under a declared real-world path valuation contract;
+- the ticket copies the five canonical score dimensions and their candidate/global scope without
+  defining another formula;
+- dated event-crush scenarios use event timing and event-to-expiry tenor;
+- mixed-expiry structures use only `CLOSE_BEFORE_FIRST_EXPIRY` with a configurable calendar-day
+  buffer.
+
 ## Economic state and full repricing
 
 For a position with legs `i`, the state value is:
@@ -42,8 +60,9 @@ Stock legs use their underlying-unit quantity. Option legs use the selected Euro
 QuantLib finite-difference pricer, the declared dividend mode, the contract multiplier and each
 leg's own IV unless a configured transformation changes it.
 
-At and after expiration, an option leg is replaced by intrinsic value. Mixed-expiry carry is
-clipped at the earliest expiry; post-expiry settlement cashflows require a separate model and are
+At expiration, an option leg is replaced by intrinsic value. Same-expiry payoff economics apply
+only known exercise, assignment and settlement fees. Mixed-expiry carry is clipped at the managed
+deadline before the first expiry; post-expiry settlement cashflows require a separate model and are
 not silently invented.
 
 ## Time decay and carry
@@ -97,7 +116,10 @@ No configured stress is described as a calibrated volatility forecast.
 
 Each deep candidate receives a Spot × Time × IV matrix. Every cell exposes full-repriced value,
 gross PnL, round-trip cost, net PnL, net return when capital is known, assumptions and scenario
-status.
+status, as well as `exit_path`, the exit cost actually applied and its status. `EVENT_IV_CRUSH`
+uses `relative_to_event_date` when supplied: an option expiring first receives no shock, a
+pre-event valuation receives no post-event shock, and an eligible post-event leg is bucketed by
+event-to-expiry days. Without an event date it remains a visibly generic configured stress.
 
 ## Breakeven clock and target timing
 
@@ -106,11 +128,26 @@ refines roots by bisection and derives all profitable intervals. It supports mon
 non-monotonic payoffs. Roots are arrays; a butterfly can therefore expose two roots and one bounded
 profit interval.
 
-For each configured horizon and base/crush/expansion scenario:
+For a close before expiry:
 
 ```text
 NetPnL(S, t) = full_repriced_position_value - total_entry_cash_cost - estimated_exit_cost
 ```
+
+At a common expiration, intrinsic/settlement payoff replaces the option value and the exit cost
+contains only known applicable exercise, assignment and settlement fees. Closing spread,
+slippage and commission are zero because no closing trade is assumed. If an applicable expiry fee
+is unknown, the cell/root is null or `BLOCKED` rather than treating it as zero.
+
+For multiple expirations, the only M0.1 policy is `CLOSE_BEFORE_FIRST_EXPIRY`:
+
+```text
+managed_exit_deadline = first_expiry - mixed_expiry_close_buffer_calendar_days
+```
+
+Requested horizons beyond that timestamp are clipped and labeled
+`CLIPPED_BY_MIXED_EXPIRY_POLICY`; the terminal root is a `MANAGED_EXIT_BREAKEVEN`, not an
+expiration breakeven.
 
 Target timing evaluates every calendar-day arrival through the earliest expiry and returns
 `LATEST_PROFITABLE_ARRIVAL`, `PROFITABLE_THROUGH_EXPIRY`,
@@ -118,9 +155,17 @@ Target timing evaluates every calendar-day arrival through the earliest expiry a
 
 ## Costs, capital and margin
 
-Entry economics separate midpoint premium, executable bid/ask cost, slippage, commissions and FX
-cost. Missing two-sided or executable quotes are blockers, never zeroes. Per-leg BBO aggregation is
-`INDICATIVE`; it is not a live combo quote.
+Entry economics separately publish theoretical midpoint paid/received/net premium and executable
+ask-paid/bid-received/net premium. Their signed reconciliation is:
+
+```text
+executable_net_premium = theoretical_mid_net_premium + entry_bid_ask_cost
+total_entry_cash_flow = executable_net_premium + slippage + commission + known FX cost
+```
+
+The spread is therefore disclosed once, as the bridge from midpoint to executable premium, and is
+not added again to the executable amount. Missing two-sided or executable quotes are blockers,
+never zeroes. Per-leg BBO aggregation is `INDICATIVE`; it is not a live combo quote.
 
 Exit spread, slippage and commission are symmetric, configurable estimates with status
 `ESTIMATED_CONFIGURED_EXECUTION_MODEL`. Round-trip costs reconcile exactly to known entry and exit
@@ -146,6 +191,14 @@ It is distinct from terminal-above/below probability and includes first-touch co
 median first-touch time, Wilson interval and effective sample size. Forecast tickets accept only
 measure `P` paths. `Q` pricing paths cannot become real-world probabilities. Without an admissible
 promoted model, every probability field is null with a machine-readable reason.
+
+`DistributionPnLMetrics` separately reports model-implied expected/median net PnL and return,
+profit/gain/loss probabilities, positive-loss VaR95/CVaR95, range, ESS, confidence intervals,
+model, measure, calibration status and assumptions. It requires either full economic paths
+(spot, time, per-leg IV, and material rates/FX) or spot paths plus an explicit
+`CONSTANT_LEG_IV_PATH_VALUATION` rule. Spot paths without such a rule yield null metrics and
+`INSUFFICIENT_STATE_PATHS_FOR_PNL_DISTRIBUTION`. All thresholds use capital at risk and all
+statistics use net PnL after the selected exit protocol.
 
 ## PnL attribution
 
@@ -179,13 +232,17 @@ European benchmark is provided when compatible with the dividend inputs.
 
 ## Trade ticket and safety boundary
 
-`TradeEconomicsTicket` version `1.0` contains legs, normalized Greeks, entry/exit/round-trip costs,
+`TradeEconomicsTicket` version `1.1` contains legs, normalized Greeks, entry/exit/round-trip costs,
 margin, payoff bounds, carry, leverage, scenarios, breakeven clock, target timing, attribution,
-probability availability, FX, liquidity, exercise risks, intensity, blockers and warnings.
+probability availability, distribution PnL, canonical five-score snapshots, FX, liquidity,
+exercise risks, intensity, blockers and warnings. The original 1.0 premium fields remain readable
+as compatibility aliases. Candidate-level score reports are preferred; a non-matching report is
+marked `RUN_GLOBAL_CONTEXT` and is never silently attributed to the candidate.
 
 Every ticket enforces:
 
 ```text
+read_only = true
 transmit = false
 what_if = true
 order_capability = forbidden

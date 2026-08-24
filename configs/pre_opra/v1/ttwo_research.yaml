@@ -210,7 +210,7 @@ report_policy:
     execution_quality: pre-opra-v2
 
 trade_economics:
-  schema_version: "1.0"
+  schema_version: "1.1"
   analysis_mode: deep_analysis
   deep_analysis_candidate_limit: 3
   time_decay_horizons_days: [1, 7, 30, 60, 90]
@@ -356,7 +356,12 @@ trade_economics:
     closing_commission_multiplier: 1.0
     fx_exit_cost_bps: null
     assignment_or_exercise_cost: null
+    exercise_cost: null
+    assignment_cost: null
+    settlement_cost: null
     status: ESTIMATED_CONFIGURED_EXECUTION_MODEL
+  mixed_expiry_lifecycle_policy: CLOSE_BEFORE_FIRST_EXPIRY
+  mixed_expiry_close_buffer_calendar_days: 1
   breakeven_solver:
     minimum_spot_multiplier: 0.0
     maximum_spot_multiplier: 3.0

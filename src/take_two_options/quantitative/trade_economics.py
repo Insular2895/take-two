@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from itertools import combinations
 from statistics import median
@@ -14,6 +15,7 @@ from take_two_options.american import (
     risk_free_rate_for_expiry,
     validate_dividend_treatment,
 )
+from take_two_options.decision.quality_scores import FiveScoreReport, QualityScore
 from take_two_options.domain import (
     ExerciseStyle,
     MarketDataBundle,
@@ -30,8 +32,16 @@ from take_two_options.trade_economics_models import (
     BreakevenClock,
     BreakevenResult,
     BreakevenSolverConfiguration,
+    DistributionAvailabilityStatus,
+    DistributionPnLMetrics,
+    EconomicPathState,
     EntryCostBreakdown,
+    EventLegEffect,
+    EventScenarioStatus,
     ExitCostEstimate,
+    ExitPath,
+    FiveScoreScope,
+    FiveScoreSnapshot,
     FullRepricingAttribution,
     FXAttribution,
     FXHandlingMode,
@@ -45,7 +55,9 @@ from take_two_options.trade_economics_models import (
     LiquidityDiagnostics,
     MarginEstimate,
     MarginStatus,
+    MixedExpiryLifecyclePolicy,
     PnLAttribution,
+    ProbabilityPnLValuationRule,
     ProbabilityStatus,
     ProfitInterval,
     RateScenario,
@@ -54,6 +66,7 @@ from take_two_options.trade_economics_models import (
     RoundTripCost,
     ScenarioCell,
     ScenarioMatrix,
+    ScoreDimensionSnapshot,
     TargetArrivalResult,
     TargetArrivalStatus,
     TimeDecayExposure,
@@ -92,6 +105,21 @@ _CONFIDENCE_ORDER = {
 }
 
 
+@dataclass(frozen=True)
+class _Lifecycle:
+    first_expiry: datetime | None
+    managed_exit_deadline: datetime | None
+    mixed_expiry: bool
+    policy: str
+
+
+@dataclass(frozen=True)
+class _ExitApplication:
+    cost: float | None
+    status: str
+    warnings: tuple[str, ...] = ()
+
+
 def _option_legs(candidate: StrategyCandidate) -> list[tuple[int, OptionQuote]]:
     output: list[tuple[int, OptionQuote]] = []
     for index, leg in enumerate(candidate.legs):
@@ -103,6 +131,53 @@ def _option_legs(candidate: StrategyCandidate) -> list[tuple[int, OptionQuote]]:
 def _effective_expiration(candidate: StrategyCandidate) -> datetime | None:
     expirations = [quote.contract.expiration for _, quote in _option_legs(candidate)]
     return min(expirations) if expirations else None
+
+
+def _lifecycle(candidate: StrategyCandidate, bundle: MarketDataBundle) -> _Lifecycle:
+    expirations = sorted({quote.contract.expiration for _, quote in _option_legs(candidate)})
+    if not expirations:
+        return _Lifecycle(None, None, False, "NOT_APPLICABLE")
+    first_expiry = expirations[0]
+    mixed = len(expirations) > 1
+    if not mixed:
+        return _Lifecycle(
+            first_expiry,
+            first_expiry,
+            False,
+            "SAME_EXPIRY_HOLD_TO_EXPIRY",
+        )
+    policy = bundle.trade_economics.mixed_expiry_lifecycle_policy
+    if policy is not MixedExpiryLifecyclePolicy.CLOSE_BEFORE_FIRST_EXPIRY:
+        raise ValueError("unsupported mixed-expiry lifecycle policy")
+    deadline = first_expiry - timedelta(
+        days=bundle.trade_economics.mixed_expiry_close_buffer_calendar_days
+    )
+    return _Lifecycle(first_expiry, deadline, True, policy.value)
+
+
+def _effective_scenario_time(
+    candidate: StrategyCandidate,
+    bundle: MarketDataBundle,
+    requested_time: datetime,
+) -> datetime:
+    lifecycle = _lifecycle(candidate, bundle)
+    if lifecycle.managed_exit_deadline is None:
+        return requested_time
+    return min(requested_time, lifecycle.managed_exit_deadline)
+
+
+def _exit_path_for_time(
+    candidate: StrategyCandidate,
+    bundle: MarketDataBundle,
+    valuation_time: datetime,
+) -> ExitPath:
+    lifecycle = _lifecycle(candidate, bundle)
+    deadline = lifecycle.managed_exit_deadline
+    if deadline is None or valuation_time < deadline:
+        return ExitPath.CLOSE_BEFORE_EXPIRY
+    if lifecycle.mixed_expiry:
+        return ExitPath.MIXED_EXPIRY_MANAGED_CLOSE
+    return ExitPath.HOLD_TO_EXPIRY
 
 
 def _intrinsic(spot: float, quote: OptionQuote) -> float:
@@ -151,20 +226,83 @@ def _scenario_volatility(
         if dte < boundary:
             shift_points = parameters.front_expiry_shift_vol_points or 0.0
     elif scenario_type is VolatilityScenarioType.EVENT_IV_CRUSH:
-        front = parameters.short_end_max_days or 90
-        back = parameters.long_end_min_days or 365
-        if dte <= front:
-            shift_points = parameters.front_expiry_shift_vol_points or 0.0
-        elif dte >= back:
-            shift_points = parameters.back_expiry_shift_vol_points or 0.0
-        else:
-            shift_points = parameters.mid_expiry_shift_vol_points or 0.0
+        shift_points = _event_leg_effect(quote, scenario, valuation_time).applied_vol_shift
     elif scenario_type in {
         VolatilityScenarioType.SPOT_UP_IV_DOWN,
         VolatilityScenarioType.SPOT_DOWN_IV_UP,
     }:
         shift_points = parameters.parallel_shift_vol_points or 0.0
     return max(base + shift_points * 0.01, 0.0001)
+
+
+def _event_leg_effect(
+    quote: OptionQuote,
+    scenario: VolatilityScenario,
+    valuation_time: datetime,
+) -> EventLegEffect:
+    if scenario.scenario_type is not VolatilityScenarioType.EVENT_IV_CRUSH:
+        return EventLegEffect(
+            contract_symbol=quote.contract.local_symbol,
+            event_status=EventScenarioStatus.NOT_APPLICABLE,
+            applied_vol_shift=0.0,
+        )
+    parameters = scenario.parameters
+    event_date = parameters.relative_to_event_date
+    front = parameters.short_end_max_days
+    back = parameters.long_end_min_days
+    if front is None or back is None:
+        raise ValueError("EVENT_IV_CRUSH requires configured tenor boundaries")
+    if event_date is None:
+        tenor_days = max(
+            math.ceil(
+                (quote.contract.expiration - valuation_time).total_seconds() / _SECONDS_PER_DAY
+            ),
+            0,
+        )
+        shift = (
+            parameters.front_expiry_shift_vol_points
+            if tenor_days <= front
+            else parameters.back_expiry_shift_vol_points
+            if tenor_days >= back
+            else parameters.mid_expiry_shift_vol_points
+        ) or 0.0
+        return EventLegEffect(
+            contract_symbol=quote.contract.local_symbol,
+            event_status=EventScenarioStatus.CONFIGURED_GENERIC_EVENT_STRESS_NO_DATE,
+            event_to_expiry_days=None,
+            applied_vol_shift=shift,
+        )
+    if quote.contract.expiration.date() < event_date:
+        return EventLegEffect(
+            contract_symbol=quote.contract.local_symbol,
+            event_date=event_date,
+            event_status=EventScenarioStatus.OPTION_EXPIRES_BEFORE_EVENT,
+            event_to_expiry_days=None,
+            applied_vol_shift=0.0,
+        )
+    event_to_expiry_days = (quote.contract.expiration.date() - event_date).days
+    if valuation_time.date() < event_date:
+        return EventLegEffect(
+            contract_symbol=quote.contract.local_symbol,
+            event_date=event_date,
+            event_status=EventScenarioStatus.EVENT_NOT_OCCURRED_YET,
+            event_to_expiry_days=event_to_expiry_days,
+            applied_vol_shift=0.0,
+        )
+    shift = (
+        parameters.front_expiry_shift_vol_points
+        if event_to_expiry_days <= front
+        else parameters.back_expiry_shift_vol_points
+        if event_to_expiry_days >= back
+        else parameters.mid_expiry_shift_vol_points
+    ) or 0.0
+    return EventLegEffect(
+        contract_symbol=quote.contract.local_symbol,
+        event_date=event_date,
+        event_status=EventScenarioStatus.EVENT_CRUSH_APPLIED,
+        event_to_expiry_days=event_to_expiry_days,
+        applied_vol_shift=shift,
+    )
 
 
 def _scenario_spot(spot: float, scenario: VolatilityScenario) -> float:
@@ -249,8 +387,7 @@ def _surface_stress_status(
     for values in transformed.values():
         ordered = sorted(values)
         if any(
-            right[1] + 1e-10 < left[1]
-            for left, right in zip(ordered, ordered[1:], strict=False)
+            right[1] + 1e-10 < left[1] for left, right in zip(ordered, ordered[1:], strict=False)
         ):
             return VolatilityScenarioStatus.SURFACE_STRESS_INVALID
     return VolatilityScenarioStatus.SURFACE_STRESS_VALID
@@ -265,6 +402,7 @@ def reprice_position(
     volatility_scenario: VolatilityScenario | None = None,
     rate_shift_basis_points: float = 0.0,
     rate_scenario: RateScenario | None = None,
+    leg_volatilities: Mapping[str, float] | None = None,
     time_grid: int | None = None,
     price_grid: int | None = None,
 ) -> float:
@@ -283,7 +421,9 @@ def reprice_position(
             value += scale * _intrinsic(spot, quote)
             continue
         volatility = (
-            _scenario_volatility(
+            leg_volatilities[quote.contract.local_symbol]
+            if leg_volatilities is not None and quote.contract.local_symbol in leg_volatilities
+            else _scenario_volatility(
                 quote,
                 bundle,
                 volatility_scenario,
@@ -293,6 +433,8 @@ def reprice_position(
             if volatility_scenario is not None
             else effective_volatility(bundle, quote).volatility
         )
+        if leg_volatilities is not None and quote.contract.local_symbol not in leg_volatilities:
+            raise ValueError("full economic paths require a volatility state for every option leg")
         scenario_rate_shift = (
             _rate_shift_for_expiry(
                 rate_scenario,
@@ -302,11 +444,14 @@ def reprice_position(
             if rate_scenario is not None
             else 0.0
         )
-        rate = risk_free_rate_for_expiry(
-            bundle,
-            valuation_time=valuation_time,
-            expiration=quote.contract.expiration,
-        ) + (rate_shift_basis_points + scenario_rate_shift) / 10_000.0
+        rate = (
+            risk_free_rate_for_expiry(
+                bundle,
+                valuation_time=valuation_time,
+                expiration=quote.contract.expiration,
+            )
+            + (rate_shift_basis_points + scenario_rate_shift) / 10_000.0
+        )
         value += scale * option_model_value(
             quote,
             bundle,
@@ -380,15 +525,16 @@ def _single_leg_estimates(
     base = value()
     delta, gamma = delta_gamma(spot, valuation_time)
     next_time = min(
-        valuation_time
-        + timedelta(days=bundle.trade_economics.greek_bumps.time_bump_calendar_days),
+        valuation_time + timedelta(days=bundle.trade_economics.greek_bumps.time_bump_calendar_days),
         quote.contract.expiration,
     )
     theta = value(selected_time=next_time) - base
     vega = vega_at(valuation_time)
     rho = (
-        value(selected_rate=rate + rate_step) - value(selected_rate=rate - rate_step)
-    ) * 0.01 / (2.0 * rate_step)
+        (value(selected_rate=rate + rate_step) - value(selected_rate=rate - rate_step))
+        * 0.01
+        / (2.0 * rate_step)
+    )
     vanna_raw = (
         value(selected_spot=spot + spot_step, selected_volatility=volatility + vol_step)
         - value(selected_spot=spot + spot_step, selected_volatility=volatility - vol_step)
@@ -542,9 +688,7 @@ def calculate_leg_advanced_greeks(
                 bumps.volatility_bumps_vol_points[
                     min(index, len(bumps.volatility_bumps_vol_points) - 1)
                 ],
-                bumps.rate_bumps_basis_points[
-                    min(index, len(bumps.rate_bumps_basis_points) - 1)
-                ],
+                bumps.rate_bumps_basis_points[min(index, len(bumps.rate_bumps_basis_points) - 1)],
                 primary_grid,
             )
         )
@@ -653,15 +797,9 @@ def calculate_leg_advanced_greeks(
         vomma=measure("vomma", raw_key="vomma_raw"),
         charm_delta_drift_1_calendar_day=measure("charm"),
         veta_vega_drift_1_calendar_day=measure("veta"),
-        speed=(
-            measure("speed")
-            if bundle.trade_economics.advanced_greeks.display_speed
-            else None
-        ),
+        speed=(measure("speed") if bundle.trade_economics.advanced_greeks.display_speed else None),
         color_gamma_drift_1_calendar_day=(
-            measure("color")
-            if bundle.trade_economics.advanced_greeks.display_color
-            else None
+            measure("color") if bundle.trade_economics.advanced_greeks.display_color else None
         ),
         confidence=confidence,
         conventions=[
@@ -885,23 +1023,111 @@ def build_exit_cost_estimate(
         if policy.fx_exit_cost_bps is None:
             warnings.append("FX exit cost is unknown and remains null")
         else:
-            fx_cost = (
-                abs(execution.theoretical_mid) * policy.fx_exit_cost_bps / 10_000.0
-            )
-    exercise_cost = policy.assignment_or_exercise_cost
-    if any(leg.side is PositionSide.SHORT for leg in candidate.legs) and exercise_cost is None:
-        warnings.append("Assignment/exercise cost is unknown; broker validation remains pending")
-    total = bid_ask + slippage + commissions + (fx_cost or 0.0) + (exercise_cost or 0.0)
+            fx_cost = abs(execution.theoretical_mid) * policy.fx_exit_cost_bps / 10_000.0
+    option_legs = [leg for leg in candidate.legs if leg.option_quote is not None]
+    has_long_option = any(leg.side is PositionSide.LONG for leg in option_legs)
+    has_short_option = any(leg.side is PositionSide.SHORT for leg in option_legs)
+    exercise_cost = (
+        policy.exercise_cost
+        if policy.exercise_cost is not None
+        else policy.assignment_or_exercise_cost
+    )
+    assignment_cost = (
+        policy.assignment_cost
+        if policy.assignment_cost is not None
+        else policy.assignment_or_exercise_cost
+    )
+    hold_costs_known = (
+        (not has_long_option or exercise_cost is not None)
+        and (not has_short_option or assignment_cost is not None)
+        and (not option_legs or policy.settlement_cost is not None)
+    )
+    hold_cost_status = (
+        "CONFIGURED_EXERCISE_ASSIGN_SETTLEMENT_COSTS"
+        if hold_costs_known
+        else "BLOCKED_UNKNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST"
+    )
+    if not hold_costs_known:
+        warnings.append(
+            "Applicable exercise, assignment, or settlement costs are unknown and remain null"
+        )
+    # A close trade never includes exercise, assignment, or settlement fees.
+    total = bid_ask + slippage + commissions + (fx_cost or 0.0)
     return ExitCostEstimate(
+        exit_path=ExitPath.CLOSE_BEFORE_EXPIRY,
         estimated_exit_bid_ask_cost=round(bid_ask, 8),
         estimated_exit_slippage=round(slippage, 8),
         closing_commissions=round(commissions, 8),
         fx_exit_cost=None if fx_cost is None else round(fx_cost, 8),
-        assignment_or_exercise_cost_if_relevant=exercise_cost,
+        assignment_or_exercise_cost_if_relevant=None,
+        exercise_cost_if_relevant=(exercise_cost if has_long_option else None),
+        assignment_cost_if_relevant=(assignment_cost if has_short_option else None),
+        settlement_cost_if_relevant=(policy.settlement_cost if option_legs else None),
+        hold_to_expiry_cost_status=hold_cost_status,
         total_exit_cost=round(total, 8),
         status=policy.status,
+        exit_cost_status=policy.status.value,
         warnings=warnings,
     )
+
+
+def _expiry_exit_cost_application(
+    candidate: StrategyCandidate,
+    bundle: MarketDataBundle,
+    *,
+    spot: float,
+) -> _ExitApplication:
+    policy = bundle.trade_economics.exit_cost_model
+    total = 0.0
+    warnings: list[str] = []
+    any_settlement = False
+    for leg in candidate.legs:
+        quote = leg.option_quote
+        if quote is None or _intrinsic(spot, quote) <= 0:
+            continue
+        any_settlement = True
+        directional_cost = (
+            policy.exercise_cost if leg.side is PositionSide.LONG else policy.assignment_cost
+        )
+        if directional_cost is None:
+            directional_cost = policy.assignment_or_exercise_cost
+        if directional_cost is None or policy.settlement_cost is None:
+            warnings.append("Exercise, assignment, or settlement cost is applicable but unknown")
+            return _ExitApplication(
+                None,
+                "BLOCKED_UNKNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+                tuple(warnings),
+            )
+        total += leg.quantity * (directional_cost + policy.settlement_cost)
+    if not any_settlement:
+        return _ExitApplication(
+            0.0,
+            "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+        )
+    return _ExitApplication(
+        round(total, 8),
+        "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+    )
+
+
+def _exit_cost_application(
+    candidate: StrategyCandidate,
+    bundle: MarketDataBundle,
+    *,
+    exit_path: ExitPath,
+    spot: float,
+    close_exit_cost: ExitCostEstimate,
+) -> _ExitApplication:
+    if exit_path in {
+        ExitPath.CLOSE_BEFORE_EXPIRY,
+        ExitPath.MIXED_EXPIRY_MANAGED_CLOSE,
+    }:
+        return _ExitApplication(
+            close_exit_cost.total_exit_cost,
+            close_exit_cost.exit_cost_status,
+            tuple(close_exit_cost.warnings),
+        )
+    return _expiry_exit_cost_application(candidate, bundle, spot=spot)
 
 
 def build_round_trip_cost(
@@ -948,6 +1174,17 @@ def _entry_cost(candidate: StrategyCandidate) -> EntryCostBreakdown:
         execution_status=execution.execution_status,
         combo_execution_status=execution.combo_execution_status,
         warnings=list(execution.notes),
+        theoretical_mid_premium_paid=execution.theoretical_mid_premium_paid,
+        theoretical_mid_premium_received=execution.theoretical_mid_premium_received,
+        theoretical_mid_net_premium=execution.theoretical_mid_net_premium,
+        executable_premium_paid=execution.executable_premium_paid,
+        executable_premium_received=execution.executable_premium_received,
+        executable_net_premium=execution.executable_net_premium,
+        entry_bid_ask_cost=execution.bid_ask_cost,
+        entry_slippage=execution.slippage,
+        entry_commission=execution.fees,
+        entry_fx_cost=execution.fx_conversion_cost,
+        total_entry_cash_flow=execution.total_entry_cash_flow,
     )
 
 
@@ -981,11 +1218,12 @@ def calculate_time_decay_exposure(
     *,
     aggregate: AdvancedGreeks | None,
 ) -> TimeDecayExposure | None:
-    expiration = _effective_expiration(candidate)
-    if expiration is None:
+    lifecycle = _lifecycle(candidate, bundle)
+    terminal_time = lifecycle.managed_exit_deadline
+    if terminal_time is None:
         return None
     analysis_time = bundle.analysis_timestamp
-    if expiration <= analysis_time:
+    if terminal_time <= analysis_time:
         return None
     base_value = reprice_position(
         candidate,
@@ -993,12 +1231,14 @@ def calculate_time_decay_exposure(
         spot=bundle.underlying.price,
         valuation_time=analysis_time,
     )
-    expiry_days = max(math.ceil((expiration - analysis_time).total_seconds() / _SECONDS_PER_DAY), 1)
-    requested = [*bundle.trade_economics.time_decay_horizons_days, expiry_days]
+    terminal_days = max(
+        math.ceil((terminal_time - analysis_time).total_seconds() / _SECONDS_PER_DAY), 1
+    )
+    requested = [*bundle.trade_economics.time_decay_horizons_days, terminal_days]
     selected_times = sorted(
         {
             analysis_time,
-            *(min(analysis_time + timedelta(days=days), expiration) for days in requested),
+            *(min(analysis_time + timedelta(days=days), terminal_time) for days in requested),
         }
     )
     capital, capital_status = _capital_at_risk(candidate)
@@ -1074,14 +1314,10 @@ def calculate_time_decay_exposure(
     rate_30_60 = rate(30, 60)
     rate_60_90 = rate(60, 90)
     acceleration_30_60 = (
-        rate_30_60 - rate_0_30
-        if rate_30_60 is not None and rate_0_30 is not None
-        else None
+        rate_30_60 - rate_0_30 if rate_30_60 is not None and rate_0_30 is not None else None
     )
     acceleration_60_90 = (
-        rate_60_90 - rate_30_60
-        if rate_60_90 is not None and rate_30_60 is not None
-        else None
+        rate_60_90 - rate_30_60 if rate_60_90 is not None and rate_30_60 is not None else None
     )
     rates = [item for item in (rate_0_30, rate_30_60, rate_60_90) if item is not None]
     if len(rates) >= 2 and any(
@@ -1101,19 +1337,17 @@ def calculate_time_decay_exposure(
         else GreekConfidenceLevel.UNRELIABLE.value
     )
     warnings = []
-    if len({quote.contract.expiration for _, quote in _option_legs(candidate)}) > 1:
+    if lifecycle.mixed_expiry:
         warnings.append(
-            "Carry is clipped at the earliest leg expiry; post-expiry settlement cashflows "
-            "for mixed-expiry structures require a separate model"
+            "Calendar/diagonal lifecycle after the first leg expiry is intentionally not "
+            "modeled. M0.1 assumes managed closure before first expiry."
         )
     if crossed_dividend:
         warnings.append("Dividend/exercise-boundary effects must not be labeled pure theta")
     return TimeDecayExposure(
         current_net_theta=theta,
         theta_per_capital_per_day=(theta / capital if capital else None),
-        theta_capital_status=(
-            "AVAILABLE" if capital else "BLOCKED_UNKNOWN_CAPITAL_AT_RISK"
-        ),
+        theta_capital_status=("AVAILABLE" if capital else "BLOCKED_UNKNOWN_CAPITAL_AT_RISK"),
         flat_spot_1d=carry_at(1),
         flat_spot_7d=carry_at(7),
         flat_spot_30d=carry_at(30),
@@ -1134,6 +1368,7 @@ def calculate_time_decay_exposure(
             "Full repricing at flat spot with CONSTANT_LEG_IV.",
             "Each leg retains its own current IV; current theta is not multiplied by horizon.",
             f"Capital basis status: {capital_status}.",
+            f"Lifecycle policy: {lifecycle.policy}.",
         ],
         confidence=confidence,
         warnings=warnings,
@@ -1174,21 +1409,15 @@ def _liquidity_diagnostics(
 
 
 def _scenario_horizons(candidate: StrategyCandidate, bundle: MarketDataBundle) -> list[int]:
-    expiration = _effective_expiration(candidate)
-    if expiration is None:
+    lifecycle = _lifecycle(candidate, bundle)
+    deadline = lifecycle.managed_exit_deadline
+    if deadline is None:
         return bundle.trade_economics.scenario_horizons_days
-    expiry_days = max(
-        math.ceil(
-            (expiration - bundle.analysis_timestamp).total_seconds() / _SECONDS_PER_DAY
-        ),
+    terminal_days = max(
+        math.ceil((deadline - bundle.analysis_timestamp).total_seconds() / _SECONDS_PER_DAY),
         0,
     )
-    return sorted(
-        {
-            min(days, expiry_days)
-            for days in [*bundle.trade_economics.scenario_horizons_days, expiry_days]
-        }
-    )
+    return sorted({*bundle.trade_economics.scenario_horizons_days, terminal_days})
 
 
 def _spot_axis(candidate: StrategyCandidate, bundle: MarketDataBundle) -> list[float]:
@@ -1216,21 +1445,29 @@ def build_scenario_matrices(
         raise ValueError("candidate execution estimate is required")
     capital, _ = _capital_at_risk(candidate)
     horizons = _scenario_horizons(candidate, bundle)
+    lifecycle = _lifecycle(candidate, bundle)
+    entry_friction = (
+        execution.bid_ask_cost
+        + execution.slippage
+        + execution.fees
+        + (execution.fx_conversion_cost or 0.0)
+    )
     matrices: list[ScenarioMatrix] = []
     for scenario in bundle.trade_economics.volatility_scenarios:
         status = _surface_stress_status(bundle, scenario)
         cells: list[ScenarioCell] = []
         actual_spots = sorted(
-            {
-                _scenario_spot(value, scenario)
-                for value in _spot_axis(candidate, bundle)
-            }
+            {_scenario_spot(value, scenario) for value in _spot_axis(candidate, bundle)}
         )
         for horizon in horizons:
-            valuation_time = bundle.analysis_timestamp + timedelta(days=horizon)
-            expiration = _effective_expiration(candidate)
-            if expiration is not None:
-                valuation_time = min(valuation_time, expiration)
+            requested_time = bundle.analysis_timestamp + timedelta(days=horizon)
+            valuation_time = _effective_scenario_time(candidate, bundle, requested_time)
+            exit_path = _exit_path_for_time(candidate, bundle, valuation_time)
+            clipped_by_mixed_policy = (
+                lifecycle.mixed_expiry
+                and lifecycle.managed_exit_deadline is not None
+                and requested_time > lifecycle.managed_exit_deadline
+            )
             for spot in actual_spots:
                 value = reprice_position(
                     candidate,
@@ -1240,7 +1477,50 @@ def build_scenario_matrices(
                     volatility_scenario=scenario,
                 )
                 gross_pnl = value - execution.theoretical_mid
-                net_pnl = value - execution.total_entry_cost - round_trip.exit.total_exit_cost
+                applied_exit = _exit_cost_application(
+                    candidate,
+                    bundle,
+                    exit_path=exit_path,
+                    spot=spot,
+                    close_exit_cost=round_trip.exit,
+                )
+                net_pnl = (
+                    value - execution.total_entry_cost - applied_exit.cost
+                    if applied_exit.cost is not None
+                    else None
+                )
+                event_effects = (
+                    [
+                        _event_leg_effect(quote, scenario, valuation_time)
+                        for _, quote in _option_legs(candidate)
+                    ]
+                    if scenario.scenario_type is VolatilityScenarioType.EVENT_IV_CRUSH
+                    else []
+                )
+                event_statuses = {effect.event_status for effect in event_effects}
+                event_tenors = {
+                    effect.event_to_expiry_days
+                    for effect in event_effects
+                    if effect.event_to_expiry_days is not None
+                }
+                event_shifts = {effect.applied_vol_shift for effect in event_effects}
+                event_dates = {
+                    effect.event_date for effect in event_effects if effect.event_date is not None
+                }
+                event_status = (
+                    next(iter(event_statuses))
+                    if len(event_statuses) == 1
+                    else EventScenarioStatus.MIXED_LEG_EVENT_EFFECTS
+                    if event_statuses
+                    else EventScenarioStatus.NOT_APPLICABLE
+                )
+                scenario_status = (
+                    "CLIPPED_BY_MIXED_EXPIRY_POLICY"
+                    if clipped_by_mixed_policy
+                    else "MANAGED_CLOSE_BEFORE_FIRST_EXPIRY"
+                    if exit_path is ExitPath.MIXED_EXPIRY_MANAGED_CLOSE
+                    else status.value
+                )
                 cells.append(
                     ScenarioCell(
                         spot=round(spot, 8),
@@ -1249,11 +1529,36 @@ def build_scenario_matrices(
                         volatility_scenario=scenario.name,
                         estimated_position_value=round(value, 8),
                         gross_pnl=round(gross_pnl, 8),
-                        round_trip_cost=round_trip.total_round_trip_cost,
-                        net_pnl=round(net_pnl, 8),
-                        net_return=(net_pnl / capital if capital else None),
-                        scenario_status=status.value,
-                        assumptions=list(scenario.assumptions),
+                        round_trip_cost=(
+                            round(entry_friction + applied_exit.cost, 8)
+                            if applied_exit.cost is not None
+                            else None
+                        ),
+                        net_pnl=(round(net_pnl, 8) if net_pnl is not None else None),
+                        net_return=(net_pnl / capital if net_pnl is not None and capital else None),
+                        scenario_status=scenario_status,
+                        exit_path=exit_path,
+                        exit_cost_applied=applied_exit.cost,
+                        exit_cost_status=applied_exit.status,
+                        requested_horizon_days=horizon,
+                        effective_horizon_days=max(
+                            (valuation_time - bundle.analysis_timestamp).total_seconds()
+                            / _SECONDS_PER_DAY,
+                            0.0,
+                        ),
+                        event_date=(next(iter(event_dates)) if len(event_dates) == 1 else None),
+                        event_status=event_status,
+                        event_to_expiry_days=(
+                            next(iter(event_tenors)) if len(event_tenors) == 1 else None
+                        ),
+                        applied_vol_shift=(
+                            next(iter(event_shifts)) if len(event_shifts) == 1 else None
+                        ),
+                        event_leg_effects=event_effects,
+                        assumptions=[
+                            *scenario.assumptions,
+                            *applied_exit.warnings,
+                        ],
                     )
                 )
         matrices.append(
@@ -1265,7 +1570,13 @@ def build_scenario_matrices(
                 horizon_days_axis=horizons,
                 cells=cells,
                 warnings=(
-                    ["Surface stress failed available static-arbitrage diagnostics"]
+                    [
+                        "Calendar/diagonal lifecycle after the first leg expiry is "
+                        "intentionally not modeled. M0.1 assumes managed closure before "
+                        "first expiry."
+                    ]
+                    if lifecycle.mixed_expiry
+                    else ["Surface stress failed available static-arbitrage diagnostics"]
                     if status is VolatilityScenarioStatus.SURFACE_STRESS_INVALID
                     else ["Stress is leg-level only; it is not a calibrated surface forecast"]
                     if status is VolatilityScenarioStatus.LEG_LEVEL_STRESS_ONLY
@@ -1387,8 +1698,9 @@ def build_breakeven_clock(
     exit_cost: ExitCostEstimate,
 ) -> BreakevenClock | None:
     execution = candidate.execution_estimate
-    expiration = _effective_expiration(candidate)
-    if execution is None or expiration is None:
+    lifecycle = _lifecycle(candidate, bundle)
+    deadline = lifecycle.managed_exit_deadline
+    if execution is None or deadline is None:
         return None
     solver = bundle.trade_economics.breakeven_solver
     targets = [
@@ -1401,14 +1713,59 @@ def build_breakeven_clock(
     results: list[BreakevenResult] = []
     for scenario in bundle.trade_economics.volatility_scenarios[:3]:
         for horizon in [0, *_scenario_horizons(candidate, bundle)]:
-            valuation_time = min(bundle.analysis_timestamp + timedelta(days=horizon), expiration)
+            requested_time = bundle.analysis_timestamp + timedelta(days=horizon)
+            valuation_time = min(requested_time, deadline)
+            exit_path = _exit_path_for_time(candidate, bundle, valuation_time)
+            probe_exit = _exit_cost_application(
+                candidate,
+                bundle,
+                exit_path=exit_path,
+                spot=maximum_spot,
+                close_exit_cost=exit_cost,
+            )
+            clipped = lifecycle.mixed_expiry and requested_time > deadline
+
+            if probe_exit.cost is None:
+                results.append(
+                    BreakevenResult(
+                        horizon_days=horizon,
+                        valuation_time=valuation_time,
+                        volatility_scenario=scenario.name,
+                        break_even_roots=[],
+                        profit_intervals=[],
+                        status="BLOCKED",
+                        search_domain=(minimum_spot, maximum_spot),
+                        exit_path=exit_path,
+                        applied_exit_cost=None,
+                        exit_cost_status=probe_exit.status,
+                        breakeven_type=(
+                            "MANAGED_EXIT_BREAKEVEN"
+                            if lifecycle.mixed_expiry
+                            else "EXPIRATION_BREAKEVEN"
+                            if exit_path is ExitPath.HOLD_TO_EXPIRY
+                            else "CLOSE_BEFORE_EXPIRY_BREAKEVEN"
+                        ),
+                        warnings=list(probe_exit.warnings),
+                    )
+                )
+                continue
 
             def evaluator(
                 spot: float,
                 *,
                 evaluation_time: datetime = valuation_time,
                 volatility_scenario: VolatilityScenario = scenario,
+                selected_exit_path: ExitPath = exit_path,
             ) -> float:
+                application = _exit_cost_application(
+                    candidate,
+                    bundle,
+                    exit_path=selected_exit_path,
+                    spot=spot,
+                    close_exit_cost=exit_cost,
+                )
+                if application.cost is None:
+                    raise ValueError("exit cost became unknown inside breakeven domain")
                 return (
                     reprice_position(
                         candidate,
@@ -1418,7 +1775,7 @@ def build_breakeven_clock(
                         volatility_scenario=volatility_scenario,
                     )
                     - execution.total_entry_cost
-                    - exit_cost.total_exit_cost
+                    - application.cost
                 )
 
             roots, intervals = solve_breakeven_regions(
@@ -1427,6 +1784,22 @@ def build_breakeven_clock(
                 maximum_spot=maximum_spot,
                 config=solver,
             )
+            root_exit = (
+                _exit_cost_application(
+                    candidate,
+                    bundle,
+                    exit_path=exit_path,
+                    spot=roots[0],
+                    close_exit_cost=exit_cost,
+                )
+                if roots
+                else probe_exit
+            )
+            warnings = []
+            if not roots:
+                warnings.append("No root was found inside the configured search domain")
+            if clipped:
+                warnings.append("CLIPPED_BY_MIXED_EXPIRY_POLICY")
             results.append(
                 BreakevenResult(
                     horizon_days=horizon,
@@ -1436,18 +1809,29 @@ def build_breakeven_clock(
                     profit_intervals=intervals,
                     status="SOLVED" if roots else "NO_ROOT_IN_DOMAIN",
                     search_domain=(minimum_spot, maximum_spot),
-                    warnings=(
-                        ["No root was found inside the configured search domain"]
-                        if not roots
-                        else []
+                    exit_path=exit_path,
+                    applied_exit_cost=root_exit.cost,
+                    exit_cost_status=root_exit.status,
+                    breakeven_type=(
+                        "MANAGED_EXIT_BREAKEVEN"
+                        if lifecycle.mixed_expiry
+                        else "EXPIRATION_BREAKEVEN"
+                        if exit_path is ExitPath.HOLD_TO_EXPIRY
+                        else "CLOSE_BEFORE_EXPIRY_BREAKEVEN"
                     ),
+                    warnings=warnings,
                 )
             )
     return BreakevenClock(
         results=results,
         assumptions=[
-            "Net PnL includes entry cost and the configured estimated exit cost.",
+            "Close-before-expiry roots include configured close-out costs.",
+            (
+                "Hold-to-expiry roots exclude fictional option-closing spread, "
+                "slippage, and commission."
+            ),
             "Roots and profit intervals are solved from full repricing on a configured domain.",
+            f"Lifecycle policy: {lifecycle.policy}.",
         ],
     )
 
@@ -1459,8 +1843,9 @@ def build_target_arrivals(
     exit_cost: ExitCostEstimate,
 ) -> list[TargetArrivalResult]:
     execution = candidate.execution_estimate
-    expiration = _effective_expiration(candidate)
-    if execution is None or expiration is None:
+    lifecycle = _lifecycle(candidate, bundle)
+    deadline = lifecycle.managed_exit_deadline
+    if execution is None or deadline is None:
         return []
     targets = sorted(
         {
@@ -1468,16 +1853,36 @@ def build_target_arrivals(
             *(scenario.target_price for scenario in bundle.fundamental.scenarios),
         }
     )
-    maximum_days = max(
-        math.ceil((expiration - bundle.analysis_timestamp).total_seconds() / _SECONDS_PER_DAY),
-        0,
+    exact_days = max(
+        (deadline - bundle.analysis_timestamp).total_seconds() / _SECONDS_PER_DAY,
+        0.0,
     )
+    whole_days = math.floor(exact_days)
+    checkpoints = [
+        (day, bundle.analysis_timestamp + timedelta(days=day)) for day in range(whole_days + 1)
+    ]
+    if not checkpoints or checkpoints[-1][1] < deadline:
+        checkpoints.append((math.ceil(exact_days), deadline))
     output: list[TargetArrivalResult] = []
     for scenario in bundle.trade_economics.volatility_scenarios[:3]:
         for target in targets:
             flags: list[bool] = []
-            for day in range(maximum_days + 1):
-                valuation_time = min(bundle.analysis_timestamp + timedelta(days=day), expiration)
+            horizon_labels: list[int] = []
+            warnings: list[str] = []
+            for day, valuation_time in checkpoints:
+                exit_path = _exit_path_for_time(candidate, bundle, valuation_time)
+                application = _exit_cost_application(
+                    candidate,
+                    bundle,
+                    exit_path=exit_path,
+                    spot=target,
+                    close_exit_cost=exit_cost,
+                )
+                if application.cost is None:
+                    flags.append(False)
+                    horizon_labels.append(day)
+                    warnings.extend(application.warnings)
+                    continue
                 pnl = (
                     reprice_position(
                         candidate,
@@ -1487,26 +1892,40 @@ def build_target_arrivals(
                         volatility_scenario=scenario,
                     )
                     - execution.total_entry_cost
-                    - exit_cost.total_exit_cost
+                    - application.cost
                 )
                 flags.append(pnl >= 0)
-            profitable = [index for index, value in enumerate(flags) if value]
+                horizon_labels.append(day)
+            profitable = [horizon_labels[index] for index, value in enumerate(flags) if value]
             segments = sum(
-                value and (index == 0 or not flags[index - 1])
-                for index, value in enumerate(flags)
+                value and (index == 0 or not flags[index - 1]) for index, value in enumerate(flags)
             )
             if not profitable:
-                status = TargetArrivalStatus.NEVER_BREAKEVEN_AT_THIS_TARGET
+                status = (
+                    TargetArrivalStatus.TARGET_TOO_LATE_UNDER_MIXED_EXPIRY_POLICY
+                    if lifecycle.mixed_expiry
+                    else TargetArrivalStatus.NEVER_BREAKEVEN_AT_THIS_TARGET
+                )
                 latest = None
             elif segments > 1:
                 status = TargetArrivalStatus.NON_MONOTONIC_TIME_RELATION
-                latest = bundle.analysis_timestamp + timedelta(days=profitable[-1])
+                latest = min(
+                    bundle.analysis_timestamp + timedelta(days=profitable[-1]),
+                    deadline,
+                )
             elif flags[-1]:
-                status = TargetArrivalStatus.PROFITABLE_THROUGH_EXPIRY
-                latest = expiration
+                status = (
+                    TargetArrivalStatus.LATEST_PROFITABLE_ARRIVAL
+                    if lifecycle.mixed_expiry
+                    else TargetArrivalStatus.PROFITABLE_THROUGH_EXPIRY
+                )
+                latest = deadline
             else:
                 status = TargetArrivalStatus.LATEST_PROFITABLE_ARRIVAL
-                latest = bundle.analysis_timestamp + timedelta(days=profitable[-1])
+                latest = min(
+                    bundle.analysis_timestamp + timedelta(days=profitable[-1]),
+                    deadline,
+                )
             output.append(
                 TargetArrivalResult(
                     target_spot=target,
@@ -1514,6 +1933,8 @@ def build_target_arrivals(
                     status=status,
                     latest_profitable_arrival_date=latest,
                     profitable_horizons_days=profitable,
+                    managed_exit_deadline=(deadline if lifecycle.mixed_expiry else None),
+                    warnings=sorted(set(warnings)),
                 )
             )
     return output
@@ -1538,11 +1959,7 @@ def calculate_fx_attribution(
         raise ValueError("known FX handling requires entry and scenario rates")
     scenario = option_pnl_usd / scenario_fx_rate_usd_per_base
     constant = option_pnl_usd / entry_fx_rate_usd_per_base
-    fee = (
-        abs(scenario) * conversion_fee_bps / 10_000.0
-        if conversion_fee_bps is not None
-        else None
-    )
+    fee = abs(scenario) * conversion_fee_bps / 10_000.0 if conversion_fee_bps is not None else None
     return FXAttribution(
         mode=mode,
         option_pnl_usd=option_pnl_usd,
@@ -1573,9 +1990,7 @@ def calculate_touch_probability(
     }
     if paths is None or unavailable:
         status = (
-            calibration_status
-            if unavailable
-            else ProbabilityStatus.PROBABILITY_MODEL_NOT_AVAILABLE
+            calibration_status if unavailable else ProbabilityStatus.PROBABILITY_MODEL_NOT_AVAILABLE
         )
         return TouchProbabilityMetrics(
             target=target,
@@ -1627,6 +2042,306 @@ def calculate_touch_probability(
     )
 
 
+def _unavailable_distribution(
+    *,
+    model: str | None,
+    calibration_status: ProbabilityStatus,
+    reason: str,
+    assumptions: Sequence[str] = (),
+) -> DistributionPnLMetrics:
+    return DistributionPnLMetrics(
+        model=model,
+        calibration_status=calibration_status,
+        availability_status=DistributionAvailabilityStatus.UNAVAILABLE,
+        missing_reason=reason,
+        assumptions=list(assumptions),
+    )
+
+
+def _linear_quantile(values: Sequence[float], probability: float) -> float:
+    if not values:
+        raise ValueError("quantile requires at least one value")
+    ordered = sorted(values)
+    location = (len(ordered) - 1) * probability
+    lower = math.floor(location)
+    upper = math.ceil(location)
+    if lower == upper:
+        return ordered[lower]
+    weight = location - lower
+    return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
+
+
+def calculate_distribution_pnl_metrics(
+    candidate: StrategyCandidate,
+    bundle: MarketDataBundle,
+    *,
+    close_exit_cost: ExitCostEstimate,
+    economic_paths: Sequence[Sequence[EconomicPathState]] | None = None,
+    spot_paths: Sequence[Sequence[float]] | None = None,
+    spot_path_horizon_days: int | None = None,
+    spot_path_valuation_rule: ProbabilityPnLValuationRule | None = None,
+    model: str | None,
+    measure: Measure | None,
+    calibration_status: ProbabilityStatus,
+) -> DistributionPnLMetrics:
+    """Calculate net pathwise PnL only under a declared, sufficient state contract."""
+    if economic_paths is not None and spot_paths is not None:
+        raise ValueError("provide either full economic paths or spot paths, not both")
+    if calibration_status in {
+        ProbabilityStatus.PROBABILITY_MODEL_NOT_AVAILABLE,
+        ProbabilityStatus.PROBABILITY_MODEL_NOT_PROMOTED,
+    }:
+        return _unavailable_distribution(
+            model=model,
+            calibration_status=calibration_status,
+            reason=calibration_status.value,
+        )
+    if measure is not Measure.REAL_WORLD:
+        raise ValueError("expected PnL requires real-world measure P")
+    if model is None:
+        return _unavailable_distribution(
+            model=None,
+            calibration_status=calibration_status,
+            reason="PROBABILITY_MODEL_NOT_PROMOTED",
+        )
+    if economic_paths is None and spot_paths is None:
+        return _unavailable_distribution(
+            model=model,
+            calibration_status=calibration_status,
+            reason="INSUFFICIENT_STATE_PATHS_FOR_PNL_DISTRIBUTION",
+        )
+    if spot_paths is not None and spot_path_valuation_rule is None:
+        return _unavailable_distribution(
+            model=model,
+            calibration_status=calibration_status,
+            reason="INSUFFICIENT_STATE_PATHS_FOR_PNL_DISTRIBUTION",
+            assumptions=["Spot paths were supplied without an authorized future-IV rule."],
+        )
+    if spot_paths is not None and spot_path_horizon_days is None:
+        raise ValueError("spot paths require an explicit exit horizon")
+
+    execution = candidate.execution_estimate
+    if execution is None:
+        raise ValueError("candidate execution estimate is required")
+    lifecycle = _lifecycle(candidate, bundle)
+    deadline = lifecycle.managed_exit_deadline
+    net_pnls: list[float] = []
+    assumptions: list[str] = []
+
+    def net_pnl_at_state(
+        *,
+        spot: float,
+        valuation_time: datetime,
+        leg_volatilities: Mapping[str, float] | None,
+        rate_shift_basis_points: float = 0.0,
+        scenario_fx_rate: float | None = None,
+    ) -> float | None:
+        effective_time = min(valuation_time, deadline) if deadline is not None else valuation_time
+        exit_path = _exit_path_for_time(candidate, bundle, effective_time)
+        exit_application = _exit_cost_application(
+            candidate,
+            bundle,
+            exit_path=exit_path,
+            spot=spot,
+            close_exit_cost=close_exit_cost,
+        )
+        if exit_application.cost is None:
+            return None
+        value = reprice_position(
+            candidate,
+            bundle,
+            spot=spot,
+            valuation_time=effective_time,
+            rate_shift_basis_points=rate_shift_basis_points,
+            leg_volatilities=leg_volatilities,
+        )
+        entry_cash = execution.total_entry_cost
+        exit_cash = exit_application.cost
+        if bundle.portfolio.currency != bundle.underlying.currency:
+            entry_fx = bundle.trade_economics.entry_fx_rate_usd_per_base
+            if entry_fx is None or scenario_fx_rate is None:
+                return None
+            value /= scenario_fx_rate
+            exit_cash /= scenario_fx_rate
+            entry_cash /= entry_fx
+        return value - entry_cash - exit_cash
+
+    if economic_paths is not None:
+        if not economic_paths or any(not path for path in economic_paths):
+            raise ValueError("economic paths must be non-empty")
+        assumptions.append(
+            "FULL_ECONOMIC_PATH_VALUATION: spot, time, per-leg IV, declared rate shift, and "
+            "material FX state are used at the managed exit checkpoint."
+        )
+        for economic_path in economic_paths:
+            if any(
+                left.valuation_time > right.valuation_time
+                for left, right in zip(economic_path, economic_path[1:], strict=False)
+            ):
+                raise ValueError("economic path timestamps must be chronological")
+            eligible = (
+                [
+                    state
+                    for state in economic_path
+                    if deadline is None or state.valuation_time <= deadline
+                ]
+                if lifecycle.mixed_expiry
+                else list(economic_path)
+            )
+            if not eligible:
+                return _unavailable_distribution(
+                    model=model,
+                    calibration_status=calibration_status,
+                    reason="NO_PATH_STATE_AT_OR_BEFORE_MANAGED_EXIT_DEADLINE",
+                    assumptions=assumptions,
+                )
+            state = eligible[-1]
+            pnl = net_pnl_at_state(
+                spot=state.spot,
+                valuation_time=state.valuation_time,
+                leg_volatilities=state.volatility_by_contract,
+                rate_shift_basis_points=state.rate_shift_basis_points,
+                scenario_fx_rate=state.fx_rate_usd_per_base,
+            )
+            if pnl is None:
+                return _unavailable_distribution(
+                    model=model,
+                    calibration_status=calibration_status,
+                    reason="UNKNOWN_EXIT_OR_FX_COST_FOR_PNL_DISTRIBUTION",
+                    assumptions=assumptions,
+                )
+            net_pnls.append(pnl)
+    else:
+        assert spot_paths is not None and spot_path_horizon_days is not None
+        if not spot_paths or any(not path for path in spot_paths):
+            raise ValueError("spot paths must be non-empty")
+        if (
+            spot_path_valuation_rule
+            is not ProbabilityPnLValuationRule.CONSTANT_LEG_IV_PATH_VALUATION
+        ):
+            raise ValueError("unsupported spot-path valuation rule")
+        assumptions.extend(
+            [
+                "CONSTANT_LEG_IV_PATH_VALUATION",
+                "MODEL_IMPLIED_UNDER_DECLARED_IV_RULE: current per-leg IV is held constant; "
+                "this is not an IV forecast.",
+            ]
+        )
+        valuation_time = bundle.analysis_timestamp + timedelta(days=spot_path_horizon_days)
+        for spot_path in spot_paths:
+            pnl = net_pnl_at_state(
+                spot=spot_path[-1],
+                valuation_time=valuation_time,
+                leg_volatilities=None,
+            )
+            if pnl is None:
+                return _unavailable_distribution(
+                    model=model,
+                    calibration_status=calibration_status,
+                    reason="UNKNOWN_EXIT_OR_FX_COST_FOR_PNL_DISTRIBUTION",
+                    assumptions=assumptions,
+                )
+            net_pnls.append(pnl)
+
+    count = len(net_pnls)
+    expected_pnl = sum(net_pnls) / count
+    median_pnl = median(net_pnls)
+    probability_profit = sum(value > 0 for value in net_pnls) / count
+    capital, _ = _capital_at_risk(candidate)
+
+    def threshold_probability(fraction: float, *, loss: bool = False) -> float | None:
+        if capital is None:
+            return None
+        threshold = fraction * capital
+        return (
+            sum(value <= -threshold for value in net_pnls) / count
+            if loss
+            else sum(value >= threshold for value in net_pnls) / count
+        )
+
+    losses = [max(-value, 0.0) for value in net_pnls]
+    var_95 = _linear_quantile(losses, 0.95)
+    tail_losses = [value for value in losses if value >= var_95]
+    cvar_95 = sum(tail_losses) / len(tail_losses)
+    probability_interval = wilson_interval(sum(value > 0 for value in net_pnls), count, 0.95)
+    confidence_intervals = {"probability_profit_wilson_95": probability_interval}
+    if count > 1:
+        variance = sum((value - expected_pnl) ** 2 for value in net_pnls) / (count - 1)
+        half_width = 1.96 * math.sqrt(variance / count)
+        confidence_intervals["expected_pnl_normal_95"] = (
+            expected_pnl - half_width,
+            expected_pnl + half_width,
+        )
+    return DistributionPnLMetrics(
+        expected_pnl=expected_pnl,
+        median_pnl=median_pnl,
+        expected_return=(expected_pnl / capital if capital else None),
+        median_return=(median_pnl / capital if capital else None),
+        probability_profit=probability_profit,
+        probability_gain_25=threshold_probability(0.25),
+        probability_gain_50=threshold_probability(0.50),
+        probability_gain_90=threshold_probability(0.90),
+        probability_x2=threshold_probability(1.0),
+        probability_x3=threshold_probability(2.0),
+        probability_loss_25=threshold_probability(0.25, loss=True),
+        probability_loss_50=threshold_probability(0.50, loss=True),
+        probability_loss_70=threshold_probability(0.70, loss=True),
+        probability_loss_90=threshold_probability(0.90, loss=True),
+        var_95=var_95,
+        cvar_95=cvar_95,
+        minimum_pnl=min(net_pnls),
+        maximum_pnl=max(net_pnls),
+        effective_sample_size=float(count),
+        confidence_intervals=confidence_intervals,
+        model=model,
+        measure="P",
+        calibration_status=calibration_status,
+        availability_status=DistributionAvailabilityStatus.AVAILABLE,
+        assumptions=assumptions,
+    )
+
+
+def build_five_score_snapshot(
+    report: FiveScoreReport,
+    *,
+    ticket_candidate_id: str,
+    generated_at: datetime,
+    config_hash: str | None = None,
+) -> FiveScoreSnapshot:
+    """Copy canonical score outputs without defining or evaluating any score formula."""
+    scope = (
+        FiveScoreScope.CANDIDATE
+        if report.candidate_id == ticket_candidate_id
+        else FiveScoreScope.RUN_GLOBAL
+    )
+
+    def snapshot(score: QualityScore) -> ScoreDimensionSnapshot:
+        return ScoreDimensionSnapshot(
+            name=score.kind.value,
+            score_value=score.score_value,
+            score_coverage=score.score_coverage,
+            missing_components=list(score.missing_components),
+            confidence=score.confidence,
+            formula_version=score.formula_version,
+            status=(
+                score.formula_status if scope is FiveScoreScope.CANDIDATE else "RUN_GLOBAL_CONTEXT"
+            ),
+        )
+
+    return FiveScoreSnapshot(
+        opportunity=snapshot(report.opportunity),
+        risk=snapshot(report.risk),
+        evidence=snapshot(report.evidence),
+        model_agreement=snapshot(report.model_agreement),
+        execution_quality=snapshot(report.execution_quality),
+        scope=scope,
+        source=report.report_id,
+        generated_at=generated_at,
+        candidate_id=report.candidate_id,
+        config_hash=config_hash,
+    )
+
+
 def _shapley_attribution(
     factors: tuple[str, ...],
     value: Callable[[frozenset[str]], float],
@@ -1640,9 +2355,7 @@ def _shapley_attribution(
             weight = factorial(size) * factorial(count - size - 1) / factorial(count)
             for subset_items in combinations(others, size):
                 subset = frozenset(subset_items)
-                contributions[factor] += weight * (
-                    value(subset | {factor}) - value(subset)
-                )
+                contributions[factor] += weight * (value(subset | {factor}) - value(subset))
     return contributions
 
 
@@ -1725,9 +2438,7 @@ def build_pnl_attribution(
         if rate_scenario is not None
         else []
     )
-    delta_rate_points = (
-        sum(rate_shifts) / len(rate_shifts) / 100.0 if rate_shifts else 0.0
-    )
+    delta_rate_points = sum(rate_shifts) / len(rate_shifts) / 100.0 if rate_shifts else 0.0
     delta_days = (target_time - bundle.analysis_timestamp).total_seconds() / _SECONDS_PER_DAY
     delta_component = aggregate.delta.value * delta_spot
     gamma_component = 0.5 * aggregate.gamma.value * delta_spot * delta_spot
@@ -1788,6 +2499,7 @@ def _intensity(
     round_trip: RoundTripCost,
     aggregate: AdvancedGreeks | None,
     event_sensitivity: float | None,
+    distribution: DistributionPnLMetrics,
 ) -> TradeIntensityDiagnostics:
     capital, _ = _capital_at_risk(candidate)
     thresholds = bundle.trade_economics.intensity_thresholds
@@ -1807,10 +2519,7 @@ def _intensity(
     category = TradeIntensityCategory.LOW
     if (
         (effective is not None and effective >= thresholds.extreme_effective_leverage)
-        or (
-            loss_30 is not None
-            and loss_30 >= thresholds.extreme_flat_spot_30d_loss_fraction
-        )
+        or (loss_30 is not None and loss_30 >= thresholds.extreme_flat_spot_30d_loss_fraction)
         or (
             cost_fraction is not None
             and cost_fraction >= thresholds.extreme_round_trip_cost_fraction
@@ -1820,14 +2529,8 @@ def _intensity(
         triggered.append("extreme_configured_policy_threshold")
     elif (
         (effective is not None and effective >= thresholds.high_effective_leverage)
-        or (
-            loss_30 is not None
-            and loss_30 >= thresholds.high_flat_spot_30d_loss_fraction
-        )
-        or (
-            cost_fraction is not None
-            and cost_fraction >= thresholds.high_round_trip_cost_fraction
-        )
+        or (loss_30 is not None and loss_30 >= thresholds.high_flat_spot_30d_loss_fraction)
+        or (cost_fraction is not None and cost_fraction >= thresholds.high_round_trip_cost_fraction)
     ):
         category = TradeIntensityCategory.HIGH
         triggered.append("high_configured_policy_threshold")
@@ -1847,13 +2550,13 @@ def _intensity(
         ),
         flat_spot_30d_loss_pct=loss_30,
         flat_spot_60d_loss_pct=loss_60,
+        probability_loss_over_50=distribution.probability_loss_50,
+        probability_loss_over_70=distribution.probability_loss_70,
         spread_over_entry_capital_pct=cost_fraction,
         greek_instability=_worst_confidence(levels),
         event_iv_sensitivity=event_sensitivity,
         max_loss_pct=(
-            maximum_loss / bundle.portfolio.max_loss_budget
-            if maximum_loss is not None
-            else None
+            maximum_loss / bundle.portfolio.max_loss_budget if maximum_loss is not None else None
         ),
         category=category,
         triggered_policies=triggered,
@@ -1874,6 +2577,10 @@ def build_trade_economics_ticket(
         ProbabilityStatus.PROBABILITY_MODEL_NOT_AVAILABLE
     ),
     probability_horizon_days: int | None = None,
+    probability_economic_paths: Sequence[Sequence[EconomicPathState]] | None = None,
+    probability_pnl_valuation_rule: ProbabilityPnLValuationRule | None = None,
+    canonical_five_score_report: FiveScoreReport | None = None,
+    five_score_config_hash: str | None = None,
 ) -> TradeEconomicsTicket:
     """Build one reconciled M0 ticket without creating any execution capability."""
     validate_dividend_treatment(bundle)
@@ -1895,6 +2602,17 @@ def build_trade_economics_ticket(
                     multiplier=1.0,
                     premium_paid=premium if leg.side is PositionSide.LONG else 0.0,
                     premium_received=premium if leg.side is PositionSide.SHORT else 0.0,
+                    mid_premium=premium,
+                    theoretical_mid_premium_paid=(
+                        premium if leg.side is PositionSide.LONG else 0.0
+                    ),
+                    theoretical_mid_premium_received=(
+                        premium if leg.side is PositionSide.SHORT else 0.0
+                    ),
+                    executable_premium_paid=(premium if leg.side is PositionSide.LONG else 0.0),
+                    executable_premium_received=(
+                        premium if leg.side is PositionSide.SHORT else 0.0
+                    ),
                 )
             )
             continue
@@ -1904,7 +2622,11 @@ def build_trade_economics_ticket(
         mid = quote.mid
         if mid is None:
             raise ValueError("BLOCKED_EXECUTION_DATA: two-sided quote required for ticket")
-        premium = leg.quantity * quote.contract.multiplier * mid
+        mid_premium = leg.quantity * quote.contract.multiplier * mid
+        executable_price = quote.ask if leg.side is PositionSide.LONG else quote.bid
+        if executable_price is None:
+            raise ValueError("BLOCKED_EXECUTION_DATA: executable quote side is required")
+        executable_premium = leg.quantity * quote.contract.multiplier * executable_price
         legs.append(
             LegEconomics(
                 side=leg.side.value,
@@ -1918,8 +2640,21 @@ def build_trade_economics_ticket(
                 mid=mid,
                 implied_volatility=effective_volatility(bundle, quote).volatility,
                 multiplier=quote.contract.multiplier,
-                premium_paid=premium if leg.side is PositionSide.LONG else 0.0,
-                premium_received=premium if leg.side is PositionSide.SHORT else 0.0,
+                premium_paid=mid_premium if leg.side is PositionSide.LONG else 0.0,
+                premium_received=mid_premium if leg.side is PositionSide.SHORT else 0.0,
+                mid_premium=mid_premium,
+                theoretical_mid_premium_paid=(
+                    mid_premium if leg.side is PositionSide.LONG else 0.0
+                ),
+                theoretical_mid_premium_received=(
+                    mid_premium if leg.side is PositionSide.SHORT else 0.0
+                ),
+                executable_premium_paid=(
+                    executable_premium if leg.side is PositionSide.LONG else 0.0
+                ),
+                executable_premium_received=(
+                    executable_premium if leg.side is PositionSide.SHORT else 0.0
+                ),
                 con_id=quote.contract.con_id,
                 local_symbol=quote.contract.local_symbol,
                 trading_class=quote.contract.trading_class,
@@ -1985,14 +2720,24 @@ def build_trade_economics_ticket(
     }:
         raise ValueError("available paths require an available probability-model status")
     probability_status = probability_calibration_status
+    distribution = calculate_distribution_pnl_metrics(
+        candidate,
+        bundle,
+        close_exit_cost=exit_cost,
+        economic_paths=probability_economic_paths,
+        spot_paths=probability_paths,
+        spot_path_horizon_days=probability_horizon_days,
+        spot_path_valuation_rule=probability_pnl_valuation_rule,
+        model=probability_model,
+        measure=probability_measure,
+        calibration_status=probability_status,
+    )
     touch = [
         calculate_touch_probability(
             probability_paths,
             target=target,
             direction=(
-                TouchDirection.UPPER
-                if target >= bundle.underlying.price
-                else TouchDirection.LOWER
+                TouchDirection.UPPER if target >= bundle.underlying.price else TouchDirection.LOWER
             ),
             horizon_days=(
                 probability_horizon_days
@@ -2043,6 +2788,7 @@ def build_trade_economics_ticket(
         round_trip=round_trip,
         aggregate=aggregate,
         event_sensitivity=event_sensitivity,
+        distribution=distribution,
     )
     expirations = sorted({quote.contract.expiration for _, quote in _option_legs(candidate)})
     expiration = min(expirations) if expirations else None
@@ -2086,6 +2832,17 @@ def build_trade_economics_ticket(
         for risk in candidate.exercise_risks
     ]
     capital, _ = _capital_at_risk(candidate)
+    lifecycle = _lifecycle(candidate, bundle)
+    five_scores = (
+        build_five_score_snapshot(
+            canonical_five_score_report,
+            ticket_candidate_id=candidate.id,
+            generated_at=bundle.analysis_timestamp,
+            config_hash=five_score_config_hash,
+        )
+        if canonical_five_score_report is not None
+        else None
+    )
     ticket = TradeEconomicsTicket(
         fixture_status=fixture_status,
         candidate_id=candidate.id,
@@ -2096,6 +2853,9 @@ def build_trade_economics_ticket(
         data_freshness_status=bundle.underlying.freshness.status.value,
         expirations=expirations,
         dte_exact_days=dte,
+        lifecycle_policy=lifecycle.policy,
+        first_expiry=lifecycle.first_expiry,
+        managed_exit_deadline=(lifecycle.managed_exit_deadline if lifecycle.mixed_expiry else None),
         intraday_precision_status=intraday_status,
         intraday_precision_warning=intraday_warning,
         legs=legs,
@@ -2105,7 +2865,9 @@ def build_trade_economics_ticket(
         margin=margin,
         maximum_loss=candidate.risk_metrics.max_loss,
         maximum_profit=candidate.risk_metrics.max_gain,
-        expiration_breakevens=candidate.risk_metrics.break_even_points,
+        expiration_breakevens=(
+            [] if lifecycle.mixed_expiry else candidate.risk_metrics.break_even_points
+        ),
         capital_at_risk=capital,
         leverage=leverage,
         time_decay=time_decay,
@@ -2115,6 +2877,8 @@ def build_trade_economics_ticket(
         scenario_matrices=matrices,
         rate_stress_results=rate_stresses,
         touch_probabilities=touch,
+        distribution_pnl=distribution,
+        five_scores=five_scores,
         pnl_attributions=attributions,
         fx_attribution=fx,
         liquidity=_liquidity_diagnostics(candidate, bundle),
@@ -2124,11 +2888,20 @@ def build_trade_economics_ticket(
         blockers=blockers,
         warnings=[
             *candidate.assumptions,
+            *(
+                [
+                    "Calendar/diagonal lifecycle after the first leg expiry is intentionally "
+                    "not modeled. M0.1 assumes managed closure before first expiry."
+                ]
+                if lifecycle.mixed_expiry
+                else []
+            ),
             "Full repricing is primary; Greek/Taylor attribution is explanatory only.",
             "All leg-level execution estimates are indicative until combo evidence exists.",
         ],
         data_status="BLOCKED" if blockers else "AVAILABLE_RESEARCH_ONLY",
         probability_status=probability_status,
+        read_only=True,
         transmit=False,
         what_if=True,
         order_capability="forbidden",

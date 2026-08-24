@@ -1,0 +1,64 @@
+{
+  "fixture_status": "SYNTHETIC_TEST_FIXTURE",
+  "ticket_schema_version": "1.1",
+  "probability_paths": [
+    [
+      257.79,
+      220.0
+    ],
+    [
+      257.79,
+      260.0
+    ],
+    [
+      257.79,
+      300.0
+    ],
+    [
+      257.79,
+      360.0
+    ]
+  ],
+  "distribution_pnl": {
+    "expected_pnl": 1791.3150759002056,
+    "median_pnl": 906.1879052401578,
+    "expected_return": 0.5966774064920826,
+    "median_return": 0.3018463118898648,
+    "probability_profit": 0.5,
+    "probability_gain_25": 0.5,
+    "probability_gain_50": 0.5,
+    "probability_gain_90": 0.25,
+    "probability_x2": 0.25,
+    "probability_x3": 0.25,
+    "probability_loss_25": 0.25,
+    "probability_loss_50": 0.25,
+    "probability_loss_70": 0.25,
+    "probability_loss_90": 0.0,
+    "var_95": 1977.8396171403856,
+    "cvar_95": 2241.9823599266724,
+    "minimum_pnl": -2241.9823599266724,
+    "maximum_pnl": 7594.866853047179,
+    "effective_sample_size": 4.0,
+    "confidence_intervals": {
+      "probability_profit_wilson_95": [
+        0.15003898915214958,
+        0.8499610108478504
+      ],
+      "expected_pnl_normal_95": [
+        -2418.670055839453,
+        6001.300207639864
+      ]
+    },
+    "model": "SYNTHETIC_EQUAL_WEIGHT_P_PATHS",
+    "measure": "P",
+    "calibration_status": "MODEL_IMPLIED",
+    "availability_status": "AVAILABLE",
+    "missing_reason": null,
+    "assumptions": [
+      "CONSTANT_LEG_IV_PATH_VALUATION",
+      "MODEL_IMPLIED_UNDER_DECLARED_IV_RULE: current per-leg IV is held constant; this is not an IV forecast."
+    ]
+  },
+  "holdout_used": false,
+  "order_capability": "forbidden"
+}

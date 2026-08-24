@@ -26,6 +26,9 @@ capacité, jamais une promesse de rendement.
 | M0 flat-spot carry, scénarios et breakeven clock | `production_ready_offline` | IV future configurée, American intraday date-based, cashflows après première échéance exclus. |
 | M0 coûts aller-retour et ticket typé | `experimental_offline` | Sortie, slippage et combo sont des estimations avant OPRA/paper. |
 | M0 P(touch) pathwise | `experimental_offline` | Calcul disponible sur chemins `P`; aucune probabilité TTWO promue dans le ticket fixture. |
+| M0.1 distribution de PnL net | `experimental_offline` | Contrat testé sur chemins économiques synthétiques ; aucun modèle `P` TTWO promu. |
+| M0.1 five-score bridge | `production_ready_offline` | Copie déterministe des scores canoniques et de leur scope ; leur calibration financière reste inchangée. |
+| M0.1 event-date et mixed-expiry | `production_ready_offline` | Timing et deadline testés ; lifecycle après première échéance volontairement exclu. |
 | M0 marge et FX | `experimental_offline` | Architecture explicite ; marge broker et mode FX réel restent à confirmer. |
 | Moteur contractuel V10.1 et contrôle américain QuantLib | `production_ready_offline` | Dépend encore de la qualité des quotes d’entrée. |
 | Provenance et cutoff | `production_ready_offline` | La complétude dépend des connecteurs fournis. |
@@ -60,12 +63,13 @@ Les seuils chiffrés de calibration, walk-forward et paper trading restent
 `draft_to_validate` dans [VALIDATION_PLAN.md](VALIDATION_PLAN.md). Ils ne doivent pas
 être inventés dans le code.
 
-## Readiness M0
+## Readiness M0.1
 
-`M0_STATUS = COMPLETE_PRE_OPRA` signifie que la logique financière offline, les schémas, le
-renderer, le golden fixture et les contrôles numériques sont présents. Cela ne promeut aucun
-candidat, score, probabilité ou seuil de risque. Restent explicitement en attente : NBBO live,
-quotes combo, profondeur, fraîcheur live, marge/commissions what-if, fills paper et qualité
+`M0_1_STATUS = COMPLETE` et `PRE_OPRA_LOGIC_STATUS = COMPLETE` signifient que les sept corrections
+de logique financière offline, le schéma ticket 1.1, le renderer, les fixtures et les contrôles
+numériques sont présents. Cela ne promeut aucun candidat, score, probabilité ou seuil de risque.
+Le holdout reste `UNOPENED` et OPRA reste `NOT_STARTED`. Restent explicitement en attente : NBBO
+live, quotes combo, profondeur, fraîcheur live, marge/commissions what-if, fills paper et qualité
 d'exécution prospective.
 
 `NEXT_PHASE = M — OPRA READ-ONLY LIVE DATA + SHADOW/PAPER VALIDATION`. Cette phase n'est pas

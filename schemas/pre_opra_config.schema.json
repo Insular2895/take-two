@@ -248,6 +248,19 @@
     "ExitCostModelConfiguration": {
       "additionalProperties": false,
       "properties": {
+        "assignment_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assignment Cost"
+        },
         "assignment_or_exercise_cost": {
           "anyOf": [
             {
@@ -267,6 +280,19 @@
           "title": "Closing Commission Multiplier",
           "type": "number"
         },
+        "exercise_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exercise Cost"
+        },
         "fx_exit_cost_bps": {
           "anyOf": [
             {
@@ -279,6 +305,19 @@
           ],
           "default": null,
           "title": "Fx Exit Cost Bps"
+        },
+        "settlement_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Settlement Cost"
         },
         "slippage_cost_multiplier": {
           "default": 1.0,
@@ -501,6 +540,13 @@
       ],
       "title": "MarketContextConfig",
       "type": "object"
+    },
+    "MixedExpiryLifecyclePolicy": {
+      "enum": [
+        "CLOSE_BEFORE_FIRST_EXPIRY"
+      ],
+      "title": "MixedExpiryLifecyclePolicy",
+      "type": "string"
     },
     "ModelDefinition": {
       "additionalProperties": false,
@@ -1226,6 +1272,16 @@
           "title": "Leverage Denominator Floor",
           "type": "number"
         },
+        "mixed_expiry_close_buffer_calendar_days": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Mixed Expiry Close Buffer Calendar Days",
+          "type": "integer"
+        },
+        "mixed_expiry_lifecycle_policy": {
+          "$ref": "#/$defs/MixedExpiryLifecyclePolicy",
+          "default": "CLOSE_BEFORE_FIRST_EXPIRY"
+        },
         "near_expiry_threshold_hours": {
           "default": 48.0,
           "exclusiveMinimum": 0,
@@ -1265,8 +1321,11 @@
           "type": "array"
         },
         "schema_version": {
-          "const": "1.0",
-          "default": "1.0",
+          "default": "1.1",
+          "enum": [
+            "1.0",
+            "1.1"
+          ],
           "title": "Schema Version",
           "type": "string"
         },

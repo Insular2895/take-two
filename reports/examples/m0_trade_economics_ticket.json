@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "fixture_status": "SYNTHETIC_TEST_FIXTURE",
   "candidate_id": "ttwo-long-call",
   "underlying": "TTWO",
@@ -11,6 +11,9 @@
     "2027-01-15T21:00:00Z"
   ],
   "dte_exact_days": 181.375,
+  "lifecycle_policy": "SAME_EXPIRY_HOLD_TO_EXPIRY",
+  "first_expiry": "2027-01-15T21:00:00Z",
+  "managed_exit_deadline": null,
   "intraday_precision_status": "APPROXIMATED_DATE_ENGINE",
   "intraday_precision_warning": "American FD engine uses date-level exercise grid; intraday exposure is approximate.",
   "legs": [
@@ -28,6 +31,11 @@
       "multiplier": 100.0,
       "premium_paid": 2900.0,
       "premium_received": 0.0,
+      "mid_premium": 2900.0,
+      "theoretical_mid_premium_paid": 2900.0,
+      "theoretical_mid_premium_received": 0.0,
+      "executable_premium_paid": 3000.0,
+      "executable_premium_received": 0.0,
       "con_id": 1002601,
       "local_symbol": "TTWO  270115C00260000",
       "trading_class": "TTWO",
@@ -479,19 +487,36 @@
     "combo_execution_status": "INDICATIVE",
     "warnings": [
       "Per-leg BBO sum is indicative and is not an executable combo quote"
-    ]
+    ],
+    "theoretical_mid_premium_paid": 2900.0,
+    "theoretical_mid_premium_received": 0.0,
+    "theoretical_mid_net_premium": 2900.0,
+    "executable_premium_paid": 3000.0,
+    "executable_premium_received": 0.0,
+    "executable_net_premium": 3000.0,
+    "entry_bid_ask_cost": 100.0,
+    "entry_slippage": 1.5,
+    "entry_commission": 0.65,
+    "entry_fx_cost": null,
+    "total_entry_cash_flow": 3002.15
   },
   "exit_cost_estimate": {
+    "exit_path": "CLOSE_BEFORE_EXPIRY",
     "estimated_exit_bid_ask_cost": 100.0,
     "estimated_exit_slippage": 1.5,
     "closing_commissions": 0.65,
     "fx_exit_cost": null,
     "assignment_or_exercise_cost_if_relevant": null,
+    "exercise_cost_if_relevant": 0.0,
+    "assignment_cost_if_relevant": null,
+    "settlement_cost_if_relevant": 0.0,
+    "hold_to_expiry_cost_status": "CONFIGURED_EXERCISE_ASSIGN_SETTLEMENT_COSTS",
     "total_exit_cost": 102.15,
     "status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
     "warnings": [
       "Future spread and slippage are configured estimates, not observations"
-    ]
+    ],
+    "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL"
   },
   "round_trip_cost": {
     "entry_bid_ask_cost": 100.0,
@@ -499,16 +524,22 @@
     "entry_commissions": 0.65,
     "entry_fx_cost": null,
     "exit": {
+      "exit_path": "CLOSE_BEFORE_EXPIRY",
       "estimated_exit_bid_ask_cost": 100.0,
       "estimated_exit_slippage": 1.5,
       "closing_commissions": 0.65,
       "fx_exit_cost": null,
       "assignment_or_exercise_cost_if_relevant": null,
+      "exercise_cost_if_relevant": 0.0,
+      "assignment_cost_if_relevant": null,
+      "settlement_cost_if_relevant": 0.0,
+      "hold_to_expiry_cost_status": "CONFIGURED_EXERCISE_ASSIGN_SETTLEMENT_COSTS",
       "total_exit_cost": 102.15,
       "status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
       "warnings": [
         "Future spread and slippage are configured estimates, not observations"
-      ]
+      ],
+      "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL"
     },
     "total_round_trip_cost": 204.3,
     "round_trip_cost_as_pct_capital": 0.06805122995186783
@@ -634,7 +665,8 @@
     "assumptions": [
       "Full repricing at flat spot with CONSTANT_LEG_IV.",
       "Each leg retains its own current IV; current theta is not multiplied by horizon.",
-      "Capital basis status: KNOWN_BOUNDED_MAX_LOSS."
+      "Capital basis status: KNOWN_BOUNDED_MAX_LOSS.",
+      "Lifecycle policy: SAME_EXPIRY_HOLD_TO_EXPIRY."
     ],
     "confidence": "HIGH",
     "warnings": []
@@ -1046,6 +1078,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1066,6 +1102,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1086,6 +1126,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1106,6 +1150,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1126,6 +1174,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1133,11 +1185,11 @@
         "valuation_time": "2027-01-15T21:00:00Z",
         "volatility_scenario": "base_constant_leg_iv",
         "break_even_roots": [
-          291.04300247
+          290.02149789
         ],
         "profit_intervals": [
           {
-            "lower": 291.04300246768,
+            "lower": 290.02149789032944,
             "upper": null
           }
         ],
@@ -1146,6 +1198,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "HOLD_TO_EXPIRY",
+        "applied_exit_cost": 0.0,
+        "exit_cost_status": "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+        "breakeven_type": "EXPIRATION_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1166,6 +1222,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1186,6 +1246,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1206,6 +1270,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1226,6 +1294,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1246,6 +1318,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1253,11 +1329,11 @@
         "valuation_time": "2027-01-15T21:00:00Z",
         "volatility_scenario": "configured_iv_crush",
         "break_even_roots": [
-          291.04300247
+          290.02149789
         ],
         "profit_intervals": [
           {
-            "lower": 291.04300246768,
+            "lower": 290.02149789032944,
             "upper": null
           }
         ],
@@ -1266,6 +1342,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "HOLD_TO_EXPIRY",
+        "applied_exit_cost": 0.0,
+        "exit_cost_status": "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+        "breakeven_type": "EXPIRATION_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1286,6 +1366,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1306,6 +1390,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1326,6 +1414,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1346,6 +1438,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1366,6 +1462,10 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "CLOSE_BEFORE_EXPIRY",
+        "applied_exit_cost": 102.15,
+        "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "breakeven_type": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
         "warnings": []
       },
       {
@@ -1373,11 +1473,11 @@
         "valuation_time": "2027-01-15T21:00:00Z",
         "volatility_scenario": "configured_iv_expansion",
         "break_even_roots": [
-          291.04300247
+          290.02149789
         ],
         "profit_intervals": [
           {
-            "lower": 291.04300246768,
+            "lower": 290.02149789032944,
             "upper": null
           }
         ],
@@ -1386,12 +1486,18 @@
           0.0,
           773.3700000000001
         ],
+        "exit_path": "HOLD_TO_EXPIRY",
+        "applied_exit_cost": 0.0,
+        "exit_cost_status": "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+        "breakeven_type": "EXPIRATION_BREAKEVEN",
         "warnings": []
       }
     ],
     "assumptions": [
-      "Net PnL includes entry cost and the configured estimated exit cost.",
-      "Roots and profit intervals are solved from full repricing on a configured domain."
+      "Close-before-expiry roots include configured close-out costs.",
+      "Hold-to-expiry roots exclude fictional option-closing spread, slippage, and commission.",
+      "Roots and profit intervals are solved from full repricing on a configured domain.",
+      "Lifecycle policy: SAME_EXPIRY_HOLD_TO_EXPIRY."
     ]
   },
   "target_arrivals": [
@@ -1401,6 +1507,7 @@
       "status": "NEVER_BREAKEVEN_AT_THIS_TARGET",
       "latest_profitable_arrival_date": null,
       "profitable_horizons_days": [],
+      "managed_exit_deadline": null,
       "warnings": []
     },
     {
@@ -1409,6 +1516,7 @@
       "status": "NEVER_BREAKEVEN_AT_THIS_TARGET",
       "latest_profitable_arrival_date": null,
       "profitable_horizons_days": [],
+      "managed_exit_deadline": null,
       "warnings": []
     },
     {
@@ -1601,6 +1709,7 @@
         181,
         182
       ],
+      "managed_exit_deadline": null,
       "warnings": []
     },
     {
@@ -1609,6 +1718,7 @@
       "status": "NEVER_BREAKEVEN_AT_THIS_TARGET",
       "latest_profitable_arrival_date": null,
       "profitable_horizons_days": [],
+      "managed_exit_deadline": null,
       "warnings": []
     },
     {
@@ -1617,6 +1727,7 @@
       "status": "NEVER_BREAKEVEN_AT_THIS_TARGET",
       "latest_profitable_arrival_date": null,
       "profitable_horizons_days": [],
+      "managed_exit_deadline": null,
       "warnings": []
     },
     {
@@ -1809,6 +1920,7 @@
         181,
         182
       ],
+      "managed_exit_deadline": null,
       "warnings": []
     },
     {
@@ -1817,6 +1929,7 @@
       "status": "NEVER_BREAKEVEN_AT_THIS_TARGET",
       "latest_profitable_arrival_date": null,
       "profitable_horizons_days": [],
+      "managed_exit_deadline": null,
       "warnings": []
     },
     {
@@ -1871,6 +1984,7 @@
         43,
         44
       ],
+      "managed_exit_deadline": null,
       "warnings": []
     },
     {
@@ -2063,6 +2177,7 @@
         181,
         182
       ],
+      "managed_exit_deadline": null,
       "warnings": []
     }
   ],
@@ -2100,8 +2215,19 @@
           "net_pnl": -2902.578818,
           "net_return": -0.9668333754157594,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2115,8 +2241,19 @@
           "net_pnl": -2383.04234611,
           "net_return": -0.7937785740578701,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2130,8 +2267,19 @@
           "net_pnl": -2121.00385409,
           "net_return": -0.7064949633046779,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2145,8 +2293,19 @@
           "net_pnl": -400.51174507,
           "net_return": -0.13340830573814377,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2160,8 +2319,19 @@
           "net_pnl": -272.96481629,
           "net_return": -0.09092311053523787,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2175,8 +2345,19 @@
           "net_pnl": 2217.50210697,
           "net_return": 0.7386380117496996,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2190,8 +2371,19 @@
           "net_pnl": 5000.79809216,
           "net_return": 1.665738917830256,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2205,8 +2397,19 @@
           "net_pnl": 5454.96314105,
           "net_return": 1.8170188501724298,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2220,8 +2423,19 @@
           "net_pnl": -2958.25313072,
           "net_return": -0.9853781892036839,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2235,8 +2449,19 @@
           "net_pnl": -2508.46389127,
           "net_return": -0.8355558154239306,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2250,8 +2475,19 @@
           "net_pnl": -2268.06299607,
           "net_return": -0.7554795716621121,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2265,8 +2501,19 @@
           "net_pnl": -607.21607193,
           "net_return": -0.20226040402044848,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2280,8 +2527,19 @@
           "net_pnl": -481.03074135,
           "net_return": -0.1602287498464207,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2295,8 +2553,19 @@
           "net_pnl": 2015.24577702,
           "net_return": 0.6712675172851731,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2310,8 +2579,19 @@
           "net_pnl": 4831.13726535,
           "net_return": 1.6092258099522916,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2325,8 +2605,19 @@
           "net_pnl": 5290.89349112,
           "net_return": 1.762368133212804,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2340,8 +2631,19 @@
           "net_pnl": -3021.04868659,
           "net_return": -1.006295050743744,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2355,8 +2657,19 @@
           "net_pnl": -2672.37767767,
           "net_return": -0.8901546150836156,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2370,8 +2683,19 @@
           "net_pnl": -2465.61427588,
           "net_return": -0.8212828392569355,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2385,8 +2709,19 @@
           "net_pnl": -898.94509061,
           "net_return": -0.29943376933486876,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2400,8 +2735,19 @@
           "net_pnl": -774.74031247,
           "net_return": -0.258061826514107,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2415,8 +2761,19 @@
           "net_pnl": 1736.4413763,
           "net_return": 0.5783992726197876,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2430,8 +2787,19 @@
           "net_pnl": 4608.03963658,
           "net_return": 1.534913191072307,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2445,8 +2813,19 @@
           "net_pnl": 5076.78602831,
           "net_return": 1.6910500902047783,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2460,8 +2839,19 @@
           "net_pnl": -3068.65564497,
           "net_return": -1.0221526722405287,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2475,8 +2865,19 @@
           "net_pnl": -2832.63930999,
           "net_return": -0.9435369018842981,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2490,8 +2891,19 @@
           "net_pnl": -2668.22377887,
           "net_return": -0.8887709737603224,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2505,8 +2917,19 @@
           "net_pnl": -1224.86471551,
           "net_return": -0.40799584148243145,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2520,8 +2943,19 @@
           "net_pnl": -1102.97533892,
           "net_return": -0.36739514645164467,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2535,8 +2969,19 @@
           "net_pnl": 1437.65835764,
           "net_return": 0.47887625789599486,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2550,8 +2995,19 @@
           "net_pnl": 4387.23129676,
           "net_return": 1.4613631220159828,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2565,8 +3021,19 @@
           "net_pnl": 4867.43355044,
           "net_return": 1.6213159070805647,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Each option leg retains its own current implied volatility."
+            "Each option leg retains its own current implied volatility.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2576,10 +3043,20 @@
           "volatility_scenario": "base_constant_leg_iv",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Each option leg retains its own current implied volatility."
           ]
@@ -2591,10 +3068,20 @@
           "volatility_scenario": "base_constant_leg_iv",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Each option leg retains its own current implied volatility."
           ]
@@ -2606,10 +3093,20 @@
           "volatility_scenario": "base_constant_leg_iv",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Each option leg retains its own current implied volatility."
           ]
@@ -2621,10 +3118,20 @@
           "volatility_scenario": "base_constant_leg_iv",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Each option leg retains its own current implied volatility."
           ]
@@ -2636,10 +3143,20 @@
           "volatility_scenario": "base_constant_leg_iv",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Each option leg retains its own current implied volatility."
           ]
@@ -2651,10 +3168,20 @@
           "volatility_scenario": "base_constant_leg_iv",
           "estimated_position_value": 3645.85,
           "gross_pnl": 745.85,
-          "round_trip_cost": 204.3,
-          "net_pnl": 541.55,
-          "net_return": 0.1803873890378566,
+          "round_trip_cost": 102.15,
+          "net_pnl": 643.7,
+          "net_return": 0.21441300401379051,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Each option leg retains its own current implied volatility."
           ]
@@ -2666,10 +3193,20 @@
           "volatility_scenario": "base_constant_leg_iv",
           "estimated_position_value": 7000.0,
           "gross_pnl": 4100.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": 3895.7,
-          "net_return": 1.2976366937028463,
+          "round_trip_cost": 102.15,
+          "net_pnl": 3997.85,
+          "net_return": 1.3316623086787802,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Each option leg retains its own current implied volatility."
           ]
@@ -2681,10 +3218,20 @@
           "volatility_scenario": "base_constant_leg_iv",
           "estimated_position_value": 7512.7,
           "gross_pnl": 4612.7,
-          "round_trip_cost": 204.3,
-          "net_pnl": 4408.4,
-          "net_return": 1.4684143030827912,
+          "round_trip_cost": 102.15,
+          "net_pnl": 4510.55,
+          "net_return": 1.502439918058725,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Each option leg retains its own current implied volatility."
           ]
@@ -2727,8 +3274,19 @@
           "net_pnl": -3063.41064212,
           "net_return": -1.0204055900331348,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2742,8 +3300,19 @@
           "net_pnl": -2803.03239675,
           "net_return": -0.9336749985001982,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2757,8 +3326,19 @@
           "net_pnl": -2624.99832811,
           "net_return": -0.8743728088572061,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2772,8 +3352,19 @@
           "net_pnl": -1101.16415374,
           "net_return": -0.3667918504201604,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2787,8 +3378,19 @@
           "net_pnl": -974.31528769,
           "net_return": -0.3245391761543162,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2802,8 +3404,19 @@
           "net_pnl": 1636.89786435,
           "net_return": 0.5452418647814761,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2817,8 +3430,19 @@
           "net_pnl": 4624.04482587,
           "net_return": 1.5402444334470584,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2832,8 +3456,19 @@
           "net_pnl": 5107.86514871,
           "net_return": 1.7014023778658638,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2847,8 +3482,19 @@
           "net_pnl": -3079.23523338,
           "net_return": -1.0256766761739127,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2862,8 +3508,19 @@
           "net_pnl": -2871.8688562,
           "net_return": -0.9566040524971604,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2877,8 +3534,19 @@
           "net_pnl": -2716.16957187,
           "net_return": -0.9047414592437877,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2892,8 +3560,19 @@
           "net_pnl": -1261.69051978,
           "net_return": -0.42026231859724805,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2907,8 +3586,19 @@
           "net_pnl": -1136.23852521,
           "net_return": -0.3784749347001816,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2922,8 +3612,19 @@
           "net_pnl": 1488.40612247,
           "net_return": 0.49578006510949396,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2937,8 +3638,19 @@
           "net_pnl": 4510.82615208,
           "net_return": 1.5025319028293578,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2952,8 +3664,19 @@
           "net_pnl": 4999.37471863,
           "net_return": 1.6652647997691838,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2967,8 +3690,19 @@
           "net_pnl": -3093.77170262,
           "net_return": -1.0305186958067205,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2982,8 +3716,19 @@
           "net_pnl": -2955.31142947,
           "net_return": -0.984398324356897,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -2997,8 +3742,19 @@
           "net_pnl": -2832.62712697,
           "net_return": -0.9435328437843012,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3012,8 +3768,19 @@
           "net_pnl": -1486.83952183,
           "net_return": -0.4952582388721276,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3027,8 +3794,19 @@
           "net_pnl": -1363.43056847,
           "net_return": -0.45415138100194524,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3042,8 +3820,19 @@
           "net_pnl": 1288.20661956,
           "net_return": 0.42909468865814243,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3057,8 +3846,19 @@
           "net_pnl": 4366.66660392,
           "net_return": 1.454513133561285,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3072,8 +3872,19 @@
           "net_pnl": 4862.01914267,
           "net_return": 1.61951239700588,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3087,8 +3898,19 @@
           "net_pnl": -3101.54583209,
           "net_return": -1.0331082164732286,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3102,8 +3924,19 @@
           "net_pnl": -3027.12456046,
           "net_return": -1.0083188916155468,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3117,8 +3950,19 @@
           "net_pnl": -2942.37153989,
           "net_return": -0.9800881168115068,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3132,8 +3976,19 @@
           "net_pnl": -1736.38403018,
           "net_return": -0.5783801709378716,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3147,8 +4002,19 @@
           "net_pnl": -1615.38498434,
           "net_return": -0.5380760402839733,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3162,8 +4028,19 @@
           "net_pnl": 1081.1705159,
           "net_return": 0.36013207731145785,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3177,8 +4054,19 @@
           "net_pnl": 4229.90547033,
           "net_return": 1.4089587363474347,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3192,8 +4080,19 @@
           "net_pnl": 4732.50109823,
           "net_return": 1.5763706337899523,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3203,10 +4102,20 @@
           "volatility_scenario": "configured_iv_crush",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3218,10 +4127,20 @@
           "volatility_scenario": "configured_iv_crush",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3233,10 +4152,20 @@
           "volatility_scenario": "configured_iv_crush",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3248,10 +4177,20 @@
           "volatility_scenario": "configured_iv_crush",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3263,10 +4202,20 @@
           "volatility_scenario": "configured_iv_crush",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3278,10 +4227,20 @@
           "volatility_scenario": "configured_iv_crush",
           "estimated_position_value": 3645.85,
           "gross_pnl": 745.85,
-          "round_trip_cost": 204.3,
-          "net_pnl": 541.55,
-          "net_return": 0.1803873890378566,
+          "round_trip_cost": 102.15,
+          "net_pnl": 643.7,
+          "net_return": 0.21441300401379051,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3293,10 +4252,20 @@
           "volatility_scenario": "configured_iv_crush",
           "estimated_position_value": 7000.0,
           "gross_pnl": 4100.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": 3895.7,
-          "net_return": 1.2976366937028463,
+          "round_trip_cost": 102.15,
+          "net_pnl": 3997.85,
+          "net_return": 1.3316623086787802,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3308,10 +4277,20 @@
           "volatility_scenario": "configured_iv_crush",
           "estimated_position_value": 7512.7,
           "gross_pnl": 4612.7,
-          "round_trip_cost": 204.3,
-          "net_pnl": 4408.4,
-          "net_return": 1.4684143030827912,
+          "round_trip_cost": 102.15,
+          "net_pnl": 4510.55,
+          "net_return": 1.502439918058725,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3354,8 +4333,19 @@
           "net_pnl": -2624.6126851,
           "net_return": -0.8742443532455869,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3369,8 +4359,19 @@
           "net_pnl": -1883.58423379,
           "net_return": -0.6274117661633156,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3384,8 +4385,19 @@
           "net_pnl": -1561.76779644,
           "net_return": -0.5202164436948629,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3399,8 +4411,19 @@
           "net_pnl": 297.78674806,
           "net_return": 0.09919116235356594,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3414,8 +4437,19 @@
           "net_pnl": 427.02938873,
           "net_return": 0.14224119005815122,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3429,8 +4463,19 @@
           "net_pnl": 2864.5857096,
           "net_return": 0.9541780755783866,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3444,8 +4489,19 @@
           "net_pnl": 5517.81579294,
           "net_return": 1.8379547300893502,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3459,8 +4515,19 @@
           "net_pnl": 5949.73874043,
           "net_return": 1.9818259382213284,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 7,
+          "effective_horizon_days": 7.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3474,8 +4541,19 @@
           "net_pnl": -2729.41171146,
           "net_return": -0.9091523446386476,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3489,8 +4567,19 @@
           "net_pnl": -2061.74401748,
           "net_return": -0.6867558308135936,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3504,8 +4593,19 @@
           "net_pnl": -1759.98193218,
           "net_return": -0.586240505030059,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3519,8 +4619,19 @@
           "net_pnl": 45.26495942,
           "net_return": 0.015077514253163848,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3534,8 +4645,19 @@
           "net_pnl": 173.08059763,
           "net_return": 0.05765221512179419,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3549,8 +4671,19 @@
           "net_pnl": 2609.97920949,
           "net_return": 0.8693700213138542,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3564,8 +4697,19 @@
           "net_pnl": 5288.71994394,
           "net_return": 1.7616441363503856,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3579,8 +4723,19 @@
           "net_pnl": 5725.65851467,
           "net_return": 1.9071860215743612,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 30,
+          "effective_horizon_days": 30.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3594,8 +4749,19 @@
           "net_pnl": -2858.71838837,
           "net_return": -0.9522237024711633,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3609,8 +4775,19 @@
           "net_pnl": -2302.49630217,
           "net_return": -0.7669491205204174,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3624,8 +4801,19 @@
           "net_pnl": -2032.42379521,
           "net_return": -0.6769894226506706,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3639,8 +4827,19 @@
           "net_pnl": -312.58262625,
           "net_return": -0.10411958971093555,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3654,8 +4853,19 @@
           "net_pnl": -186.83550245,
           "net_return": -0.06223389985554965,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3669,8 +4879,19 @@
           "net_pnl": 2254.63478951,
           "net_return": 0.7510067083606907,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3684,8 +4905,19 @@
           "net_pnl": 4979.52953165,
           "net_return": 1.65865447484181,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3699,8 +4931,19 @@
           "net_pnl": 5425.04939133,
           "net_return": 1.8070547412122469,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 60,
+          "effective_horizon_days": 60.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3714,8 +4957,19 @@
           "net_pnl": -2972.97996632,
           "net_return": -0.990283618847695,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3729,8 +4983,19 @@
           "net_pnl": -2551.48871822,
           "net_return": -0.8498871536144401,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3744,8 +5009,19 @@
           "net_pnl": -2322.61267364,
           "net_return": -0.773649775540582,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3759,8 +5035,19 @@
           "net_pnl": -714.41973352,
           "net_return": -0.2379693664612574,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3774,8 +5061,19 @@
           "net_pnl": -591.075926,
           "net_return": -0.19688420831717346,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3789,8 +5087,19 @@
           "net_pnl": 1866.21894269,
           "net_return": 0.6216274812033781,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3804,8 +5113,19 @@
           "net_pnl": 4660.59108453,
           "net_return": 1.552417795423903,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3819,8 +5139,19 @@
           "net_pnl": 5118.10142473,
           "net_return": 1.7048120262919646,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "CLOSE_BEFORE_EXPIRY",
+          "exit_cost_applied": 102.15,
+          "exit_cost_status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "requested_horizon_days": 90,
+          "effective_horizon_days": 90.0,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
-            "Configured stress; not a calibrated forecast."
+            "Configured stress; not a calibrated forecast.",
+            "Future spread and slippage are configured estimates, not observations"
           ]
         },
         {
@@ -3830,10 +5161,20 @@
           "volatility_scenario": "configured_iv_expansion",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3845,10 +5186,20 @@
           "volatility_scenario": "configured_iv_expansion",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3860,10 +5211,20 @@
           "volatility_scenario": "configured_iv_expansion",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3875,10 +5236,20 @@
           "volatility_scenario": "configured_iv_expansion",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3890,10 +5261,20 @@
           "volatility_scenario": "configured_iv_expansion",
           "estimated_position_value": 0.0,
           "gross_pnl": -2900.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": -3104.3,
-          "net_return": -1.034025614975934,
+          "round_trip_cost": 102.15,
+          "net_pnl": -3002.15,
+          "net_return": -1.0,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "NOT_APPLIED_HOLD_TO_EXPIRY_ALL_OPTIONS_WORTHLESS",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3905,10 +5286,20 @@
           "volatility_scenario": "configured_iv_expansion",
           "estimated_position_value": 3645.85,
           "gross_pnl": 745.85,
-          "round_trip_cost": 204.3,
-          "net_pnl": 541.55,
-          "net_return": 0.1803873890378566,
+          "round_trip_cost": 102.15,
+          "net_pnl": 643.7,
+          "net_return": 0.21441300401379051,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3920,10 +5311,20 @@
           "volatility_scenario": "configured_iv_expansion",
           "estimated_position_value": 7000.0,
           "gross_pnl": 4100.0,
-          "round_trip_cost": 204.3,
-          "net_pnl": 3895.7,
-          "net_return": 1.2976366937028463,
+          "round_trip_cost": 102.15,
+          "net_pnl": 3997.85,
+          "net_return": 1.3316623086787802,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -3935,10 +5336,20 @@
           "volatility_scenario": "configured_iv_expansion",
           "estimated_position_value": 7512.7,
           "gross_pnl": 4612.7,
-          "round_trip_cost": 204.3,
-          "net_pnl": 4408.4,
-          "net_return": 1.4684143030827912,
+          "round_trip_cost": 102.15,
+          "net_pnl": 4510.55,
+          "net_return": 1.502439918058725,
           "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "exit_path": "HOLD_TO_EXPIRY",
+          "exit_cost_applied": 0.0,
+          "exit_cost_status": "APPLIED_KNOWN_EXERCISE_ASSIGN_SETTLEMENT_COST",
+          "requested_horizon_days": 182,
+          "effective_horizon_days": 181.375,
+          "event_date": null,
+          "event_status": "NOT_APPLICABLE",
+          "event_to_expiry_days": null,
+          "applied_vol_shift": null,
+          "event_leg_effects": [],
           "assumptions": [
             "Configured stress; not a calibrated forecast."
           ]
@@ -4025,6 +5436,94 @@
     }
   ],
   "touch_probabilities": [],
+  "distribution_pnl": {
+    "expected_pnl": null,
+    "median_pnl": null,
+    "expected_return": null,
+    "median_return": null,
+    "probability_profit": null,
+    "probability_gain_25": null,
+    "probability_gain_50": null,
+    "probability_gain_90": null,
+    "probability_x2": null,
+    "probability_x3": null,
+    "probability_loss_25": null,
+    "probability_loss_50": null,
+    "probability_loss_70": null,
+    "probability_loss_90": null,
+    "var_95": null,
+    "cvar_95": null,
+    "minimum_pnl": null,
+    "maximum_pnl": null,
+    "effective_sample_size": null,
+    "confidence_intervals": {},
+    "model": null,
+    "measure": null,
+    "calibration_status": "PROBABILITY_MODEL_NOT_AVAILABLE",
+    "availability_status": "UNAVAILABLE",
+    "missing_reason": "PROBABILITY_MODEL_NOT_AVAILABLE",
+    "assumptions": []
+  },
+  "five_scores": {
+    "opportunity": {
+      "name": "opportunity",
+      "score_value": 37.07072964641373,
+      "score_coverage": 1.0,
+      "missing_components": [],
+      "confidence": "LOW",
+      "formula_version": "pre-opra-v2",
+      "status": "RUN_GLOBAL_CONTEXT"
+    },
+    "risk": {
+      "name": "risk",
+      "score_value": 49.46668008285406,
+      "score_coverage": 1.0,
+      "missing_components": [],
+      "confidence": "LOW",
+      "formula_version": "pre-opra-v2",
+      "status": "RUN_GLOBAL_CONTEXT"
+    },
+    "evidence": {
+      "name": "evidence",
+      "score_value": 40.32979003133478,
+      "score_coverage": 0.8,
+      "missing_components": [
+        "holdout_validation",
+        "rights_confirmation"
+      ],
+      "confidence": "LOW",
+      "formula_version": "pre-opra-v2",
+      "status": "RUN_GLOBAL_CONTEXT"
+    },
+    "model_agreement": {
+      "name": "model_agreement",
+      "score_value": 31.4613888021953,
+      "score_coverage": 0.5,
+      "missing_components": [
+        "option_expected_return_agreement",
+        "candidate_ranking_agreement"
+      ],
+      "confidence": "VERY_LOW",
+      "formula_version": "pre-opra-v2",
+      "status": "RUN_GLOBAL_CONTEXT"
+    },
+    "execution_quality": {
+      "name": "execution_quality",
+      "score_value": 50.49182237441286,
+      "score_coverage": 0.75,
+      "missing_components": [
+        "live_execution_component"
+      ],
+      "confidence": "LOW",
+      "formula_version": "pre-opra-v2",
+      "status": "RUN_GLOBAL_CONTEXT"
+    },
+    "scope": "RUN_GLOBAL",
+    "source": "ttwo-five-scores-v2",
+    "generated_at": "2026-07-18T12:00:00Z",
+    "candidate_id": "engine_candidate",
+    "config_hash": null
+  },
   "pnl_attributions": [
     {
       "scenario_name": "base_constant_leg_iv_30d",
@@ -4285,6 +5784,7 @@
   ],
   "data_status": "AVAILABLE_RESEARCH_ONLY",
   "probability_status": "PROBABILITY_MODEL_NOT_AVAILABLE",
+  "read_only": true,
   "transmit": false,
   "what_if": true,
   "order_capability": "forbidden"

@@ -111,12 +111,45 @@
     "BreakevenResult": {
       "additionalProperties": false,
       "properties": {
+        "applied_exit_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applied Exit Cost"
+        },
         "break_even_roots": {
           "items": {
             "type": "number"
           },
           "title": "Break Even Roots",
           "type": "array"
+        },
+        "breakeven_type": {
+          "default": "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
+          "enum": [
+            "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
+            "EXPIRATION_BREAKEVEN",
+            "MANAGED_EXIT_BREAKEVEN"
+          ],
+          "title": "Breakeven Type",
+          "type": "string"
+        },
+        "exit_cost_status": {
+          "default": "NOT_EVALUATED",
+          "minLength": 1,
+          "title": "Exit Cost Status",
+          "type": "string"
+        },
+        "exit_path": {
+          "$ref": "#/$defs/ExitPath",
+          "default": "CLOSE_BEFORE_EXPIRY"
         },
         "horizon_days": {
           "minimum": 0,
@@ -183,6 +216,343 @@
       "title": "BreakevenResult",
       "type": "object"
     },
+    "DistributionAvailabilityStatus": {
+      "enum": [
+        "AVAILABLE",
+        "UNAVAILABLE"
+      ],
+      "title": "DistributionAvailabilityStatus",
+      "type": "string"
+    },
+    "DistributionPnLMetrics": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "availability_status": {
+          "$ref": "#/$defs/DistributionAvailabilityStatus"
+        },
+        "calibration_status": {
+          "$ref": "#/$defs/ProbabilityStatus"
+        },
+        "confidence_intervals": {
+          "additionalProperties": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Confidence Intervals",
+          "type": "object"
+        },
+        "cvar_95": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cvar 95"
+        },
+        "effective_sample_size": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective Sample Size"
+        },
+        "expected_pnl": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Pnl"
+        },
+        "expected_return": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Return"
+        },
+        "maximum_pnl": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Pnl"
+        },
+        "measure": {
+          "anyOf": [
+            {
+              "const": "P",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Measure"
+        },
+        "median_pnl": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Median Pnl"
+        },
+        "median_return": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Median Return"
+        },
+        "minimum_pnl": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum Pnl"
+        },
+        "missing_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Missing Reason"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "probability_gain_25": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Gain 25"
+        },
+        "probability_gain_50": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Gain 50"
+        },
+        "probability_gain_90": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Gain 90"
+        },
+        "probability_loss_25": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Loss 25"
+        },
+        "probability_loss_50": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Loss 50"
+        },
+        "probability_loss_70": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Loss 70"
+        },
+        "probability_loss_90": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Loss 90"
+        },
+        "probability_profit": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Profit"
+        },
+        "probability_x2": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability X2"
+        },
+        "probability_x3": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability X3"
+        },
+        "var_95": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Var 95"
+        }
+      },
+      "required": [
+        "calibration_status",
+        "availability_status"
+      ],
+      "title": "DistributionPnLMetrics",
+      "type": "object"
+    },
     "EntryCostBreakdown": {
       "additionalProperties": false,
       "properties": {
@@ -204,6 +574,96 @@
           "minimum": 0,
           "title": "Commission",
           "type": "number"
+        },
+        "entry_bid_ask_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entry Bid Ask Cost"
+        },
+        "entry_commission": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entry Commission"
+        },
+        "entry_fx_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entry Fx Cost"
+        },
+        "entry_slippage": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entry Slippage"
+        },
+        "executable_net_premium": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Executable Net Premium"
+        },
+        "executable_premium_paid": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Executable Premium Paid"
+        },
+        "executable_premium_received": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Executable Premium Received"
         },
         "execution_status": {
           "$ref": "#/$defs/ExecutionEstimateStatus"
@@ -244,6 +704,44 @@
           "title": "Premium Received",
           "type": "number"
         },
+        "theoretical_mid_net_premium": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Theoretical Mid Net Premium"
+        },
+        "theoretical_mid_premium_paid": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Theoretical Mid Premium Paid"
+        },
+        "theoretical_mid_premium_received": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Theoretical Mid Premium Received"
+        },
         "total_capital_required": {
           "anyOf": [
             {
@@ -256,6 +754,18 @@
           ],
           "default": null,
           "title": "Total Capital Required"
+        },
+        "total_entry_cash_flow": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Total Entry Cash Flow"
         },
         "total_entry_cost": {
           "title": "Total Entry Cost",
@@ -283,6 +793,68 @@
       "title": "EntryCostBreakdown",
       "type": "object"
     },
+    "EventLegEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "applied_vol_shift": {
+          "title": "Applied Vol Shift",
+          "type": "number"
+        },
+        "contract_symbol": {
+          "minLength": 1,
+          "title": "Contract Symbol",
+          "type": "string"
+        },
+        "event_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Event Date"
+        },
+        "event_status": {
+          "$ref": "#/$defs/EventScenarioStatus"
+        },
+        "event_to_expiry_days": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Event To Expiry Days"
+        }
+      },
+      "required": [
+        "contract_symbol",
+        "event_status",
+        "applied_vol_shift"
+      ],
+      "title": "EventLegEffect",
+      "type": "object"
+    },
+    "EventScenarioStatus": {
+      "enum": [
+        "NOT_APPLICABLE",
+        "OPTION_EXPIRES_BEFORE_EVENT",
+        "EVENT_NOT_OCCURRED_YET",
+        "EVENT_CRUSH_APPLIED",
+        "CONFIGURED_GENERIC_EVENT_STRESS_NO_DATE",
+        "MIXED_LEG_EVENT_EFFECTS"
+      ],
+      "title": "EventScenarioStatus",
+      "type": "string"
+    },
     "ExecutionEstimateStatus": {
       "enum": [
         "INDICATIVE",
@@ -296,6 +868,19 @@
     "ExitCostEstimate": {
       "additionalProperties": false,
       "properties": {
+        "assignment_cost_if_relevant": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assignment Cost If Relevant"
+        },
         "assignment_or_exercise_cost_if_relevant": {
           "anyOf": [
             {
@@ -324,6 +909,28 @@
           "title": "Estimated Exit Slippage",
           "type": "number"
         },
+        "exercise_cost_if_relevant": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exercise Cost If Relevant"
+        },
+        "exit_cost_status": {
+          "default": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+          "title": "Exit Cost Status",
+          "type": "string"
+        },
+        "exit_path": {
+          "$ref": "#/$defs/ExitPath",
+          "default": "CLOSE_BEFORE_EXPIRY"
+        },
         "fx_exit_cost": {
           "anyOf": [
             {
@@ -336,6 +943,24 @@
           ],
           "default": null,
           "title": "Fx Exit Cost"
+        },
+        "hold_to_expiry_cost_status": {
+          "default": "NOT_EVALUATED",
+          "title": "Hold To Expiry Cost Status",
+          "type": "string"
+        },
+        "settlement_cost_if_relevant": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Settlement Cost If Relevant"
         },
         "status": {
           "$ref": "#/$defs/ExecutionEstimateStatus"
@@ -361,6 +986,16 @@
       ],
       "title": "ExitCostEstimate",
       "type": "object"
+    },
+    "ExitPath": {
+      "enum": [
+        "CLOSE_BEFORE_EXPIRY",
+        "HOLD_TO_EXPIRY",
+        "EXERCISE_ASSIGN_SETTLE",
+        "MIXED_EXPIRY_MANAGED_CLOSE"
+      ],
+      "title": "ExitPath",
+      "type": "string"
     },
     "FXAttribution": {
       "additionalProperties": false,
@@ -477,6 +1112,84 @@
       ],
       "title": "FXHandlingMode",
       "type": "string"
+    },
+    "FiveScoreScope": {
+      "enum": [
+        "CANDIDATE",
+        "RUN_GLOBAL",
+        "UNAVAILABLE"
+      ],
+      "title": "FiveScoreScope",
+      "type": "string"
+    },
+    "FiveScoreSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Candidate Id"
+        },
+        "config_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Config Hash"
+        },
+        "evidence": {
+          "$ref": "#/$defs/ScoreDimensionSnapshot"
+        },
+        "execution_quality": {
+          "$ref": "#/$defs/ScoreDimensionSnapshot"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "model_agreement": {
+          "$ref": "#/$defs/ScoreDimensionSnapshot"
+        },
+        "opportunity": {
+          "$ref": "#/$defs/ScoreDimensionSnapshot"
+        },
+        "risk": {
+          "$ref": "#/$defs/ScoreDimensionSnapshot"
+        },
+        "scope": {
+          "$ref": "#/$defs/FiveScoreScope"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "opportunity",
+        "risk",
+        "evidence",
+        "model_agreement",
+        "execution_quality",
+        "scope",
+        "source",
+        "generated_at"
+      ],
+      "title": "FiveScoreSnapshot",
+      "type": "object"
     },
     "FullRepricingAttribution": {
       "additionalProperties": false,
@@ -883,6 +1596,32 @@
           "default": null,
           "title": "Deliverable"
         },
+        "executable_premium_paid": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Executable Premium Paid"
+        },
+        "executable_premium_received": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Executable Premium Received"
+        },
         "exercise_style": {
           "anyOf": [
             {
@@ -962,6 +1701,19 @@
           "default": null,
           "title": "Mid"
         },
+        "mid_premium": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mid Premium"
+        },
         "multiplier": {
           "exclusiveMinimum": 0,
           "title": "Multiplier",
@@ -1023,6 +1775,32 @@
           ],
           "default": null,
           "title": "Strike"
+        },
+        "theoretical_mid_premium_paid": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Theoretical Mid Premium Paid"
+        },
+        "theoretical_mid_premium_received": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Theoretical Mid Premium Received"
         },
         "trading_class": {
           "anyOf": [
@@ -1555,6 +2333,18 @@
     "ScenarioCell": {
       "additionalProperties": false,
       "properties": {
+        "applied_vol_shift": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applied Vol Shift"
+        },
         "assumptions": {
           "items": {
             "type": "string"
@@ -1562,9 +2352,82 @@
           "title": "Assumptions",
           "type": "array"
         },
+        "effective_horizon_days": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective Horizon Days"
+        },
         "estimated_position_value": {
           "title": "Estimated Position Value",
           "type": "number"
+        },
+        "event_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Event Date"
+        },
+        "event_leg_effects": {
+          "items": {
+            "$ref": "#/$defs/EventLegEffect"
+          },
+          "title": "Event Leg Effects",
+          "type": "array"
+        },
+        "event_status": {
+          "$ref": "#/$defs/EventScenarioStatus",
+          "default": "NOT_APPLICABLE"
+        },
+        "event_to_expiry_days": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Event To Expiry Days"
+        },
+        "exit_cost_applied": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exit Cost Applied"
+        },
+        "exit_cost_status": {
+          "default": "NOT_EVALUATED",
+          "minLength": 1,
+          "title": "Exit Cost Status",
+          "type": "string"
+        },
+        "exit_path": {
+          "$ref": "#/$defs/ExitPath",
+          "default": "CLOSE_BEFORE_EXPIRY"
         },
         "gross_pnl": {
           "title": "Gross Pnl",
@@ -1576,8 +2439,16 @@
           "type": "integer"
         },
         "net_pnl": {
-          "title": "Net Pnl",
-          "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Net Pnl"
         },
         "net_return": {
           "anyOf": [
@@ -1591,10 +2462,31 @@
           "default": null,
           "title": "Net Return"
         },
+        "requested_horizon_days": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Requested Horizon Days"
+        },
         "round_trip_cost": {
-          "minimum": 0,
-          "title": "Round Trip Cost",
-          "type": "number"
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Round Trip Cost"
         },
         "scenario_status": {
           "minLength": 1,
@@ -1624,8 +2516,6 @@
         "volatility_scenario",
         "estimated_position_value",
         "gross_pnl",
-        "round_trip_cost",
-        "net_pnl",
         "scenario_status"
       ],
       "title": "ScenarioCell",
@@ -1688,6 +2578,73 @@
       "title": "ScenarioMatrix",
       "type": "object"
     },
+    "ScoreDimensionSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "minLength": 1,
+          "title": "Confidence",
+          "type": "string"
+        },
+        "formula_version": {
+          "minLength": 1,
+          "title": "Formula Version",
+          "type": "string"
+        },
+        "missing_components": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Components",
+          "type": "array"
+        },
+        "name": {
+          "enum": [
+            "opportunity",
+            "risk",
+            "evidence",
+            "model_agreement",
+            "execution_quality"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "score_coverage": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Score Coverage",
+          "type": "number"
+        },
+        "score_value": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score Value"
+        },
+        "status": {
+          "minLength": 1,
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "score_coverage",
+        "confidence",
+        "formula_version",
+        "status"
+      ],
+      "title": "ScoreDimensionSnapshot",
+      "type": "object"
+    },
     "TargetArrivalResult": {
       "additionalProperties": false,
       "properties": {
@@ -1703,6 +2660,19 @@
           ],
           "default": null,
           "title": "Latest Profitable Arrival Date"
+        },
+        "managed_exit_deadline": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Managed Exit Deadline"
         },
         "profitable_horizons_days": {
           "items": {
@@ -1745,7 +2715,8 @@
         "LATEST_PROFITABLE_ARRIVAL",
         "PROFITABLE_THROUGH_EXPIRY",
         "NEVER_BREAKEVEN_AT_THIS_TARGET",
-        "NON_MONOTONIC_TIME_RELATION"
+        "NON_MONOTONIC_TIME_RELATION",
+        "TARGET_TOO_LATE_UNDER_MIXED_EXPIRY_POLICY"
       ],
       "title": "TargetArrivalStatus",
       "type": "string"
@@ -2470,6 +3441,17 @@
       "title": "Data Status",
       "type": "string"
     },
+    "distribution_pnl": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DistributionPnLMetrics"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "dte_exact_days": {
       "minimum": 0,
       "title": "Dte Exact Days",
@@ -2500,6 +3482,30 @@
       },
       "title": "Expirations",
       "type": "array"
+    },
+    "first_expiry": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "First Expiry"
+    },
+    "five_scores": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FiveScoreSnapshot"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     },
     "fixture_status": {
       "enum": [
@@ -2549,12 +3555,30 @@
     "leverage": {
       "$ref": "#/$defs/LeverageDiagnostics"
     },
+    "lifecycle_policy": {
+      "default": "SAME_EXPIRY_HOLD_TO_EXPIRY",
+      "title": "Lifecycle Policy",
+      "type": "string"
+    },
     "liquidity": {
       "items": {
         "$ref": "#/$defs/LiquidityDiagnostics"
       },
       "title": "Liquidity",
       "type": "array"
+    },
+    "managed_exit_deadline": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Managed Exit Deadline"
     },
     "margin": {
       "$ref": "#/$defs/MarginEstimate"
@@ -2608,6 +3632,12 @@
       "title": "Rate Stress Results",
       "type": "array"
     },
+    "read_only": {
+      "const": true,
+      "default": true,
+      "title": "Read Only",
+      "type": "boolean"
+    },
     "round_trip_cost": {
       "$ref": "#/$defs/RoundTripCost"
     },
@@ -2619,8 +3649,11 @@
       "type": "array"
     },
     "schema_version": {
-      "const": "1.0",
-      "default": "1.0",
+      "default": "1.1",
+      "enum": [
+        "1.0",
+        "1.1"
+      ],
       "title": "Schema Version",
       "type": "string"
     },

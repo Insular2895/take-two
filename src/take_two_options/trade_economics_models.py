@@ -58,6 +58,15 @@ class VolatilityScenarioStatus(StrEnum):
     SURFACE_STRESS_INVALID = "SURFACE_STRESS_INVALID"
 
 
+class EventScenarioStatus(StrEnum):
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    OPTION_EXPIRES_BEFORE_EVENT = "OPTION_EXPIRES_BEFORE_EVENT"
+    EVENT_NOT_OCCURRED_YET = "EVENT_NOT_OCCURRED_YET"
+    EVENT_CRUSH_APPLIED = "EVENT_CRUSH_APPLIED"
+    CONFIGURED_GENERIC_EVENT_STRESS_NO_DATE = "CONFIGURED_GENERIC_EVENT_STRESS_NO_DATE"
+    MIXED_LEG_EVENT_EFFECTS = "MIXED_LEG_EVENT_EFFECTS"
+
+
 class RateScenarioType(StrEnum):
     BASE_CURVE = "BASE_CURVE"
     PARALLEL_UP = "PARALLEL_UP"
@@ -101,11 +110,38 @@ class ProbabilityStatus(StrEnum):
     PROBABILITY_MODEL_NOT_PROMOTED = "PROBABILITY_MODEL_NOT_PROMOTED"
 
 
+class DistributionAvailabilityStatus(StrEnum):
+    AVAILABLE = "AVAILABLE"
+    UNAVAILABLE = "UNAVAILABLE"
+
+
+class ProbabilityPnLValuationRule(StrEnum):
+    CONSTANT_LEG_IV_PATH_VALUATION = "CONSTANT_LEG_IV_PATH_VALUATION"
+
+
+class ExitPath(StrEnum):
+    CLOSE_BEFORE_EXPIRY = "CLOSE_BEFORE_EXPIRY"
+    HOLD_TO_EXPIRY = "HOLD_TO_EXPIRY"
+    EXERCISE_ASSIGN_SETTLE = "EXERCISE_ASSIGN_SETTLE"
+    MIXED_EXPIRY_MANAGED_CLOSE = "MIXED_EXPIRY_MANAGED_CLOSE"
+
+
+class MixedExpiryLifecyclePolicy(StrEnum):
+    CLOSE_BEFORE_FIRST_EXPIRY = "CLOSE_BEFORE_FIRST_EXPIRY"
+
+
+class FiveScoreScope(StrEnum):
+    CANDIDATE = "CANDIDATE"
+    RUN_GLOBAL = "RUN_GLOBAL"
+    UNAVAILABLE = "UNAVAILABLE"
+
+
 class TargetArrivalStatus(StrEnum):
     LATEST_PROFITABLE_ARRIVAL = "LATEST_PROFITABLE_ARRIVAL"
     PROFITABLE_THROUGH_EXPIRY = "PROFITABLE_THROUGH_EXPIRY"
     NEVER_BREAKEVEN_AT_THIS_TARGET = "NEVER_BREAKEVEN_AT_THIS_TARGET"
     NON_MONOTONIC_TIME_RELATION = "NON_MONOTONIC_TIME_RELATION"
+    TARGET_TOO_LATE_UNDER_MIXED_EXPIRY_POLICY = "TARGET_TOO_LATE_UNDER_MIXED_EXPIRY_POLICY"
 
 
 class TradeIntensityCategory(StrEnum):
@@ -177,19 +213,33 @@ class VolatilityScenario(StrictModel):
     name: str = Field(min_length=1)
     scenario_type: VolatilityScenarioType
     unit: Literal["vol_points", "multiplier", "mixed", "none"]
-    parameters: VolatilityScenarioParameters = Field(
-        default_factory=VolatilityScenarioParameters
-    )
+    parameters: VolatilityScenarioParameters = Field(default_factory=VolatilityScenarioParameters)
     source: str = Field(min_length=1)
     status: VolatilityScenarioStatus = VolatilityScenarioStatus.CONFIGURED_STRESS
     assumptions: list[str] = Field(default_factory=list)
 
+    @model_validator(mode="after")
+    def validate_event_policy(self) -> VolatilityScenario:
+        if self.scenario_type is not VolatilityScenarioType.EVENT_IV_CRUSH:
+            return self
+        parameters = self.parameters
+        required = (
+            parameters.short_end_max_days,
+            parameters.long_end_min_days,
+            parameters.front_expiry_shift_vol_points,
+            parameters.mid_expiry_shift_vol_points,
+            parameters.back_expiry_shift_vol_points,
+        )
+        if any(value is None for value in required):
+            raise ValueError("EVENT_IV_CRUSH requires explicit tenor boundaries and shifts")
+        if parameters.long_end_min_days <= parameters.short_end_max_days:  # type: ignore[operator]
+            raise ValueError("event long-end boundary must follow short-end boundary")
+        return self
+
 
 class SpotGridConfiguration(StrictModel):
     mode: Literal["spot_multipliers", "absolute_spots"] = "spot_multipliers"
-    values: list[float] = Field(
-        default_factory=lambda: [0.70, 0.85, 1.0, 1.15, 1.30], min_length=2
-    )
+    values: list[float] = Field(default_factory=lambda: [0.70, 0.85, 1.0, 1.15, 1.30], min_length=2)
 
     @model_validator(mode="after")
     def validate_values(self) -> SpotGridConfiguration:
@@ -214,8 +264,7 @@ class RateScenario(StrictModel):
         if self.long_end_min_days <= self.short_end_max_days:
             raise ValueError("long-end rate boundary must follow short-end boundary")
         if self.scenario_type is RateScenarioType.BASE_CURVE and (
-            self.short_end_shift_basis_points != 0
-            or self.long_end_shift_basis_points != 0
+            self.short_end_shift_basis_points != 0 or self.long_end_shift_basis_points != 0
         ):
             raise ValueError("BASE_CURVE cannot carry a rate shift")
         return self
@@ -241,9 +290,7 @@ class GreekBumpConfiguration(StrictModel):
     volatility_bumps_vol_points: list[float] = Field(
         default_factory=lambda: [0.5, 1.0, 2.0], min_length=2
     )
-    rate_bumps_basis_points: list[float] = Field(
-        default_factory=lambda: [10.0, 25.0], min_length=2
-    )
+    rate_bumps_basis_points: list[float] = Field(default_factory=lambda: [10.0, 25.0], min_length=2)
     time_bump_calendar_days: int = Field(default=1, gt=0)
     grid_levels: list[int] = Field(default_factory=lambda: [100, 200], min_length=2)
 
@@ -285,9 +332,10 @@ class ExitCostModelConfiguration(StrictModel):
     closing_commission_multiplier: float = Field(default=1.0, ge=0)
     fx_exit_cost_bps: float | None = Field(default=None, ge=0)
     assignment_or_exercise_cost: float | None = Field(default=None, ge=0)
-    status: ExecutionEstimateStatus = (
-        ExecutionEstimateStatus.ESTIMATED_CONFIGURED_EXECUTION_MODEL
-    )
+    exercise_cost: float | None = Field(default=None, ge=0)
+    assignment_cost: float | None = Field(default=None, ge=0)
+    settlement_cost: float | None = Field(default=None, ge=0)
+    status: ExecutionEstimateStatus = ExecutionEstimateStatus.ESTIMATED_CONFIGURED_EXECUTION_MODEL
 
 
 class BreakevenSolverConfiguration(StrictModel):
@@ -380,15 +428,13 @@ def _default_rate_scenarios() -> list[RateScenario]:
 
 
 class TradeEconomicsConfiguration(StrictModel):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.0", "1.1"] = "1.1"
     analysis_mode: AnalysisMode = AnalysisMode.SCREEN
     deep_analysis_candidate_limit: int = Field(default=3, gt=0, le=20)
     time_decay_horizons_days: list[int] = Field(
         default_factory=lambda: [1, 7, 30, 60, 90], min_length=1
     )
-    scenario_horizons_days: list[int] = Field(
-        default_factory=lambda: [7, 30, 60, 90], min_length=1
-    )
+    scenario_horizons_days: list[int] = Field(default_factory=lambda: [7, 30, 60, 90], min_length=1)
     spot_grid: SpotGridConfiguration = Field(default_factory=SpotGridConfiguration)
     target_spots: list[float] = Field(default_factory=list)
     volatility_scenarios: list[VolatilityScenario] = Field(
@@ -398,28 +444,24 @@ class TradeEconomicsConfiguration(StrictModel):
     numerical_tolerances: NumericalToleranceConfiguration = Field(
         default_factory=NumericalToleranceConfiguration
     )
-    rate_stresses: list[RateScenario] = Field(
-        default_factory=_default_rate_scenarios, min_length=5
-    )
+    rate_stresses: list[RateScenario] = Field(default_factory=_default_rate_scenarios, min_length=5)
     fx_mode: FXHandlingMode = FXHandlingMode.UNKNOWN
     entry_fx_rate_usd_per_base: float | None = Field(default=None, gt=0)
     scenario_fx_rate_usd_per_base: float | None = Field(default=None, gt=0)
-    exit_cost_model: ExitCostModelConfiguration = Field(
-        default_factory=ExitCostModelConfiguration
+    exit_cost_model: ExitCostModelConfiguration = Field(default_factory=ExitCostModelConfiguration)
+    mixed_expiry_lifecycle_policy: MixedExpiryLifecyclePolicy = (
+        MixedExpiryLifecyclePolicy.CLOSE_BEFORE_FIRST_EXPIRY
     )
+    mixed_expiry_close_buffer_calendar_days: int = Field(default=1, ge=0)
     breakeven_solver: BreakevenSolverConfiguration = Field(
         default_factory=BreakevenSolverConfiguration
     )
     touch_targets: list[float] = Field(default_factory=list)
     near_expiry_threshold_hours: float = Field(default=48.0, gt=0)
-    display_policy: TradeEconomicsDisplayPolicy = Field(
-        default_factory=TradeEconomicsDisplayPolicy
-    )
+    display_policy: TradeEconomicsDisplayPolicy = Field(default_factory=TradeEconomicsDisplayPolicy)
     advanced_greeks: AdvancedGreekPolicy = Field(default_factory=AdvancedGreekPolicy)
     leverage_denominator_floor: float = Field(default=1.0, gt=0)
-    intensity_thresholds: TradeIntensityThresholds = Field(
-        default_factory=TradeIntensityThresholds
-    )
+    intensity_thresholds: TradeIntensityThresholds = Field(default_factory=TradeIntensityThresholds)
 
     @model_validator(mode="after")
     def validate_policy_axes(self) -> TradeEconomicsConfiguration:
@@ -441,8 +483,7 @@ class TradeEconomicsConfiguration(StrictModel):
         }:
             raise ValueError("rate stresses must include base/up/down/steepening/flattening")
         if self.fx_mode is not FXHandlingMode.UNKNOWN and (
-            self.entry_fx_rate_usd_per_base is None
-            or self.scenario_fx_rate_usd_per_base is None
+            self.entry_fx_rate_usd_per_base is None or self.scenario_fx_rate_usd_per_base is None
         ):
             raise ValueError("known FX handling modes require entry and scenario FX rates")
         return self
@@ -560,6 +601,8 @@ class LiquidityDiagnostics(StrictModel):
 
 
 class EntryCostBreakdown(StrictModel):
+    # Deprecated 1.0 aliases. They retain midpoint semantics so historical tickets
+    # remain readable; schema 1.1 callers must use the explicit fields below.
     premium_paid: float = Field(ge=0)
     premium_received: float = Field(ge=0)
     net_premium: float
@@ -573,17 +616,107 @@ class EntryCostBreakdown(StrictModel):
     execution_status: ExecutionEstimateStatus
     combo_execution_status: Literal["INDICATIVE", "OBSERVED_COMBO"] = "INDICATIVE"
     warnings: list[str] = Field(default_factory=list)
+    theoretical_mid_premium_paid: float | None = Field(default=None, ge=0)
+    theoretical_mid_premium_received: float | None = Field(default=None, ge=0)
+    theoretical_mid_net_premium: float | None = None
+    executable_premium_paid: float | None = Field(default=None, ge=0)
+    executable_premium_received: float | None = Field(default=None, ge=0)
+    executable_net_premium: float | None = None
+    entry_bid_ask_cost: float | None = Field(default=None, ge=0)
+    entry_slippage: float | None = Field(default=None, ge=0)
+    entry_commission: float | None = Field(default=None, ge=0)
+    entry_fx_cost: float | None = Field(default=None, ge=0)
+    total_entry_cash_flow: float | None = None
+
+    @model_validator(mode="after")
+    def reconcile_entry_economics(self) -> EntryCostBreakdown:
+        theoretical_paid = (
+            self.theoretical_mid_premium_paid
+            if self.theoretical_mid_premium_paid is not None
+            else self.premium_paid
+        )
+        theoretical_received = (
+            self.theoretical_mid_premium_received
+            if self.theoretical_mid_premium_received is not None
+            else self.premium_received
+        )
+        theoretical_net = theoretical_paid - theoretical_received
+        theoretical_net_value = self.theoretical_mid_net_premium
+        if theoretical_net_value is None:
+            theoretical_net_value = theoretical_net
+            object.__setattr__(self, "theoretical_mid_net_premium", theoretical_net_value)
+        object.__setattr__(self, "theoretical_mid_premium_paid", theoretical_paid)
+        object.__setattr__(self, "theoretical_mid_premium_received", theoretical_received)
+        if abs(theoretical_net_value - theoretical_net) > 1e-8:
+            raise ValueError("theoretical midpoint premiums do not reconcile")
+        executable_paid = (
+            self.executable_premium_paid
+            if self.executable_premium_paid is not None
+            else theoretical_paid + (self.bid_ask_cost if theoretical_net >= 0 else 0.0)
+        )
+        executable_received = (
+            self.executable_premium_received
+            if self.executable_premium_received is not None
+            else theoretical_received - (self.bid_ask_cost if theoretical_net < 0 else 0.0)
+        )
+        executable_net = executable_paid - executable_received
+        executable_net_value = self.executable_net_premium
+        if executable_net_value is None:
+            executable_net_value = executable_net
+            object.__setattr__(self, "executable_net_premium", executable_net_value)
+        object.__setattr__(self, "executable_premium_paid", executable_paid)
+        object.__setattr__(self, "executable_premium_received", executable_received)
+        if abs(executable_net_value - executable_net) > 1e-8:
+            raise ValueError("executable premiums do not reconcile")
+        spread_cost = executable_net - theoretical_net
+        if spread_cost < -1e-8:
+            raise ValueError("executable premium cannot improve on the declared midpoint")
+        entry_bid_ask_cost = self.entry_bid_ask_cost
+        if entry_bid_ask_cost is None:
+            entry_bid_ask_cost = self.bid_ask_cost
+            object.__setattr__(self, "entry_bid_ask_cost", entry_bid_ask_cost)
+        if abs(entry_bid_ask_cost - spread_cost) > 1e-8:
+            raise ValueError("entry spread cost does not reconcile midpoint and executable premium")
+        entry_slippage = (
+            self.expected_slippage if self.entry_slippage is None else self.entry_slippage
+        )
+        entry_commission = (
+            self.commission if self.entry_commission is None else self.entry_commission
+        )
+        object.__setattr__(self, "entry_slippage", entry_slippage)
+        object.__setattr__(self, "entry_commission", entry_commission)
+        if self.entry_fx_cost is None:
+            object.__setattr__(self, "entry_fx_cost", self.fx_conversion_cost)
+        known_total = (
+            executable_net + entry_slippage + entry_commission + (self.entry_fx_cost or 0.0)
+        )
+        total_entry_cash_flow = self.total_entry_cash_flow
+        if total_entry_cash_flow is None:
+            total_entry_cash_flow = self.total_entry_cost
+            object.__setattr__(self, "total_entry_cash_flow", total_entry_cash_flow)
+        if abs(total_entry_cash_flow - known_total) > 1e-8:
+            raise ValueError("entry cash-flow components do not reconcile")
+        if abs(self.total_entry_cost - total_entry_cash_flow) > 1e-8:
+            raise ValueError("deprecated total_entry_cost must equal total_entry_cash_flow")
+        return self
 
 
 class ExitCostEstimate(StrictModel):
+    exit_path: ExitPath = ExitPath.CLOSE_BEFORE_EXPIRY
     estimated_exit_bid_ask_cost: float = Field(ge=0)
     estimated_exit_slippage: float = Field(ge=0)
     closing_commissions: float = Field(ge=0)
     fx_exit_cost: float | None = Field(default=None, ge=0)
+    # Legacy 1.0 field. New 1.1 builders do not apply this cost to a close trade.
     assignment_or_exercise_cost_if_relevant: float | None = Field(default=None, ge=0)
+    exercise_cost_if_relevant: float | None = Field(default=None, ge=0)
+    assignment_cost_if_relevant: float | None = Field(default=None, ge=0)
+    settlement_cost_if_relevant: float | None = Field(default=None, ge=0)
+    hold_to_expiry_cost_status: str = "NOT_EVALUATED"
     total_exit_cost: float
     status: ExecutionEstimateStatus
     warnings: list[str] = Field(default_factory=list)
+    exit_cost_status: str = "ESTIMATED_CONFIGURED_EXECUTION_MODEL"
 
     @model_validator(mode="after")
     def reconcile_total(self) -> ExitCostEstimate:
@@ -662,10 +795,20 @@ class ScenarioCell(StrictModel):
     volatility_scenario: str = Field(min_length=1)
     estimated_position_value: float
     gross_pnl: float
-    round_trip_cost: float = Field(ge=0)
-    net_pnl: float
+    round_trip_cost: float | None = Field(default=None, ge=0)
+    net_pnl: float | None = None
     net_return: float | None = None
     scenario_status: str = Field(min_length=1)
+    exit_path: ExitPath = ExitPath.CLOSE_BEFORE_EXPIRY
+    exit_cost_applied: float | None = Field(default=None, ge=0)
+    exit_cost_status: str = Field(default="NOT_EVALUATED", min_length=1)
+    requested_horizon_days: int | None = Field(default=None, ge=0)
+    effective_horizon_days: float | None = Field(default=None, ge=0)
+    event_date: date | None = None
+    event_status: EventScenarioStatus = EventScenarioStatus.NOT_APPLICABLE
+    event_to_expiry_days: int | None = Field(default=None, ge=0)
+    applied_vol_shift: float | None = None
+    event_leg_effects: list[EventLegEffect] = Field(default_factory=list)
     assumptions: list[str] = Field(default_factory=list)
 
 
@@ -677,6 +820,14 @@ class ScenarioMatrix(StrictModel):
     horizon_days_axis: list[int] = Field(min_length=1)
     cells: list[ScenarioCell] = Field(min_length=1)
     warnings: list[str] = Field(default_factory=list)
+
+
+class EventLegEffect(StrictModel):
+    contract_symbol: str = Field(min_length=1)
+    event_date: date | None = None
+    event_status: EventScenarioStatus
+    event_to_expiry_days: int | None = Field(default=None, ge=0)
+    applied_vol_shift: float
 
 
 class RateStressResult(StrictModel):
@@ -704,6 +855,14 @@ class BreakevenResult(StrictModel):
     profit_intervals: list[ProfitInterval]
     status: Literal["SOLVED", "NO_ROOT_IN_DOMAIN", "BLOCKED"]
     search_domain: tuple[float, float]
+    exit_path: ExitPath = ExitPath.CLOSE_BEFORE_EXPIRY
+    applied_exit_cost: float | None = Field(default=None, ge=0)
+    exit_cost_status: str = Field(default="NOT_EVALUATED", min_length=1)
+    breakeven_type: Literal[
+        "CLOSE_BEFORE_EXPIRY_BREAKEVEN",
+        "EXPIRATION_BREAKEVEN",
+        "MANAGED_EXIT_BREAKEVEN",
+    ] = "CLOSE_BEFORE_EXPIRY_BREAKEVEN"
     warnings: list[str] = Field(default_factory=list)
 
 
@@ -718,6 +877,7 @@ class TargetArrivalResult(StrictModel):
     status: TargetArrivalStatus
     latest_profitable_arrival_date: datetime | None = None
     profitable_horizons_days: list[int] = Field(default_factory=list)
+    managed_exit_deadline: datetime | None = None
     warnings: list[str] = Field(default_factory=list)
 
 
@@ -754,6 +914,103 @@ class TouchProbabilityMetrics(StrictModel):
         if unavailable and (any(value is not None for value in values) or not self.reason):
             raise ValueError("unavailable probabilities must be null and carry a reason")
         return self
+
+
+class EconomicPathState(StrictModel):
+    spot: float = Field(gt=0)
+    valuation_time: datetime
+    volatility_by_contract: dict[str, float] = Field(min_length=1)
+    rate_shift_basis_points: float = 0.0
+    fx_rate_usd_per_base: float | None = Field(default=None, gt=0)
+    assumptions: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_volatilities(self) -> EconomicPathState:
+        if any(value <= 0 for value in self.volatility_by_contract.values()):
+            raise ValueError("economic path volatilities must be positive")
+        return self
+
+
+class DistributionPnLMetrics(StrictModel):
+    expected_pnl: float | None = None
+    median_pnl: float | None = None
+    expected_return: float | None = None
+    median_return: float | None = None
+    probability_profit: float | None = Field(default=None, ge=0, le=1)
+    probability_gain_25: float | None = Field(default=None, ge=0, le=1)
+    probability_gain_50: float | None = Field(default=None, ge=0, le=1)
+    probability_gain_90: float | None = Field(default=None, ge=0, le=1)
+    probability_x2: float | None = Field(default=None, ge=0, le=1)
+    probability_x3: float | None = Field(default=None, ge=0, le=1)
+    probability_loss_25: float | None = Field(default=None, ge=0, le=1)
+    probability_loss_50: float | None = Field(default=None, ge=0, le=1)
+    probability_loss_70: float | None = Field(default=None, ge=0, le=1)
+    probability_loss_90: float | None = Field(default=None, ge=0, le=1)
+    var_95: float | None = Field(default=None, ge=0)
+    cvar_95: float | None = Field(default=None, ge=0)
+    minimum_pnl: float | None = None
+    maximum_pnl: float | None = None
+    effective_sample_size: float | None = Field(default=None, gt=0)
+    confidence_intervals: dict[str, tuple[float, float]] = Field(default_factory=dict)
+    model: str | None = None
+    measure: Literal["P"] | None = None
+    calibration_status: ProbabilityStatus
+    availability_status: DistributionAvailabilityStatus
+    missing_reason: str | None = None
+    assumptions: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def enforce_distribution_availability(self) -> DistributionPnLMetrics:
+        values = (
+            self.expected_pnl,
+            self.median_pnl,
+            self.expected_return,
+            self.median_return,
+            self.probability_profit,
+            self.probability_gain_25,
+            self.probability_gain_50,
+            self.probability_gain_90,
+            self.probability_x2,
+            self.probability_x3,
+            self.probability_loss_25,
+            self.probability_loss_50,
+            self.probability_loss_70,
+            self.probability_loss_90,
+            self.var_95,
+            self.cvar_95,
+            self.minimum_pnl,
+            self.maximum_pnl,
+            self.effective_sample_size,
+        )
+        if self.availability_status is DistributionAvailabilityStatus.UNAVAILABLE:
+            if any(value is not None for value in values) or not self.missing_reason:
+                raise ValueError("unavailable PnL distributions must remain null with a reason")
+        elif self.expected_pnl is None or self.probability_profit is None:
+            raise ValueError("available PnL distributions require expected PnL and P(profit)")
+        return self
+
+
+class ScoreDimensionSnapshot(StrictModel):
+    name: Literal["opportunity", "risk", "evidence", "model_agreement", "execution_quality"]
+    score_value: float | None = Field(default=None, ge=0, le=100)
+    score_coverage: float = Field(ge=0, le=1)
+    missing_components: list[str] = Field(default_factory=list)
+    confidence: str = Field(min_length=1)
+    formula_version: str = Field(min_length=1)
+    status: str = Field(min_length=1)
+
+
+class FiveScoreSnapshot(StrictModel):
+    opportunity: ScoreDimensionSnapshot
+    risk: ScoreDimensionSnapshot
+    evidence: ScoreDimensionSnapshot
+    model_agreement: ScoreDimensionSnapshot
+    execution_quality: ScoreDimensionSnapshot
+    scope: FiveScoreScope
+    source: str = Field(min_length=1)
+    generated_at: datetime
+    candidate_id: str | None = None
+    config_hash: str | None = None
 
 
 class GreekTaylorAttribution(StrictModel):
@@ -803,9 +1060,7 @@ class TradeIntensityDiagnostics(StrictModel):
     max_loss_pct: float | None = None
     category: TradeIntensityCategory
     triggered_policies: list[str] = Field(default_factory=list)
-    policy_status: Literal["CONFIGURED_POLICY_UNCALIBRATED"] = (
-        "CONFIGURED_POLICY_UNCALIBRATED"
-    )
+    policy_status: Literal["CONFIGURED_POLICY_UNCALIBRATED"] = "CONFIGURED_POLICY_UNCALIBRATED"
 
 
 class LegEconomics(StrictModel):
@@ -822,6 +1077,11 @@ class LegEconomics(StrictModel):
     multiplier: float = Field(gt=0)
     premium_paid: float = Field(ge=0)
     premium_received: float = Field(ge=0)
+    mid_premium: float | None = Field(default=None, ge=0)
+    theoretical_mid_premium_paid: float | None = Field(default=None, ge=0)
+    theoretical_mid_premium_received: float | None = Field(default=None, ge=0)
+    executable_premium_paid: float | None = Field(default=None, ge=0)
+    executable_premium_received: float | None = Field(default=None, ge=0)
     con_id: int | None = Field(default=None, gt=0)
     local_symbol: str | None = None
     trading_class: str | None = None
@@ -833,7 +1093,7 @@ class LegEconomics(StrictModel):
 
 
 class TradeEconomicsTicket(StrictModel):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.0", "1.1"] = "1.1"
     fixture_status: Literal["LIVE_INPUT", "SYNTHETIC_TEST_FIXTURE", "RESEARCH_FIXTURE"]
     candidate_id: str = Field(min_length=1)
     underlying: str = Field(min_length=1)
@@ -843,6 +1103,9 @@ class TradeEconomicsTicket(StrictModel):
     data_freshness_status: str = Field(min_length=1)
     expirations: list[datetime]
     dte_exact_days: float = Field(ge=0)
+    lifecycle_policy: str = "SAME_EXPIRY_HOLD_TO_EXPIRY"
+    first_expiry: datetime | None = None
+    managed_exit_deadline: datetime | None = None
     intraday_precision_status: IntradayPrecisionStatus
     intraday_precision_warning: str | None = None
     legs: list[LegEconomics]
@@ -862,6 +1125,8 @@ class TradeEconomicsTicket(StrictModel):
     scenario_matrices: list[ScenarioMatrix] = Field(default_factory=list)
     rate_stress_results: list[RateStressResult] = Field(default_factory=list)
     touch_probabilities: list[TouchProbabilityMetrics] = Field(default_factory=list)
+    distribution_pnl: DistributionPnLMetrics | None = None
+    five_scores: FiveScoreSnapshot | None = None
     pnl_attributions: list[PnLAttribution] = Field(default_factory=list)
     fx_attribution: FXAttribution
     liquidity: list[LiquidityDiagnostics] = Field(default_factory=list)
@@ -872,6 +1137,7 @@ class TradeEconomicsTicket(StrictModel):
     warnings: list[str] = Field(default_factory=list)
     data_status: str = Field(min_length=1)
     probability_status: ProbabilityStatus
+    read_only: Literal[True] = True
     transmit: Literal[False] = False
     what_if: Literal[True] = True
     order_capability: Literal["forbidden"] = "forbidden"

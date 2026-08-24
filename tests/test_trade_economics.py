@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from datetime import timedelta
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from take_two_options.american import price_option_quote, validate_dividend_treatment
 from take_two_options.candidates import generate_candidates
 from take_two_options.data import FixtureDataProvider
+from take_two_options.decision.quality_scores import FiveScoreReport
 from take_two_options.domain import (
     DividendForecast,
     ExerciseStyle,
@@ -19,10 +20,12 @@ from take_two_options.domain import (
     PositionSide,
 )
 from take_two_options.engine import analyze_bundle
-from take_two_options.pricing import analyze_risk
+from take_two_options.pricing import analyze_risk, estimate_execution
 from take_two_options.quantitative.contracts import Measure
 from take_two_options.quantitative.trade_economics import (
+    _event_leg_effect,
     build_trade_economics_ticket,
+    calculate_distribution_pnl_metrics,
     calculate_fx_attribution,
     calculate_leg_advanced_greeks,
     calculate_touch_probability,
@@ -34,18 +37,27 @@ from take_two_options.reporting.trade_economics import (
 from take_two_options.trade_economics_models import (
     AnalysisMode,
     BreakevenSolverConfiguration,
+    DistributionAvailabilityStatus,
     DividendTreatmentMode,
+    EconomicPathState,
+    EventScenarioStatus,
+    ExitPath,
+    FiveScoreScope,
     FXHandlingMode,
     GreekConfidenceLevel,
     IntradayPrecisionStatus,
     MarginEstimate,
     MarginStatus,
+    ProbabilityPnLValuationRule,
     ProbabilityStatus,
     RateScenarioType,
     RiskFreeCurve,
     RiskFreeCurveNode,
     TouchDirection,
     TradeEconomicsTicket,
+    VolatilityScenario,
+    VolatilityScenarioParameters,
+    VolatilityScenarioType,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -60,6 +72,9 @@ def _fast_bundle() -> MarketDataBundle:
     config.volatility_scenarios = config.volatility_scenarios[:3]
     config.greek_bumps.grid_levels = [50, 75]
     config.breakeven_solver.grid_points = 101
+    config.exit_cost_model.exercise_cost = 0.0
+    config.exit_cost_model.assignment_cost = 0.0
+    config.exit_cost_model.settlement_cost = 0.0
     return bundle
 
 
@@ -97,10 +112,7 @@ def test_flat_spot_carry_is_full_repricing_and_spread_greeks_aggregate(
     naive_30d = long_ticket.time_decay.current_net_theta * 30
     assert long_ticket.time_decay.flat_spot_30d != pytest.approx(naive_30d, rel=1e-3)
     leg_delta = sum(
-        (-1 if leg.side == "short" else 1)
-        * leg.quantity
-        * leg.multiplier
-        * leg.greeks.delta.value
+        (-1 if leg.side == "short" else 1) * leg.quantity * leg.multiplier * leg.greeks.delta.value
         for leg in spread_ticket.legs
         if leg.greeks is not None
     )
@@ -117,18 +129,17 @@ def test_advanced_greeks_match_european_benchmarks_and_publish_conventions() -> 
     assert quote is not None
     quote.contract.exercise_style = ExerciseStyle.EUROPEAN
     advanced = calculate_leg_advanced_greeks(quote, bundle, side=PositionSide.LONG)
-    time_years = (
-        quote.contract.expiration - bundle.analysis_timestamp
-    ).total_seconds() / (365 * 24 * 60 * 60)
+    time_years = (quote.contract.expiration - bundle.analysis_timestamp).total_seconds() / (
+        365 * 24 * 60 * 60
+    )
     spot = bundle.underlying.price
     strike = quote.contract.strike
     sigma = quote.implied_volatility
     assert sigma is not None
     root_time = math.sqrt(time_years)
-    d1 = (
-        math.log(spot / strike)
-        + (bundle.risk_free_rate + 0.5 * sigma * sigma) * time_years
-    ) / (sigma * root_time)
+    d1 = (math.log(spot / strike) + (bundle.risk_free_rate + 0.5 * sigma * sigma) * time_years) / (
+        sigma * root_time
+    )
     d2 = d1 - sigma * root_time
     density = math.exp(-0.5 * d1 * d1) / math.sqrt(2 * math.pi)
     vega_raw = spot * density * root_time
@@ -136,9 +147,7 @@ def test_advanced_greeks_match_european_benchmarks_and_publish_conventions() -> 
     expected_vomma = (vega_raw * d1 * d2 / sigma) * 0.0001
     assert advanced.vanna.value == pytest.approx(expected_vanna, abs=3e-5)
     assert advanced.vomma.value == pytest.approx(expected_vomma, abs=4e-5)
-    assert advanced.charm_delta_drift_1_calendar_day.unit == (
-        "delta_drift_per_calendar_day"
-    )
+    assert advanced.charm_delta_drift_1_calendar_day.unit == ("delta_drift_per_calendar_day")
     assert advanced.veta_vega_drift_1_calendar_day.unit == "vega_drift_per_calendar_day"
     assert advanced.speed is not None
     assert advanced.color_gamma_drift_1_calendar_day is not None
@@ -200,10 +209,7 @@ def test_breakeven_solver_supports_call_vertical_and_non_monotonic_butterfly() -
         config=config,
     )
     butterfly_roots, butterfly_profit = solve_breakeven_regions(
-        lambda spot: max(spot - 90, 0)
-        - 2 * max(spot - 100, 0)
-        + max(spot - 110, 0)
-        - 4,
+        lambda spot: max(spot - 90, 0) - 2 * max(spot - 100, 0) + max(spot - 110, 0) - 4,
         minimum_spot=0,
         maximum_spot=200,
         config=config,
@@ -415,13 +421,9 @@ def test_required_rate_curve_stresses_are_full_repriced_and_visible(
 
 def test_committed_golden_json_and_markdown_represent_the_same_ticket() -> None:
     ticket = TradeEconomicsTicket.model_validate_json(
-        (ROOT / "reports/examples/m0_trade_economics_ticket.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "reports/examples/m0_trade_economics_ticket.json").read_text(encoding="utf-8")
     )
-    markdown = (ROOT / "reports/examples/m0_trade_economics_ticket.md").read_text(
-        encoding="utf-8"
-    )
+    markdown = (ROOT / "reports/examples/m0_trade_economics_ticket.md").read_text(encoding="utf-8")
     assert ticket.fixture_status == "SYNTHETIC_TEST_FIXTURE"
     assert markdown == render_trade_economics_markdown(ticket)
 
@@ -442,3 +444,336 @@ def test_engine_deep_mode_attaches_tickets_only_to_configured_top_candidates() -
     ]
     assert len(tickets) == 2
     assert all(ticket.order_capability == "forbidden" for ticket in tickets)
+
+
+def test_m0_1_long_and_short_premiums_use_midpoint_and_executable_sides_once() -> None:
+    bundle = _fast_bundle()
+    long_candidate = next(
+        item for item in generate_candidates(bundle) if item.id == "ttwo-long-call"
+    )
+    long_execution = estimate_execution(long_candidate, bundle)
+    assert long_execution.theoretical_mid_premium_paid == pytest.approx(2_900)
+    assert long_execution.executable_premium_paid == pytest.approx(3_000)
+    assert long_execution.bid_ask_cost == pytest.approx(100)
+    assert long_execution.total_entry_cash_flow == pytest.approx(3_002.15)
+    assert long_execution.total_entry_cash_flow == pytest.approx(
+        long_execution.executable_net_premium + long_execution.slippage + long_execution.fees
+    )
+
+    short_candidate = long_candidate.model_copy(deep=True)
+    short_candidate.legs[0].side = PositionSide.SHORT
+    quote = short_candidate.legs[0].option_quote
+    assert quote is not None
+    quote.bid = 8
+    quote.ask = 10
+    short_execution = estimate_execution(short_candidate, bundle)
+    assert short_execution.theoretical_mid_premium_received == pytest.approx(900)
+    assert short_execution.executable_premium_received == pytest.approx(800)
+    assert short_execution.bid_ask_cost == pytest.approx(100)
+    assert short_execution.executable_net_premium == pytest.approx(-800)
+    assert short_execution.total_entry_cash_flow == pytest.approx(-797.85)
+
+
+def test_expiration_uses_hold_path_without_fictional_close_cost_and_reconciles(
+    m0_tickets: tuple[TradeEconomicsTicket, TradeEconomicsTicket],
+) -> None:
+    for ticket in m0_tickets:
+        assert ticket.breakeven_clock is not None
+        base_results = [
+            result
+            for result in ticket.breakeven_clock.results
+            if result.volatility_scenario == "base_constant_leg_iv"
+        ]
+        expiry_result = max(base_results, key=lambda result: result.valuation_time)
+        assert expiry_result.exit_path is ExitPath.HOLD_TO_EXPIRY
+        assert expiry_result.breakeven_type == "EXPIRATION_BREAKEVEN"
+        assert expiry_result.applied_exit_cost == pytest.approx(0)
+        assert expiry_result.break_even_roots == pytest.approx(
+            ticket.expiration_breakevens,
+            abs=2e-4,
+        )
+        close_cell = next(
+            cell for cell in ticket.scenario_matrices[0].cells if cell.requested_horizon_days == 7
+        )
+        expiry_cell = max(
+            ticket.scenario_matrices[0].cells,
+            key=lambda cell: cell.valuation_time,
+        )
+        assert close_cell.exit_path is ExitPath.CLOSE_BEFORE_EXPIRY
+        assert any(
+            result.breakeven_type == "CLOSE_BEFORE_EXPIRY_BREAKEVEN" for result in base_results
+        )
+        assert close_cell.exit_cost_applied == pytest.approx(
+            ticket.exit_cost_estimate.total_exit_cost
+        )
+        assert expiry_cell.exit_path is ExitPath.HOLD_TO_EXPIRY
+        assert expiry_cell.exit_cost_applied == pytest.approx(0)
+        assert ticket.exit_cost_estimate.total_exit_cost == pytest.approx(
+            ticket.exit_cost_estimate.estimated_exit_bid_ask_cost
+            + ticket.exit_cost_estimate.estimated_exit_slippage
+            + ticket.exit_cost_estimate.closing_commissions
+            + (ticket.exit_cost_estimate.fx_exit_cost or 0)
+        )
+        assert ticket.exit_cost_estimate.exercise_cost_if_relevant in {None, 0}
+        assert ticket.exit_cost_estimate.settlement_cost_if_relevant == 0
+
+
+def test_bear_put_expiration_breakeven_reconciles_with_contractual_payoff() -> None:
+    bundle = _fast_bundle()
+    candidate = next(
+        item for item in generate_candidates(bundle) if item.id == "ttwo-bear-put-spread"
+    )
+    analyze_risk(candidate, bundle)
+    ticket = build_trade_economics_ticket(candidate, bundle)
+    assert ticket.breakeven_clock is not None
+    expiry = max(
+        (
+            result
+            for result in ticket.breakeven_clock.results
+            if result.volatility_scenario == "base_constant_leg_iv"
+        ),
+        key=lambda result: result.valuation_time,
+    )
+    assert expiry.break_even_roots == pytest.approx(ticket.expiration_breakevens, abs=2e-4)
+
+
+def test_renderer_exposes_full_theta_statistics_and_score_sections(
+    m0_tickets: tuple[TradeEconomicsTicket, TradeEconomicsTicket],
+) -> None:
+    markdown = render_trade_economics_markdown(m0_tickets[0])
+    for expected in (
+        "Theta / capital / day",
+        "Flat Spot 7d %",
+        "Flat Spot 30d %",
+        "Flat Spot 60d %",
+        "Flat Spot 90d %",
+        "Decay rate 0-7d",
+        "Decay acceleration 30-60",
+        "Statistics",
+        "Decision scores",
+        "Current theta is NOT multiplied by horizon",
+    ):
+        assert expected in markdown
+
+
+def test_distribution_pnl_is_null_without_sufficient_promoted_paths(
+    m0_tickets: tuple[TradeEconomicsTicket, TradeEconomicsTicket],
+) -> None:
+    distribution = m0_tickets[0].distribution_pnl
+    assert distribution is not None
+    assert distribution.availability_status is DistributionAvailabilityStatus.UNAVAILABLE
+    assert distribution.expected_pnl is None
+    assert distribution.median_pnl is None
+    assert distribution.probability_profit is None
+    assert distribution.cvar_95 is None
+    assert distribution.missing_reason
+
+
+def test_full_economic_paths_produce_exact_net_pnl_distribution() -> None:
+    bundle = _fast_bundle()
+    candidate = next(item for item in generate_candidates(bundle) if item.id == "ttwo-long-call")
+    analyze_risk(candidate, bundle)
+    ticket = build_trade_economics_ticket(candidate, bundle)
+    quote = candidate.legs[0].option_quote
+    assert quote is not None and quote.implied_volatility is not None
+    paths = [
+        [
+            EconomicPathState(
+                spot=spot,
+                valuation_time=quote.contract.expiration,
+                volatility_by_contract={quote.contract.local_symbol: quote.implied_volatility},
+            )
+        ]
+        for spot in (250.0, 280.0, 320.0, 400.0)
+    ]
+    metrics = calculate_distribution_pnl_metrics(
+        candidate,
+        bundle,
+        close_exit_cost=ticket.exit_cost_estimate,
+        economic_paths=paths,
+        model="synthetic_full_economic_paths",
+        measure=Measure.REAL_WORLD,
+        calibration_status=ProbabilityStatus.MODEL_IMPLIED,
+    )
+    expected_path_pnls = [-3002.15, -1002.15, 2997.85, 10997.85]
+    assert metrics.expected_pnl == pytest.approx(sum(expected_path_pnls) / 4)
+    assert metrics.median_pnl == pytest.approx(997.85)
+    assert metrics.probability_profit == pytest.approx(0.5)
+    assert metrics.probability_loss_25 == pytest.approx(0.5)
+    assert metrics.probability_loss_90 == pytest.approx(0.25)
+    assert metrics.var_95 == pytest.approx(2702.15)
+    assert metrics.cvar_95 == pytest.approx(3002.15)
+    assert metrics.effective_sample_size == pytest.approx(4)
+
+
+def test_spot_paths_require_an_explicit_future_iv_valuation_rule() -> None:
+    bundle = _fast_bundle()
+    candidate = next(item for item in generate_candidates(bundle) if item.id == "ttwo-long-call")
+    analyze_risk(candidate, bundle)
+    ticket = build_trade_economics_ticket(candidate, bundle)
+    unavailable = calculate_distribution_pnl_metrics(
+        candidate,
+        bundle,
+        close_exit_cost=ticket.exit_cost_estimate,
+        spot_paths=[[257.79, 300.0]],
+        spot_path_horizon_days=30,
+        model="synthetic_spot_paths",
+        measure=Measure.REAL_WORLD,
+        calibration_status=ProbabilityStatus.MODEL_IMPLIED,
+    )
+    assert unavailable.expected_pnl is None
+    assert unavailable.missing_reason == "INSUFFICIENT_STATE_PATHS_FOR_PNL_DISTRIBUTION"
+    available = calculate_distribution_pnl_metrics(
+        candidate,
+        bundle,
+        close_exit_cost=ticket.exit_cost_estimate,
+        spot_paths=[[257.79, 300.0]],
+        spot_path_horizon_days=30,
+        spot_path_valuation_rule=(ProbabilityPnLValuationRule.CONSTANT_LEG_IV_PATH_VALUATION),
+        model="synthetic_spot_paths",
+        measure=Measure.REAL_WORLD,
+        calibration_status=ProbabilityStatus.MODEL_IMPLIED,
+    )
+    assert available.expected_pnl is not None
+    assert "MODEL_IMPLIED_UNDER_DECLARED_IV_RULE" in " ".join(available.assumptions)
+
+
+def test_engine_bridges_exact_canonical_candidate_scores_into_ranked_deep_ticket() -> None:
+    bundle = _fast_bundle()
+    screen_bundle = bundle.model_copy(deep=True)
+    screen_bundle.trade_economics.analysis_mode = AnalysisMode.SCREEN
+    canonical_rank = analyze_bundle(screen_bundle).ranked_candidate_ids
+    bundle.trade_economics.analysis_mode = AnalysisMode.DEEP_ANALYSIS
+    bundle.trade_economics.deep_analysis_candidate_limit = 1
+    report = FiveScoreReport.model_validate_json(
+        (ROOT / "reports/pre_opra/five_scores_2026-08-08.json").read_text(encoding="utf-8")
+    )
+    canonical = {
+        candidate_id: report.model_copy(
+            update={
+                "candidate_id": candidate_id,
+                "report_id": f"synthetic-{candidate_id}",
+            }
+        )
+        for candidate_id in canonical_rank
+    }
+    decision = analyze_bundle(
+        bundle,
+        canonical_five_score_reports=canonical,
+        canonical_ranked_candidate_ids=canonical_rank,
+    )
+    assert decision.ranked_candidate_ids == canonical_rank
+    top_id = decision.ranked_candidate_ids[0]
+    top = next(candidate for candidate in decision.candidates if candidate.id == top_id)
+    assert top.trade_economics is not None
+    scores = top.trade_economics.five_scores
+    assert scores is not None
+    assert scores.scope is FiveScoreScope.CANDIDATE
+    source = canonical[top_id]
+    assert scores.opportunity.score_value == source.opportunity.score_value
+    assert scores.risk.score_value == source.risk.score_value
+    assert scores.evidence.score_value == source.evidence.score_value
+    assert scores.model_agreement.score_value == source.model_agreement.score_value
+    assert scores.execution_quality.score_value == source.execution_quality.score_value
+    assert top.trade_economics.read_only is True
+    assert top.trade_economics.transmit is False
+
+
+def _event_scenario(event_date: date) -> VolatilityScenario:
+    return VolatilityScenario(
+        name="synthetic_event_crush",
+        scenario_type=VolatilityScenarioType.EVENT_IV_CRUSH,
+        unit="vol_points",
+        parameters=VolatilityScenarioParameters(
+            short_end_max_days=90,
+            long_end_min_days=365,
+            front_expiry_shift_vol_points=-20,
+            mid_expiry_shift_vol_points=-10,
+            back_expiry_shift_vol_points=-2,
+            relative_to_event_date=event_date,
+        ),
+        source="synthetic_test",
+    )
+
+
+def test_event_iv_crush_uses_event_date_and_event_to_expiry_tenor() -> None:
+    bundle = _fast_bundle()
+    quote = bundle.option_quotes[0].model_copy(deep=True)
+    event_date = bundle.analysis_timestamp.date() + timedelta(days=30)
+    scenario = _event_scenario(event_date)
+    before = _event_leg_effect(quote, scenario, bundle.analysis_timestamp)
+    assert before.event_status is EventScenarioStatus.EVENT_NOT_OCCURRED_YET
+    assert before.applied_vol_shift == 0
+
+    event_time = bundle.analysis_timestamp + timedelta(days=30)
+    exact = _event_leg_effect(quote, scenario, event_time)
+    after = _event_leg_effect(quote, scenario, event_time + timedelta(days=1))
+    assert exact.event_status is EventScenarioStatus.EVENT_CRUSH_APPLIED
+    assert after.event_status is EventScenarioStatus.EVENT_CRUSH_APPLIED
+
+    expires_before = quote.model_copy(deep=True)
+    expires_before.contract.expiration = event_time - timedelta(days=1)
+    expired_effect = _event_leg_effect(expires_before, scenario, event_time)
+    assert expired_effect.event_status is EventScenarioStatus.OPTION_EXPIRES_BEFORE_EVENT
+    assert expired_effect.applied_vol_shift == 0
+
+    front = quote.model_copy(deep=True)
+    front.contract.expiration = event_time + timedelta(days=45)
+    back = quote.model_copy(deep=True)
+    back.contract.expiration = event_time + timedelta(days=400)
+    assert _event_leg_effect(front, scenario, event_time).applied_vol_shift == -20
+    assert _event_leg_effect(back, scenario, event_time).applied_vol_shift == -2
+
+    generic = scenario.model_copy(deep=True)
+    generic.parameters.relative_to_event_date = None
+    generic_effect = _event_leg_effect(quote, generic, bundle.analysis_timestamp)
+    assert (
+        generic_effect.event_status is EventScenarioStatus.CONFIGURED_GENERIC_EVENT_STRESS_NO_DATE
+    )
+    assert generic_effect.event_date is None
+
+
+@pytest.mark.parametrize("calendar", [True, False])
+def test_mixed_expiry_calendar_and_diagonal_stop_at_managed_deadline(
+    calendar: bool,
+) -> None:
+    bundle = _fast_bundle()
+    bundle.trade_economics.scenario_horizons_days = [7, 400]
+    bundle.trade_economics.time_decay_horizons_days = [1, 7, 400]
+    candidate = next(
+        item for item in generate_candidates(bundle) if item.id == "ttwo-bull-call-spread"
+    ).model_copy(deep=True)
+    first_quote = candidate.legs[0].option_quote
+    second_quote = candidate.legs[1].option_quote
+    assert first_quote is not None and second_quote is not None
+    second_quote.contract.expiration = first_quote.contract.expiration + timedelta(days=90)
+    if calendar:
+        second_quote.contract.strike = first_quote.contract.strike
+    analyze_risk(candidate, bundle)
+    ticket = build_trade_economics_ticket(candidate, bundle)
+    deadline = first_quote.contract.expiration - timedelta(days=1)
+    assert ticket.managed_exit_deadline == deadline
+    assert ticket.expiration_breakevens == []
+    assert ticket.time_decay is not None
+    assert max(point.valuation_time for point in ticket.time_decay.time_decay_curve) <= deadline
+    clipped = [
+        cell
+        for matrix in ticket.scenario_matrices
+        for cell in matrix.cells
+        if cell.requested_horizon_days == 400
+    ]
+    assert clipped
+    assert all(cell.valuation_time == deadline for cell in clipped)
+    assert all(cell.exit_path is ExitPath.MIXED_EXPIRY_MANAGED_CLOSE for cell in clipped)
+    assert all(cell.scenario_status == "CLIPPED_BY_MIXED_EXPIRY_POLICY" for cell in clipped)
+    assert all(
+        target.latest_profitable_arrival_date is None
+        or target.latest_profitable_arrival_date <= deadline
+        for target in ticket.target_arrivals
+    )
+    assert ticket.breakeven_clock is not None
+    assert all(
+        result.breakeven_type == "MANAGED_EXIT_BREAKEVEN"
+        for result in ticket.breakeven_clock.results
+    )
+    assert "intentionally not modeled" in render_trade_economics_markdown(ticket)

@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-24",
+  "branch": "codex/v10-quantitative-validation-and-robust-decision-engine",
+  "base_commit": "9b8842e",
+  "m0_1_status": "COMPLETE",
+  "pre_opra_logic_status": "COMPLETE",
+  "next_phase": "M — OPRA READ-ONLY LIVE DATA + SHADOW/PAPER VALIDATION",
+  "holdout_status": "UNOPENED",
+  "opra_phase_status": "NOT_STARTED",
+  "shadow_mode_started": false,
+  "paper_trading_started": false,
+  "safety": {
+    "read_only": true,
+    "transmit": false,
+    "what_if": true,
+    "order_capability": "forbidden"
+  },
+  "corrections": [
+    {
+      "id": 1,
+      "name": "MIDPOINT_VS_EXECUTABLE_PREMIUM",
+      "status": "COMPLETE"
+    },
+    {
+      "id": 2,
+      "name": "EXIT_PATH_AND_EXPIRY_COSTS",
+      "status": "COMPLETE"
+    },
+    {
+      "id": 3,
+      "name": "FULL_THETA_AND_CARRY_RENDERING",
+      "status": "COMPLETE"
+    },
+    {
+      "id": 4,
+      "name": "DISTRIBUTION_PNL_METRICS",
+      "status": "COMPLETE"
+    },
+    {
+      "id": 5,
+      "name": "CANONICAL_FIVE_SCORE_BRIDGE",
+      "status": "COMPLETE"
+    },
+    {
+      "id": 6,
+      "name": "EVENT_DATE_AWARE_IV_CRUSH",
+      "status": "COMPLETE"
+    },
+    {
+      "id": 7,
+      "name": "MIXED_EXPIRY_MANAGED_CLOSE",
+      "status": "COMPLETE"
+    }
+  ],
+  "schema_changes": {
+    "trade_economics_ticket": "1.1",
+    "legacy_ticket_1_0_readable": true,
+    "exported_schema_count": 27
+  },
+  "verification": {
+    "pytest": {
+      "status": "passed",
+      "passed": 287,
+      "warnings": 1,
+      "warning_scope": "third_party_websockets_deprecation"
+    },
+    "ruff": "passed",
+    "mypy": {
+      "status": "passed",
+      "checked_source_files": 186
+    },
+    "schema_check": "passed",
+    "offline_artifacts": "passed",
+    "golden_regeneration": "deterministic"
+  },
+  "artifacts": [
+    "reports/examples/m0_trade_economics_ticket.json",
+    "reports/examples/m0_trade_economics_ticket.md",
+    "reports/examples/m0_1_probability_distribution_fixture.json"
+  ],
+  "pending": {
+    "opra": [
+      "live NBBO",
+      "quote freshness",
+      "sizes and depth",
+      "provider Greeks",
+      "contract discovery"
+    ],
+    "broker": [
+      "combo quote",
+      "broker margin",
+      "account commission preview"
+    ],
+    "paper": [
+      "realized fills",
+      "real exit spread",
+      "real slippage",
+      "prospective PnL",
+      "score calibration",
+      "touch and distribution probability calibration",
+      "V10 strategy superiority"
+    ]
+  }
+}

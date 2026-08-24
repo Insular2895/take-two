@@ -389,6 +389,68 @@ class ExecutionEstimate(StrictModel):
     margin_status: MarginStatus = MarginStatus.NOT_REQUIRED
     execution_status: ExecutionEstimateStatus = ExecutionEstimateStatus.INDICATIVE
     combo_execution_status: Literal["INDICATIVE", "OBSERVED_COMBO"] = "INDICATIVE"
+    theoretical_mid_premium_paid: float | None = Field(default=None, ge=0)
+    theoretical_mid_premium_received: float | None = Field(default=None, ge=0)
+    theoretical_mid_net_premium: float | None = None
+    executable_premium_paid: float | None = Field(default=None, ge=0)
+    executable_premium_received: float | None = Field(default=None, ge=0)
+    executable_net_premium: float | None = None
+    total_entry_cash_flow: float | None = None
+
+    @model_validator(mode="after")
+    def reconcile_explicit_entry_economics(self) -> ExecutionEstimate:
+        theoretical_paid = (
+            self.theoretical_mid_premium_paid
+            if self.theoretical_mid_premium_paid is not None
+            else self.premium_paid
+        )
+        theoretical_received = (
+            self.theoretical_mid_premium_received
+            if self.theoretical_mid_premium_received is not None
+            else self.premium_received
+        )
+        theoretical_net = theoretical_paid - theoretical_received
+        theoretical_net_value = self.theoretical_mid_net_premium
+        if theoretical_net_value is None:
+            theoretical_net_value = theoretical_net
+            object.__setattr__(self, "theoretical_mid_net_premium", theoretical_net_value)
+        object.__setattr__(self, "theoretical_mid_premium_paid", theoretical_paid)
+        object.__setattr__(self, "theoretical_mid_premium_received", theoretical_received)
+        if abs(theoretical_net_value - theoretical_net) > 1e-8:
+            raise ValueError("theoretical midpoint premiums do not reconcile")
+        executable_paid = (
+            self.executable_premium_paid
+            if self.executable_premium_paid is not None
+            else theoretical_paid + (self.bid_ask_cost if theoretical_net >= 0 else 0.0)
+        )
+        executable_received = (
+            self.executable_premium_received
+            if self.executable_premium_received is not None
+            else theoretical_received - (self.bid_ask_cost if theoretical_net < 0 else 0.0)
+        )
+        executable_net = executable_paid - executable_received
+        executable_net_value = self.executable_net_premium
+        if executable_net_value is None:
+            executable_net_value = executable_net
+            object.__setattr__(self, "executable_net_premium", executable_net_value)
+        object.__setattr__(self, "executable_premium_paid", executable_paid)
+        object.__setattr__(self, "executable_premium_received", executable_received)
+        if abs(executable_net_value - executable_net) > 1e-8:
+            raise ValueError("executable premiums do not reconcile")
+        if abs(executable_net - theoretical_net - self.bid_ask_cost) > 1e-8:
+            raise ValueError("entry bid/ask cost does not reconcile")
+        known_cash_flow = (
+            executable_net + self.slippage + self.fees + (self.fx_conversion_cost or 0.0)
+        )
+        total_entry_cash_flow = self.total_entry_cash_flow
+        if total_entry_cash_flow is None:
+            total_entry_cash_flow = self.total_entry_cost
+            object.__setattr__(self, "total_entry_cash_flow", total_entry_cash_flow)
+        if abs(total_entry_cash_flow - known_cash_flow) > 1e-8:
+            raise ValueError("total entry cash flow does not reconcile")
+        if abs(self.total_entry_cost - total_entry_cash_flow) > 1e-8:
+            raise ValueError("deprecated total_entry_cost must equal total_entry_cash_flow")
+        return self
 
 
 class PayoffPoint(StrictModel):
