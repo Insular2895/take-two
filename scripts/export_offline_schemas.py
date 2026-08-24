@@ -9,6 +9,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from take_two_options.cloud.contracts import CloudPositionDossier
 from take_two_options.config.contracts import PreOpraConfig, ProspectiveBudgetConfig
 from take_two_options.decision.engine_verdict import EngineVerdictReport
 from take_two_options.decision.quality_scores import FiveScoreReport
@@ -58,6 +59,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "severity_gate_report.schema.json": SeverityGateReport,
     "pre_opra_config.schema.json": PreOpraConfig,
     "prospective_budget_config.schema.json": ProspectiveBudgetConfig,
+    "cloud_position_dossier.schema.json": CloudPositionDossier,
     "trade_economics_ticket.schema.json": TradeEconomicsTicket,
     "historical_dataset_manifest.schema.json": HistoricalDatasetManifest,
     "historical_option_dataset_summary.schema.json": HistoricalOptionDatasetSummary,

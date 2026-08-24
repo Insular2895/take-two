@@ -1,0 +1,94 @@
+{
+  "report": "PHASE_M_CF0_ZERO_COST_CONTROL_PLANE",
+  "report_date": "2026-08-24",
+  "deployment_performed": false,
+  "workers_dev_url": null,
+  "architecture": {
+    "worker_deployments": 1,
+    "d1_databases": 1,
+    "durable_object_classes": ["TTWOPositionMonitor"],
+    "durable_object_storage_backend": "sqlite",
+    "static_assets": "vanilla_html_css_javascript",
+    "canonical_quant_engine": "python_local_export",
+    "d1_source_of_truth": true,
+    "vps_required": false,
+    "production_docker_required": false,
+    "always_on_user_device_required": false
+  },
+  "free_tier_estimate": {
+    "label": "APPLICATION_ESTIMATE_ONLY",
+    "monitor_alarm_executions_per_day": 990,
+    "browser_api_requests_per_day": 2880,
+    "worker_and_do_invocations_with_allowance_per_day": 3970,
+    "external_provider_subrequests_per_day": 4950,
+    "pnl_snapshot_rows_per_day": 600,
+    "estimated_d1_rows_written_per_day": 7150,
+    "soft_warning": 60000,
+    "degrade": 80000,
+    "unsafe": 90000,
+    "default_status": "NORMAL"
+  },
+  "security": {
+    "password": "PBKDF2-HMAC-SHA256; versioned; 600000 iterations; secret only",
+    "session_token_bits": 256,
+    "session_token_stored_in_d1": false,
+    "session_max_age_seconds": 43200,
+    "sensitive_reauthentication_seconds": 300,
+    "csrf": true,
+    "login_rate_limit": "5 failures / 10 minutes",
+    "unauthenticated_trade_data": false
+  },
+  "economics": {
+    "mark_to_market_separate": true,
+    "estimated_liquidation_separate": true,
+    "expected_remaining_model_snapshot_separate": true,
+    "unknown_fx_cost_assumed_zero": false,
+    "partial_close": true,
+    "immutable_estimate_vs_actual": true,
+    "synthetic_acceptance_case": {
+      "entry_cash": 1023,
+      "mtm_pnl": 464,
+      "estimated_liquidation_proceeds": 1455,
+      "estimated_liquidation_pnl": 432,
+      "expected_remaining_pnl": 91,
+      "actual_proceeds": 1440,
+      "actual_realized_pnl": 417,
+      "estimate_error": -15,
+      "currency": "EUR"
+    }
+  },
+  "safety": {
+    "read_only": true,
+    "transmit": false,
+    "what_if": true,
+    "human_confirmation_required": true,
+    "order_capability": "forbidden",
+    "structure_close_only": true,
+    "leg_by_leg_fallback": false
+  },
+  "tests": {
+    "cloudflare_vitest": 25,
+    "cloudflare_vitest_status": "PASS",
+    "cross_language_fixture": "fixtures/cloudflare/monitoring_parity.json",
+    "python_full_suite": 346,
+    "python_full_suite_status": "PASS",
+    "schema_count": 29,
+    "wrangler_dry_run": "PASS",
+    "github_ci": "PENDING_PUBLICATION"
+  },
+  "status": {
+    "CF0_CONTROL_PLANE": "READY",
+    "CF0_WEB_UI": "READY",
+    "CF0_AUTH": "READY",
+    "CF0_PERSISTENCE": "READY",
+    "CF0_MONITOR_SCHEDULER": "READY",
+    "CF0_STRUCTURE_CLOSE_PREVIEW": "READY",
+    "CF0_REALIZED_PNL_RECONCILIATION": "READY",
+    "CF0_FREE_TIER_DESIGN": "READY",
+    "LIVE_MARKET_DATA": "NOT_CONFIGURED",
+    "BROKER_LIVE_SYNC": "NOT_CONFIGURED",
+    "ORDER_TRANSMISSION": "FORBIDDEN",
+    "PHASE_M_VALIDATION": "NOT_STARTED",
+    "FINAL_HOLDOUT": "UNOPENED"
+  }
+}

@@ -10,6 +10,31 @@ constraints, runs separate conditional simulations, validates hard gates, then
 uses Pareto ranking. `NO_TRADE` and `BLOCKED_INSUFFICIENT_DATA` are first-class
 outcomes.
 
+## Zero-cost cloud dashboard
+
+Phase M-CF0 adds one private Cloudflare Workers application under [`cloudflare/`](cloudflare):
+static dashboard, authenticated API, D1 persistence, and a SQLite Durable Object alarm monitor.
+The Python engine exports the immutable dossier; Cloudflare does not duplicate pricing or model
+training and cannot transmit a broker order. No VPS, production Docker, database server, or
+always-on Mac is required.
+
+```bash
+python -m take_two_options.cloud.export_position \
+  --ticket reports/examples/m0_trade_economics_ticket.json \
+  --output cloud_position.json
+cd cloudflare
+npm install
+npm run db:local
+npm run dev
+```
+
+For a €0 Cloudflare Free deployment: log in with Wrangler, create the D1 database, replace its ID
+in `wrangler.jsonc`, apply remote migrations, set `ADMIN_USERNAME` and the generated
+`ADMIN_PASSWORD_HASH` as Wrangler secrets, then run `npm run deploy`. Wrangler returns the real
+`take-two-control.<account>.workers.dev` URL. A custom domain is optional later. See the
+[`zero-cost deployment guide`](docs/cloudflare/ZERO_COST_DEPLOYMENT.md) and
+[`CF0 architecture`](docs/cloudflare/ARCHITECTURE.md).
+
 ## M0.2.1 — Final budget semantics cleanup
 
 The pre-OPRA budget logic is now finalized and frozen. A positive account

@@ -3,6 +3,7 @@
   "fixture_status": "SYNTHETIC_TEST_FIXTURE",
   "candidate_id": "ttwo-long-call",
   "underlying": "TTWO",
+  "underlying_spot": 257.79,
   "strategy_name": "Long call",
   "exact_market_timestamp": "2026-07-18T12:00:00Z",
   "currency": "USD",

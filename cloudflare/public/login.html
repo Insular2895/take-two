@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TTWO — Connexion privée</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body class="login-page">
+    <main class="login-card">
+      <p class="eyebrow">TAKE TWO CONTROL</p>
+      <h1>Accès privé</h1>
+      <p class="muted">Le dossier, les positions et les données de marché ne sont jamais servis avant authentification.</p>
+      <form id="login-form">
+        <label>Identifiant<input id="username" name="username" autocomplete="username" required></label>
+        <label>Mot de passe<input id="password" name="password" type="password" autocomplete="current-password" required></label>
+        <button type="submit" class="primary">SE CONNECTER</button>
+      </form>
+      <p id="login-error" class="error" role="alert"></p>
+    </main>
+    <script src="/login.js" defer></script>
+  </body>
+</html>

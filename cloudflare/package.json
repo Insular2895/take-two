@@ -1,0 +1,24 @@
+{
+  "name": "take-two-cloudflare-control",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit && node scripts/safety-scan.mjs",
+    "password:hash": "node scripts/hash-password.mjs",
+    "db:local": "wrangler d1 migrations apply take-two-control --local",
+    "db:remote": "wrangler d1 migrations apply take-two-control --remote",
+    "check": "npm run typecheck && npm run lint && npm test"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.0.0",
+    "@cloudflare/workers-types": "5.20260823.1",
+    "typescript": "5.9.2",
+    "vitest": "4.1.11",
+    "wrangler": "4.125.0"
+  }
+}

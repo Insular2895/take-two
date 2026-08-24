@@ -32,6 +32,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
         "comparable_panel_dataset.schema.json",
         "backtest_report.schema.json",
         "calibration_report.schema.json",
+        "cloud_position_dossier.schema.json",
         "data_usage_rights.schema.json",
         "empirical_calibration.schema.json",
         "engine_verdict_report.schema.json",

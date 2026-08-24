@@ -3027,6 +3027,7 @@ def build_trade_economics_ticket(
         fixture_status=fixture_status,
         candidate_id=candidate.id,
         underlying=bundle.underlying.ticker,
+        underlying_spot=bundle.underlying.price,
         strategy_name=candidate.name,
         exact_market_timestamp=bundle.analysis_timestamp,
         currency=bundle.underlying.currency,

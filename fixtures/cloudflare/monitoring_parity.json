@@ -1,0 +1,27 @@
+{
+  "fixture_id": "cloudflare-python-monitoring-parity-v1",
+  "synthetic": true,
+  "entry_cash": 1023.0,
+  "baseline": {
+    "market_value": 1487.0,
+    "mtm_pnl": 464.0,
+    "liquidation_value": 1455.0,
+    "liquidation_pnl": 432.0,
+    "mtm_return": 0.45356793743890517,
+    "liquidation_return": 0.4222873900293255,
+    "expected_remaining_pnl": 91.0
+  },
+  "cases": [
+    { "case_id": "hold", "overrides": {}, "expected_action": "HOLD" },
+    { "case_id": "profit_target", "overrides": { "market_value_usd": 1560.0, "prudent_liquidation_value_usd": 1540.0 }, "expected_action": "EXIT_REVIEW" },
+    { "case_id": "stop_loss", "overrides": { "market_value_usd": 720.0, "prudent_liquidation_value_usd": 700.0 }, "expected_action": "EXIT_REVIEW" },
+    { "case_id": "time_exit", "overrides": { "days_to_expiration": 20 }, "expected_action": "EXIT_REVIEW" },
+    { "case_id": "iv_crush", "overrides": { "current_iv": 0.25 }, "expected_action": "EXIT_REVIEW" },
+    { "case_id": "theta_threshold", "overrides": { "current_greeks": { "theta": -0.6 } }, "expected_action": "WATCH" },
+    { "case_id": "trailing_drawdown", "overrides": { "peak_prudent_liquidation_value_usd": 1700.0 }, "expected_action": "EXIT_REVIEW" },
+    { "case_id": "data_stale", "overrides": { "data_fresh": false }, "expected_action": "DATA_STALE" },
+    { "case_id": "thesis_invalidation", "overrides": { "thesis_invalidated": true }, "expected_action": "THESIS_INVALIDATED" },
+    { "case_id": "insufficient_data", "overrides": { "data_sufficient": false }, "expected_action": "BLOCKED_INSUFFICIENT_DATA" },
+    { "case_id": "scenario_probability_drop", "overrides": { "current_scenario_probabilities": { "bear": 0.45, "base": 0.5, "bull": 0.05 } }, "expected_action": "WATCH" }
+  ]
+}

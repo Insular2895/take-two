@@ -43,6 +43,25 @@ jobs:
       - name: Validate offline fixtures
         run: python scripts/validate_offline_artifacts.py
 
+      - name: Set up Node for Cloudflare control plane
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: cloudflare/package-lock.json
+
+      - name: Install Cloudflare control-plane dependencies
+        working-directory: cloudflare
+        run: npm ci
+
+      - name: Validate Cloudflare control plane
+        working-directory: cloudflare
+        run: npm run check
+
+      - name: Build Cloudflare deployment bundle
+        working-directory: cloudflare
+        run: npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/take-two-cf0-dist"
+
       - name: Validate documentary lineage
         run: python scripts/validate_research_registry.py
 

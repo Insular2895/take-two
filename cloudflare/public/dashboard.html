@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TTWO — Position Control</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div><p class="eyebrow">PRIVATE CONTROL PLANE</p><h1>TTWO — POSITION CONTROL</h1></div>
+      <div class="safety-lock"><span>ORDER CAPABILITY</span><strong>FORBIDDEN</strong></div>
+    </header>
+    <main>
+      <section id="demo-banner" class="banner demo hidden">SYNTHETIC DEMO — aucune implication de marché réel</section>
+      <section id="conservation-banner" class="banner warning hidden">FREE_TIER_CONSERVATION_MODE — cadence réduite, événements de sécurité préservés</section>
+      <section class="card system-card">
+        <div class="section-title"><h2>SYSTEM</h2><span id="system-online" class="pill good">ONLINE</span></div>
+        <div class="status-grid">
+          <div><span>MONITORING</span><strong id="monitor-status">—</strong></div>
+          <div><span>MARKET DATA</span><strong id="market-status">—</strong></div>
+          <div><span>SOURCE</span><strong id="market-source">—</strong></div>
+          <div><span>LAST QUOTE</span><strong id="last-quote">—</strong></div>
+          <div><span>LAST MONITOR RUN</span><strong id="last-monitor">—</strong></div>
+          <div><span>FREE TIER</span><strong id="free-tier">—</strong></div>
+        </div>
+      </section>
+
+      <section id="empty-state" class="card empty-state hidden">
+        <h2>Aucune position</h2>
+        <p>Importez le <code>cloud_position.json</code> produit par le moteur Python. SAFE MODE bloque les nouveaux imports.</p>
+        <div class="actions"><label class="button-like">IMPORT POSITION DOSSIER<input id="dossier-file" type="file" accept="application/json" hidden></label><button id="demo-import">CHARGER LA DÉMO SYNTHÉTIQUE</button></div>
+      </section>
+
+      <div id="dashboard-content" class="hidden">
+        <section class="card priority-card">
+          <div class="section-title"><div><p id="position-state" class="eyebrow">—</p><h2 id="structure-name">POSITION / PNL</h2><p id="structure-legs" class="muted"></p></div><strong id="remaining-quantity" class="quantity"></strong></div>
+          <div class="pnl-grid">
+            <article><span>INVESTED</span><strong id="invested">—</strong></article>
+            <article><span>MARK-TO-MARKET PNL</span><strong id="mtm-pnl">—</strong><small id="mtm-return">—</small></article>
+            <article class="liquidation"><span>IF CLOSED NOW</span><strong id="liquidation-pnl">—</strong><small id="liquidation-return">—</small></article>
+            <article><span>EXPECTED REMAINING PNL</span><strong id="expected-pnl">—</strong><small id="model-age">—</small></article>
+          </div>
+          <div class="economics-strip"><span>MARK VALUE <strong id="mark-value">—</strong></span><span>NET LIQUIDATION <strong id="liquidation-value">—</strong></span><span>REALIZED <strong id="realized-pnl">—</strong></span><span>TOTAL PNL <strong id="total-pnl">—</strong></span><span>MODE <strong id="liquidation-mode">—</strong></span></div>
+        </section>
+
+        <div class="columns">
+          <section class="card"><h2>MARKET / THETA</h2><dl id="market-panel"></dl><p class="note">Les diagnostics Flat Spot proviennent uniquement du dernier snapshot canonique. Aucun calcul theta × jours n’est effectué.</p></section>
+          <section class="card"><h2>RISK</h2><dl id="risk-panel"></dl></section>
+          <section class="card"><h2>ENGINE</h2><div id="engine-action" class="engine-action">—</div><p id="engine-reason" class="muted"></p><div id="scores" class="scores"></div></section>
+          <section class="card"><h2>PNL HISTORY</h2><div class="range-buttons"><button data-range="today">TODAY</button><button data-range="7d">7 DAYS</button><button data-range="all">SINCE ENTRY</button></div><svg id="pnl-chart" viewBox="0 0 600 220" role="img" aria-label="MTM and liquidation PnL history"></svg><div class="legend"><span class="mtm">MTM PnL</span><span class="liq">Liquidation PnL</span></div></section>
+        </div>
+
+        <section class="card close-card"><h2>CLOSE STRUCTURE</h2><p>Un seul aperçu de combo complet. Aucun ordre n’est transmis et aucun fallback jambe par jambe n’existe.</p><button id="close-structure" class="danger primary-close">CLOSE STRUCTURE</button><button id="manual-close-reported" class="hidden">I CLOSED THIS STRUCTURE IN IBKR</button><p id="close-status" class="note"></p></section>
+
+        <section class="card"><h2>CONTROLS</h2><div class="actions"><button id="safe-mode">SAFE MODE</button><button id="monitor-toggle">PAUSE MONITORING</button><button id="export-data">EXPORT DATA</button><button id="logout">LOGOUT</button></div><p class="note">SAFE MODE ne ferme rien. PAUSE MONITORING ne change aucune vérité broker.</p></section>
+        <section class="card"><h2>RECENT EVENTS</h2><ol id="events" class="events"></ol></section>
+      </div>
+    </main>
+
+    <dialog id="close-dialog"><form method="dialog"><button class="dialog-x" value="cancel" aria-label="Fermer">×</button></form><p class="eyebrow">CLOSE STRUCTURE — PREVIEW</p><h2 id="preview-title">—</h2><div id="preview-economics" class="modal-economics"></div><div id="preview-legs" class="preview-legs"></div><p class="warning-text">NO ORDER IS TRANSMITTED. Close all legs as one structure manually in IBKR.</p><div class="actions"><button id="preview-cancel">CANCEL</button><button id="preview-ack" class="danger">ACKNOWLEDGE CLOSE PREVIEW</button></div></dialog>
+    <dialog id="reauth-dialog"><h2>Ré-authentification requise</h2><p>La dernière authentification sensible a plus de cinq minutes.</p><label>Mot de passe<input id="reauth-password" type="password" autocomplete="current-password"></label><p id="reauth-error" class="error"></p><div class="actions"><button id="reauth-cancel">CANCEL</button><button id="reauth-submit" class="danger">CONFIRM</button></div></dialog>
+    <dialog id="fill-dialog"><h2>ACTUAL FILL RECONCILIATION</h2><p>L’estimation pré-close restera immuable.</p><form id="fill-form"><label>Actual close timestamp<input name="timestamp" type="datetime-local" required></label><label>Actual combo fill price<input name="combo_fill_price" type="number" min="0" step="0.0001" required></label><label>Quantity closed<input name="quantity_closed" type="number" min="1" step="1" required></label><label>Actual FX rate<input name="actual_fx_rate" type="number" min="0" step="0.000001"></label><label>Commission<input name="commission" type="number" min="0" step="0.01" required></label><label>FX cost<input name="fx_cost" type="number" min="0" step="0.01" required></label><label>IBKR execution/reference id (optional)<input name="broker_reference"></label><p id="fill-error" class="error"></p><div class="actions"><button id="fill-cancel" type="button">CANCEL</button><button type="submit" class="danger">RECONCILE ACTUAL FILL</button></div></form></dialog>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

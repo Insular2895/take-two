@@ -1,0 +1,330 @@
+import { authenticate, hasFreshSensitiveAuth, login, logout, reauthenticate, requireCsrf } from "./auth";
+import { activePosition, audit, importDossier, incrementUsage, latestProjection, persistProjection } from "./db";
+import { syntheticDemoDossier } from "./demo";
+import { calculateProjection, estimateDailyUsage, inverseStructureLegs, randomId, validateDossier } from "./domain";
+import { TTWOPositionMonitor } from "./monitor";
+import type { AuthContext, CloudPositionDossier } from "./types";
+
+export { TTWOPositionMonitor };
+
+const SECURITY_HEADERS: Record<string, string> = {
+  "Cache-Control": "no-store",
+  "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
+  "Referrer-Policy": "no-referrer",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+};
+
+function withSecurity(response: Response): Response {
+  const secured = new Response(response.body, response);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) secured.headers.set(name, value);
+  return secured;
+}
+
+function apiError(error: unknown): Response {
+  const message = error instanceof Error ? error.message : "INTERNAL_ERROR";
+  const status = message === "CSRF_INVALID" ? 403
+    : message.startsWith("INVALID_") || message.startsWith("COMBO_") || message.startsWith("MISSING_") || message === "FX_RATE_UNAVAILABLE" ? 400
+      : 500;
+  return Response.json({ error: message }, { status });
+}
+
+async function jsonBody<T>(request: Request): Promise<T> {
+  const contentType = request.headers.get("Content-Type") ?? "";
+  if (!contentType.includes("application/json")) throw new Error("INVALID_CONTENT_TYPE");
+  return request.json<T>();
+}
+
+function monitorStub(env: Env): DurableObjectStub {
+  return env.MONITOR.get(env.MONITOR.idFromName("single-ttwo-position-monitor"));
+}
+
+async function serveAsset(env: Env, request: Request, pathname: string): Promise<Response> {
+  const url = new URL(request.url);
+  url.pathname = pathname;
+  return env.ASSETS.fetch(new Request(url, request));
+}
+
+async function dashboardPayload(env: Env, auth: AuthContext): Promise<Response> {
+  const position = await activePosition(env.DB) ?? await env.DB.prepare("SELECT * FROM positions ORDER BY updated_at DESC LIMIT 1").first<Record<string, unknown>>();
+  const positionId = position ? String(position.id) : null;
+  const statements = positionId
+    ? [
+      env.DB.prepare("SELECT * FROM pnl_snapshots WHERE position_id=? ORDER BY timestamp DESC LIMIT 720").bind(positionId),
+      env.DB.prepare("SELECT * FROM close_previews WHERE position_id=? ORDER BY created_at DESC LIMIT 20").bind(positionId),
+      env.DB.prepare("SELECT * FROM fills WHERE position_id=? ORDER BY timestamp DESC LIMIT 20").bind(positionId),
+      env.DB.prepare("SELECT * FROM monitoring_events WHERE position_id=? ORDER BY timestamp DESC LIMIT 50").bind(positionId),
+      env.DB.prepare("SELECT * FROM audit_events WHERE position_id=? OR position_id IS NULL ORDER BY timestamp DESC LIMIT 50").bind(positionId),
+    ]
+    : [];
+  const results = statements.length ? await env.DB.batch(statements) : [];
+  const system = await env.DB.prepare("SELECT * FROM system_state WHERE singleton=1").first<Record<string, unknown>>();
+  const usage = await env.DB.prepare("SELECT * FROM daily_usage WHERE date=?").bind(new Date().toISOString().slice(0, 10)).first<Record<string, unknown>>();
+  return Response.json({
+    csrf_token: auth.session.csrfToken,
+    system,
+    position: position
+      ? { ...position, canonical_dossier: JSON.parse(String(position.canonical_dossier_json)), canonical_dossier_json: undefined }
+      : null,
+    pnl_history: results[0]?.results ?? [],
+    latest_pnl: results[0]?.results[0] ?? null,
+    close_previews: results[1]?.results ?? [],
+    fills: results[2]?.results ?? [],
+    monitoring_events: results[3]?.results ?? [],
+    audit_events: results[4]?.results ?? [],
+    usage: usage ?? { label: "APPLICATION_ESTIMATE_ONLY" },
+    usage_estimate: estimateDailyUsage(),
+    safety: { read_only: true, transmit: false, what_if: true, order_capability: "forbidden" },
+  });
+}
+
+async function setSafeMode(request: Request, env: Env, auth: AuthContext): Promise<Response> {
+  requireCsrf(request, auth);
+  const body = await jsonBody<{ enabled?: boolean }>(request);
+  if (typeof body.enabled !== "boolean") throw new Error("INVALID_SAFE_MODE_VALUE");
+  const now = new Date().toISOString();
+  await env.DB.prepare("UPDATE system_state SET safe_mode=?,updated_at=? WHERE singleton=1").bind(body.enabled ? 1 : 0, now).run();
+  await audit(env.DB, body.enabled ? "SAFE_MODE_ENABLED" : "SAFE_MODE_DISABLED", "admin");
+  return Response.json({ safe_mode: body.enabled });
+}
+
+async function setMonitoring(request: Request, env: Env, auth: AuthContext, paused: boolean): Promise<Response> {
+  requireCsrf(request, auth);
+  const now = new Date().toISOString();
+  await env.DB.prepare("UPDATE system_state SET monitoring_paused=?,updated_at=? WHERE singleton=1").bind(paused ? 1 : 0, now).run();
+  await monitorStub(env).fetch(`https://monitor/${paused ? "pause" : "resume"}`, { method: "POST" });
+  await audit(env.DB, paused ? "MONITOR_PAUSED" : "MONITOR_RESUMED", "admin");
+  return Response.json({ monitoring_paused: paused });
+}
+
+async function importPosition(request: Request, env: Env, auth: AuthContext, demo = false): Promise<Response> {
+  requireCsrf(request, auth);
+  const state = await env.DB.prepare("SELECT safe_mode FROM system_state WHERE singleton=1").first<{ safe_mode: number }>();
+  if (state?.safe_mode) return Response.json({ error: "SAFE_MODE_BLOCKS_IMPORT" }, { status: 409 });
+  const existing = await activePosition(env.DB);
+  if (existing) return Response.json({ error: "ACTIVE_POSITION_ALREADY_EXISTS" }, { status: 409 });
+  const raw = demo ? syntheticDemoDossier() : await jsonBody<unknown>(request);
+  const dossier = validateDossier(raw);
+  if (dossier.ticker !== "TTWO") throw new Error("INVALID_DOSSIER: CF0 supports TTWO only");
+  await importDossier(env.DB, dossier);
+  if (dossier.initial_position_state !== "PLANNED") {
+    if (dossier.last_imported_snapshot) {
+      await persistProjection(
+        env.DB,
+        dossier.position_id,
+        calculateProjection(dossier, dossier.last_imported_snapshot),
+      );
+    }
+    await env.DB.prepare("UPDATE system_state SET monitoring_paused=0,updated_at=? WHERE singleton=1").bind(new Date().toISOString()).run();
+    await monitorStub(env).fetch("https://monitor/start", { method: "POST" });
+    await audit(env.DB, "MONITOR_STARTED", "admin", dossier.position_id, { trigger: "POSITION_IMPORT" });
+  }
+  return Response.json({ imported: true, position_id: dossier.position_id, fixture_status: dossier.fixture_status }, { status: 201 });
+}
+
+async function createClosePreview(request: Request, env: Env, auth: AuthContext): Promise<Response> {
+  requireCsrf(request, auth);
+  const body = await jsonBody<{ quantity?: number }>(request);
+  const position = await activePosition(env.DB);
+  if (!position) return Response.json({ error: "NO_ACTIVE_POSITION" }, { status: 409 });
+  const dossier = validateDossier(JSON.parse(position.canonical_dossier_json));
+  const quantity = body.quantity ?? position.quantity_remaining;
+  if (quantity > position.quantity_remaining) throw new Error("COMBO_CLOSE_PREVIEW_UNAVAILABLE");
+  const projection = await latestProjection(env.DB, position.id);
+  if (!projection || projection.liquidation_value === null || projection.liquidation_pnl === null || projection.liquidation_return === null) {
+    return Response.json({ error: "COMBO_CLOSE_PREVIEW_UNAVAILABLE" }, { status: 409 });
+  }
+  const legs = inverseStructureLegs(dossier, quantity);
+  const scale = quantity / position.quantity_remaining;
+  const previewId = randomId("preview");
+  const createdAt = new Date().toISOString();
+  await env.DB.prepare(
+    `INSERT INTO close_previews(preview_id,position_id,created_at,quantity,pre_close_market_value,
+     pre_close_liquidation_value,estimated_pnl,estimated_return,estimated_commission,estimated_slippage,
+     estimated_fx,engine_action,quote_timestamp,quote_provider,legs_json,status)
+     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'CREATED')`,
+  ).bind(
+    previewId, position.id, createdAt, quantity, Number(projection.market_value_policy) * scale,
+    Number(projection.liquidation_value) * scale, Number(projection.liquidation_pnl) * scale,
+    Number(projection.liquidation_return), projection.estimated_exit_commission === null ? null : Number(projection.estimated_exit_commission) * scale,
+    projection.estimated_exit_slippage === null ? null : Number(projection.estimated_exit_slippage) * scale,
+    projection.estimated_exit_fx === null ? null : Number(projection.estimated_exit_fx) * scale,
+    String(projection.monitor_action), String(projection.timestamp), String(projection.provider), JSON.stringify(legs),
+  ).run();
+  await audit(env.DB, "CLOSE_PREVIEW_CREATED", "admin", position.id, { preview_id: previewId, quantity });
+  return Response.json({
+    preview_id: previewId,
+    status: "CREATED",
+    quantity,
+    structure_name: position.structure_name,
+    legs,
+    market_value: Number(projection.market_value_policy) * scale,
+    liquidation_value: Number(projection.liquidation_value) * scale,
+    estimated_pnl: Number(projection.liquidation_pnl) * scale,
+    estimated_return: Number(projection.liquidation_return),
+    engine_action: projection.monitor_action,
+    quote_timestamp: projection.timestamp,
+    quote_provider: projection.provider,
+    safety: { transmit: false, what_if: true, order_capability: "forbidden", security_type: "BAG" },
+  }, { status: 201 });
+}
+
+async function acknowledgeClose(request: Request, env: Env, auth: AuthContext, previewId: string): Promise<Response> {
+  requireCsrf(request, auth);
+  if (!hasFreshSensitiveAuth(auth)) return Response.json({ error: "SENSITIVE_REAUTH_REQUIRED" }, { status: 403 });
+  const acknowledgedAt = new Date().toISOString();
+  const result = await env.DB.prepare(
+    "UPDATE close_previews SET acknowledged_at=?,status='ACKNOWLEDGED' WHERE preview_id=? AND status='CREATED'",
+  ).bind(acknowledgedAt, previewId).run();
+  if (!result.meta.changes) return Response.json({ error: "PREVIEW_NOT_ACKNOWLEDGEABLE" }, { status: 409 });
+  const preview = await env.DB.prepare("SELECT position_id FROM close_previews WHERE preview_id=?").bind(previewId).first<{ position_id: string }>();
+  await audit(env.DB, "CLOSE_PREVIEW_ACKNOWLEDGED", "admin", preview?.position_id ?? null, { preview_id: previewId });
+  return Response.json({ status: "CLOSE_PREVIEW_READY", instruction: "Close this entire combo manually in IBKR.", transmitted: false });
+}
+
+async function reportManualClose(request: Request, env: Env, auth: AuthContext, previewId: string): Promise<Response> {
+  requireCsrf(request, auth);
+  const preview = await env.DB.prepare("SELECT position_id,status FROM close_previews WHERE preview_id=?").bind(previewId).first<{ position_id: string; status: string }>();
+  if (!preview || preview.status !== "ACKNOWLEDGED") return Response.json({ error: "ACKNOWLEDGED_PREVIEW_REQUIRED" }, { status: 409 });
+  await env.DB.batch([
+    env.DB.prepare("UPDATE close_previews SET status='RECONCILIATION_REQUIRED' WHERE preview_id=?").bind(previewId),
+    env.DB.prepare("UPDATE positions SET state='RECONCILIATION_REQUIRED',updated_at=? WHERE id=?").bind(new Date().toISOString(), preview.position_id),
+  ]);
+  await audit(env.DB, "MANUAL_CLOSE_REPORTED", "admin", preview.position_id, { preview_id: previewId });
+  return Response.json({ status: "RECONCILIATION_REQUIRED" });
+}
+
+interface FillRequest {
+  timestamp?: string;
+  combo_fill_price?: number;
+  quantity_closed?: number;
+  commission?: number;
+  fx_cost?: number;
+  actual_fx_rate?: number;
+  broker_reference?: string;
+}
+
+async function reconcileFill(request: Request, env: Env, auth: AuthContext, previewId: string): Promise<Response> {
+  requireCsrf(request, auth);
+  const body = await jsonBody<FillRequest>(request);
+  const preview = await env.DB.prepare("SELECT * FROM close_previews WHERE preview_id=?").bind(previewId).first<Record<string, unknown>>();
+  if (!preview || preview.status !== "RECONCILIATION_REQUIRED") return Response.json({ error: "RECONCILIATION_NOT_READY" }, { status: 409 });
+  const position = await env.DB.prepare("SELECT * FROM positions WHERE id=?").bind(String(preview.position_id)).first<Record<string, unknown>>();
+  if (!position) return Response.json({ error: "POSITION_NOT_FOUND" }, { status: 404 });
+  const timestamp = body.timestamp ?? "";
+  const quantity = body.quantity_closed ?? 0;
+  const fillPrice = body.combo_fill_price ?? Number.NaN;
+  const commission = body.commission ?? Number.NaN;
+  const fxCost = body.fx_cost ?? Number.NaN;
+  if (!Number.isFinite(Date.parse(timestamp)) || !Number.isInteger(quantity) || quantity <= 0 || quantity > Number(position.quantity_remaining) || quantity > Number(preview.quantity)) {
+    throw new Error("INVALID_FILL_IDENTITY_OR_QUANTITY");
+  }
+  if (![fillPrice, commission, fxCost].every(Number.isFinite) || fillPrice < 0 || commission < 0 || fxCost < 0) throw new Error("INVALID_FILL_ECONOMICS");
+  const dossier = validateDossier(JSON.parse(String(position.canonical_dossier_json)));
+  const sameCurrency = dossier.entry_native_currency === dossier.policy_currency;
+  const fxRate = sameCurrency ? 1 : body.actual_fx_rate;
+  if (!fxRate || fxRate <= 0) throw new Error("FX_RATE_UNAVAILABLE");
+  const nativeProceeds = fillPrice * quantity * dossier.multiplier;
+  const policyProceeds = nativeProceeds * fxRate - commission - fxCost;
+  const entryBasis = dossier.actual_entry_cash * quantity / dossier.quantity;
+  const realized = policyProceeds - entryBasis;
+  const estimated = Number(preview.estimated_pnl) * quantity / Number(preview.quantity);
+  const estimateError = realized - estimated;
+  const remaining = Number(position.quantity_remaining) - quantity;
+  const newState = remaining === 0 ? "CLOSED" : "PARTIAL_CLOSE";
+  const now = new Date().toISOString();
+  const fillId = randomId("fill");
+  await env.DB.batch([
+    env.DB.prepare(
+      `INSERT INTO fills(fill_id,position_id,preview_id,timestamp,quantity_closed,combo_fill_price,native_proceeds,
+       policy_proceeds,commission,fx_cost,actual_realized_pnl,estimate_error,broker_reference,source,created_at)
+       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,'MANUAL_IBKR_RECONCILIATION',?)`,
+    ).bind(fillId, position.id, previewId, timestamp, quantity, fillPrice, nativeProceeds, policyProceeds, commission, fxCost, realized, estimateError, body.broker_reference ?? null, now),
+    env.DB.prepare(
+      "UPDATE positions SET quantity_remaining=?,realized_pnl=coalesce(realized_pnl,0)+?,state=?,closed_at=?,updated_at=? WHERE id=?",
+    ).bind(remaining, realized, newState, remaining === 0 ? timestamp : null, now, position.id),
+    env.DB.prepare("UPDATE close_previews SET status='RECONCILED' WHERE preview_id=?").bind(previewId),
+  ]);
+  if (remaining > 0 && dossier.last_imported_snapshot) {
+    const remainingProjection = calculateProjection(
+      dossier,
+      dossier.last_imported_snapshot,
+      remaining,
+      new Date(),
+    );
+    await persistProjection(env.DB, String(position.id), remainingProjection);
+  }
+  await audit(env.DB, "FILL_RECONCILED", "admin", String(position.id), { fill_id: fillId, preview_id: previewId, actual_realized_pnl: realized, estimate_error: estimateError });
+  await audit(env.DB, remaining === 0 ? "POSITION_CLOSED" : "POSITION_PARTIALLY_CLOSED", "admin", String(position.id), { quantity_closed: quantity, quantity_remaining: remaining });
+  return Response.json({
+    fill_id: fillId,
+    state: newState,
+    quantity_remaining: remaining,
+    actual_proceeds: policyProceeds,
+    actual_realized_pnl: realized,
+    estimated_pnl: estimated,
+    estimate_error: estimateError,
+  }, { status: 201 });
+}
+
+async function exportData(env: Env): Promise<Response> {
+  const tables = ["positions", "position_legs", "fills", "pnl_snapshots", "model_snapshots", "close_previews", "monitoring_events", "audit_events"] as const;
+  const results = await env.DB.batch(tables.map((table) => env.DB.prepare(`SELECT * FROM ${table}`)));
+  const payload = Object.fromEntries(tables.map((table, index) => [table, results[index]?.results ?? []]));
+  await audit(env.DB, "DATA_EXPORTED", "admin", null, { format: "json", secrets_included: false });
+  return new Response(JSON.stringify({ exported_at: new Date().toISOString(), schema_version: "1.0", ...payload }, null, 2), {
+    headers: { "Content-Type": "application/json", "Content-Disposition": `attachment; filename="take-two-control-${new Date().toISOString().slice(0, 10)}.json"` },
+  });
+}
+
+async function routeAuthenticated(request: Request, env: Env, auth: AuthContext, path: string): Promise<Response> {
+  await incrementUsage(env.DB, "worker_api_requests");
+  if (path === "/api/session" && request.method === "GET") return Response.json({ authenticated: true, csrf_token: auth.session.csrfToken });
+  if (path === "/api/dashboard" && request.method === "GET") return dashboardPayload(env, auth);
+  if (path === "/api/logout" && request.method === "POST") { requireCsrf(request, auth); return logout(auth, env); }
+  if (path === "/api/reauth" && request.method === "POST") { requireCsrf(request, auth); return reauthenticate(request, auth, env); }
+  if (path === "/api/positions/import" && request.method === "POST") return importPosition(request, env, auth);
+  if (path === "/api/demo/import" && request.method === "POST") return importPosition(request, env, auth, true);
+  if (path === "/api/safe-mode" && request.method === "POST") return setSafeMode(request, env, auth);
+  if (path === "/api/monitor/pause" && request.method === "POST") return setMonitoring(request, env, auth, true);
+  if (path === "/api/monitor/resume" && request.method === "POST") return setMonitoring(request, env, auth, false);
+  if (path === "/api/close-previews" && request.method === "POST") return createClosePreview(request, env, auth);
+  const acknowledge = path.match(/^\/api\/close-previews\/([^/]+)\/acknowledge$/);
+  if (acknowledge && request.method === "POST") return acknowledgeClose(request, env, auth, decodeURIComponent(acknowledge[1]!));
+  const reported = path.match(/^\/api\/close-previews\/([^/]+)\/manual-close-reported$/);
+  if (reported && request.method === "POST") return reportManualClose(request, env, auth, decodeURIComponent(reported[1]!));
+  const reconcile = path.match(/^\/api\/close-previews\/([^/]+)\/reconcile$/);
+  if (reconcile && request.method === "POST") return reconcileFill(request, env, auth, decodeURIComponent(reconcile[1]!));
+  if (path === "/api/export" && request.method === "GET") return exportData(env);
+  if (path === "/api/usage-estimate" && request.method === "GET") return Response.json(estimateDailyUsage());
+  return Response.json({ error: "NOT_FOUND" }, { status: 404 });
+}
+
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    try {
+      const path = new URL(request.url).pathname;
+      if (path === "/api/login" && request.method === "POST") return withSecurity(await login(request, env));
+      const auth = await authenticate(request, env);
+      if (path === "/") {
+        if (auth) return withSecurity(Response.redirect(new URL("/dashboard", request.url), 302));
+        return withSecurity(await serveAsset(env, request, "/login.html"));
+      }
+      if (path === "/dashboard.html") {
+        return withSecurity(Response.redirect(new URL(auth ? "/dashboard" : "/", request.url), 302));
+      }
+      if (path === "/dashboard") {
+        if (!auth) return withSecurity(Response.redirect(new URL("/", request.url), 302));
+        return withSecurity(await env.ASSETS.fetch(request));
+      }
+      if (path.startsWith("/api/")) {
+        if (!auth) return withSecurity(Response.json({ error: "UNAUTHORIZED" }, { status: 401 }));
+        return withSecurity(await routeAuthenticated(request, env, auth, path));
+      }
+      return withSecurity(await env.ASSETS.fetch(request));
+    } catch (error) {
+      return withSecurity(apiError(error));
+    }
+  },
+} satisfies ExportedHandler<Env>;

@@ -4391,6 +4391,19 @@
       "title": "Underlying",
       "type": "string"
     },
+    "underlying_spot": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Underlying Spot"
+    },
     "warnings": {
       "items": {
         "type": "string"

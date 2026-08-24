@@ -1,0 +1,46 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "take-two-control",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-23",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/", "/dashboard", "/api/*"]
+  },
+  "vars": {
+    "FREE_TIER_MODE": "true",
+    "SESSION_MAX_AGE_SECONDS": "43200",
+    "MARKET_INTERVAL_SECONDS": "30",
+    "OFF_HOURS_INTERVAL_SECONDS": "300",
+    "SNAPSHOT_INTERVAL_SECONDS": "60"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "take-two-control",
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "MONITOR",
+        "class_name": "TTWOPositionMonitor"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["TTWOPositionMonitor"]
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1
+  }
+}

@@ -1116,6 +1116,7 @@ class TradeEconomicsTicket(StrictModel):
     fixture_status: Literal["LIVE_INPUT", "SYNTHETIC_TEST_FIXTURE", "RESEARCH_FIXTURE"]
     candidate_id: str = Field(min_length=1)
     underlying: str = Field(min_length=1)
+    underlying_spot: float | None = Field(default=None, gt=0)
     strategy_name: str = Field(min_length=1)
     exact_market_timestamp: datetime
     currency: str = Field(min_length=3, max_length=3)
