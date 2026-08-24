@@ -1,0 +1,2707 @@
+{
+  "$defs": {
+    "AdvancedGreeks": {
+      "additionalProperties": false,
+      "properties": {
+        "charm_delta_drift_1_calendar_day": {
+          "$ref": "#/$defs/GreekMeasure"
+        },
+        "color_gamma_drift_1_calendar_day": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GreekMeasure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "confidence": {
+          "items": {
+            "$ref": "#/$defs/GreekConfidence"
+          },
+          "minItems": 7,
+          "title": "Confidence",
+          "type": "array"
+        },
+        "conventions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Conventions",
+          "type": "array"
+        },
+        "delta": {
+          "$ref": "#/$defs/GreekMeasure"
+        },
+        "gamma": {
+          "$ref": "#/$defs/GreekMeasure"
+        },
+        "rho": {
+          "$ref": "#/$defs/GreekMeasure"
+        },
+        "speed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GreekMeasure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "theta": {
+          "$ref": "#/$defs/GreekMeasure"
+        },
+        "vanna": {
+          "$ref": "#/$defs/GreekMeasure"
+        },
+        "vega": {
+          "$ref": "#/$defs/GreekMeasure"
+        },
+        "veta_vega_drift_1_calendar_day": {
+          "$ref": "#/$defs/GreekMeasure"
+        },
+        "vomma": {
+          "$ref": "#/$defs/GreekMeasure"
+        }
+      },
+      "required": [
+        "delta",
+        "gamma",
+        "theta",
+        "vega",
+        "rho",
+        "vanna",
+        "vomma",
+        "charm_delta_drift_1_calendar_day",
+        "veta_vega_drift_1_calendar_day",
+        "confidence"
+      ],
+      "title": "AdvancedGreeks",
+      "type": "object"
+    },
+    "BreakevenClock": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/BreakevenResult"
+          },
+          "minItems": 1,
+          "title": "Results",
+          "type": "array"
+        }
+      },
+      "required": [
+        "results"
+      ],
+      "title": "BreakevenClock",
+      "type": "object"
+    },
+    "BreakevenResult": {
+      "additionalProperties": false,
+      "properties": {
+        "break_even_roots": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Break Even Roots",
+          "type": "array"
+        },
+        "horizon_days": {
+          "minimum": 0,
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "profit_intervals": {
+          "items": {
+            "$ref": "#/$defs/ProfitInterval"
+          },
+          "title": "Profit Intervals",
+          "type": "array"
+        },
+        "search_domain": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Search Domain",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "SOLVED",
+            "NO_ROOT_IN_DOMAIN",
+            "BLOCKED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "valuation_time": {
+          "format": "date-time",
+          "title": "Valuation Time",
+          "type": "string"
+        },
+        "volatility_scenario": {
+          "minLength": 1,
+          "title": "Volatility Scenario",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "horizon_days",
+        "valuation_time",
+        "volatility_scenario",
+        "break_even_roots",
+        "profit_intervals",
+        "status",
+        "search_domain"
+      ],
+      "title": "BreakevenResult",
+      "type": "object"
+    },
+    "EntryCostBreakdown": {
+      "additionalProperties": false,
+      "properties": {
+        "bid_ask_cost": {
+          "minimum": 0,
+          "title": "Bid Ask Cost",
+          "type": "number"
+        },
+        "combo_execution_status": {
+          "default": "INDICATIVE",
+          "enum": [
+            "INDICATIVE",
+            "OBSERVED_COMBO"
+          ],
+          "title": "Combo Execution Status",
+          "type": "string"
+        },
+        "commission": {
+          "minimum": 0,
+          "title": "Commission",
+          "type": "number"
+        },
+        "execution_status": {
+          "$ref": "#/$defs/ExecutionEstimateStatus"
+        },
+        "expected_slippage": {
+          "minimum": 0,
+          "title": "Expected Slippage",
+          "type": "number"
+        },
+        "fx_conversion_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Conversion Cost"
+        },
+        "mid_theoretical_value": {
+          "title": "Mid Theoretical Value",
+          "type": "number"
+        },
+        "net_premium": {
+          "title": "Net Premium",
+          "type": "number"
+        },
+        "premium_paid": {
+          "minimum": 0,
+          "title": "Premium Paid",
+          "type": "number"
+        },
+        "premium_received": {
+          "minimum": 0,
+          "title": "Premium Received",
+          "type": "number"
+        },
+        "total_capital_required": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Total Capital Required"
+        },
+        "total_entry_cost": {
+          "title": "Total Entry Cost",
+          "type": "number"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "premium_paid",
+        "premium_received",
+        "net_premium",
+        "mid_theoretical_value",
+        "bid_ask_cost",
+        "expected_slippage",
+        "commission",
+        "total_entry_cost",
+        "execution_status"
+      ],
+      "title": "EntryCostBreakdown",
+      "type": "object"
+    },
+    "ExecutionEstimateStatus": {
+      "enum": [
+        "INDICATIVE",
+        "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "OBSERVED",
+        "BLOCKED_MISSING_EXECUTION_DATA"
+      ],
+      "title": "ExecutionEstimateStatus",
+      "type": "string"
+    },
+    "ExitCostEstimate": {
+      "additionalProperties": false,
+      "properties": {
+        "assignment_or_exercise_cost_if_relevant": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assignment Or Exercise Cost If Relevant"
+        },
+        "closing_commissions": {
+          "minimum": 0,
+          "title": "Closing Commissions",
+          "type": "number"
+        },
+        "estimated_exit_bid_ask_cost": {
+          "minimum": 0,
+          "title": "Estimated Exit Bid Ask Cost",
+          "type": "number"
+        },
+        "estimated_exit_slippage": {
+          "minimum": 0,
+          "title": "Estimated Exit Slippage",
+          "type": "number"
+        },
+        "fx_exit_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Exit Cost"
+        },
+        "status": {
+          "$ref": "#/$defs/ExecutionEstimateStatus"
+        },
+        "total_exit_cost": {
+          "title": "Total Exit Cost",
+          "type": "number"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "estimated_exit_bid_ask_cost",
+        "estimated_exit_slippage",
+        "closing_commissions",
+        "total_exit_cost",
+        "status"
+      ],
+      "title": "ExitCostEstimate",
+      "type": "object"
+    },
+    "FXAttribution": {
+      "additionalProperties": false,
+      "properties": {
+        "entry_fx_rate_usd_per_base": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entry Fx Rate Usd Per Base"
+        },
+        "fx_contribution_base": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Contribution Base"
+        },
+        "fx_conversion_fees_base": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Conversion Fees Base"
+        },
+        "mode": {
+          "$ref": "#/$defs/FXHandlingMode"
+        },
+        "option_pnl_usd": {
+          "title": "Option Pnl Usd",
+          "type": "number"
+        },
+        "pnl_base_at_constant_entry_fx": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pnl Base At Constant Entry Fx"
+        },
+        "pnl_base_at_scenario_fx": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pnl Base At Scenario Fx"
+        },
+        "scenario_fx_rate_usd_per_base": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scenario Fx Rate Usd Per Base"
+        },
+        "status": {
+          "minLength": 1,
+          "title": "Status",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "mode",
+        "option_pnl_usd",
+        "status"
+      ],
+      "title": "FXAttribution",
+      "type": "object"
+    },
+    "FXHandlingMode": {
+      "enum": [
+        "CONVERT_AT_ENTRY_AND_EXIT",
+        "MAINTAIN_UNDERLYING_CURRENCY_CASH",
+        "ACCOUNT_BASE_TRANSLATION_ONLY",
+        "UNKNOWN"
+      ],
+      "title": "FXHandlingMode",
+      "type": "string"
+    },
+    "FullRepricingAttribution": {
+      "additionalProperties": false,
+      "properties": {
+        "execution_costs": {
+          "title": "Execution Costs",
+          "type": "number"
+        },
+        "full_repriced_pnl": {
+          "title": "Full Repriced Pnl",
+          "type": "number"
+        },
+        "fx": {
+          "title": "Fx",
+          "type": "number"
+        },
+        "method": {
+          "const": "exact_shapley_full_repricing",
+          "default": "exact_shapley_full_repricing",
+          "title": "Method",
+          "type": "string"
+        },
+        "other": {
+          "title": "Other",
+          "type": "number"
+        },
+        "rates": {
+          "title": "Rates",
+          "type": "number"
+        },
+        "residual": {
+          "title": "Residual",
+          "type": "number"
+        },
+        "spot": {
+          "title": "Spot",
+          "type": "number"
+        },
+        "time": {
+          "title": "Time",
+          "type": "number"
+        },
+        "volatility": {
+          "title": "Volatility",
+          "type": "number"
+        }
+      },
+      "required": [
+        "spot",
+        "time",
+        "volatility",
+        "rates",
+        "fx",
+        "execution_costs",
+        "other",
+        "residual",
+        "full_repriced_pnl"
+      ],
+      "title": "FullRepricingAttribution",
+      "type": "object"
+    },
+    "GreekConfidence": {
+      "additionalProperties": false,
+      "properties": {
+        "alternate_bumps": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Alternate Bumps",
+          "type": "array"
+        },
+        "benchmark_difference": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Benchmark Difference"
+        },
+        "confidence_level": {
+          "$ref": "#/$defs/GreekConfidenceLevel"
+        },
+        "estimate": {
+          "title": "Estimate",
+          "type": "number"
+        },
+        "estimate_dispersion": {
+          "minimum": 0,
+          "title": "Estimate Dispersion",
+          "type": "number"
+        },
+        "greek": {
+          "minLength": 1,
+          "title": "Greek",
+          "type": "string"
+        },
+        "grid_levels": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Grid Levels",
+          "type": "array"
+        },
+        "method": {
+          "minLength": 1,
+          "title": "Method",
+          "type": "string"
+        },
+        "primary_bump": {
+          "title": "Primary Bump",
+          "type": "number"
+        },
+        "relative_dispersion": {
+          "minimum": 0,
+          "title": "Relative Dispersion",
+          "type": "number"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "greek",
+        "estimate",
+        "method",
+        "primary_bump",
+        "alternate_bumps",
+        "grid_levels",
+        "estimate_dispersion",
+        "relative_dispersion",
+        "confidence_level"
+      ],
+      "title": "GreekConfidence",
+      "type": "object"
+    },
+    "GreekConfidenceLevel": {
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW",
+        "UNRELIABLE"
+      ],
+      "title": "GreekConfidenceLevel",
+      "type": "string"
+    },
+    "GreekMeasure": {
+      "additionalProperties": false,
+      "properties": {
+        "bump_size": {
+          "title": "Bump Size",
+          "type": "number"
+        },
+        "calculation_method": {
+          "minLength": 1,
+          "title": "Calculation Method",
+          "type": "string"
+        },
+        "confidence": {
+          "$ref": "#/$defs/GreekConfidenceLevel"
+        },
+        "currency": {
+          "maxLength": 3,
+          "minLength": 3,
+          "title": "Currency",
+          "type": "string"
+        },
+        "model": {
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "multiplier": {
+          "exclusiveMinimum": 0,
+          "title": "Multiplier",
+          "type": "number"
+        },
+        "normalized_internal_value": {
+          "title": "Normalized Internal Value",
+          "type": "number"
+        },
+        "normalized_value": {
+          "title": "Normalized Value",
+          "type": "number"
+        },
+        "position_sign": {
+          "maximum": 1,
+          "minimum": -1,
+          "title": "Position Sign",
+          "type": "integer"
+        },
+        "provider_convention": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Convention"
+        },
+        "provider_raw_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Raw Value"
+        },
+        "raw_value": {
+          "title": "Raw Value",
+          "type": "number"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "raw_value",
+        "normalized_value",
+        "unit",
+        "currency",
+        "multiplier",
+        "position_sign",
+        "model",
+        "source",
+        "timestamp",
+        "bump_size",
+        "confidence",
+        "calculation_method",
+        "normalized_internal_value"
+      ],
+      "title": "GreekMeasure",
+      "type": "object"
+    },
+    "GreekTaylorAttribution": {
+      "additionalProperties": false,
+      "properties": {
+        "delta": {
+          "title": "Delta",
+          "type": "number"
+        },
+        "execution_costs": {
+          "title": "Execution Costs",
+          "type": "number"
+        },
+        "full_repriced_pnl": {
+          "title": "Full Repriced Pnl",
+          "type": "number"
+        },
+        "gamma": {
+          "title": "Gamma",
+          "type": "number"
+        },
+        "greek_approximated_pnl": {
+          "title": "Greek Approximated Pnl",
+          "type": "number"
+        },
+        "residual": {
+          "title": "Residual",
+          "type": "number"
+        },
+        "rho": {
+          "title": "Rho",
+          "type": "number"
+        },
+        "theta": {
+          "title": "Theta",
+          "type": "number"
+        },
+        "vanna": {
+          "title": "Vanna",
+          "type": "number"
+        },
+        "vega": {
+          "title": "Vega",
+          "type": "number"
+        },
+        "vomma": {
+          "title": "Vomma",
+          "type": "number"
+        }
+      },
+      "required": [
+        "delta",
+        "gamma",
+        "theta",
+        "vega",
+        "vomma",
+        "vanna",
+        "rho",
+        "execution_costs",
+        "greek_approximated_pnl",
+        "full_repriced_pnl",
+        "residual"
+      ],
+      "title": "GreekTaylorAttribution",
+      "type": "object"
+    },
+    "IntradayPrecisionStatus": {
+      "enum": [
+        "EXACT",
+        "APPROXIMATED_DATE_ENGINE",
+        "INSUFFICIENT_NEAR_EXPIRY",
+        "NOT_APPLICABLE"
+      ],
+      "title": "IntradayPrecisionStatus",
+      "type": "string"
+    },
+    "LegEconomics": {
+      "additionalProperties": false,
+      "properties": {
+        "adjusted_contract": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Adjusted Contract"
+        },
+        "ask": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ask"
+        },
+        "bid": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bid"
+        },
+        "con_id": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Con Id"
+        },
+        "deliverable": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deliverable"
+        },
+        "exercise_style": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exercise Style"
+        },
+        "expiration": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expiration"
+        },
+        "greeks": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AdvancedGreeks"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "implied_volatility": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Implied Volatility"
+        },
+        "instrument_type": {
+          "minLength": 1,
+          "title": "Instrument Type",
+          "type": "string"
+        },
+        "local_symbol": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Local Symbol"
+        },
+        "mid": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mid"
+        },
+        "multiplier": {
+          "exclusiveMinimum": 0,
+          "title": "Multiplier",
+          "type": "number"
+        },
+        "option_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Option Type"
+        },
+        "premium_paid": {
+          "minimum": 0,
+          "title": "Premium Paid",
+          "type": "number"
+        },
+        "premium_received": {
+          "minimum": 0,
+          "title": "Premium Received",
+          "type": "number"
+        },
+        "quantity": {
+          "exclusiveMinimum": 0,
+          "title": "Quantity",
+          "type": "integer"
+        },
+        "settlement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Settlement"
+        },
+        "side": {
+          "minLength": 1,
+          "title": "Side",
+          "type": "string"
+        },
+        "strike": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Strike"
+        },
+        "trading_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trading Class"
+        }
+      },
+      "required": [
+        "side",
+        "quantity",
+        "instrument_type",
+        "multiplier",
+        "premium_paid",
+        "premium_received"
+      ],
+      "title": "LegEconomics",
+      "type": "object"
+    },
+    "LeverageDiagnostics": {
+      "additionalProperties": false,
+      "properties": {
+        "capital_at_risk": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Capital At Risk"
+        },
+        "capital_status": {
+          "minLength": 1,
+          "title": "Capital Status",
+          "type": "string"
+        },
+        "delta_notional_leverage": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Delta Notional Leverage"
+        },
+        "gross_delta_leverage": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gross Delta Leverage"
+        },
+        "lambda_value_elasticity": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lambda Value Elasticity"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "capital_status"
+      ],
+      "title": "LeverageDiagnostics",
+      "type": "object"
+    },
+    "LiquidityDiagnostics": {
+      "additionalProperties": false,
+      "properties": {
+        "ask": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ask"
+        },
+        "ask_size": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ask Size"
+        },
+        "bid": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bid"
+        },
+        "bid_size": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bid Size"
+        },
+        "calibration_status": {
+          "default": "UNCALIBRATED",
+          "enum": [
+            "UNCALIBRATED",
+            "CALIBRATED"
+          ],
+          "title": "Calibration Status",
+          "type": "string"
+        },
+        "contract_symbol": {
+          "minLength": 1,
+          "title": "Contract Symbol",
+          "type": "string"
+        },
+        "liquidity_model_version": {
+          "minLength": 1,
+          "title": "Liquidity Model Version",
+          "type": "string"
+        },
+        "liquidity_score": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Liquidity Score",
+          "type": "number"
+        },
+        "mid": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mid"
+        },
+        "open_interest": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Open Interest"
+        },
+        "quote_age_seconds": {
+          "minimum": 0,
+          "title": "Quote Age Seconds",
+          "type": "number"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "spread_abs": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spread Abs"
+        },
+        "spread_pct_mid": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spread Pct Mid"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "volume": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Volume"
+        }
+      },
+      "required": [
+        "contract_symbol",
+        "quote_age_seconds",
+        "source",
+        "timestamp",
+        "liquidity_score",
+        "liquidity_model_version"
+      ],
+      "title": "LiquidityDiagnostics",
+      "type": "object"
+    },
+    "MarginEstimate": {
+      "additionalProperties": false,
+      "properties": {
+        "buying_power_usage": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Buying Power Usage"
+        },
+        "margin_requirement": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Margin Requirement"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/MarginStatus"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "source"
+      ],
+      "title": "MarginEstimate",
+      "type": "object"
+    },
+    "MarginStatus": {
+      "enum": [
+        "KNOWN_BROKER",
+        "ESTIMATED",
+        "UNKNOWN",
+        "NOT_REQUIRED",
+        "BLOCKED"
+      ],
+      "title": "MarginStatus",
+      "type": "string"
+    },
+    "PnLAttribution": {
+      "additionalProperties": false,
+      "properties": {
+        "full_repricing": {
+          "$ref": "#/$defs/FullRepricingAttribution"
+        },
+        "scenario_name": {
+          "minLength": 1,
+          "title": "Scenario Name",
+          "type": "string"
+        },
+        "taylor": {
+          "$ref": "#/$defs/GreekTaylorAttribution"
+        }
+      },
+      "required": [
+        "scenario_name",
+        "taylor",
+        "full_repricing"
+      ],
+      "title": "PnLAttribution",
+      "type": "object"
+    },
+    "ProbabilityStatus": {
+      "enum": [
+        "MODEL_IMPLIED",
+        "EMPIRICALLY_CALIBRATED",
+        "PAPER_OBSERVED",
+        "PROBABILITY_MODEL_NOT_AVAILABLE",
+        "PROBABILITY_MODEL_NOT_PROMOTED"
+      ],
+      "title": "ProbabilityStatus",
+      "type": "string"
+    },
+    "ProfitInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "lower": {
+          "minimum": 0,
+          "title": "Lower",
+          "type": "number"
+        },
+        "upper": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Upper"
+        }
+      },
+      "required": [
+        "lower"
+      ],
+      "title": "ProfitInterval",
+      "type": "object"
+    },
+    "RateScenarioType": {
+      "enum": [
+        "BASE_CURVE",
+        "PARALLEL_UP",
+        "PARALLEL_DOWN",
+        "STEEPENING",
+        "FLATTENING"
+      ],
+      "title": "RateScenarioType",
+      "type": "string"
+    },
+    "RateStressResult": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "estimated_position_value": {
+          "title": "Estimated Position Value",
+          "type": "number"
+        },
+        "gross_pnl": {
+          "title": "Gross Pnl",
+          "type": "number"
+        },
+        "leg_rate_shifts_basis_points": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Leg Rate Shifts Basis Points",
+          "type": "object"
+        },
+        "net_pnl": {
+          "title": "Net Pnl",
+          "type": "number"
+        },
+        "round_trip_cost": {
+          "minimum": 0,
+          "title": "Round Trip Cost",
+          "type": "number"
+        },
+        "scenario_name": {
+          "minLength": 1,
+          "title": "Scenario Name",
+          "type": "string"
+        },
+        "scenario_type": {
+          "$ref": "#/$defs/RateScenarioType"
+        },
+        "status": {
+          "const": "CONFIGURED_STRESS",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scenario_name",
+        "scenario_type",
+        "status",
+        "leg_rate_shifts_basis_points",
+        "estimated_position_value",
+        "gross_pnl",
+        "round_trip_cost",
+        "net_pnl"
+      ],
+      "title": "RateStressResult",
+      "type": "object"
+    },
+    "RoundTripCost": {
+      "additionalProperties": false,
+      "properties": {
+        "entry_bid_ask_cost": {
+          "minimum": 0,
+          "title": "Entry Bid Ask Cost",
+          "type": "number"
+        },
+        "entry_commissions": {
+          "minimum": 0,
+          "title": "Entry Commissions",
+          "type": "number"
+        },
+        "entry_fx_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entry Fx Cost"
+        },
+        "entry_slippage": {
+          "minimum": 0,
+          "title": "Entry Slippage",
+          "type": "number"
+        },
+        "exit": {
+          "$ref": "#/$defs/ExitCostEstimate"
+        },
+        "round_trip_cost_as_pct_capital": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Round Trip Cost As Pct Capital"
+        },
+        "total_round_trip_cost": {
+          "minimum": 0,
+          "title": "Total Round Trip Cost",
+          "type": "number"
+        }
+      },
+      "required": [
+        "entry_bid_ask_cost",
+        "entry_slippage",
+        "entry_commissions",
+        "exit",
+        "total_round_trip_cost"
+      ],
+      "title": "RoundTripCost",
+      "type": "object"
+    },
+    "ScenarioCell": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "estimated_position_value": {
+          "title": "Estimated Position Value",
+          "type": "number"
+        },
+        "gross_pnl": {
+          "title": "Gross Pnl",
+          "type": "number"
+        },
+        "horizon_days": {
+          "minimum": 0,
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "net_pnl": {
+          "title": "Net Pnl",
+          "type": "number"
+        },
+        "net_return": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Net Return"
+        },
+        "round_trip_cost": {
+          "minimum": 0,
+          "title": "Round Trip Cost",
+          "type": "number"
+        },
+        "scenario_status": {
+          "minLength": 1,
+          "title": "Scenario Status",
+          "type": "string"
+        },
+        "spot": {
+          "minimum": 0,
+          "title": "Spot",
+          "type": "number"
+        },
+        "valuation_time": {
+          "format": "date-time",
+          "title": "Valuation Time",
+          "type": "string"
+        },
+        "volatility_scenario": {
+          "minLength": 1,
+          "title": "Volatility Scenario",
+          "type": "string"
+        }
+      },
+      "required": [
+        "spot",
+        "horizon_days",
+        "valuation_time",
+        "volatility_scenario",
+        "estimated_position_value",
+        "gross_pnl",
+        "round_trip_cost",
+        "net_pnl",
+        "scenario_status"
+      ],
+      "title": "ScenarioCell",
+      "type": "object"
+    },
+    "ScenarioMatrix": {
+      "additionalProperties": false,
+      "properties": {
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/ScenarioCell"
+          },
+          "minItems": 1,
+          "title": "Cells",
+          "type": "array"
+        },
+        "horizon_days_axis": {
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Horizon Days Axis",
+          "type": "array"
+        },
+        "scenario_name": {
+          "minLength": 1,
+          "title": "Scenario Name",
+          "type": "string"
+        },
+        "scenario_status": {
+          "$ref": "#/$defs/VolatilityScenarioStatus"
+        },
+        "scenario_type": {
+          "$ref": "#/$defs/VolatilityScenarioType"
+        },
+        "spot_axis": {
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "title": "Spot Axis",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "scenario_name",
+        "scenario_type",
+        "scenario_status",
+        "spot_axis",
+        "horizon_days_axis",
+        "cells"
+      ],
+      "title": "ScenarioMatrix",
+      "type": "object"
+    },
+    "TargetArrivalResult": {
+      "additionalProperties": false,
+      "properties": {
+        "latest_profitable_arrival_date": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Latest Profitable Arrival Date"
+        },
+        "profitable_horizons_days": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Profitable Horizons Days",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/TargetArrivalStatus"
+        },
+        "target_spot": {
+          "exclusiveMinimum": 0,
+          "title": "Target Spot",
+          "type": "number"
+        },
+        "volatility_scenario": {
+          "minLength": 1,
+          "title": "Volatility Scenario",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target_spot",
+        "volatility_scenario",
+        "status"
+      ],
+      "title": "TargetArrivalResult",
+      "type": "object"
+    },
+    "TargetArrivalStatus": {
+      "enum": [
+        "LATEST_PROFITABLE_ARRIVAL",
+        "PROFITABLE_THROUGH_EXPIRY",
+        "NEVER_BREAKEVEN_AT_THIS_TARGET",
+        "NON_MONOTONIC_TIME_RELATION"
+      ],
+      "title": "TargetArrivalStatus",
+      "type": "string"
+    },
+    "TimeDecayExposure": {
+      "additionalProperties": false,
+      "properties": {
+        "acceleration_status": {
+          "enum": [
+            "ACCELERATING",
+            "DECELERATING",
+            "SIGN_FLIP",
+            "INSUFFICIENT"
+          ],
+          "title": "Acceleration Status",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "confidence": {
+          "minLength": 1,
+          "title": "Confidence",
+          "type": "string"
+        },
+        "current_net_theta": {
+          "title": "Current Net Theta",
+          "type": "number"
+        },
+        "decay_acceleration_30_60": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decay Acceleration 30 60"
+        },
+        "decay_acceleration_60_90": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decay Acceleration 60 90"
+        },
+        "effective_decay_rate_0_30": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective Decay Rate 0 30"
+        },
+        "effective_decay_rate_0_7": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective Decay Rate 0 7"
+        },
+        "effective_decay_rate_30_60": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective Decay Rate 30 60"
+        },
+        "effective_decay_rate_60_90": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective Decay Rate 60 90"
+        },
+        "flat_spot_1d": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Flat Spot 1D"
+        },
+        "flat_spot_30d": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Flat Spot 30D"
+        },
+        "flat_spot_60d": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Flat Spot 60D"
+        },
+        "flat_spot_7d": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Flat Spot 7D"
+        },
+        "flat_spot_90d": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Flat Spot 90D"
+        },
+        "theta_capital_status": {
+          "minLength": 1,
+          "title": "Theta Capital Status",
+          "type": "string"
+        },
+        "theta_per_capital_per_day": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Theta Per Capital Per Day"
+        },
+        "time_decay_curve": {
+          "items": {
+            "$ref": "#/$defs/TimeDecayPoint"
+          },
+          "minItems": 2,
+          "title": "Time Decay Curve",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "current_net_theta",
+        "theta_capital_status",
+        "acceleration_status",
+        "time_decay_curve",
+        "assumptions",
+        "confidence"
+      ],
+      "title": "TimeDecayExposure",
+      "type": "object"
+    },
+    "TimeDecayPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "carry_as_pct_capital": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Carry As Pct Capital"
+        },
+        "carry_as_pct_max_loss": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Carry As Pct Max Loss"
+        },
+        "carry_classification": {
+          "enum": [
+            "PURE_FLAT_SPOT_CARRY",
+            "CROSSES_DIVIDEND_EVENT"
+          ],
+          "title": "Carry Classification",
+          "type": "string"
+        },
+        "estimated_position_value": {
+          "title": "Estimated Position Value",
+          "type": "number"
+        },
+        "ex_div_adjusted_position_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ex Div Adjusted Position Value"
+        },
+        "flat_spot_carry": {
+          "title": "Flat Spot Carry",
+          "type": "number"
+        },
+        "horizon_days": {
+          "minimum": 0,
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "valuation_time": {
+          "format": "date-time",
+          "title": "Valuation Time",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "horizon_days",
+        "valuation_time",
+        "estimated_position_value",
+        "flat_spot_carry",
+        "carry_classification"
+      ],
+      "title": "TimeDecayPoint",
+      "type": "object"
+    },
+    "TouchDirection": {
+      "enum": [
+        "UPPER",
+        "LOWER"
+      ],
+      "title": "TouchDirection",
+      "type": "string"
+    },
+    "TouchProbabilityMetrics": {
+      "additionalProperties": false,
+      "properties": {
+        "calibration_status": {
+          "$ref": "#/$defs/ProbabilityStatus"
+        },
+        "confidence_interval_touch": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence Interval Touch"
+        },
+        "direction": {
+          "$ref": "#/$defs/TouchDirection"
+        },
+        "effective_sample_size": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective Sample Size"
+        },
+        "first_touch_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First Touch Count"
+        },
+        "horizon_days": {
+          "exclusiveMinimum": 0,
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "median_first_touch_time_conditional_on_touch": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Median First Touch Time Conditional On Touch"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "probability_terminal_above": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Terminal Above"
+        },
+        "probability_terminal_below": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Terminal Below"
+        },
+        "probability_touch": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Touch"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "target": {
+          "exclusiveMinimum": 0,
+          "title": "Target",
+          "type": "number"
+        }
+      },
+      "required": [
+        "target",
+        "direction",
+        "horizon_days",
+        "calibration_status"
+      ],
+      "title": "TouchProbabilityMetrics",
+      "type": "object"
+    },
+    "TradeIntensityCategory": {
+      "enum": [
+        "LOW",
+        "MODERATE",
+        "HIGH",
+        "EXTREME",
+        "UNKNOWN"
+      ],
+      "title": "TradeIntensityCategory",
+      "type": "string"
+    },
+    "TradeIntensityDiagnostics": {
+      "additionalProperties": false,
+      "properties": {
+        "capital_at_risk_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Capital At Risk Pct"
+        },
+        "category": {
+          "$ref": "#/$defs/TradeIntensityCategory"
+        },
+        "effective_leverage": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective Leverage"
+        },
+        "event_iv_sensitivity": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Event Iv Sensitivity"
+        },
+        "flat_spot_30d_loss_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Flat Spot 30D Loss Pct"
+        },
+        "flat_spot_60d_loss_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Flat Spot 60D Loss Pct"
+        },
+        "greek_instability": {
+          "$ref": "#/$defs/GreekConfidenceLevel"
+        },
+        "max_loss_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Loss Pct"
+        },
+        "policy_status": {
+          "const": "CONFIGURED_POLICY_UNCALIBRATED",
+          "default": "CONFIGURED_POLICY_UNCALIBRATED",
+          "title": "Policy Status",
+          "type": "string"
+        },
+        "probability_loss_over_50": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Loss Over 50"
+        },
+        "probability_loss_over_70": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Loss Over 70"
+        },
+        "spread_over_entry_capital_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spread Over Entry Capital Pct"
+        },
+        "theta_per_capital_per_day": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Theta Per Capital Per Day"
+        },
+        "triggered_policies": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Triggered Policies",
+          "type": "array"
+        }
+      },
+      "required": [
+        "greek_instability",
+        "category"
+      ],
+      "title": "TradeIntensityDiagnostics",
+      "type": "object"
+    },
+    "VolatilityScenarioStatus": {
+      "enum": [
+        "CONFIGURED_STRESS",
+        "LEG_LEVEL_STRESS_ONLY",
+        "SURFACE_STRESS_VALID",
+        "SURFACE_STRESS_INVALID"
+      ],
+      "title": "VolatilityScenarioStatus",
+      "type": "string"
+    },
+    "VolatilityScenarioType": {
+      "enum": [
+        "CONSTANT_LEG_IV",
+        "PARALLEL_ABSOLUTE_VOL_SHIFT",
+        "RELATIVE_VOL_MULTIPLIER",
+        "SKEW_STEEPENING",
+        "SKEW_FLATTENING",
+        "SHORT_END_CRUSH",
+        "LONG_END_STABLE",
+        "SHORT_END_EXPANSION",
+        "EVENT_IV_CRUSH",
+        "SPOT_UP_IV_DOWN",
+        "SPOT_DOWN_IV_UP"
+      ],
+      "title": "VolatilityScenarioType",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/trade_economics_ticket.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "aggregate_greeks": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AdvancedGreeks"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "assignment_and_exercise_risks": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Assignment And Exercise Risks",
+      "type": "array"
+    },
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "breakeven_clock": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BreakevenClock"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "candidate_id": {
+      "minLength": 1,
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "capital_at_risk": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Capital At Risk"
+    },
+    "classification": {
+      "minLength": 1,
+      "title": "Classification",
+      "type": "string"
+    },
+    "currency": {
+      "maxLength": 3,
+      "minLength": 3,
+      "title": "Currency",
+      "type": "string"
+    },
+    "data_freshness_status": {
+      "minLength": 1,
+      "title": "Data Freshness Status",
+      "type": "string"
+    },
+    "data_status": {
+      "minLength": 1,
+      "title": "Data Status",
+      "type": "string"
+    },
+    "dte_exact_days": {
+      "minimum": 0,
+      "title": "Dte Exact Days",
+      "type": "number"
+    },
+    "entry_cost": {
+      "$ref": "#/$defs/EntryCostBreakdown"
+    },
+    "exact_market_timestamp": {
+      "format": "date-time",
+      "title": "Exact Market Timestamp",
+      "type": "string"
+    },
+    "exit_cost_estimate": {
+      "$ref": "#/$defs/ExitCostEstimate"
+    },
+    "expiration_breakevens": {
+      "items": {
+        "type": "number"
+      },
+      "title": "Expiration Breakevens",
+      "type": "array"
+    },
+    "expirations": {
+      "items": {
+        "format": "date-time",
+        "type": "string"
+      },
+      "title": "Expirations",
+      "type": "array"
+    },
+    "fixture_status": {
+      "enum": [
+        "LIVE_INPUT",
+        "SYNTHETIC_TEST_FIXTURE",
+        "RESEARCH_FIXTURE"
+      ],
+      "title": "Fixture Status",
+      "type": "string"
+    },
+    "fx_attribution": {
+      "$ref": "#/$defs/FXAttribution"
+    },
+    "intensity": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TradeIntensityDiagnostics"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "intraday_precision_status": {
+      "$ref": "#/$defs/IntradayPrecisionStatus"
+    },
+    "intraday_precision_warning": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Intraday Precision Warning"
+    },
+    "legs": {
+      "items": {
+        "$ref": "#/$defs/LegEconomics"
+      },
+      "title": "Legs",
+      "type": "array"
+    },
+    "leverage": {
+      "$ref": "#/$defs/LeverageDiagnostics"
+    },
+    "liquidity": {
+      "items": {
+        "$ref": "#/$defs/LiquidityDiagnostics"
+      },
+      "title": "Liquidity",
+      "type": "array"
+    },
+    "margin": {
+      "$ref": "#/$defs/MarginEstimate"
+    },
+    "maximum_loss": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Maximum Loss"
+    },
+    "maximum_profit": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Maximum Profit"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "pnl_attributions": {
+      "items": {
+        "$ref": "#/$defs/PnLAttribution"
+      },
+      "title": "Pnl Attributions",
+      "type": "array"
+    },
+    "probability_status": {
+      "$ref": "#/$defs/ProbabilityStatus"
+    },
+    "rate_stress_results": {
+      "items": {
+        "$ref": "#/$defs/RateStressResult"
+      },
+      "title": "Rate Stress Results",
+      "type": "array"
+    },
+    "round_trip_cost": {
+      "$ref": "#/$defs/RoundTripCost"
+    },
+    "scenario_matrices": {
+      "items": {
+        "$ref": "#/$defs/ScenarioMatrix"
+      },
+      "title": "Scenario Matrices",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "strategy_name": {
+      "minLength": 1,
+      "title": "Strategy Name",
+      "type": "string"
+    },
+    "target_arrivals": {
+      "items": {
+        "$ref": "#/$defs/TargetArrivalResult"
+      },
+      "title": "Target Arrivals",
+      "type": "array"
+    },
+    "time_decay": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TimeDecayExposure"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "touch_probabilities": {
+      "items": {
+        "$ref": "#/$defs/TouchProbabilityMetrics"
+      },
+      "title": "Touch Probabilities",
+      "type": "array"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    },
+    "underlying": {
+      "minLength": 1,
+      "title": "Underlying",
+      "type": "string"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "what_if": {
+      "const": true,
+      "default": true,
+      "title": "What If",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "fixture_status",
+    "candidate_id",
+    "underlying",
+    "strategy_name",
+    "exact_market_timestamp",
+    "currency",
+    "data_freshness_status",
+    "expirations",
+    "dte_exact_days",
+    "intraday_precision_status",
+    "legs",
+    "entry_cost",
+    "exit_cost_estimate",
+    "round_trip_cost",
+    "margin",
+    "expiration_breakevens",
+    "leverage",
+    "fx_attribution",
+    "classification",
+    "data_status",
+    "probability_status"
+  ],
+  "title": "TradeEconomicsTicket",
+  "type": "object"
+}

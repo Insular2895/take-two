@@ -170,6 +170,17 @@ class LiveOptionQuote(StrictModel):
     theta: float | None = None
     multiplier: float = Field(gt=0)
     exchange: str | None = None
+    con_id: int | None = Field(default=None, gt=0)
+    local_symbol: str | None = None
+    trading_class: str | None = None
+    currency: str | None = Field(default=None, min_length=3, max_length=3)
+    deliverable: str | None = None
+    exercise_style: Literal["american", "european", "unknown"] | None = None
+    settlement: str | None = None
+    adjusted_contract: bool | None = None
+    rho: float | None = None
+    provider_greek_convention: str | None = None
+    provider_stream: str | None = None
 
     @field_validator("quote_timestamp", "received_at")
     @classmethod

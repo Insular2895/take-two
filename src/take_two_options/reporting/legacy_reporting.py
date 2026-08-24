@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from take_two_options.domain import DecisionReport, StrategyCandidate, StrategyLeg
+from take_two_options.reporting.trade_economics import render_trade_economics_markdown
 
 
 def render_json(report: DecisionReport) -> str:
@@ -122,6 +123,16 @@ def _candidate_markdown(candidate: StrategyCandidate) -> list[str]:
         lines.append(
             f"- Evidence `{evidence.id}` ({evidence.status.value}, {evidence.confidence_level}): "
             f"`{evidence.uri}`"
+        )
+    if candidate.trade_economics is not None:
+        lines.extend(
+            [
+                "",
+                render_trade_economics_markdown(
+                    candidate.trade_economics,
+                    heading_level=4,
+                ),
+            ]
         )
     lines.append("")
     return lines

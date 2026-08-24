@@ -23,6 +23,10 @@ from take_two_options.quantitative.contracts import (
     Measure,
     require_measure,
 )
+from take_two_options.trade_economics_models import (
+    ExecutionEstimateStatus,
+    MarginStatus,
+)
 
 
 @dataclass(frozen=True)
@@ -130,6 +134,8 @@ def _quote_liquidity(quote: OptionQuote) -> float:
 def estimate_execution(candidate: StrategyCandidate, bundle: MarketDataBundle) -> ExecutionEstimate:
     theoretical_mid = 0.0
     market_cost = 0.0
+    premium_paid = 0.0
+    premium_received = 0.0
     fees = 0.0
     slippage = 0.0
     liquidity_scores: list[float] = []
@@ -153,11 +159,23 @@ def estimate_execution(candidate: StrategyCandidate, bundle: MarketDataBundle) -
         assert leg.option_quote is not None
         quote = leg.option_quote
         multiplier = quote.contract.multiplier
-        mid = quote.mid or 0.0
+        mid = quote.mid
+        if mid is None:
+            raise ValueError(
+                f"BLOCKED_EXECUTION_DATA: missing two-sided quote for {quote.contract.local_symbol}"
+            )
         executable_price = quote.ask if leg.side is PositionSide.LONG else quote.bid
-        executable_price = executable_price or 0.0
+        if executable_price is None:
+            raise ValueError(
+                "BLOCKED_EXECUTION_DATA: missing executable quote side for "
+                f"{quote.contract.local_symbol}"
+            )
         theoretical_mid += side * leg.quantity * multiplier * mid
         market_cost += side * leg.quantity * multiplier * executable_price
+        if leg.side is PositionSide.LONG:
+            premium_paid += leg.quantity * multiplier * mid
+        else:
+            premium_received += leg.quantity * multiplier * mid
         if bundle.portfolio.commission_per_option_contract is not None:
             fees += leg.quantity * bundle.portfolio.commission_per_option_contract
         if bundle.portfolio.slippage_per_option_contract is not None:
@@ -165,13 +183,50 @@ def estimate_execution(candidate: StrategyCandidate, bundle: MarketDataBundle) -
         liquidity_scores.append(_quote_liquidity(quote))
         has_short_option = has_short_option or leg.side is PositionSide.SHORT
 
-    total_entry_cost = market_cost + fees + slippage
-    margin_requirement: float | None = 0.0
-    if has_short_option and not bundle.portfolio.margin_known:
-        margin_requirement = None
-        notes.append("Broker margin is unknown for a structure containing a short option leg")
+    bid_ask_cost = market_cost - theoretical_mid
+    if bid_ask_cost < -1e-8:
+        raise ValueError("entry bid/ask cost cannot improve on the declared midpoint")
+    bid_ask_cost = max(bid_ask_cost, 0.0)
+    total_entry_cost = theoretical_mid + bid_ask_cost + fees + slippage
+    margin_requirement: float | None = None
+    margin_status = MarginStatus.NOT_REQUIRED
+    total_capital_required: float | None = max(total_entry_cost, 0.0)
+    option_legs = [leg for leg in candidate.legs if leg.option_quote is not None]
+    bounded_vertical = (
+        len(option_legs) == 2
+        and option_legs[0].option_quote is not None
+        and option_legs[1].option_quote is not None
+        and option_legs[0].option_quote.contract.expiration
+        == option_legs[1].option_quote.contract.expiration
+        and option_legs[0].option_quote.contract.option_type
+        is option_legs[1].option_quote.contract.option_type
+        and option_legs[0].quantity == option_legs[1].quantity
+        and option_legs[0].side is not option_legs[1].side
+    )
+    if has_short_option and total_entry_cost <= 0:
+        if bundle.portfolio.broker_margin_requirement is not None:
+            margin_requirement = bundle.portfolio.broker_margin_requirement
+            margin_status = MarginStatus.KNOWN_BROKER
+            total_capital_required = margin_requirement
+        elif bounded_vertical:
+            first = option_legs[0].option_quote
+            second = option_legs[1].option_quote
+            assert first is not None and second is not None
+            width = abs(first.contract.strike - second.contract.strike)
+            scale = option_legs[0].quantity * first.contract.multiplier
+            margin_requirement = max(width * scale + total_entry_cost, 0.01)
+            margin_status = MarginStatus.ESTIMATED
+            total_capital_required = margin_requirement
+            notes.append(
+                "Bounded vertical credit margin is an analytical estimate, not broker margin"
+            )
+        else:
+            margin_status = MarginStatus.UNKNOWN
+            total_capital_required = None
+            notes.append("Broker margin is unknown for a credit structure with a short option")
     elif has_short_option:
-        notes.append("Margin is fixture-provided and must be refreshed at the broker before use")
+        notes.append("Debit structure capital uses paid debit; broker preview remains pending")
+    notes.append("Per-leg BBO sum is indicative and is not an executable combo quote")
 
     return ExecutionEstimate(
         theoretical_mid=round(theoretical_mid, 6),
@@ -183,6 +238,17 @@ def estimate_execution(candidate: StrategyCandidate, bundle: MarketDataBundle) -
         margin_requirement=margin_requirement,
         liquidity_score=min(liquidity_scores, default=1.0),
         notes=notes,
+        premium_paid=round(premium_paid, 6),
+        premium_received=round(premium_received, 6),
+        net_premium=round(theoretical_mid, 6),
+        bid_ask_cost=round(bid_ask_cost, 6),
+        fx_conversion_cost=None,
+        total_capital_required=(
+            round(total_capital_required, 6) if total_capital_required is not None else None
+        ),
+        margin_status=margin_status,
+        execution_status=ExecutionEstimateStatus.INDICATIVE,
+        combo_execution_status="INDICATIVE",
     )
 
 

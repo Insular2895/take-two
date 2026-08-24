@@ -209,6 +209,180 @@ report_policy:
     model_agreement: pre-opra-v2
     execution_quality: pre-opra-v2
 
+trade_economics:
+  schema_version: "1.0"
+  analysis_mode: deep_analysis
+  deep_analysis_candidate_limit: 3
+  time_decay_horizons_days: [1, 7, 30, 60, 90]
+  scenario_horizons_days: [7, 30, 60, 90]
+  spot_grid:
+    mode: spot_multipliers
+    values: [0.70, 0.85, 1.00, 1.15, 1.30]
+  target_spots: []
+  volatility_scenarios:
+    - name: base_constant_leg_iv
+      scenario_type: CONSTANT_LEG_IV
+      unit: none
+      parameters: {}
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Each leg retains its observed implied volatility.]
+    - name: parallel_iv_crush
+      scenario_type: PARALLEL_ABSOLUTE_VOL_SHIFT
+      unit: vol_points
+      parameters: {parallel_shift_vol_points: -10.0}
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Configured sensitivity stress; not a forecast.]
+    - name: parallel_iv_expansion
+      scenario_type: PARALLEL_ABSOLUTE_VOL_SHIFT
+      unit: vol_points
+      parameters: {parallel_shift_vol_points: 10.0}
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Configured sensitivity stress; not a forecast.]
+    - name: skew_steepening
+      scenario_type: SKEW_STEEPENING
+      unit: vol_points
+      parameters: {skew_slope_vol_points: 5.0}
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Log-moneyness stress is diagnostic and uncalibrated.]
+    - name: short_end_crush
+      scenario_type: SHORT_END_CRUSH
+      unit: vol_points
+      parameters:
+        short_end_max_days: 90
+        front_expiry_shift_vol_points: -15.0
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Only maturities at or below the configured boundary are shocked.]
+    - name: event_iv_crush
+      scenario_type: EVENT_IV_CRUSH
+      unit: vol_points
+      parameters:
+        short_end_max_days: 90
+        long_end_min_days: 365
+        front_expiry_shift_vol_points: -20.0
+        mid_expiry_shift_vol_points: -10.0
+        back_expiry_shift_vol_points: 0.0
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Term-structure crush is a stress, not a calibrated event forecast.]
+    - name: spot_up_iv_down
+      scenario_type: SPOT_UP_IV_DOWN
+      unit: mixed
+      parameters:
+        spot_multiplier: 1.15
+        parallel_shift_vol_points: -8.0
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Spot/vol correlation stress is diagnostic.]
+    - name: spot_down_iv_up
+      scenario_type: SPOT_DOWN_IV_UP
+      unit: mixed
+      parameters:
+        spot_multiplier: 0.85
+        parallel_shift_vol_points: 12.0
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Spot/vol correlation stress is diagnostic.]
+  greek_bumps:
+    spot_relative_bumps: [0.0025, 0.005, 0.01]
+    minimum_spot_bump: 0.01
+    volatility_bumps_vol_points: [0.5, 1.0, 2.0]
+    rate_bumps_basis_points: [10.0, 25.0]
+    time_bump_calendar_days: 1
+    grid_levels: [100, 200]
+  numerical_tolerances:
+    greek_high_relative_dispersion: 0.01
+    greek_medium_relative_dispersion: 0.05
+    greek_low_relative_dispersion: 0.20
+    greek_absolute_scale_floor: 1.0e-8
+    price_grid_tolerance: 0.02
+    reconciliation_tolerance: 1.0e-5
+  rate_stresses:
+    - name: base_curve
+      scenario_type: BASE_CURVE
+      short_end_shift_basis_points: 0.0
+      long_end_shift_basis_points: 0.0
+      short_end_max_days: 90
+      long_end_min_days: 730
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Use the declared input curve without an added shock.]
+    - name: parallel_up
+      scenario_type: PARALLEL_UP
+      short_end_shift_basis_points: 100.0
+      long_end_shift_basis_points: 100.0
+      short_end_max_days: 90
+      long_end_min_days: 730
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Configured +100 bp sensitivity stress; not a forecast.]
+    - name: parallel_down
+      scenario_type: PARALLEL_DOWN
+      short_end_shift_basis_points: -100.0
+      long_end_shift_basis_points: -100.0
+      short_end_max_days: 90
+      long_end_min_days: 730
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Configured -100 bp sensitivity stress; not a forecast.]
+    - name: steepening
+      scenario_type: STEEPENING
+      short_end_shift_basis_points: -50.0
+      long_end_shift_basis_points: 50.0
+      short_end_max_days: 90
+      long_end_min_days: 730
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Configured maturity-dependent curve stress.]
+    - name: flattening
+      scenario_type: FLATTENING
+      short_end_shift_basis_points: 50.0
+      long_end_shift_basis_points: -50.0
+      short_end_max_days: 90
+      long_end_min_days: 730
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Configured maturity-dependent curve stress.]
+  fx_mode: UNKNOWN
+  entry_fx_rate_usd_per_base: null
+  scenario_fx_rate_usd_per_base: null
+  exit_cost_model:
+    spread_cost_multiplier: 1.0
+    slippage_cost_multiplier: 1.0
+    closing_commission_multiplier: 1.0
+    fx_exit_cost_bps: null
+    assignment_or_exercise_cost: null
+    status: ESTIMATED_CONFIGURED_EXECUTION_MODEL
+  breakeven_solver:
+    minimum_spot_multiplier: 0.0
+    maximum_spot_multiplier: 3.0
+    grid_points: 401
+    root_tolerance: 1.0e-5
+    pnl_tolerance: 1.0e-4
+    maximum_iterations: 100
+  touch_targets: []
+  near_expiry_threshold_hours: 48.0
+  display_policy:
+    show_raw_greeks: true
+    show_numerical_confidence: true
+    show_scenario_assumptions: true
+  advanced_greeks:
+    enabled: true
+    display_speed: true
+    display_color: true
+  leverage_denominator_floor: 1.0
+  intensity_thresholds:
+    high_effective_leverage: 5.0
+    extreme_effective_leverage: 10.0
+    high_flat_spot_30d_loss_fraction: 0.20
+    extreme_flat_spot_30d_loss_fraction: 0.40
+    high_round_trip_cost_fraction: 0.08
+    extreme_round_trip_cost_fraction: 0.15
+
 extensions:
   option_normalization:
     cache_dir: data/marketdata/cache

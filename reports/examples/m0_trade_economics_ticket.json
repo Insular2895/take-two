@@ -1,0 +1,4291 @@
+{
+  "schema_version": "1.0",
+  "fixture_status": "SYNTHETIC_TEST_FIXTURE",
+  "candidate_id": "ttwo-long-call",
+  "underlying": "TTWO",
+  "strategy_name": "Long call",
+  "exact_market_timestamp": "2026-07-18T12:00:00Z",
+  "currency": "USD",
+  "data_freshness_status": "current",
+  "expirations": [
+    "2027-01-15T21:00:00Z"
+  ],
+  "dte_exact_days": 181.375,
+  "intraday_precision_status": "APPROXIMATED_DATE_ENGINE",
+  "intraday_precision_warning": "American FD engine uses date-level exercise grid; intraday exposure is approximate.",
+  "legs": [
+    {
+      "side": "long",
+      "quantity": 1,
+      "instrument_type": "option",
+      "option_type": "call",
+      "strike": 260.0,
+      "expiration": "2027-01-15T21:00:00Z",
+      "bid": 28.0,
+      "ask": 30.0,
+      "mid": 29.0,
+      "implied_volatility": 0.36,
+      "multiplier": 100.0,
+      "premium_paid": 2900.0,
+      "premium_received": 0.0,
+      "con_id": 1002601,
+      "local_symbol": "TTWO  270115C00260000",
+      "trading_class": "TTWO",
+      "deliverable": "100 TTWO common shares",
+      "exercise_style": "american",
+      "settlement": "T+1 equity delivery after exercise/assignment",
+      "adjusted_contract": false,
+      "greeks": {
+        "delta": {
+          "value": 0.5722907513699952,
+          "raw_value": 0.5722907513699952,
+          "normalized_value": 0.5722907513699952,
+          "unit": "currency_per_1_spot_unit",
+          "currency": "USD",
+          "multiplier": 100.0,
+          "position_sign": 1,
+          "model": "quantlib_fd_american",
+          "source": "internal_same_full_pricer",
+          "timestamp": "2026-07-18T12:00:00Z",
+          "bump_size": 0.005,
+          "confidence": "HIGH",
+          "calculation_method": "same_pricer_central_finite_difference_multi_bump",
+          "provider_raw_value": 0.56,
+          "provider_convention": "provider_convention_not_supplied",
+          "normalized_internal_value": 0.5722907513699952
+        },
+        "gamma": {
+          "value": 0.006010260095635064,
+          "raw_value": 0.006010260095635064,
+          "normalized_value": 0.006010260095635064,
+          "unit": "delta_per_1_spot_unit",
+          "currency": "USD",
+          "multiplier": 100.0,
+          "position_sign": 1,
+          "model": "quantlib_fd_american",
+          "source": "internal_same_full_pricer",
+          "timestamp": "2026-07-18T12:00:00Z",
+          "bump_size": 0.005,
+          "confidence": "HIGH",
+          "calculation_method": "same_pricer_central_finite_difference_multi_bump",
+          "provider_raw_value": 0.0065,
+          "provider_convention": "provider_convention_not_supplied",
+          "normalized_internal_value": 0.006010260095635064
+        },
+        "theta": {
+          "value": -0.08579418576730191,
+          "raw_value": -0.08579418576730191,
+          "normalized_value": -0.08579418576730191,
+          "unit": "currency_per_calendar_day",
+          "currency": "USD",
+          "multiplier": 100.0,
+          "position_sign": 1,
+          "model": "quantlib_fd_american",
+          "source": "internal_same_full_pricer",
+          "timestamp": "2026-07-18T12:00:00Z",
+          "bump_size": 1.0,
+          "confidence": "HIGH",
+          "calculation_method": "same_pricer_central_finite_difference_multi_bump",
+          "provider_raw_value": -0.08,
+          "provider_convention": "provider_convention_not_supplied",
+          "normalized_internal_value": -0.08579418576730191
+        },
+        "vega": {
+          "value": 0.7130118276023723,
+          "raw_value": 0.7130118276023723,
+          "normalized_value": 0.7130118276023723,
+          "unit": "currency_per_1_vol_point",
+          "currency": "USD",
+          "multiplier": 100.0,
+          "position_sign": 1,
+          "model": "quantlib_fd_american",
+          "source": "internal_same_full_pricer",
+          "timestamp": "2026-07-18T12:00:00Z",
+          "bump_size": 1.0,
+          "confidence": "HIGH",
+          "calculation_method": "same_pricer_central_finite_difference_multi_bump",
+          "provider_raw_value": 0.44,
+          "provider_convention": "provider_convention_not_supplied",
+          "normalized_internal_value": 0.7130118276023723
+        },
+        "rho": {
+          "value": 0.594609935444872,
+          "raw_value": 0.594609935444872,
+          "normalized_value": 0.594609935444872,
+          "unit": "currency_per_1_percentage_point_rate",
+          "currency": "USD",
+          "multiplier": 100.0,
+          "position_sign": 1,
+          "model": "quantlib_fd_american",
+          "source": "internal_same_full_pricer",
+          "timestamp": "2026-07-18T12:00:00Z",
+          "bump_size": 25.0,
+          "confidence": "HIGH",
+          "calculation_method": "same_pricer_central_finite_difference_multi_bump",
+          "provider_raw_value": 0.27,
+          "provider_convention": "provider_convention_not_supplied",
+          "normalized_internal_value": 0.594609935444872
+        },
+        "vanna": {
+          "value": 0.0007943281496029231,
+          "raw_value": 0.07943281496029231,
+          "normalized_value": 0.0007943281496029231,
+          "unit": "currency_per_spot_unit_per_vol_point",
+          "currency": "USD",
+          "multiplier": 100.0,
+          "position_sign": 1,
+          "model": "quantlib_fd_american",
+          "source": "internal_same_full_pricer",
+          "timestamp": "2026-07-18T12:00:00Z",
+          "bump_size": 1.0,
+          "confidence": "HIGH",
+          "calculation_method": "same_pricer_central_finite_difference_multi_bump",
+          "provider_raw_value": null,
+          "provider_convention": null,
+          "normalized_internal_value": 0.0007943281496029231
+        },
+        "vomma": {
+          "value": -0.0002515448328708203,
+          "raw_value": -2.515448328708203,
+          "normalized_value": -0.0002515448328708203,
+          "unit": "currency_per_vol_point_squared",
+          "currency": "USD",
+          "multiplier": 100.0,
+          "position_sign": 1,
+          "model": "quantlib_fd_american",
+          "source": "internal_same_full_pricer",
+          "timestamp": "2026-07-18T12:00:00Z",
+          "bump_size": 1.0,
+          "confidence": "MEDIUM",
+          "calculation_method": "same_pricer_central_finite_difference_multi_bump",
+          "provider_raw_value": null,
+          "provider_convention": null,
+          "normalized_internal_value": -0.0002515448328708203
+        },
+        "charm_delta_drift_1_calendar_day": {
+          "value": -0.0002707022391790215,
+          "raw_value": -0.0002707022391790215,
+          "normalized_value": -0.0002707022391790215,
+          "unit": "delta_drift_per_calendar_day",
+          "currency": "USD",
+          "multiplier": 100.0,
+          "position_sign": 1,
+          "model": "quantlib_fd_american",
+          "source": "internal_same_full_pricer",
+          "timestamp": "2026-07-18T12:00:00Z",
+          "bump_size": 1.0,
+          "confidence": "HIGH",
+          "calculation_method": "same_pricer_central_finite_difference_multi_bump",
+          "provider_raw_value": null,
+          "provider_convention": null,
+          "normalized_internal_value": -0.0002707022391790215
+        },
+        "veta_vega_drift_1_calendar_day": {
+          "value": -0.0018850948560746872,
+          "raw_value": -0.0018850948560746872,
+          "normalized_value": -0.0018850948560746872,
+          "unit": "vega_drift_per_calendar_day",
+          "currency": "USD",
+          "multiplier": 100.0,
+          "position_sign": 1,
+          "model": "quantlib_fd_american",
+          "source": "internal_same_full_pricer",
+          "timestamp": "2026-07-18T12:00:00Z",
+          "bump_size": 1.0,
+          "confidence": "HIGH",
+          "calculation_method": "same_pricer_central_finite_difference_multi_bump",
+          "provider_raw_value": null,
+          "provider_convention": null,
+          "normalized_internal_value": -0.0018850948560746872
+        },
+        "speed": {
+          "value": -0.00003774261546124487,
+          "raw_value": -0.00003774261546124487,
+          "normalized_value": -0.00003774261546124487,
+          "unit": "gamma_per_spot_unit",
+          "currency": "USD",
+          "multiplier": 100.0,
+          "position_sign": 1,
+          "model": "quantlib_fd_american",
+          "source": "internal_same_full_pricer",
+          "timestamp": "2026-07-18T12:00:00Z",
+          "bump_size": 0.005,
+          "confidence": "LOW",
+          "calculation_method": "same_pricer_central_finite_difference_multi_bump",
+          "provider_raw_value": null,
+          "provider_convention": null,
+          "normalized_internal_value": -0.00003774261546124487
+        },
+        "color_gamma_drift_1_calendar_day": {
+          "value": 0.000017121023050194716,
+          "raw_value": 0.000017121023050194716,
+          "normalized_value": 0.000017121023050194716,
+          "unit": "gamma_drift_per_calendar_day",
+          "currency": "USD",
+          "multiplier": 100.0,
+          "position_sign": 1,
+          "model": "quantlib_fd_american",
+          "source": "internal_same_full_pricer",
+          "timestamp": "2026-07-18T12:00:00Z",
+          "bump_size": 1.0,
+          "confidence": "MEDIUM",
+          "calculation_method": "same_pricer_central_finite_difference_multi_bump",
+          "provider_raw_value": null,
+          "provider_convention": null,
+          "normalized_internal_value": 0.000017121023050194716
+        },
+        "confidence": [
+          {
+            "greek": "delta",
+            "estimate": 0.5722907513699952,
+            "method": "same_pricer_central_finite_difference_multi_bump",
+            "primary_bump": 0.005,
+            "alternate_bumps": [
+              0.0025,
+              0.005,
+              0.01
+            ],
+            "grid_levels": [
+              100,
+              200
+            ],
+            "estimate_dispersion": 0.0003414937995658285,
+            "relative_dispersion": 0.0005967138185412458,
+            "benchmark_difference": 0.0003316497871940216,
+            "confidence_level": "HIGH",
+            "warnings": []
+          },
+          {
+            "greek": "gamma",
+            "estimate": 0.006010260095635064,
+            "method": "same_pricer_central_finite_difference_multi_bump",
+            "primary_bump": 0.005,
+            "alternate_bumps": [
+              0.0025,
+              0.005,
+              0.01
+            ],
+            "grid_levels": [
+              100,
+              200
+            ],
+            "estimate_dispersion": 4.681517803912898e-6,
+            "relative_dispersion": 0.0007789209999934675,
+            "benchmark_difference": 0.000011567490107558358,
+            "confidence_level": "HIGH",
+            "warnings": []
+          },
+          {
+            "greek": "theta",
+            "estimate": -0.08579418576730191,
+            "method": "same_pricer_central_finite_difference_multi_bump",
+            "primary_bump": 1.0,
+            "alternate_bumps": [
+              1.0
+            ],
+            "grid_levels": [
+              100,
+              200
+            ],
+            "estimate_dispersion": 0.00005404157467836512,
+            "relative_dispersion": 0.0006298978677289525,
+            "benchmark_difference": 0.0002523653054726238,
+            "confidence_level": "HIGH",
+            "warnings": []
+          },
+          {
+            "greek": "vega",
+            "estimate": 0.7130118276023723,
+            "method": "same_pricer_central_finite_difference_multi_bump",
+            "primary_bump": 1.0,
+            "alternate_bumps": [
+              0.5,
+              1.0,
+              2.0
+            ],
+            "grid_levels": [
+              100,
+              200
+            ],
+            "estimate_dispersion": 0.0004358069364052142,
+            "relative_dispersion": 0.0006112197856109788,
+            "benchmark_difference": 0.00012982397362704123,
+            "confidence_level": "HIGH",
+            "warnings": []
+          },
+          {
+            "greek": "rho",
+            "estimate": 0.594609935444872,
+            "method": "same_pricer_central_finite_difference_multi_bump",
+            "primary_bump": 25.0,
+            "alternate_bumps": [
+              10.0,
+              25.0
+            ],
+            "grid_levels": [
+              100,
+              200
+            ],
+            "estimate_dispersion": 0.0004259089939573357,
+            "relative_dispersion": 0.000716283009362569,
+            "benchmark_difference": 0.0006340551987502607,
+            "confidence_level": "HIGH",
+            "warnings": []
+          },
+          {
+            "greek": "vanna",
+            "estimate": 0.0007943281496029231,
+            "method": "same_pricer_central_finite_difference_multi_bump",
+            "primary_bump": 1.0,
+            "alternate_bumps": [
+              0.5,
+              1.0,
+              2.0
+            ],
+            "grid_levels": [
+              100,
+              200
+            ],
+            "estimate_dispersion": 5.136538380500757e-6,
+            "relative_dispersion": 0.006466519388829997,
+            "benchmark_difference": 5.005259569477441e-6,
+            "confidence_level": "HIGH",
+            "warnings": []
+          },
+          {
+            "greek": "vomma",
+            "estimate": -0.0002515448328708203,
+            "method": "same_pricer_central_finite_difference_multi_bump",
+            "primary_bump": 1.0,
+            "alternate_bumps": [
+              0.5,
+              1.0,
+              2.0
+            ],
+            "grid_levels": [
+              100,
+              200
+            ],
+            "estimate_dispersion": 5.563664344343522e-6,
+            "relative_dispersion": 0.0221179830284994,
+            "benchmark_difference": 8.599497758468154e-6,
+            "confidence_level": "MEDIUM",
+            "warnings": []
+          },
+          {
+            "greek": "charm",
+            "estimate": -0.0002707022391790215,
+            "method": "same_pricer_central_finite_difference_multi_bump",
+            "primary_bump": 1.0,
+            "alternate_bumps": [
+              1.0
+            ],
+            "grid_levels": [
+              100,
+              200
+            ],
+            "estimate_dispersion": 8.01301051400749e-7,
+            "relative_dispersion": 0.00296008283430131,
+            "benchmark_difference": null,
+            "confidence_level": "HIGH",
+            "warnings": []
+          },
+          {
+            "greek": "veta",
+            "estimate": -0.0018850948560746872,
+            "method": "same_pricer_central_finite_difference_multi_bump",
+            "primary_bump": 1.0,
+            "alternate_bumps": [
+              0.5,
+              1.0,
+              2.0
+            ],
+            "grid_levels": [
+              100,
+              200
+            ],
+            "estimate_dispersion": 2.2522157365756357e-6,
+            "relative_dispersion": 0.0011947492877177545,
+            "benchmark_difference": null,
+            "confidence_level": "HIGH",
+            "warnings": []
+          },
+          {
+            "greek": "speed",
+            "estimate": -0.00003774261546124487,
+            "method": "same_pricer_central_finite_difference_multi_bump",
+            "primary_bump": 0.005,
+            "alternate_bumps": [
+              0.0025,
+              0.005,
+              0.01
+            ],
+            "grid_levels": [
+              100,
+              200
+            ],
+            "estimate_dispersion": 2.358367476050464e-6,
+            "relative_dispersion": 0.06248553385157155,
+            "benchmark_difference": null,
+            "confidence_level": "LOW",
+            "warnings": [
+              "Estimate is sensitive to configured bumps or FD grid refinement"
+            ]
+          },
+          {
+            "greek": "color",
+            "estimate": 0.000017121023050194716,
+            "method": "same_pricer_central_finite_difference_multi_bump",
+            "primary_bump": 1.0,
+            "alternate_bumps": [
+              1.0
+            ],
+            "grid_levels": [
+              100,
+              200
+            ],
+            "estimate_dispersion": 6.09512837008476e-7,
+            "relative_dispersion": 0.03560025795313348,
+            "benchmark_difference": null,
+            "confidence_level": "MEDIUM",
+            "warnings": []
+          }
+        ],
+        "conventions": [
+          "Theta is currency per calendar day and is a local one-day reprice.",
+          "Vega is currency per +1 volatility point (sigma decimal +0.01).",
+          "Rho is currency per +1 percentage-point rate move.",
+          "Vanna is d2V/(dS dsigma), normalized per spot unit per vol point.",
+          "Vomma is d2V/dsigma2, normalized per vol point squared.",
+          "Charm is exposed as Delta(t+1 calendar day)-Delta(t) at flat spot/IV.",
+          "Veta is exposed as Vega(t+1 calendar day)-Vega(t) at flat spot/IV.",
+          "Color is exposed as Gamma(t+1 calendar day)-Gamma(t) at flat spot/IV."
+        ]
+      }
+    }
+  ],
+  "entry_cost": {
+    "premium_paid": 2900.0,
+    "premium_received": 0.0,
+    "net_premium": 2900.0,
+    "mid_theoretical_value": 2900.0,
+    "bid_ask_cost": 100.0,
+    "expected_slippage": 1.5,
+    "commission": 0.65,
+    "fx_conversion_cost": null,
+    "total_entry_cost": 3002.15,
+    "total_capital_required": 3002.15,
+    "execution_status": "INDICATIVE",
+    "combo_execution_status": "INDICATIVE",
+    "warnings": [
+      "Per-leg BBO sum is indicative and is not an executable combo quote"
+    ]
+  },
+  "exit_cost_estimate": {
+    "estimated_exit_bid_ask_cost": 100.0,
+    "estimated_exit_slippage": 1.5,
+    "closing_commissions": 0.65,
+    "fx_exit_cost": null,
+    "assignment_or_exercise_cost_if_relevant": null,
+    "total_exit_cost": 102.15,
+    "status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+    "warnings": [
+      "Future spread and slippage are configured estimates, not observations"
+    ]
+  },
+  "round_trip_cost": {
+    "entry_bid_ask_cost": 100.0,
+    "entry_slippage": 1.5,
+    "entry_commissions": 0.65,
+    "entry_fx_cost": null,
+    "exit": {
+      "estimated_exit_bid_ask_cost": 100.0,
+      "estimated_exit_slippage": 1.5,
+      "closing_commissions": 0.65,
+      "fx_exit_cost": null,
+      "assignment_or_exercise_cost_if_relevant": null,
+      "total_exit_cost": 102.15,
+      "status": "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+      "warnings": [
+        "Future spread and slippage are configured estimates, not observations"
+      ]
+    },
+    "total_round_trip_cost": 204.3,
+    "round_trip_cost_as_pct_capital": 0.06805122995186783
+  },
+  "margin": {
+    "margin_requirement": null,
+    "buying_power_usage": null,
+    "status": "NOT_REQUIRED",
+    "source": "not_required_for_paid_debit",
+    "warnings": [
+      "Real broker margin remains PENDING_BROKER until an IBKR what-if preview is available"
+    ]
+  },
+  "maximum_loss": 3002.15,
+  "maximum_profit": null,
+  "expiration_breakevens": [
+    290.0215
+  ],
+  "capital_at_risk": 3002.15,
+  "leverage": {
+    "capital_at_risk": 3002.15,
+    "capital_status": "KNOWN_BOUNDED_MAX_LOSS",
+    "lambda_value_elasticity": 5.337028984776597,
+    "delta_notional_leverage": 4.914172602823679,
+    "gross_delta_leverage": 4.914172602823679,
+    "warnings": []
+  },
+  "time_decay": {
+    "current_net_theta": -8.579418576730191,
+    "theta_per_capital_per_day": -0.002857758132248619,
+    "theta_capital_status": "AVAILABLE",
+    "flat_spot_1d": -8.57941858,
+    "flat_spot_7d": -60.49938931,
+    "flat_spot_30d": -267.20371617,
+    "flat_spot_60d": -558.93273485,
+    "flat_spot_90d": -884.85235975,
+    "effective_decay_rate_0_7": -8.64276990142857,
+    "effective_decay_rate_0_30": -8.906790539000001,
+    "effective_decay_rate_30_60": -9.724300622666666,
+    "effective_decay_rate_60_90": -10.863987496666669,
+    "decay_acceleration_30_60": -0.8175100836666651,
+    "decay_acceleration_60_90": -1.1396868740000023,
+    "acceleration_status": "ACCELERATING",
+    "time_decay_curve": [
+      {
+        "horizon_days": 0,
+        "valuation_time": "2026-07-18T12:00:00Z",
+        "estimated_position_value": 2764.28764424,
+        "flat_spot_carry": 0.0,
+        "carry_as_pct_capital": 0.0,
+        "carry_as_pct_max_loss": 0.0,
+        "carry_classification": "PURE_FLAT_SPOT_CARRY",
+        "ex_div_adjusted_position_value": null,
+        "warnings": []
+      },
+      {
+        "horizon_days": 1,
+        "valuation_time": "2026-07-19T12:00:00Z",
+        "estimated_position_value": 2755.70822566,
+        "flat_spot_carry": -8.57941858,
+        "carry_as_pct_capital": -0.0028577581322486896,
+        "carry_as_pct_max_loss": -0.0028577581322486896,
+        "carry_classification": "PURE_FLAT_SPOT_CARRY",
+        "ex_div_adjusted_position_value": null,
+        "warnings": []
+      },
+      {
+        "horizon_days": 7,
+        "valuation_time": "2026-07-25T12:00:00Z",
+        "estimated_position_value": 2703.78825493,
+        "flat_spot_carry": -60.49938931,
+        "carry_as_pct_capital": -0.02015202082223412,
+        "carry_as_pct_max_loss": -0.02015202082223412,
+        "carry_classification": "PURE_FLAT_SPOT_CARRY",
+        "ex_div_adjusted_position_value": null,
+        "warnings": []
+      },
+      {
+        "horizon_days": 30,
+        "valuation_time": "2026-08-17T12:00:00Z",
+        "estimated_position_value": 2497.08392807,
+        "flat_spot_carry": -267.20371617,
+        "carry_as_pct_capital": -0.08900411910453883,
+        "carry_as_pct_max_loss": -0.08900411910453883,
+        "carry_classification": "PURE_FLAT_SPOT_CARRY",
+        "ex_div_adjusted_position_value": null,
+        "warnings": []
+      },
+      {
+        "horizon_days": 60,
+        "valuation_time": "2026-09-16T12:00:00Z",
+        "estimated_position_value": 2205.35490939,
+        "flat_spot_carry": -558.93273485,
+        "carry_as_pct_capital": -0.18617748441895907,
+        "carry_as_pct_max_loss": -0.18617748441895907,
+        "carry_classification": "PURE_FLAT_SPOT_CARRY",
+        "ex_div_adjusted_position_value": null,
+        "warnings": []
+      },
+      {
+        "horizon_days": 90,
+        "valuation_time": "2026-10-16T12:00:00Z",
+        "estimated_position_value": 1879.43528449,
+        "flat_spot_carry": -884.85235975,
+        "carry_as_pct_capital": -0.29473955656652173,
+        "carry_as_pct_max_loss": -0.29473955656652173,
+        "carry_classification": "PURE_FLAT_SPOT_CARRY",
+        "ex_div_adjusted_position_value": null,
+        "warnings": []
+      },
+      {
+        "horizon_days": 181,
+        "valuation_time": "2027-01-15T21:00:00Z",
+        "estimated_position_value": 0.0,
+        "flat_spot_carry": -2764.28764424,
+        "carry_as_pct_capital": -0.9207693300600243,
+        "carry_as_pct_max_loss": -0.9207693300600243,
+        "carry_classification": "PURE_FLAT_SPOT_CARRY",
+        "ex_div_adjusted_position_value": null,
+        "warnings": []
+      }
+    ],
+    "assumptions": [
+      "Full repricing at flat spot with CONSTANT_LEG_IV.",
+      "Each leg retains its own current IV; current theta is not multiplied by horizon.",
+      "Capital basis status: KNOWN_BOUNDED_MAX_LOSS."
+    ],
+    "confidence": "HIGH",
+    "warnings": []
+  },
+  "aggregate_greeks": {
+    "delta": {
+      "value": 57.22907513699952,
+      "raw_value": 57.22907513699952,
+      "normalized_value": 57.22907513699952,
+      "unit": "currency_per_1_spot_unit",
+      "currency": "USD",
+      "multiplier": 1.0,
+      "position_sign": 0,
+      "model": "position_aggregate_same_full_pricer",
+      "source": "signed_leg_sum",
+      "timestamp": "2026-07-18T12:00:00Z",
+      "bump_size": 0.0,
+      "confidence": "HIGH",
+      "calculation_method": "sum(side*quantity*contract_multiplier*normalized_leg_greek)",
+      "provider_raw_value": null,
+      "provider_convention": null,
+      "normalized_internal_value": 57.22907513699952
+    },
+    "gamma": {
+      "value": 0.6010260095635064,
+      "raw_value": 0.6010260095635064,
+      "normalized_value": 0.6010260095635064,
+      "unit": "delta_per_1_spot_unit",
+      "currency": "USD",
+      "multiplier": 1.0,
+      "position_sign": 0,
+      "model": "position_aggregate_same_full_pricer",
+      "source": "signed_leg_sum",
+      "timestamp": "2026-07-18T12:00:00Z",
+      "bump_size": 0.0,
+      "confidence": "HIGH",
+      "calculation_method": "sum(side*quantity*contract_multiplier*normalized_leg_greek)",
+      "provider_raw_value": null,
+      "provider_convention": null,
+      "normalized_internal_value": 0.6010260095635064
+    },
+    "theta": {
+      "value": -8.579418576730191,
+      "raw_value": -8.579418576730191,
+      "normalized_value": -8.579418576730191,
+      "unit": "currency_per_calendar_day",
+      "currency": "USD",
+      "multiplier": 1.0,
+      "position_sign": 0,
+      "model": "position_aggregate_same_full_pricer",
+      "source": "signed_leg_sum",
+      "timestamp": "2026-07-18T12:00:00Z",
+      "bump_size": 0.0,
+      "confidence": "HIGH",
+      "calculation_method": "sum(side*quantity*contract_multiplier*normalized_leg_greek)",
+      "provider_raw_value": null,
+      "provider_convention": null,
+      "normalized_internal_value": -8.579418576730191
+    },
+    "vega": {
+      "value": 71.30118276023723,
+      "raw_value": 71.30118276023723,
+      "normalized_value": 71.30118276023723,
+      "unit": "currency_per_1_vol_point",
+      "currency": "USD",
+      "multiplier": 1.0,
+      "position_sign": 0,
+      "model": "position_aggregate_same_full_pricer",
+      "source": "signed_leg_sum",
+      "timestamp": "2026-07-18T12:00:00Z",
+      "bump_size": 0.0,
+      "confidence": "HIGH",
+      "calculation_method": "sum(side*quantity*contract_multiplier*normalized_leg_greek)",
+      "provider_raw_value": null,
+      "provider_convention": null,
+      "normalized_internal_value": 71.30118276023723
+    },
+    "rho": {
+      "value": 59.460993544487195,
+      "raw_value": 59.460993544487195,
+      "normalized_value": 59.460993544487195,
+      "unit": "currency_per_1_percentage_point_rate",
+      "currency": "USD",
+      "multiplier": 1.0,
+      "position_sign": 0,
+      "model": "position_aggregate_same_full_pricer",
+      "source": "signed_leg_sum",
+      "timestamp": "2026-07-18T12:00:00Z",
+      "bump_size": 0.0,
+      "confidence": "HIGH",
+      "calculation_method": "sum(side*quantity*contract_multiplier*normalized_leg_greek)",
+      "provider_raw_value": null,
+      "provider_convention": null,
+      "normalized_internal_value": 59.460993544487195
+    },
+    "vanna": {
+      "value": 0.07943281496029231,
+      "raw_value": 7.943281496029231,
+      "normalized_value": 0.07943281496029231,
+      "unit": "currency_per_spot_unit_per_vol_point",
+      "currency": "USD",
+      "multiplier": 1.0,
+      "position_sign": 0,
+      "model": "position_aggregate_same_full_pricer",
+      "source": "signed_leg_sum",
+      "timestamp": "2026-07-18T12:00:00Z",
+      "bump_size": 0.0,
+      "confidence": "HIGH",
+      "calculation_method": "sum(side*quantity*contract_multiplier*normalized_leg_greek)",
+      "provider_raw_value": null,
+      "provider_convention": null,
+      "normalized_internal_value": 0.07943281496029231
+    },
+    "vomma": {
+      "value": -0.02515448328708203,
+      "raw_value": -251.5448328708203,
+      "normalized_value": -0.02515448328708203,
+      "unit": "currency_per_vol_point_squared",
+      "currency": "USD",
+      "multiplier": 1.0,
+      "position_sign": 0,
+      "model": "position_aggregate_same_full_pricer",
+      "source": "signed_leg_sum",
+      "timestamp": "2026-07-18T12:00:00Z",
+      "bump_size": 0.0,
+      "confidence": "MEDIUM",
+      "calculation_method": "sum(side*quantity*contract_multiplier*normalized_leg_greek)",
+      "provider_raw_value": null,
+      "provider_convention": null,
+      "normalized_internal_value": -0.02515448328708203
+    },
+    "charm_delta_drift_1_calendar_day": {
+      "value": -0.027070223917902148,
+      "raw_value": -0.027070223917902148,
+      "normalized_value": -0.027070223917902148,
+      "unit": "delta_drift_per_calendar_day",
+      "currency": "USD",
+      "multiplier": 1.0,
+      "position_sign": 0,
+      "model": "position_aggregate_same_full_pricer",
+      "source": "signed_leg_sum",
+      "timestamp": "2026-07-18T12:00:00Z",
+      "bump_size": 0.0,
+      "confidence": "HIGH",
+      "calculation_method": "sum(side*quantity*contract_multiplier*normalized_leg_greek)",
+      "provider_raw_value": null,
+      "provider_convention": null,
+      "normalized_internal_value": -0.027070223917902148
+    },
+    "veta_vega_drift_1_calendar_day": {
+      "value": -0.18850948560746872,
+      "raw_value": -0.18850948560746872,
+      "normalized_value": -0.18850948560746872,
+      "unit": "vega_drift_per_calendar_day",
+      "currency": "USD",
+      "multiplier": 1.0,
+      "position_sign": 0,
+      "model": "position_aggregate_same_full_pricer",
+      "source": "signed_leg_sum",
+      "timestamp": "2026-07-18T12:00:00Z",
+      "bump_size": 0.0,
+      "confidence": "HIGH",
+      "calculation_method": "sum(side*quantity*contract_multiplier*normalized_leg_greek)",
+      "provider_raw_value": null,
+      "provider_convention": null,
+      "normalized_internal_value": -0.18850948560746872
+    },
+    "speed": {
+      "value": -0.003774261546124487,
+      "raw_value": -0.003774261546124487,
+      "normalized_value": -0.003774261546124487,
+      "unit": "gamma_per_spot_unit",
+      "currency": "USD",
+      "multiplier": 1.0,
+      "position_sign": 0,
+      "model": "position_aggregate_same_full_pricer",
+      "source": "signed_leg_sum",
+      "timestamp": "2026-07-18T12:00:00Z",
+      "bump_size": 0.0,
+      "confidence": "LOW",
+      "calculation_method": "sum(side*quantity*contract_multiplier*normalized_leg_greek)",
+      "provider_raw_value": null,
+      "provider_convention": null,
+      "normalized_internal_value": -0.003774261546124487
+    },
+    "color_gamma_drift_1_calendar_day": {
+      "value": 0.0017121023050194716,
+      "raw_value": 0.0017121023050194716,
+      "normalized_value": 0.0017121023050194716,
+      "unit": "gamma_drift_per_calendar_day",
+      "currency": "USD",
+      "multiplier": 1.0,
+      "position_sign": 0,
+      "model": "position_aggregate_same_full_pricer",
+      "source": "signed_leg_sum",
+      "timestamp": "2026-07-18T12:00:00Z",
+      "bump_size": 0.0,
+      "confidence": "MEDIUM",
+      "calculation_method": "sum(side*quantity*contract_multiplier*normalized_leg_greek)",
+      "provider_raw_value": null,
+      "provider_convention": null,
+      "normalized_internal_value": 0.0017121023050194716
+    },
+    "confidence": [
+      {
+        "greek": "delta",
+        "estimate": 57.22907513699952,
+        "method": "worst_leg_confidence_signed_aggregation",
+        "primary_bump": 0.0,
+        "alternate_bumps": [],
+        "grid_levels": [
+          100,
+          200
+        ],
+        "estimate_dispersion": 0.03414937995658285,
+        "relative_dispersion": 0.0005967138185412458,
+        "benchmark_difference": null,
+        "confidence_level": "HIGH",
+        "warnings": []
+      },
+      {
+        "greek": "gamma",
+        "estimate": 0.6010260095635064,
+        "method": "worst_leg_confidence_signed_aggregation",
+        "primary_bump": 0.0,
+        "alternate_bumps": [],
+        "grid_levels": [
+          100,
+          200
+        ],
+        "estimate_dispersion": 0.00046815178039128977,
+        "relative_dispersion": 0.0007789209999934675,
+        "benchmark_difference": null,
+        "confidence_level": "HIGH",
+        "warnings": []
+      },
+      {
+        "greek": "theta",
+        "estimate": -8.579418576730191,
+        "method": "worst_leg_confidence_signed_aggregation",
+        "primary_bump": 0.0,
+        "alternate_bumps": [],
+        "grid_levels": [
+          100,
+          200
+        ],
+        "estimate_dispersion": 0.005404157467836512,
+        "relative_dispersion": 0.0006298978677289525,
+        "benchmark_difference": null,
+        "confidence_level": "HIGH",
+        "warnings": []
+      },
+      {
+        "greek": "vega",
+        "estimate": 71.30118276023723,
+        "method": "worst_leg_confidence_signed_aggregation",
+        "primary_bump": 0.0,
+        "alternate_bumps": [],
+        "grid_levels": [
+          100,
+          200
+        ],
+        "estimate_dispersion": 0.04358069364052142,
+        "relative_dispersion": 0.0006112197856109788,
+        "benchmark_difference": null,
+        "confidence_level": "HIGH",
+        "warnings": []
+      },
+      {
+        "greek": "rho",
+        "estimate": 59.460993544487195,
+        "method": "worst_leg_confidence_signed_aggregation",
+        "primary_bump": 0.0,
+        "alternate_bumps": [],
+        "grid_levels": [
+          100,
+          200
+        ],
+        "estimate_dispersion": 0.04259089939573357,
+        "relative_dispersion": 0.000716283009362569,
+        "benchmark_difference": null,
+        "confidence_level": "HIGH",
+        "warnings": []
+      },
+      {
+        "greek": "vanna",
+        "estimate": 0.07943281496029231,
+        "method": "worst_leg_confidence_signed_aggregation",
+        "primary_bump": 0.0,
+        "alternate_bumps": [],
+        "grid_levels": [
+          100,
+          200
+        ],
+        "estimate_dispersion": 0.0005136538380500757,
+        "relative_dispersion": 0.006466519388829997,
+        "benchmark_difference": null,
+        "confidence_level": "HIGH",
+        "warnings": []
+      },
+      {
+        "greek": "vomma",
+        "estimate": -0.02515448328708203,
+        "method": "worst_leg_confidence_signed_aggregation",
+        "primary_bump": 0.0,
+        "alternate_bumps": [],
+        "grid_levels": [
+          100,
+          200
+        ],
+        "estimate_dispersion": 0.0005563664344343522,
+        "relative_dispersion": 0.0221179830284994,
+        "benchmark_difference": null,
+        "confidence_level": "MEDIUM",
+        "warnings": [
+          "Aggregate confidence is bounded by the least stable component leg"
+        ]
+      },
+      {
+        "greek": "charm",
+        "estimate": -0.027070223917902148,
+        "method": "worst_leg_confidence_signed_aggregation",
+        "primary_bump": 0.0,
+        "alternate_bumps": [],
+        "grid_levels": [
+          100,
+          200
+        ],
+        "estimate_dispersion": 0.0000801301051400749,
+        "relative_dispersion": 0.00296008283430131,
+        "benchmark_difference": null,
+        "confidence_level": "HIGH",
+        "warnings": []
+      },
+      {
+        "greek": "veta",
+        "estimate": -0.18850948560746872,
+        "method": "worst_leg_confidence_signed_aggregation",
+        "primary_bump": 0.0,
+        "alternate_bumps": [],
+        "grid_levels": [
+          100,
+          200
+        ],
+        "estimate_dispersion": 0.00022522157365756354,
+        "relative_dispersion": 0.0011947492877177545,
+        "benchmark_difference": null,
+        "confidence_level": "HIGH",
+        "warnings": []
+      },
+      {
+        "greek": "speed",
+        "estimate": -0.003774261546124487,
+        "method": "worst_leg_confidence_signed_aggregation",
+        "primary_bump": 0.0,
+        "alternate_bumps": [],
+        "grid_levels": [
+          100,
+          200
+        ],
+        "estimate_dispersion": 0.0002358367476050464,
+        "relative_dispersion": 0.06248553385157155,
+        "benchmark_difference": null,
+        "confidence_level": "LOW",
+        "warnings": [
+          "Aggregate confidence is bounded by the least stable component leg"
+        ]
+      },
+      {
+        "greek": "color",
+        "estimate": 0.0017121023050194716,
+        "method": "worst_leg_confidence_signed_aggregation",
+        "primary_bump": 0.0,
+        "alternate_bumps": [],
+        "grid_levels": [
+          100,
+          200
+        ],
+        "estimate_dispersion": 0.000060951283700847604,
+        "relative_dispersion": 0.03560025795313348,
+        "benchmark_difference": null,
+        "confidence_level": "MEDIUM",
+        "warnings": [
+          "Aggregate confidence is bounded by the least stable component leg"
+        ]
+      }
+    ],
+    "conventions": [
+      "Position Greeks are signed sums of normalized leg Greeks."
+    ]
+  },
+  "breakeven_clock": {
+    "results": [
+      {
+        "horizon_days": 0,
+        "valuation_time": "2026-07-18T12:00:00Z",
+        "volatility_scenario": "base_constant_leg_iv",
+        "break_even_roots": [
+          263.55867619
+        ],
+        "profit_intervals": [
+          {
+            "lower": 263.55867619485855,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 7,
+        "valuation_time": "2026-07-25T12:00:00Z",
+        "volatility_scenario": "base_constant_leg_iv",
+        "break_even_roots": [
+          264.56845752
+        ],
+        "profit_intervals": [
+          {
+            "lower": 264.5684575245382,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 30,
+        "valuation_time": "2026-08-17T12:00:00Z",
+        "volatility_scenario": "base_constant_leg_iv",
+        "break_even_roots": [
+          267.96922822
+        ],
+        "profit_intervals": [
+          {
+            "lower": 267.96922822179795,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 60,
+        "valuation_time": "2026-09-16T12:00:00Z",
+        "volatility_scenario": "base_constant_leg_iv",
+        "break_even_roots": [
+          272.60599209
+        ],
+        "profit_intervals": [
+          {
+            "lower": 272.6059920948029,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 90,
+        "valuation_time": "2026-10-16T12:00:00Z",
+        "volatility_scenario": "base_constant_leg_iv",
+        "break_even_roots": [
+          277.47867757
+        ],
+        "profit_intervals": [
+          {
+            "lower": 277.4786775688649,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 182,
+        "valuation_time": "2027-01-15T21:00:00Z",
+        "volatility_scenario": "base_constant_leg_iv",
+        "break_even_roots": [
+          291.04300247
+        ],
+        "profit_intervals": [
+          {
+            "lower": 291.04300246768,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 0,
+        "valuation_time": "2026-07-18T12:00:00Z",
+        "volatility_scenario": "configured_iv_crush",
+        "break_even_roots": [
+          274.44804288
+        ],
+        "profit_intervals": [
+          {
+            "lower": 274.44804287939075,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 7,
+        "valuation_time": "2026-07-25T12:00:00Z",
+        "volatility_scenario": "configured_iv_crush",
+        "break_even_roots": [
+          275.13874094
+        ],
+        "profit_intervals": [
+          {
+            "lower": 275.1387409350873,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 30,
+        "valuation_time": "2026-08-17T12:00:00Z",
+        "volatility_scenario": "configured_iv_crush",
+        "break_even_roots": [
+          277.43526947
+        ],
+        "profit_intervals": [
+          {
+            "lower": 277.4352694693566,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 60,
+        "valuation_time": "2026-09-16T12:00:00Z",
+        "volatility_scenario": "configured_iv_crush",
+        "break_even_roots": [
+          280.48524623
+        ],
+        "profit_intervals": [
+          {
+            "lower": 280.48524622678764,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 90,
+        "valuation_time": "2026-10-16T12:00:00Z",
+        "volatility_scenario": "configured_iv_crush",
+        "break_even_roots": [
+          283.57000552
+        ],
+        "profit_intervals": [
+          {
+            "lower": 283.57000551710144,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 182,
+        "valuation_time": "2027-01-15T21:00:00Z",
+        "volatility_scenario": "configured_iv_crush",
+        "break_even_roots": [
+          291.04300247
+        ],
+        "profit_intervals": [
+          {
+            "lower": 291.04300246768,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 0,
+        "valuation_time": "2026-07-18T12:00:00Z",
+        "volatility_scenario": "configured_iv_expansion",
+        "break_even_roots": [
+          251.2250821
+        ],
+        "profit_intervals": [
+          {
+            "lower": 251.22508210172657,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 7,
+        "valuation_time": "2026-07-25T12:00:00Z",
+        "volatility_scenario": "configured_iv_expansion",
+        "break_even_roots": [
+          252.53666976
+        ],
+        "profit_intervals": [
+          {
+            "lower": 252.53666975812916,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 30,
+        "valuation_time": "2026-08-17T12:00:00Z",
+        "volatility_scenario": "configured_iv_expansion",
+        "break_even_roots": [
+          256.99676624
+        ],
+        "profit_intervals": [
+          {
+            "lower": 256.99676624321944,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 60,
+        "valuation_time": "2026-09-16T12:00:00Z",
+        "volatility_scenario": "configured_iv_expansion",
+        "break_even_roots": [
+          263.19727639
+        ],
+        "profit_intervals": [
+          {
+            "lower": 263.1972763851644,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 90,
+        "valuation_time": "2026-10-16T12:00:00Z",
+        "volatility_scenario": "configured_iv_expansion",
+        "break_even_roots": [
+          269.89543636
+        ],
+        "profit_intervals": [
+          {
+            "lower": 269.89543636250505,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      },
+      {
+        "horizon_days": 182,
+        "valuation_time": "2027-01-15T21:00:00Z",
+        "volatility_scenario": "configured_iv_expansion",
+        "break_even_roots": [
+          291.04300247
+        ],
+        "profit_intervals": [
+          {
+            "lower": 291.04300246768,
+            "upper": null
+          }
+        ],
+        "status": "SOLVED",
+        "search_domain": [
+          0.0,
+          773.3700000000001
+        ],
+        "warnings": []
+      }
+    ],
+    "assumptions": [
+      "Net PnL includes entry cost and the configured estimated exit cost.",
+      "Roots and profit intervals are solved from full repricing on a configured domain."
+    ]
+  },
+  "target_arrivals": [
+    {
+      "target_spot": 210.0,
+      "volatility_scenario": "base_constant_leg_iv",
+      "status": "NEVER_BREAKEVEN_AT_THIS_TARGET",
+      "latest_profitable_arrival_date": null,
+      "profitable_horizons_days": [],
+      "warnings": []
+    },
+    {
+      "target_spot": 260.0,
+      "volatility_scenario": "base_constant_leg_iv",
+      "status": "NEVER_BREAKEVEN_AT_THIS_TARGET",
+      "latest_profitable_arrival_date": null,
+      "profitable_horizons_days": [],
+      "warnings": []
+    },
+    {
+      "target_spot": 330.0,
+      "volatility_scenario": "base_constant_leg_iv",
+      "status": "PROFITABLE_THROUGH_EXPIRY",
+      "latest_profitable_arrival_date": "2027-01-15T21:00:00Z",
+      "profitable_horizons_days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182
+      ],
+      "warnings": []
+    },
+    {
+      "target_spot": 210.0,
+      "volatility_scenario": "configured_iv_crush",
+      "status": "NEVER_BREAKEVEN_AT_THIS_TARGET",
+      "latest_profitable_arrival_date": null,
+      "profitable_horizons_days": [],
+      "warnings": []
+    },
+    {
+      "target_spot": 260.0,
+      "volatility_scenario": "configured_iv_crush",
+      "status": "NEVER_BREAKEVEN_AT_THIS_TARGET",
+      "latest_profitable_arrival_date": null,
+      "profitable_horizons_days": [],
+      "warnings": []
+    },
+    {
+      "target_spot": 330.0,
+      "volatility_scenario": "configured_iv_crush",
+      "status": "PROFITABLE_THROUGH_EXPIRY",
+      "latest_profitable_arrival_date": "2027-01-15T21:00:00Z",
+      "profitable_horizons_days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182
+      ],
+      "warnings": []
+    },
+    {
+      "target_spot": 210.0,
+      "volatility_scenario": "configured_iv_expansion",
+      "status": "NEVER_BREAKEVEN_AT_THIS_TARGET",
+      "latest_profitable_arrival_date": null,
+      "profitable_horizons_days": [],
+      "warnings": []
+    },
+    {
+      "target_spot": 260.0,
+      "volatility_scenario": "configured_iv_expansion",
+      "status": "LATEST_PROFITABLE_ARRIVAL",
+      "latest_profitable_arrival_date": "2026-08-31T12:00:00Z",
+      "profitable_horizons_days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44
+      ],
+      "warnings": []
+    },
+    {
+      "target_spot": 330.0,
+      "volatility_scenario": "configured_iv_expansion",
+      "status": "PROFITABLE_THROUGH_EXPIRY",
+      "latest_profitable_arrival_date": "2027-01-15T21:00:00Z",
+      "profitable_horizons_days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182
+      ],
+      "warnings": []
+    }
+  ],
+  "scenario_matrices": [
+    {
+      "scenario_name": "base_constant_leg_iv",
+      "scenario_type": "CONSTANT_LEG_IV",
+      "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+      "spot_axis": [
+        180.453,
+        210.0,
+        219.1215,
+        257.79,
+        260.0,
+        296.4585,
+        330.0,
+        335.127
+      ],
+      "horizon_days_axis": [
+        7,
+        30,
+        60,
+        90,
+        182
+      ],
+      "cells": [
+        {
+          "spot": 180.453,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 201.721182,
+          "gross_pnl": -2698.278818,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2902.578818,
+          "net_return": -0.9668333754157594,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 721.25765389,
+          "gross_pnl": -2178.74234611,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2383.04234611,
+          "net_return": -0.7937785740578701,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 983.29614591,
+          "gross_pnl": -1916.70385409,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2121.00385409,
+          "net_return": -0.7064949633046779,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 2703.78825493,
+          "gross_pnl": -196.21174507,
+          "round_trip_cost": 204.3,
+          "net_pnl": -400.51174507,
+          "net_return": -0.13340830573814377,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 2831.33518371,
+          "gross_pnl": -68.66481629,
+          "round_trip_cost": 204.3,
+          "net_pnl": -272.96481629,
+          "net_return": -0.09092311053523787,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 5321.80210697,
+          "gross_pnl": 2421.80210697,
+          "round_trip_cost": 204.3,
+          "net_pnl": 2217.50210697,
+          "net_return": 0.7386380117496996,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 8105.09809216,
+          "gross_pnl": 5205.09809216,
+          "round_trip_cost": 204.3,
+          "net_pnl": 5000.79809216,
+          "net_return": 1.665738917830256,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 8559.26314105,
+          "gross_pnl": 5659.26314105,
+          "round_trip_cost": 204.3,
+          "net_pnl": 5454.96314105,
+          "net_return": 1.8170188501724298,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 180.453,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 146.04686928,
+          "gross_pnl": -2753.95313072,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2958.25313072,
+          "net_return": -0.9853781892036839,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 595.83610873,
+          "gross_pnl": -2304.16389127,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2508.46389127,
+          "net_return": -0.8355558154239306,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 836.23700393,
+          "gross_pnl": -2063.76299607,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2268.06299607,
+          "net_return": -0.7554795716621121,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 2497.08392807,
+          "gross_pnl": -402.91607193,
+          "round_trip_cost": 204.3,
+          "net_pnl": -607.21607193,
+          "net_return": -0.20226040402044848,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 2623.26925865,
+          "gross_pnl": -276.73074135,
+          "round_trip_cost": 204.3,
+          "net_pnl": -481.03074135,
+          "net_return": -0.1602287498464207,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 5119.54577702,
+          "gross_pnl": 2219.54577702,
+          "round_trip_cost": 204.3,
+          "net_pnl": 2015.24577702,
+          "net_return": 0.6712675172851731,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 7935.43726535,
+          "gross_pnl": 5035.43726535,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4831.13726535,
+          "net_return": 1.6092258099522916,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 8395.19349112,
+          "gross_pnl": 5495.19349112,
+          "round_trip_cost": 204.3,
+          "net_pnl": 5290.89349112,
+          "net_return": 1.762368133212804,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 180.453,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 83.25131341,
+          "gross_pnl": -2816.74868659,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3021.04868659,
+          "net_return": -1.006295050743744,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 431.92232233,
+          "gross_pnl": -2468.07767767,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2672.37767767,
+          "net_return": -0.8901546150836156,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 638.68572412,
+          "gross_pnl": -2261.31427588,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2465.61427588,
+          "net_return": -0.8212828392569355,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 2205.35490939,
+          "gross_pnl": -694.64509061,
+          "round_trip_cost": 204.3,
+          "net_pnl": -898.94509061,
+          "net_return": -0.29943376933486876,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 2329.55968753,
+          "gross_pnl": -570.44031247,
+          "round_trip_cost": 204.3,
+          "net_pnl": -774.74031247,
+          "net_return": -0.258061826514107,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 4840.7413763,
+          "gross_pnl": 1940.7413763,
+          "round_trip_cost": 204.3,
+          "net_pnl": 1736.4413763,
+          "net_return": 0.5783992726197876,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 7712.33963658,
+          "gross_pnl": 4812.33963658,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4608.03963658,
+          "net_return": 1.534913191072307,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 8181.08602831,
+          "gross_pnl": 5281.08602831,
+          "round_trip_cost": 204.3,
+          "net_pnl": 5076.78602831,
+          "net_return": 1.6910500902047783,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 180.453,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 35.64435503,
+          "gross_pnl": -2864.35564497,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3068.65564497,
+          "net_return": -1.0221526722405287,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 271.66069001,
+          "gross_pnl": -2628.33930999,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2832.63930999,
+          "net_return": -0.9435369018842981,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 436.07622113,
+          "gross_pnl": -2463.92377887,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2668.22377887,
+          "net_return": -0.8887709737603224,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 1879.43528449,
+          "gross_pnl": -1020.56471551,
+          "round_trip_cost": 204.3,
+          "net_pnl": -1224.86471551,
+          "net_return": -0.40799584148243145,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 2001.32466108,
+          "gross_pnl": -898.67533892,
+          "round_trip_cost": 204.3,
+          "net_pnl": -1102.97533892,
+          "net_return": -0.36739514645164467,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 4541.95835764,
+          "gross_pnl": 1641.95835764,
+          "round_trip_cost": 204.3,
+          "net_pnl": 1437.65835764,
+          "net_return": 0.47887625789599486,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 7491.53129676,
+          "gross_pnl": 4591.53129676,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4387.23129676,
+          "net_return": 1.4613631220159828,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 7971.73355044,
+          "gross_pnl": 5071.73355044,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4867.43355044,
+          "net_return": 1.6213159070805647,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 180.453,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 3645.85,
+          "gross_pnl": 745.85,
+          "round_trip_cost": 204.3,
+          "net_pnl": 541.55,
+          "net_return": 0.1803873890378566,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 7000.0,
+          "gross_pnl": 4100.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": 3895.7,
+          "net_return": 1.2976366937028463,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "base_constant_leg_iv",
+          "estimated_position_value": 7512.7,
+          "gross_pnl": 4612.7,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4408.4,
+          "net_return": 1.4684143030827912,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Each option leg retains its own current implied volatility."
+          ]
+        }
+      ],
+      "warnings": [
+        "Stress is leg-level only; it is not a calibrated surface forecast"
+      ]
+    },
+    {
+      "scenario_name": "configured_iv_crush",
+      "scenario_type": "PARALLEL_ABSOLUTE_VOL_SHIFT",
+      "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+      "spot_axis": [
+        180.453,
+        210.0,
+        219.1215,
+        257.79,
+        260.0,
+        296.4585,
+        330.0,
+        335.127
+      ],
+      "horizon_days_axis": [
+        7,
+        30,
+        60,
+        90,
+        182
+      ],
+      "cells": [
+        {
+          "spot": 180.453,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 40.88935788,
+          "gross_pnl": -2859.11064212,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3063.41064212,
+          "net_return": -1.0204055900331348,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 301.26760325,
+          "gross_pnl": -2598.73239675,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2803.03239675,
+          "net_return": -0.9336749985001982,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 479.30167189,
+          "gross_pnl": -2420.69832811,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2624.99832811,
+          "net_return": -0.8743728088572061,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 2003.13584626,
+          "gross_pnl": -896.86415374,
+          "round_trip_cost": 204.3,
+          "net_pnl": -1101.16415374,
+          "net_return": -0.3667918504201604,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 2129.98471231,
+          "gross_pnl": -770.01528769,
+          "round_trip_cost": 204.3,
+          "net_pnl": -974.31528769,
+          "net_return": -0.3245391761543162,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 4741.19786435,
+          "gross_pnl": 1841.19786435,
+          "round_trip_cost": 204.3,
+          "net_pnl": 1636.89786435,
+          "net_return": 0.5452418647814761,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 7728.34482587,
+          "gross_pnl": 4828.34482587,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4624.04482587,
+          "net_return": 1.5402444334470584,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 8212.16514871,
+          "gross_pnl": 5312.16514871,
+          "round_trip_cost": 204.3,
+          "net_pnl": 5107.86514871,
+          "net_return": 1.7014023778658638,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 180.453,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 25.06476662,
+          "gross_pnl": -2874.93523338,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3079.23523338,
+          "net_return": -1.0256766761739127,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 232.4311438,
+          "gross_pnl": -2667.5688562,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2871.8688562,
+          "net_return": -0.9566040524971604,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 388.13042813,
+          "gross_pnl": -2511.86957187,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2716.16957187,
+          "net_return": -0.9047414592437877,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 1842.60948022,
+          "gross_pnl": -1057.39051978,
+          "round_trip_cost": 204.3,
+          "net_pnl": -1261.69051978,
+          "net_return": -0.42026231859724805,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 1968.06147479,
+          "gross_pnl": -931.93852521,
+          "round_trip_cost": 204.3,
+          "net_pnl": -1136.23852521,
+          "net_return": -0.3784749347001816,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 4592.70612247,
+          "gross_pnl": 1692.70612247,
+          "round_trip_cost": 204.3,
+          "net_pnl": 1488.40612247,
+          "net_return": 0.49578006510949396,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 7615.12615208,
+          "gross_pnl": 4715.12615208,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4510.82615208,
+          "net_return": 1.5025319028293578,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 8103.67471863,
+          "gross_pnl": 5203.67471863,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4999.37471863,
+          "net_return": 1.6652647997691838,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 180.453,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 10.52829738,
+          "gross_pnl": -2889.47170262,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3093.77170262,
+          "net_return": -1.0305186958067205,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 148.98857053,
+          "gross_pnl": -2751.01142947,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2955.31142947,
+          "net_return": -0.984398324356897,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 271.67287303,
+          "gross_pnl": -2628.32712697,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2832.62712697,
+          "net_return": -0.9435328437843012,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 1617.46047817,
+          "gross_pnl": -1282.53952183,
+          "round_trip_cost": 204.3,
+          "net_pnl": -1486.83952183,
+          "net_return": -0.4952582388721276,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 1740.86943153,
+          "gross_pnl": -1159.13056847,
+          "round_trip_cost": 204.3,
+          "net_pnl": -1363.43056847,
+          "net_return": -0.45415138100194524,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 4392.50661956,
+          "gross_pnl": 1492.50661956,
+          "round_trip_cost": 204.3,
+          "net_pnl": 1288.20661956,
+          "net_return": 0.42909468865814243,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 7470.96660392,
+          "gross_pnl": 4570.96660392,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4366.66660392,
+          "net_return": 1.454513133561285,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 7966.31914267,
+          "gross_pnl": 5066.31914267,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4862.01914267,
+          "net_return": 1.61951239700588,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 180.453,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 2.75416791,
+          "gross_pnl": -2897.24583209,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3101.54583209,
+          "net_return": -1.0331082164732286,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 77.17543954,
+          "gross_pnl": -2822.82456046,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3027.12456046,
+          "net_return": -1.0083188916155468,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 161.92846011,
+          "gross_pnl": -2738.07153989,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2942.37153989,
+          "net_return": -0.9800881168115068,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 1367.91596982,
+          "gross_pnl": -1532.08403018,
+          "round_trip_cost": 204.3,
+          "net_pnl": -1736.38403018,
+          "net_return": -0.5783801709378716,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 1488.91501566,
+          "gross_pnl": -1411.08498434,
+          "round_trip_cost": 204.3,
+          "net_pnl": -1615.38498434,
+          "net_return": -0.5380760402839733,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 4185.4705159,
+          "gross_pnl": 1285.4705159,
+          "round_trip_cost": 204.3,
+          "net_pnl": 1081.1705159,
+          "net_return": 0.36013207731145785,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 7334.20547033,
+          "gross_pnl": 4434.20547033,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4229.90547033,
+          "net_return": 1.4089587363474347,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 7836.80109823,
+          "gross_pnl": 4936.80109823,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4732.50109823,
+          "net_return": 1.5763706337899523,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 180.453,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 3645.85,
+          "gross_pnl": 745.85,
+          "round_trip_cost": 204.3,
+          "net_pnl": 541.55,
+          "net_return": 0.1803873890378566,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 7000.0,
+          "gross_pnl": 4100.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": 3895.7,
+          "net_return": 1.2976366937028463,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_crush",
+          "estimated_position_value": 7512.7,
+          "gross_pnl": 4612.7,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4408.4,
+          "net_return": 1.4684143030827912,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        }
+      ],
+      "warnings": [
+        "Stress is leg-level only; it is not a calibrated surface forecast"
+      ]
+    },
+    {
+      "scenario_name": "configured_iv_expansion",
+      "scenario_type": "PARALLEL_ABSOLUTE_VOL_SHIFT",
+      "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+      "spot_axis": [
+        180.453,
+        210.0,
+        219.1215,
+        257.79,
+        260.0,
+        296.4585,
+        330.0,
+        335.127
+      ],
+      "horizon_days_axis": [
+        7,
+        30,
+        60,
+        90,
+        182
+      ],
+      "cells": [
+        {
+          "spot": 180.453,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 479.6873149,
+          "gross_pnl": -2420.3126851,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2624.6126851,
+          "net_return": -0.8742443532455869,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 1220.71576621,
+          "gross_pnl": -1679.28423379,
+          "round_trip_cost": 204.3,
+          "net_pnl": -1883.58423379,
+          "net_return": -0.6274117661633156,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 1542.53220356,
+          "gross_pnl": -1357.46779644,
+          "round_trip_cost": 204.3,
+          "net_pnl": -1561.76779644,
+          "net_return": -0.5202164436948629,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 3402.08674806,
+          "gross_pnl": 502.08674806,
+          "round_trip_cost": 204.3,
+          "net_pnl": 297.78674806,
+          "net_return": 0.09919116235356594,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 3531.32938873,
+          "gross_pnl": 631.32938873,
+          "round_trip_cost": 204.3,
+          "net_pnl": 427.02938873,
+          "net_return": 0.14224119005815122,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 5968.8857096,
+          "gross_pnl": 3068.8857096,
+          "round_trip_cost": 204.3,
+          "net_pnl": 2864.5857096,
+          "net_return": 0.9541780755783866,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 8622.11579294,
+          "gross_pnl": 5722.11579294,
+          "round_trip_cost": 204.3,
+          "net_pnl": 5517.81579294,
+          "net_return": 1.8379547300893502,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 7,
+          "valuation_time": "2026-07-25T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 9054.03874043,
+          "gross_pnl": 6154.03874043,
+          "round_trip_cost": 204.3,
+          "net_pnl": 5949.73874043,
+          "net_return": 1.9818259382213284,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 180.453,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 374.88828854,
+          "gross_pnl": -2525.11171146,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2729.41171146,
+          "net_return": -0.9091523446386476,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 1042.55598252,
+          "gross_pnl": -1857.44401748,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2061.74401748,
+          "net_return": -0.6867558308135936,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 1344.31806782,
+          "gross_pnl": -1555.68193218,
+          "round_trip_cost": 204.3,
+          "net_pnl": -1759.98193218,
+          "net_return": -0.586240505030059,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 3149.56495942,
+          "gross_pnl": 249.56495942,
+          "round_trip_cost": 204.3,
+          "net_pnl": 45.26495942,
+          "net_return": 0.015077514253163848,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 3277.38059763,
+          "gross_pnl": 377.38059763,
+          "round_trip_cost": 204.3,
+          "net_pnl": 173.08059763,
+          "net_return": 0.05765221512179419,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 5714.27920949,
+          "gross_pnl": 2814.27920949,
+          "round_trip_cost": 204.3,
+          "net_pnl": 2609.97920949,
+          "net_return": 0.8693700213138542,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 8393.01994394,
+          "gross_pnl": 5493.01994394,
+          "round_trip_cost": 204.3,
+          "net_pnl": 5288.71994394,
+          "net_return": 1.7616441363503856,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 30,
+          "valuation_time": "2026-08-17T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 8829.95851467,
+          "gross_pnl": 5929.95851467,
+          "round_trip_cost": 204.3,
+          "net_pnl": 5725.65851467,
+          "net_return": 1.9071860215743612,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 180.453,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 245.58161163,
+          "gross_pnl": -2654.41838837,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2858.71838837,
+          "net_return": -0.9522237024711633,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 801.80369783,
+          "gross_pnl": -2098.19630217,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2302.49630217,
+          "net_return": -0.7669491205204174,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 1071.87620479,
+          "gross_pnl": -1828.12379521,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2032.42379521,
+          "net_return": -0.6769894226506706,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 2791.71737375,
+          "gross_pnl": -108.28262625,
+          "round_trip_cost": 204.3,
+          "net_pnl": -312.58262625,
+          "net_return": -0.10411958971093555,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 2917.46449755,
+          "gross_pnl": 17.46449755,
+          "round_trip_cost": 204.3,
+          "net_pnl": -186.83550245,
+          "net_return": -0.06223389985554965,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 5358.93478951,
+          "gross_pnl": 2458.93478951,
+          "round_trip_cost": 204.3,
+          "net_pnl": 2254.63478951,
+          "net_return": 0.7510067083606907,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 8083.82953165,
+          "gross_pnl": 5183.82953165,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4979.52953165,
+          "net_return": 1.65865447484181,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 60,
+          "valuation_time": "2026-09-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 8529.34939133,
+          "gross_pnl": 5629.34939133,
+          "round_trip_cost": 204.3,
+          "net_pnl": 5425.04939133,
+          "net_return": 1.8070547412122469,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 180.453,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 131.32003368,
+          "gross_pnl": -2768.67996632,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2972.97996632,
+          "net_return": -0.990283618847695,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 552.81128178,
+          "gross_pnl": -2347.18871822,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2551.48871822,
+          "net_return": -0.8498871536144401,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 781.68732636,
+          "gross_pnl": -2118.31267364,
+          "round_trip_cost": 204.3,
+          "net_pnl": -2322.61267364,
+          "net_return": -0.773649775540582,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 2389.88026648,
+          "gross_pnl": -510.11973352,
+          "round_trip_cost": 204.3,
+          "net_pnl": -714.41973352,
+          "net_return": -0.2379693664612574,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 2513.224074,
+          "gross_pnl": -386.775926,
+          "round_trip_cost": 204.3,
+          "net_pnl": -591.075926,
+          "net_return": -0.19688420831717346,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 4970.51894269,
+          "gross_pnl": 2070.51894269,
+          "round_trip_cost": 204.3,
+          "net_pnl": 1866.21894269,
+          "net_return": 0.6216274812033781,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 7764.89108453,
+          "gross_pnl": 4864.89108453,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4660.59108453,
+          "net_return": 1.552417795423903,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 90,
+          "valuation_time": "2026-10-16T12:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 8222.40142473,
+          "gross_pnl": 5322.40142473,
+          "round_trip_cost": 204.3,
+          "net_pnl": 5118.10142473,
+          "net_return": 1.7048120262919646,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 180.453,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 210.0,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 219.1215,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 257.79,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 260.0,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 0.0,
+          "gross_pnl": -2900.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": -3104.3,
+          "net_return": -1.034025614975934,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 296.4585,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 3645.85,
+          "gross_pnl": 745.85,
+          "round_trip_cost": 204.3,
+          "net_pnl": 541.55,
+          "net_return": 0.1803873890378566,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 330.0,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 7000.0,
+          "gross_pnl": 4100.0,
+          "round_trip_cost": 204.3,
+          "net_pnl": 3895.7,
+          "net_return": 1.2976366937028463,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        },
+        {
+          "spot": 335.127,
+          "horizon_days": 182,
+          "valuation_time": "2027-01-15T21:00:00Z",
+          "volatility_scenario": "configured_iv_expansion",
+          "estimated_position_value": 7512.7,
+          "gross_pnl": 4612.7,
+          "round_trip_cost": 204.3,
+          "net_pnl": 4408.4,
+          "net_return": 1.4684143030827912,
+          "scenario_status": "LEG_LEVEL_STRESS_ONLY",
+          "assumptions": [
+            "Configured stress; not a calibrated forecast."
+          ]
+        }
+      ],
+      "warnings": [
+        "Stress is leg-level only; it is not a calibrated surface forecast"
+      ]
+    }
+  ],
+  "rate_stress_results": [
+    {
+      "scenario_name": "base_curve",
+      "scenario_type": "BASE_CURVE",
+      "status": "CONFIGURED_STRESS",
+      "leg_rate_shifts_basis_points": {
+        "TTWO  270115C00260000": 0.0
+      },
+      "estimated_position_value": 2764.28764424,
+      "gross_pnl": -135.71235576,
+      "round_trip_cost": 204.3,
+      "net_pnl": -340.01235576,
+      "assumptions": []
+    },
+    {
+      "scenario_name": "parallel_up",
+      "scenario_type": "PARALLEL_UP",
+      "status": "CONFIGURED_STRESS",
+      "leg_rate_shifts_basis_points": {
+        "TTWO  270115C00260000": 100.0
+      },
+      "estimated_position_value": 2824.09133415,
+      "gross_pnl": -75.90866585,
+      "round_trip_cost": 204.3,
+      "net_pnl": -280.20866585,
+      "assumptions": [
+        "Configured +100 bp curve stress; not a rate forecast."
+      ]
+    },
+    {
+      "scenario_name": "parallel_down",
+      "scenario_type": "PARALLEL_DOWN",
+      "status": "CONFIGURED_STRESS",
+      "leg_rate_shifts_basis_points": {
+        "TTWO  270115C00260000": -100.0
+      },
+      "estimated_position_value": 2705.17060917,
+      "gross_pnl": -194.82939083,
+      "round_trip_cost": 204.3,
+      "net_pnl": -399.12939083,
+      "assumptions": [
+        "Configured -100 bp curve stress; not a rate forecast."
+      ]
+    },
+    {
+      "scenario_name": "steepening",
+      "scenario_type": "STEEPENING",
+      "status": "CONFIGURED_STRESS",
+      "leg_rate_shifts_basis_points": {
+        "TTWO  270115C00260000": -35.72265625
+      },
+      "estimated_position_value": 2743.0902882,
+      "gross_pnl": -156.9097118,
+      "round_trip_cost": 204.3,
+      "net_pnl": -361.2097118,
+      "assumptions": [
+        "Configured maturity-dependent curve stress."
+      ]
+    },
+    {
+      "scenario_name": "flattening",
+      "scenario_type": "FLATTENING",
+      "status": "CONFIGURED_STRESS",
+      "leg_rate_shifts_basis_points": {
+        "TTWO  270115C00260000": 35.72265625
+      },
+      "estimated_position_value": 2785.57257318,
+      "gross_pnl": -114.42742682,
+      "round_trip_cost": 204.3,
+      "net_pnl": -318.72742682,
+      "assumptions": [
+        "Configured maturity-dependent curve stress."
+      ]
+    }
+  ],
+  "touch_probabilities": [],
+  "pnl_attributions": [
+    {
+      "scenario_name": "base_constant_leg_iv_30d",
+      "taylor": {
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": -257.38255730190576,
+        "vega": 0.0,
+        "vomma": -0.0,
+        "vanna": 0.0,
+        "rho": 0.0,
+        "execution_costs": -204.3,
+        "greek_approximated_pnl": -461.6825573019058,
+        "full_repriced_pnl": -471.50371616969124,
+        "residual": -9.82115886778547
+      },
+      "full_repricing": {
+        "spot": 0.0,
+        "time": -267.20371616969123,
+        "volatility": 0.0,
+        "rates": 0.0,
+        "fx": 0.0,
+        "execution_costs": -204.3,
+        "other": 0.0,
+        "residual": 0.0,
+        "full_repriced_pnl": -471.50371616969124,
+        "method": "exact_shapley_full_repricing"
+      }
+    },
+    {
+      "scenario_name": "configured_iv_crush_30d",
+      "taylor": {
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": -257.38255730190576,
+        "vega": -713.0118276023721,
+        "vomma": -1.257724164354101,
+        "vanna": -0.0,
+        "rho": 0.0,
+        "execution_costs": -204.3,
+        "greek_approximated_pnl": -1175.952109068632,
+        "full_repriced_pnl": -1125.97816401643,
+        "residual": 49.973945052202
+      },
+      "full_repricing": {
+        "spot": 0.0,
+        "time": -237.43418027994136,
+        "volatility": -684.2439837364886,
+        "rates": 0.0,
+        "fx": 0.0,
+        "execution_costs": -204.3,
+        "other": 0.0,
+        "residual": 0.0,
+        "full_repriced_pnl": -1125.97816401643,
+        "method": "exact_shapley_full_repricing"
+      }
+    },
+    {
+      "scenario_name": "configured_iv_expansion_30d",
+      "taylor": {
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": -257.38255730190576,
+        "vega": 713.0118276023721,
+        "vomma": -1.257724164354101,
+        "vanna": 0.0,
+        "rho": 0.0,
+        "execution_costs": -204.3,
+        "greek_approximated_pnl": 250.07154613611226,
+        "full_repriced_pnl": 180.97731517543406,
+        "residual": -69.0942309606782
+      },
+      "full_repricing": {
+        "spot": 0.0,
+        "time": -296.73737015865595,
+        "volatility": 682.0146853340901,
+        "rates": 0.0,
+        "fx": 0.0,
+        "execution_costs": -204.3,
+        "other": 0.0,
+        "residual": -1.1368683772161603e-13,
+        "full_repriced_pnl": 180.97731517543406,
+        "method": "exact_shapley_full_repricing"
+      }
+    },
+    {
+      "scenario_name": "base_constant_leg_iv_parallel_up_30d",
+      "taylor": {
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": -257.38255730190576,
+        "vega": 0.0,
+        "vomma": -0.0,
+        "vanna": 0.0,
+        "rho": 59.460993544487195,
+        "execution_costs": -204.3,
+        "greek_approximated_pnl": -402.2215637574186,
+        "full_repriced_pnl": -421.43780367673827,
+        "residual": -19.216239919319662
+      },
+      "full_repricing": {
+        "spot": 0.0,
+        "time": -272.07260487878716,
+        "volatility": 0.0,
+        "rates": 54.9348012020489,
+        "fx": 0.0,
+        "execution_costs": -204.3,
+        "other": 0.0,
+        "residual": 0.0,
+        "full_repriced_pnl": -421.43780367673827,
+        "method": "exact_shapley_full_repricing"
+      }
+    },
+    {
+      "scenario_name": "base_constant_leg_iv_parallel_down_30d",
+      "taylor": {
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": -257.38255730190576,
+        "vega": 0.0,
+        "vomma": -0.0,
+        "vanna": 0.0,
+        "rho": -59.460993544487195,
+        "execution_costs": -204.3,
+        "greek_approximated_pnl": -521.143550846393,
+        "full_repriced_pnl": -521.0250413966126,
+        "residual": 0.11850944978050393
+      },
+      "full_repricing": {
+        "spot": 0.0,
+        "time": -262.40586124891325,
+        "volatility": 0.0,
+        "rates": -54.319180147699406,
+        "fx": 0.0,
+        "execution_costs": -204.3,
+        "other": 0.0,
+        "residual": 1.1368683772161603e-13,
+        "full_repriced_pnl": -521.0250413966126,
+        "method": "exact_shapley_full_repricing"
+      }
+    },
+    {
+      "scenario_name": "base_constant_leg_iv_steepening_30d",
+      "taylor": {
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": -257.38255730190576,
+        "vega": 0.0,
+        "vomma": -0.0,
+        "vanna": 0.0,
+        "rho": -21.24104632673185,
+        "execution_costs": -204.3,
+        "greek_approximated_pnl": -482.92360362863764,
+        "full_repriced_pnl": -491.581185755181,
+        "residual": -8.657582126543389
+      },
+      "full_repricing": {
+        "spot": 0.0,
+        "time": -266.6437729405643,
+        "volatility": 0.0,
+        "rates": -20.63741281461671,
+        "fx": 0.0,
+        "execution_costs": -204.3,
+        "other": 0.0,
+        "residual": 0.0,
+        "full_repriced_pnl": -491.581185755181,
+        "method": "exact_shapley_full_repricing"
+      }
+    },
+    {
+      "scenario_name": "base_constant_leg_iv_flattening_30d",
+      "taylor": {
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": -257.38255730190576,
+        "vega": 0.0,
+        "vomma": -0.0,
+        "vanna": 0.0,
+        "rho": 21.24104632673185,
+        "execution_costs": -204.3,
+        "greek_approximated_pnl": -440.4415109751739,
+        "full_repriced_pnl": -451.3371979974898,
+        "residual": -10.895687022315883
+      },
+      "full_repricing": {
+        "spot": 0.0,
+        "time": -267.7629215550321,
+        "volatility": 0.0,
+        "rates": 20.725723557542324,
+        "fx": 0.0,
+        "execution_costs": -204.3,
+        "other": 0.0,
+        "residual": 0.0,
+        "full_repriced_pnl": -451.3371979974898,
+        "method": "exact_shapley_full_repricing"
+      }
+    }
+  ],
+  "fx_attribution": {
+    "mode": "UNKNOWN",
+    "option_pnl_usd": -237.86235576029821,
+    "entry_fx_rate_usd_per_base": null,
+    "scenario_fx_rate_usd_per_base": null,
+    "pnl_base_at_scenario_fx": null,
+    "pnl_base_at_constant_entry_fx": null,
+    "fx_contribution_base": null,
+    "fx_conversion_fees_base": null,
+    "status": "BLOCKED_UNKNOWN_FX_HANDLING",
+    "warnings": [
+      "FX handling is unknown; no conversion fee or contribution is invented"
+    ]
+  },
+  "liquidity": [
+    {
+      "contract_symbol": "TTWO  270115C00260000",
+      "bid": 28.0,
+      "ask": 30.0,
+      "mid": 29.0,
+      "spread_abs": 2.0,
+      "spread_pct_mid": 0.06896551724137931,
+      "bid_size": 24,
+      "ask_size": 22,
+      "volume": 210,
+      "open_interest": 1840,
+      "quote_age_seconds": 0.0,
+      "source": "FIXTURE-CHAIN-TTWO-20260718",
+      "timestamp": "2026-07-18T12:00:00Z",
+      "liquidity_score": 0.848276,
+      "liquidity_model_version": "legacy_weighted_heuristic_v1",
+      "calibration_status": "UNCALIBRATED"
+    }
+  ],
+  "intensity": {
+    "effective_leverage": 4.914172602823679,
+    "capital_at_risk_pct": 0.60043,
+    "theta_per_capital_per_day": -0.002857758132248619,
+    "flat_spot_30d_loss_pct": 0.08900411910464168,
+    "flat_spot_60d_loss_pct": 0.18617748441949936,
+    "probability_loss_over_50": null,
+    "probability_loss_over_70": null,
+    "spread_over_entry_capital_pct": 0.06805122995186783,
+    "greek_instability": "LOW",
+    "event_iv_sensitivity": null,
+    "max_loss_pct": 0.60043,
+    "category": "MODERATE",
+    "triggered_policies": [],
+    "policy_status": "CONFIGURED_POLICY_UNCALIBRATED"
+  },
+  "assignment_and_exercise_risks": [
+    "TTWO  270115C00260000: assignment=low; early_exercise=low; pin=low; adjusted_contract=False; human_review=False"
+  ],
+  "classification": "research_candidate",
+  "blockers": [],
+  "warnings": [
+    "QuantLib American model values are indicative and not executable quotes",
+    "Full repricing is primary; Greek/Taylor attribution is explanatory only.",
+    "All leg-level execution estimates are indicative until combo evidence exists."
+  ],
+  "data_status": "AVAILABLE_RESEARCH_ONLY",
+  "probability_status": "PROBABILITY_MODEL_NOT_AVAILABLE",
+  "transmit": false,
+  "what_if": true,
+  "order_capability": "forbidden"
+}

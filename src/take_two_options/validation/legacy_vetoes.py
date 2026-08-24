@@ -13,6 +13,7 @@ from take_two_options.domain import (
     StrategyCandidate,
     StrategyKind,
 )
+from take_two_options.trade_economics_models import MarginStatus
 
 
 def _add_rule(
@@ -301,13 +302,17 @@ def apply_vetoes(candidate: StrategyCandidate, bundle: MarketDataBundle) -> Cand
     margin_unknown = has_short_option and (
         not bundle.portfolio.margin_known
         or candidate.execution_estimate is None
-        or candidate.execution_estimate.margin_requirement is None
+        or candidate.execution_estimate.margin_status
+        in {MarginStatus.UNKNOWN, MarginStatus.BLOCKED}
     )
     _add_rule(
         candidate,
         rule_id="VETO-MARGIN",
         passed=not margin_unknown,
-        message="Broker margin must be known for any structure containing a short option",
+        message=(
+            "Margin must be known, analytically bounded, or explicitly not required for "
+            "a paid-debit structure"
+        ),
         blocks=margin_unknown,
     )
 

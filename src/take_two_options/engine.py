@@ -5,8 +5,10 @@ from __future__ import annotations
 from take_two_options.candidates import generate_candidates
 from take_two_options.domain import DecisionReport, MarketDataBundle, ModelReadiness
 from take_two_options.pricing import analyze_risk
+from take_two_options.quantitative.trade_economics import build_trade_economics_ticket
 from take_two_options.scenarios import deterministic_scenarios, monte_carlo_scenarios
 from take_two_options.scoring import pareto_frontier, rank_candidates, score_candidate
+from take_two_options.trade_economics_models import AnalysisMode
 from take_two_options.validation import apply_vetoes, freshness_is_stale
 from take_two_options.vol_surface import surface_diagnostics
 
@@ -19,6 +21,17 @@ def analyze_bundle(bundle: MarketDataBundle) -> DecisionReport:
         monte_carlo_scenarios(candidate, bundle)
         apply_vetoes(candidate, bundle)
         score_candidate(candidate, bundle)
+
+    ranked_candidate_ids = rank_candidates(candidates)
+    if bundle.trade_economics.analysis_mode is AnalysisMode.DEEP_ANALYSIS:
+        candidate_by_id = {candidate.id: candidate for candidate in candidates}
+        deep_ids = [
+            candidate_id
+            for candidate_id in ranked_candidate_ids
+            if candidate_by_id[candidate_id].legs
+        ][: bundle.trade_economics.deep_analysis_candidate_limit]
+        for candidate_id in deep_ids:
+            build_trade_economics_ticket(candidate_by_id[candidate_id], bundle)
 
     data_issues: list[str] = []
     if freshness_is_stale(bundle.underlying.freshness, bundle):
@@ -62,7 +75,7 @@ def analyze_bundle(bundle: MarketDataBundle) -> DecisionReport:
         created_at=bundle.analysis_timestamp,
         bundle=bundle,
         candidates=candidates,
-        ranked_candidate_ids=rank_candidates(candidates),
+        ranked_candidate_ids=ranked_candidate_ids,
         pareto_candidate_ids=pareto_frontier(candidates),
         global_warnings=[
             "Research output only: not an investment recommendation or order instruction.",

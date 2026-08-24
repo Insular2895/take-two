@@ -13,6 +13,7 @@ from pydantic import Field, model_validator
 
 from take_two_options.domain import StrictModel
 from take_two_options.knowledge.schemas import Architecture, SourceReference
+from take_two_options.trade_economics_models import TradeEconomicsConfiguration
 
 AssumptionStatus = Literal[
     "sourced",
@@ -217,7 +218,7 @@ class ReportPolicyConfig(StrictModel):
 
 
 class PreOpraConfig(StrictModel):
-    """The eleven mandatory configuration groups and no execution capability."""
+    """Governed pre-OPRA configuration with no execution capability."""
 
     schema_version: Literal["1.0"]
     research_request: ResearchRequestConfig
@@ -231,6 +232,7 @@ class PreOpraConfig(StrictModel):
     validation_policy: ValidationPolicyConfig
     optimization_objective: OptimizationObjectiveConfig
     report_policy: ReportPolicyConfig
+    trade_economics: TradeEconomicsConfiguration
     extensions: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")

@@ -22,9 +22,14 @@ from take_two_options.domain import (
     StrategyCandidate,
     StrictModel,
 )
+from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS
 from take_two_options.quantitative.implied_volatility import (
     ImpliedVolStatus,
     solve_implied_volatility,
+)
+from take_two_options.trade_economics_models import (
+    DividendTreatmentMode,
+    IntradayPrecisionStatus,
 )
 from take_two_options.vol_surface import effective_volatility
 
@@ -37,6 +42,95 @@ def _intrinsic(spot: float, strike: float, option_type: OptionType) -> float:
     if option_type is OptionType.CALL:
         return max(spot - strike, 0.0)
     return max(strike - spot, 0.0)
+
+
+def _normal_cdf(value: float) -> float:
+    return 0.5 * (1.0 + math.erf(value / math.sqrt(2.0)))
+
+
+def _analytic_european_value_exact(
+    *,
+    spot: float,
+    strike: float,
+    time_years: float,
+    rate: float,
+    volatility: float,
+    option_type: OptionType,
+    dividend_yield: float,
+) -> float:
+    """Exact-clock Black-Scholes benchmark for continuous dividends only."""
+    if time_years <= 0:
+        return _intrinsic(spot, strike, option_type)
+    root_time = math.sqrt(time_years)
+    d1 = (
+        math.log(spot / strike)
+        + (rate - dividend_yield + 0.5 * volatility * volatility) * time_years
+    ) / (volatility * root_time)
+    d2 = d1 - volatility * root_time
+    discount_r = math.exp(-rate * time_years)
+    discount_q = math.exp(-dividend_yield * time_years)
+    if option_type is OptionType.CALL:
+        return spot * discount_q * _normal_cdf(d1) - strike * discount_r * _normal_cdf(d2)
+    return strike * discount_r * _normal_cdf(-d2) - spot * discount_q * _normal_cdf(-d1)
+
+
+def validate_dividend_treatment(bundle: MarketDataBundle) -> None:
+    """Reject ambiguous or duplicated dividend economics before pricing."""
+    mode = bundle.dividend_treatment_mode
+    has_continuous = bundle.continuous_dividend_yield > 0
+    has_discrete = bool(bundle.dividends)
+    if mode is DividendTreatmentMode.NONE and (has_continuous or has_discrete):
+        raise ValueError("BLOCKED_DIVIDEND_TREATMENT_AMBIGUOUS: NONE has dividend inputs")
+    if mode is DividendTreatmentMode.CONTINUOUS_YIELD and has_discrete:
+        raise ValueError(
+            "BLOCKED_DIVIDEND_TREATMENT_AMBIGUOUS: continuous mode has cash dividends"
+        )
+    if mode is DividendTreatmentMode.DISCRETE_CASH and has_continuous:
+        raise ValueError(
+            "BLOCKED_DIVIDEND_TREATMENT_AMBIGUOUS: discrete mode has continuous yield"
+        )
+    if mode is DividendTreatmentMode.HYBRID_EXPLICIT_NON_OVERLAPPING:
+        if not (has_continuous and has_discrete and bundle.dividend_overlap_explanation):
+            raise ValueError(
+                "BLOCKED_DIVIDEND_TREATMENT_AMBIGUOUS: hybrid mode requires both inputs "
+                "and a non-overlap explanation"
+            )
+
+
+def _dividend_inputs(bundle: MarketDataBundle) -> tuple[float, tuple[tuple[date, float], ...]]:
+    validate_dividend_treatment(bundle)
+    mode = bundle.dividend_treatment_mode
+    dividend_yield = (
+        bundle.continuous_dividend_yield
+        if mode
+        in {
+            DividendTreatmentMode.CONTINUOUS_YIELD,
+            DividendTreatmentMode.HYBRID_EXPLICIT_NON_OVERLAPPING,
+        }
+        else 0.0
+    )
+    dividends = (
+        tuple((item.ex_date, item.amount) for item in bundle.dividends)
+        if mode
+        in {
+            DividendTreatmentMode.DISCRETE_CASH,
+            DividendTreatmentMode.HYBRID_EXPLICIT_NON_OVERLAPPING,
+        }
+        else ()
+    )
+    return dividend_yield, dividends
+
+
+def risk_free_rate_for_expiry(
+    bundle: MarketDataBundle, *, valuation_time: datetime, expiration: datetime
+) -> float:
+    if bundle.risk_free_curve is None:
+        return bundle.risk_free_rate
+    maturity_days = max(
+        math.ceil((expiration - valuation_time).total_seconds() / (24.0 * 60.0 * 60.0)),
+        1,
+    )
+    return bundle.risk_free_curve.rate_for(maturity_days)
 
 
 @lru_cache(maxsize=16_384)
@@ -403,13 +497,23 @@ def option_model_value(
     volatility: float | None = None,
     rate: float | None = None,
     force_european: bool = False,
+    time_grid: int | None = None,
+    price_grid: int | None = None,
 ) -> float:
     contract = quote.contract
     selected_spot = spot if spot is not None else bundle.underlying.price
     selected_time = valuation_time or bundle.analysis_timestamp
     selected_volatility = volatility or effective_volatility(bundle, quote).volatility
-    selected_rate = rate if rate is not None else bundle.risk_free_rate
-    dividends = tuple((item.ex_date, item.amount) for item in bundle.dividends)
+    selected_rate = (
+        rate
+        if rate is not None
+        else risk_free_rate_for_expiry(
+            bundle,
+            valuation_time=selected_time,
+            expiration=contract.expiration,
+        )
+    )
+    dividend_yield, dividends = _dividend_inputs(bundle)
     return _quantlib_value(
         spot=round(selected_spot, 10),
         strike=contract.strike,
@@ -418,15 +522,15 @@ def option_model_value(
         rate=round(selected_rate, 10),
         volatility=round(selected_volatility, 10),
         option_type=contract.option_type.value,
-        dividend_yield=bundle.continuous_dividend_yield,
+        dividend_yield=dividend_yield,
         dividends=dividends,
         american=(
             contract.exercise_style is ExerciseStyle.AMERICAN
             and bundle.pricing.american_model is PricingModel.QUANTLIB_FD_AMERICAN
             and not force_european
         ),
-        time_grid=bundle.pricing.time_grid,
-        price_grid=bundle.pricing.price_grid,
+        time_grid=time_grid if time_grid is not None else bundle.pricing.time_grid,
+        price_grid=price_grid if price_grid is not None else bundle.pricing.price_grid,
     )
 
 
@@ -442,7 +546,15 @@ def price_option_quote(
     selected_spot = spot if spot is not None else bundle.underlying.price
     selected_time = valuation_time or bundle.analysis_timestamp
     selected_volatility = volatility or effective_volatility(bundle, quote).volatility
-    selected_rate = rate if rate is not None else bundle.risk_free_rate
+    selected_rate = (
+        rate
+        if rate is not None
+        else risk_free_rate_for_expiry(
+            bundle,
+            valuation_time=selected_time,
+            expiration=quote.contract.expiration,
+        )
+    )
     contract = quote.contract
     base = option_model_value(
         quote,
@@ -542,6 +654,39 @@ def price_option_quote(
         for item in bundle.dividends
         if selected_time.date() < item.ex_date <= contract.expiration.date()
     ]
+    exact_time = DEFAULT_QUANT_CONVENTIONS.calendar_year_fraction(
+        selected_time,
+        contract.expiration,
+    )
+    exact_hours = exact_time * DEFAULT_QUANT_CONVENTIONS.calendar_day_basis * 24.0
+    near_expiry = exact_hours <= bundle.trade_economics.near_expiry_threshold_hours
+    intraday_status = (
+        IntradayPrecisionStatus.INSUFFICIENT_NEAR_EXPIRY
+        if near_expiry and contract.exercise_style is ExerciseStyle.AMERICAN
+        else IntradayPrecisionStatus.APPROXIMATED_DATE_ENGINE
+    )
+    intraday_warning = (
+        "American FD engine uses a date-level exercise grid; near-expiry intraday "
+        "exposure is insufficiently precise."
+        if intraday_status is IntradayPrecisionStatus.INSUFFICIENT_NEAR_EXPIRY
+        else "QuantLib FD engine uses date-level exercise and valuation inputs; "
+        "intraday exposure is approximate."
+    )
+    warnings.append(intraday_warning)
+    dividend_yield, benchmark_dividends = _dividend_inputs(bundle)
+    analytic_benchmark = (
+        None
+        if benchmark_dividends
+        else _analytic_european_value_exact(
+            spot=selected_spot,
+            strike=contract.strike,
+            time_years=exact_time,
+            rate=selected_rate,
+            volatility=selected_volatility,
+            option_type=contract.option_type,
+            dividend_yield=dividend_yield,
+        )
+    )
     return AmericanPricingResult(
         contract_symbol=contract.local_symbol,
         valuation_time=selected_time,
@@ -552,6 +697,9 @@ def price_option_quote(
         ),
         price=round(base, 8),
         european_benchmark=round(european, 8),
+        analytic_european_benchmark_exact=(
+            round(analytic_benchmark, 8) if analytic_benchmark is not None else None
+        ),
         early_exercise_premium=round(premium, 8),
         delta=round(delta, 8),
         gamma=round(gamma, 8),
@@ -560,6 +708,9 @@ def price_option_quote(
         rho=round(rho, 8),
         dividend_count=len(active_dividends),
         warnings=warnings,
+        exact_time_to_expiry_years=exact_time,
+        intraday_precision_status=intraday_status,
+        intraday_precision_warning=intraday_warning,
     )
 
 
@@ -627,6 +778,8 @@ def assess_exercise_risk(
         next_ex_dividend_date=next_dividend.ex_date if next_dividend else None,
         reasons=reasons,
         human_review_required=human_review,
+        early_exercise_risk=assignment,
+        adjusted_contract=contract.adjusted_contract,
     )
 
 

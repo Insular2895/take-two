@@ -10,6 +10,26 @@ constraints, runs separate conditional simulations, validates hard gates, then
 uses Pareto ranking. `NO_TRADE` and `BLOCKED_INSUFFICIENT_DATA` are first-class
 outcomes.
 
+## M0 — Greeks, carry and trade economics
+
+The offline M0 layer now provides a versioned `TradeEconomicsTicket` for deep-analysis
+candidates: same-pricer advanced Greeks with numerical confidence, exact-clock metadata with an
+explicit date-based American limitation, full-repriced flat-spot carry, Spot × Time × IV matrices,
+generic breakeven clocks and target deadlines, Shapley/full-repricing PnL attribution, pathwise
+`P(touch)` when admissible `P` paths exist, and reconciled entry/exit/round-trip costs. Unknown
+margin, FX and probabilities remain null or blocked rather than becoming zero.
+
+The synthetic golden ticket is available as
+[`JSON`](reports/examples/m0_trade_economics_ticket.json) and
+[`Markdown`](reports/examples/m0_trade_economics_ticket.md); both are rendered from the same typed
+object. The detailed contract, conventions and 2026 source check are in
+[`M0_GREEKS_CARRY_TRADE_ECONOMICS.md`](docs/specs/M0_GREEKS_CARRY_TRADE_ECONOMICS.md),
+[`M0_GREEK_CONVENTIONS.md`](docs/research/M0_GREEK_CONVENTIONS.md), and
+[`M0_2026_VALIDITY_AUDIT.md`](docs/research/M0_2026_VALIDITY_AUDIT.md).
+
+M0 adds no live provider connection and no execution path. Real NBBO, combo quotes, broker margin,
+slippage, fills and prospective performance remain pending OPRA/broker/paper validation.
+
 ## Statut final pré-OPRA — 8 août 2026
 
 Les clôtures C1–C13 sont terminées sur les données locales réelles. Le résultat est

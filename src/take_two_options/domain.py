@@ -6,11 +6,18 @@ from datetime import date, datetime
 from enum import StrEnum
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
-
-class StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+from take_two_options.models import StrictModel as StrictModel
+from take_two_options.trade_economics_models import (
+    DividendTreatmentMode,
+    ExecutionEstimateStatus,
+    IntradayPrecisionStatus,
+    MarginStatus,
+    RiskFreeCurve,
+    TradeEconomicsConfiguration,
+    TradeEconomicsTicket,
+)
 
 
 class OptionType(StrEnum):
@@ -340,6 +347,7 @@ class PortfolioState(StrictModel):
     stock_slippage_bps: float | None = Field(default=None, ge=0)
     margin_available: float | None = Field(default=None, ge=0)
     margin_known: bool = False
+    broker_margin_requirement: float | None = Field(default=None, gt=0)
     account_permissions: list[str] = Field(default_factory=list)
 
 
@@ -372,6 +380,15 @@ class ExecutionEstimate(StrictModel):
     margin_requirement: float | None = Field(default=None, ge=0)
     liquidity_score: float = Field(ge=0, le=1)
     notes: list[str] = Field(default_factory=list)
+    premium_paid: float = Field(default=0.0, ge=0)
+    premium_received: float = Field(default=0.0, ge=0)
+    net_premium: float = 0.0
+    bid_ask_cost: float = Field(default=0.0, ge=0)
+    fx_conversion_cost: float | None = Field(default=None, ge=0)
+    total_capital_required: float | None = Field(default=None, ge=0)
+    margin_status: MarginStatus = MarginStatus.NOT_REQUIRED
+    execution_status: ExecutionEstimateStatus = ExecutionEstimateStatus.INDICATIVE
+    combo_execution_status: Literal["INDICATIVE", "OBSERVED_COMBO"] = "INDICATIVE"
 
 
 class PayoffPoint(StrictModel):
@@ -431,6 +448,7 @@ class AmericanPricingResult(StrictModel):
     model: PricingModel
     price: float = Field(ge=0)
     european_benchmark: float = Field(ge=0)
+    analytic_european_benchmark_exact: float | None = Field(default=None, ge=0)
     early_exercise_premium: float
     delta: float
     gamma: float
@@ -439,6 +457,11 @@ class AmericanPricingResult(StrictModel):
     rho: float
     dividend_count: int = Field(ge=0)
     warnings: list[str] = Field(default_factory=list)
+    exact_time_to_expiry_years: float | None = Field(default=None, ge=0)
+    intraday_precision_status: IntradayPrecisionStatus = (
+        IntradayPrecisionStatus.APPROXIMATED_DATE_ENGINE
+    )
+    intraday_precision_warning: str | None = None
 
 
 class ExerciseRiskAssessment(StrictModel):
@@ -452,6 +475,8 @@ class ExerciseRiskAssessment(StrictModel):
     next_ex_dividend_date: date | None = None
     reasons: list[str] = Field(default_factory=list)
     human_review_required: bool = False
+    early_exercise_risk: RiskLevel = RiskLevel.UNKNOWN
+    adjusted_contract: bool = False
 
 
 class SurfaceDiagnostics(StrictModel):
@@ -503,6 +528,7 @@ class StrategyCandidate(StrictModel):
     failure_modes: list[str] = Field(default_factory=list)
     contradictions: list[str] = Field(default_factory=list)
     human_validation_required: bool = False
+    trade_economics: TradeEconomicsTicket | None = None
 
 
 class MarketDataBundle(StrictModel):
@@ -521,12 +547,18 @@ class MarketDataBundle(StrictModel):
     volatility_freshness: DataFreshness
     volatility_source: EvidenceReference
     continuous_dividend_yield: float = Field(default=0.0, ge=0, lt=1)
+    dividend_treatment_mode: DividendTreatmentMode = DividendTreatmentMode.DISCRETE_CASH
+    dividend_overlap_explanation: str | None = None
     dividend_yield_freshness: DataFreshness | None = None
     dividend_yield_source: EvidenceReference | None = None
     dividends: list[DividendForecast] = Field(default_factory=list)
     volatility_surface: VolatilitySurface | None = None
+    risk_free_curve: RiskFreeCurve | None = None
     pricing: PricingConfiguration = Field(default_factory=PricingConfiguration)
     simulation: SimulationConfiguration = Field(default_factory=SimulationConfiguration)
+    trade_economics: TradeEconomicsConfiguration = Field(
+        default_factory=TradeEconomicsConfiguration
+    )
 
 
 class DecisionReport(StrictModel):

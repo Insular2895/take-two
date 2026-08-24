@@ -3,6 +3,18 @@
     "LiveOptionQuote": {
       "additionalProperties": false,
       "properties": {
+        "adjusted_contract": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Adjusted Contract"
+        },
         "ask": {
           "minimum": 0,
           "title": "Ask",
@@ -39,6 +51,45 @@
           "default": null,
           "title": "Bid Size"
         },
+        "con_id": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Con Id"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "maxLength": 3,
+              "minLength": 3,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "deliverable": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deliverable"
+        },
         "delta": {
           "anyOf": [
             {
@@ -62,6 +113,23 @@
           ],
           "default": null,
           "title": "Exchange"
+        },
+        "exercise_style": {
+          "anyOf": [
+            {
+              "enum": [
+                "american",
+                "european",
+                "unknown"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exercise Style"
         },
         "expiration": {
           "format": "date",
@@ -94,6 +162,18 @@
           "default": null,
           "title": "Implied Volatility"
         },
+        "local_symbol": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Local Symbol"
+        },
         "multiplier": {
           "exclusiveMinimum": 0,
           "title": "Multiplier",
@@ -120,6 +200,30 @@
         "option_type": {
           "$ref": "#/$defs/OptionType"
         },
+        "provider_greek_convention": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Greek Convention"
+        },
+        "provider_stream": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Stream"
+        },
         "quote_timestamp": {
           "format": "date-time",
           "title": "Quote Timestamp",
@@ -129,6 +233,30 @@
           "format": "date-time",
           "title": "Received At",
           "type": "string"
+        },
+        "rho": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rho"
+        },
+        "settlement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Settlement"
         },
         "strike": {
           "exclusiveMinimum": 0,
@@ -151,6 +279,18 @@
           "minLength": 1,
           "title": "Ticker",
           "type": "string"
+        },
+        "trading_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trading Class"
         },
         "vega": {
           "anyOf": [

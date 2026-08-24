@@ -39,6 +39,7 @@ from take_two_options.opra.paper_decisions import (
 )
 from take_two_options.quantitative.historical_surfaces import HistoricalSurfaceReport
 from take_two_options.reporting.pre_opra_final import FinalPreOpraReport
+from take_two_options.trade_economics_models import TradeEconomicsTicket
 from take_two_options.validation.baseline_comparison import BaselineComparisonReport
 from take_two_options.validation.comparable_panel import ComparablePanelDataset
 from take_two_options.validation.final_holdout import HoldoutLedgerEntry
@@ -56,6 +57,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "final_pre_opra_report.schema.json": FinalPreOpraReport,
     "severity_gate_report.schema.json": SeverityGateReport,
     "pre_opra_config.schema.json": PreOpraConfig,
+    "trade_economics_ticket.schema.json": TradeEconomicsTicket,
     "historical_dataset_manifest.schema.json": HistoricalDatasetManifest,
     "historical_option_dataset_summary.schema.json": HistoricalOptionDatasetSummary,
     "market_context_summary.schema.json": MarketContextSummary,

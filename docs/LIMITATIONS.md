@@ -1,5 +1,31 @@
 # Limitations
 
+## M0 Greeks, carry and trade economics
+
+- M0 full-repricing mechanics, advanced Greeks, carry curves, scenario matrices, breakeven clocks,
+  round-trip architecture, FX decomposition and typed tickets are complete offline. This validates
+  software behavior on deterministic/synthetic inputs, not a trading edge or market calibration.
+- The QuantLib American FD engine is date-based. Exact timestamps and DTE are preserved, but
+  American intraday outputs are `APPROXIMATED_DATE_ENGINE` and become
+  `INSUFFICIENT_NEAR_EXPIRY` inside the configured threshold.
+- Future IV transformations are `CONFIGURED_STRESS`. Without a valid supplied surface they remain
+  `LEG_LEVEL_STRESS_ONLY`; they are not forecasts of skew, term structure or event crush.
+- Exit spread, exit slippage and closing costs are configured estimates. Real NBBO, simultaneous
+  combo execution, fill quality, market depth and prospective slippage remain `PENDING_OPRA` or
+  `PENDING_PAPER_VALIDATION`.
+- Broker margin remains `PENDING_BROKER` unless an explicit future what-if value is supplied.
+  Unknown margin is null, never zero; analytical bounded-risk estimates are visibly labeled.
+- `P(touch)` is available only from admissible full `P` paths. The M0 golden ticket has no promoted
+  real-world probability model, so probability fields remain null rather than inheriting `Q`
+  pricing simulations.
+- Exact Shapley attribution removes factor ordering, but attribution is still model- and
+  state-definition-dependent. Taylor attribution remains a local explanation with a visible
+  residual; full repricing is primary.
+- Treasury CMT inputs retain their par-yield identity. M0 provides curve metadata/interpolation
+  architecture but does not claim a bootstrapped arbitrage-free zero curve.
+- Mixed-expiry carry stops at the earliest leg expiry. Post-expiry settlement, exercise and cash
+  management require a separate lifecycle model.
+
 - Le panel options réel contient 25 observations alignées et seulement 10 tests OOS
   non chevauchants, contre 41 observations requises par la politique formelle. Les
   intervalles sont larges et le holdout futur reste `UNOPENED`.

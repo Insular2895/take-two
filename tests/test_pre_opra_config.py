@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs/pre_opra/v1/ttwo_research.yaml"
 
 
-def test_unified_pre_opra_config_contains_the_eleven_required_groups() -> None:
+def test_unified_pre_opra_config_contains_required_governance_groups() -> None:
     config = load_pre_opra_config(CONFIG)
     payload = config.model_dump(mode="json")
     assert set(payload) == {
@@ -27,6 +27,7 @@ def test_unified_pre_opra_config_contains_the_eleven_required_groups() -> None:
         "validation_policy",
         "optimization_objective",
         "report_policy",
+        "trade_economics",
         "extensions",
     }
     assert config.execution_assumptions.order_capability == "forbidden"

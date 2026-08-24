@@ -22,6 +22,11 @@ capacité, jamais une promesse de rendement.
 
 | Capacité | Statut maximal | Limite déterminante |
 | --- | --- | --- |
+| M0 full repricing, Greeks avancés et confiance numérique | `production_ready_offline` | Mécanique testée ; aucune calibration marché ou validation de rendement. |
+| M0 flat-spot carry, scénarios et breakeven clock | `production_ready_offline` | IV future configurée, American intraday date-based, cashflows après première échéance exclus. |
+| M0 coûts aller-retour et ticket typé | `experimental_offline` | Sortie, slippage et combo sont des estimations avant OPRA/paper. |
+| M0 P(touch) pathwise | `experimental_offline` | Calcul disponible sur chemins `P`; aucune probabilité TTWO promue dans le ticket fixture. |
+| M0 marge et FX | `experimental_offline` | Architecture explicite ; marge broker et mode FX réel restent à confirmer. |
 | Moteur contractuel V10.1 et contrôle américain QuantLib | `production_ready_offline` | Dépend encore de la qualité des quotes d’entrée. |
 | Provenance et cutoff | `production_ready_offline` | La complétude dépend des connecteurs fournis. |
 | Normalisation déterministe des événements | `experimental_offline` | Revue humaine et calibration des règles requises. |
@@ -54,3 +59,14 @@ Chaque passage exige un validateur nommé et des preuves archivées. Aucun gate
 Les seuils chiffrés de calibration, walk-forward et paper trading restent
 `draft_to_validate` dans [VALIDATION_PLAN.md](VALIDATION_PLAN.md). Ils ne doivent pas
 être inventés dans le code.
+
+## Readiness M0
+
+`M0_STATUS = COMPLETE_PRE_OPRA` signifie que la logique financière offline, les schémas, le
+renderer, le golden fixture et les contrôles numériques sont présents. Cela ne promeut aucun
+candidat, score, probabilité ou seuil de risque. Restent explicitement en attente : NBBO live,
+quotes combo, profondeur, fraîcheur live, marge/commissions what-if, fills paper et qualité
+d'exécution prospective.
+
+`NEXT_PHASE = M — OPRA READ-ONLY LIVE DATA + SHADOW/PAPER VALIDATION`. Cette phase n'est pas
+lancée par M0.
