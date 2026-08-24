@@ -9,20 +9,34 @@ function hiddenPrompt(label) {
     input.setRawMode(true);
     input.resume();
     input.setEncoding("utf8");
-    const onData = (character) => {
-      if (character === "\u0003") {
-        input.setRawMode(false);
-        reject(new Error("Cancelled."));
-      } else if (character === "\r" || character === "\n") {
-        input.setRawMode(false);
-        input.pause();
-        input.off("data", onData);
-        process.stdout.write("\n");
-        resolve(characters.join(""));
-      } else if (character === "\u007f") {
-        characters.pop();
-      } else {
-        characters.push(character);
+    const finish = () => {
+      input.setRawMode(false);
+      input.pause();
+      input.off("data", onData);
+    };
+    const onData = (data) => {
+      for (const character of data) {
+        if (character === "\u0003") {
+          finish();
+          process.stdout.write("\n");
+          reject(new Error("Cancelled."));
+          return;
+        }
+        if (character === "\r" || character === "\n") {
+          finish();
+          process.stdout.write("\n");
+          resolve(characters.join(""));
+          return;
+        }
+        if (character === "\u007f" || character === "\b") {
+          if (characters.length > 0) {
+            characters.pop();
+            process.stdout.write("\b \b");
+          }
+        } else {
+          characters.push(character);
+          process.stdout.write("*");
+        }
       }
     };
     input.on("data", onData);

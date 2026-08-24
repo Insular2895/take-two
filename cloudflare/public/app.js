@@ -1,3 +1,5 @@
+import { selectTrackedClosePreview } from "/preview-state.js";
+
 const state = { csrf: "", data: null, preview: null, range: "all" };
 const $ = (selector) => document.querySelector(selector);
 const h = (value) => String(value ?? "—").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
@@ -124,7 +126,7 @@ function render(data) {
   const events = [...data.audit_events, ...data.monitoring_events].sort((left, right) => String(right.timestamp).localeCompare(String(left.timestamp))).slice(0, 30);
   $("#events").innerHTML = events.map((event) => `<li><time>${h(new Date(event.timestamp).toLocaleString("fr-FR"))}</time><strong>${h(event.event_type)}</strong></li>`).join("") || "<li>No event</li>";
   const actionablePreview = data.close_previews.find((preview) => ["ACKNOWLEDGED", "RECONCILIATION_REQUIRED"].includes(preview.status));
-  state.preview = actionablePreview || null;
+  state.preview = selectTrackedClosePreview(data.close_previews);
   $("#manual-close-reported").classList.toggle("hidden", actionablePreview?.status !== "ACKNOWLEDGED");
   $("#close-status").textContent = actionablePreview ? `${actionablePreview.status} · ${actionablePreview.preview_id}` : "";
   if (position.state === "CLOSED") {
@@ -163,7 +165,9 @@ $("#close-structure").addEventListener("click", async () => {
 $("#preview-cancel").addEventListener("click", () => $("#close-dialog").close());
 async function acknowledge() {
   try {
-    await mutation(`/api/close-previews/${encodeURIComponent(state.preview.preview_id)}/acknowledge`);
+    const previewId = state.preview?.preview_id;
+    if (!previewId) throw new Error("CLOSE_PREVIEW_CONTEXT_LOST — reopen the close preview.");
+    await mutation(`/api/close-previews/${encodeURIComponent(previewId)}/acknowledge`);
     $("#close-dialog").close();
     alert("CLOSE_PREVIEW_READY — Close this entire combo manually in IBKR. Nothing was transmitted.");
   } catch (error) {

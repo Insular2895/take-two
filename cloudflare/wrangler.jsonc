@@ -21,7 +21,7 @@
     {
       "binding": "DB",
       "database_name": "take-two-control",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "0a887220-0109-4623-bcfc-e04586bc7951",
       "migrations_dir": "migrations"
     }
   ],
