@@ -14,6 +14,9 @@ export interface PositionRow {
   native_currency: string;
   policy_currency: string;
   entry_cash: number;
+  schema_version: string | null;
+  entry_cash_flow_policy: number | null;
+  capital_required_policy: number | null;
   realized_pnl: number | null;
   managed_exit_deadline: string | null;
   canonical_dossier_json: string;
@@ -57,14 +60,16 @@ export async function importDossier(db: D1Database, dossier: CloudPositionDossie
   const statements: D1PreparedStatement[] = [
     db.prepare(
       `INSERT INTO positions(id,dossier_id,ticker,structure_name,state,opened_at,quantity_initial,quantity_remaining,
-       native_currency,policy_currency,entry_cash,managed_exit_deadline,canonical_dossier_json,ticket_hash,config_hash,git_commit,created_at,updated_at)
-       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       native_currency,policy_currency,entry_cash,managed_exit_deadline,canonical_dossier_json,ticket_hash,config_hash,git_commit,created_at,updated_at,
+       schema_version,entry_cash_flow_policy,capital_required_policy)
+       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     ).bind(
       dossier.position_id, dossier.dossier_id, dossier.ticker, dossier.structure_name,
       dossier.initial_position_state, dossier.opened_at, dossier.quantity, dossier.quantity,
-      dossier.entry_native_currency, dossier.policy_currency, dossier.actual_entry_cash,
+      dossier.entry_native_currency, dossier.policy_currency, dossier.capital_required_policy,
       dossier.managed_exit_deadline, JSON.stringify(dossier), dossier.trade_economics_ticket_hash,
-      dossier.config_hash, dossier.git_commit, now, now,
+      dossier.config_hash, dossier.git_commit, now, now, dossier.schema_version,
+      dossier.entry_cash_flow_policy, dossier.capital_required_policy,
     ),
     ...dossier.legs.map((leg) => db.prepare(
       `INSERT INTO position_legs(position_id,leg_id,contract_identity,con_id,local_symbol,side,close_action,ratio,
@@ -96,15 +101,24 @@ export async function persistProjection(db: D1Database, positionId: string, proj
   await db.prepare(
     `INSERT INTO pnl_snapshots(id,position_id,timestamp,spot,market_value_native,market_value_policy,mtm_pnl,mtm_return,
      liquidation_value,liquidation_pnl,liquidation_return,liquidation_estimate_mode,estimated_exit_commission,
-     estimated_exit_slippage,estimated_exit_fx,iv,theta,greeks_json,monitor_action,data_freshness,provider)
-     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+     estimated_exit_slippage,estimated_exit_fx,iv,theta,greeks_json,monitor_action,data_freshness,provider,
+     estimated_close_cash_flow_policy,required_data_effective_timestamp,underlying_timestamp,oldest_option_timestamp,
+     fx_timestamp,combo_timestamp,required_data_age_seconds,freshness_reasons_json)
+     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
   ).bind(
     randomId("pnl"), positionId, projection.timestamp, projection.spot, projection.market_value_native,
     projection.market_value_policy, projection.mtm_pnl, projection.mtm_return, projection.liquidation_value,
     projection.liquidation_pnl, projection.liquidation_return, projection.liquidation_estimate_mode,
     projection.estimated_exit_commission, projection.estimated_exit_slippage, projection.estimated_exit_fx,
     projection.current_iv, projection.current_greeks.theta ?? null, JSON.stringify(projection.current_greeks), projection.monitor_action,
-    projection.data_freshness, projection.provider,
+    projection.data_freshness, projection.provider, projection.estimated_close_cash_flow_policy,
+    projection.required_data_freshness.effective_timestamp,
+    projection.required_data_freshness.underlying_timestamp,
+    projection.required_data_freshness.oldest_option_timestamp,
+    projection.required_data_freshness.fx_timestamp,
+    projection.required_data_freshness.combo_timestamp,
+    projection.required_data_freshness.age_seconds,
+    JSON.stringify(projection.required_data_freshness.reasons),
   ).run();
   await incrementUsage(db, "d1_snapshot_writes");
 }

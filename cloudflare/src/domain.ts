@@ -1,14 +1,18 @@
 import type {
   CloudLeg,
   CloudPositionDossier,
+  LegacyCloudPositionDossierV10,
   MonitorAction,
   PnlProjection,
+  ProjectionFreshness,
   ProviderSnapshot,
 } from "./types";
 
 const SHA256 = /^[a-f0-9]{64}$/;
 const GIT_COMMIT = /^[a-f0-9]{7,40}$/;
 const CURRENCY = /^[A-Z]{3}$/;
+export const MARKET_DATA_STALE_SECONDS = 120;
+export const MARKET_TIMESTAMP_FUTURE_TOLERANCE_SECONDS = 5;
 
 function requireCondition(condition: boolean, message: string): asserts condition {
   if (!condition) throw new Error(message);
@@ -24,8 +28,37 @@ function validDate(value: unknown): value is string {
 
 export function validateDossier(value: unknown): CloudPositionDossier {
   requireCondition(isRecord(value), "INVALID_DOSSIER: expected an object");
-  const dossier = value as unknown as CloudPositionDossier;
-  requireCondition(dossier.schema_version === "1.0", "INVALID_DOSSIER: schema_version");
+  let dossier: CloudPositionDossier;
+  if (value.schema_version === "1.0") {
+    const legacy = value as unknown as LegacyCloudPositionDossierV10;
+    const legacyExecutableNetDebit = Array.isArray(legacy.legs)
+      ? legacy.legs.reduce(
+        (total, leg) => total + (leg.side === "LONG" ? 1 : -1) *
+          leg.entry_executable_price * leg.quantity * leg.multiplier,
+        0,
+      )
+      : Number.NaN;
+    requireCondition(
+      legacy.fixture_status === "SYNTHETIC_DEMO" &&
+        Number.isFinite(legacy.actual_entry_cash) && legacy.actual_entry_cash > 0 &&
+        Number.isFinite(legacyExecutableNetDebit) && legacyExecutableNetDebit > 0,
+      "ENTRY_CASH_FLOW_SIGN_UNPROVEN",
+    );
+    const { actual_entry_cash: legacyEntryCash, ...legacyFields } = legacy;
+    const imported = legacy.last_imported_snapshot;
+    dossier = {
+      ...legacyFields,
+      schema_version: "1.1",
+      entry_cash_flow_policy: -legacyEntryCash,
+      capital_required_policy: legacyEntryCash,
+      last_imported_snapshot: imported
+        ? { ...imported, underlying_timestamp: imported.underlying_timestamp ?? imported.timestamp }
+        : null,
+    };
+  } else {
+    dossier = value as unknown as CloudPositionDossier;
+  }
+  requireCondition(dossier.schema_version === "1.1", "INVALID_DOSSIER: schema_version");
   requireCondition(
     dossier.fixture_status === "CANONICAL_EXPORT" || dossier.fixture_status === "SYNTHETIC_DEMO",
     "INVALID_DOSSIER: fixture_status",
@@ -40,7 +73,11 @@ export function validateDossier(value: unknown): CloudPositionDossier {
   requireCondition(CURRENCY.test(dossier.entry_native_currency) && CURRENCY.test(dossier.policy_currency), "INVALID_DOSSIER: currency");
   requireCondition(Number.isInteger(dossier.quantity) && dossier.quantity > 0, "INVALID_DOSSIER: quantity");
   requireCondition(Number.isFinite(dossier.multiplier) && dossier.multiplier > 0, "INVALID_DOSSIER: multiplier");
-  requireCondition(Number.isFinite(dossier.actual_entry_cash) && dossier.actual_entry_cash > 0, "INVALID_DOSSIER: entry cash");
+  requireCondition(Number.isFinite(dossier.entry_cash_flow_policy), "INVALID_DOSSIER: entry cash flow");
+  requireCondition(
+    Number.isFinite(dossier.capital_required_policy) && dossier.capital_required_policy >= 0,
+    "INVALID_DOSSIER: capital requirement",
+  );
   requireCondition(Number.isFinite(dossier.initial_spot) && dossier.initial_spot > 0, "INVALID_DOSSIER: initial spot");
   requireCondition(
     dossier.read_only === true && dossier.transmit === false && dossier.what_if === true &&
@@ -89,18 +126,140 @@ function quoteMap(snapshot: ProviderSnapshot): Map<string, ProviderSnapshot["opt
   return result;
 }
 
+function timestampMilliseconds(value: string | null | undefined): number | null {
+  if (typeof value !== "string") return null;
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+export function calculateRequiredDataFreshness(
+  dossier: CloudPositionDossier,
+  snapshot: ProviderSnapshot,
+  liquidationMode: PnlProjection["liquidation_estimate_mode"],
+  now = new Date(),
+  staleSeconds = MARKET_DATA_STALE_SECONDS,
+  futureToleranceSeconds = MARKET_TIMESTAMP_FUTURE_TOLERANCE_SECONDS,
+): ProjectionFreshness {
+  const reasons: string[] = [];
+  const requiredTimestamps: Array<{ label: string; value: string; milliseconds: number }> = [];
+  const optionTimestamps: Record<string, string | null> = {};
+  const quotes = new Map(snapshot.option_quotes.map((quote) => [quote.contract_identity, quote]));
+  if (quotes.size !== snapshot.option_quotes.length) reasons.push("DUPLICATE_OPTION_QUOTE");
+
+  const addRequiredTimestamp = (label: string, value: string | null | undefined): void => {
+    const milliseconds = timestampMilliseconds(value);
+    if (value == null || value === "") {
+      reasons.push(`MISSING_${label}_TIMESTAMP`);
+      return;
+    }
+    if (milliseconds === null) {
+      reasons.push(`INVALID_${label}_TIMESTAMP`);
+      return;
+    }
+    requiredTimestamps.push({ label, value, milliseconds });
+  };
+
+  addRequiredTimestamp("UNDERLYING", snapshot.underlying_timestamp);
+  for (const leg of dossier.legs) {
+    const quote = quotes.get(leg.contract_identity);
+    if (!quote) {
+      optionTimestamps[leg.contract_identity] = null;
+      reasons.push(`MISSING_OPTION_QUOTE:${leg.contract_identity}`);
+      continue;
+    }
+    optionTimestamps[leg.contract_identity] = quote.timestamp;
+    if (![quote.bid, quote.ask].every(Number.isFinite) || quote.bid < 0 || quote.ask < quote.bid) {
+      reasons.push(`INVALID_OPTION_QUOTE:${leg.contract_identity}`);
+    }
+    addRequiredTimestamp(`OPTION:${leg.contract_identity}`, quote.timestamp);
+  }
+
+  const sameCurrency = dossier.entry_native_currency === dossier.policy_currency;
+  if (!sameCurrency) {
+    if (
+      snapshot.fx_rate_to_policy_currency === null ||
+      !Number.isFinite(snapshot.fx_rate_to_policy_currency) ||
+      snapshot.fx_rate_to_policy_currency <= 0
+    ) {
+      reasons.push("MISSING_FX_RATE");
+    }
+    addRequiredTimestamp("FX", snapshot.fx_timestamp);
+  }
+  if (liquidationMode === "COMBO_QUOTE") {
+    if (
+      !snapshot.combo_quote ||
+      !Number.isFinite(snapshot.combo_quote.price) ||
+      snapshot.combo_quote.price < 0 ||
+      !["CREDIT", "DEBIT"].includes(snapshot.combo_quote.cash_flow_type)
+    ) {
+      reasons.push("INVALID_COMBO_QUOTE");
+    }
+    addRequiredTimestamp("COMBO", snapshot.combo_quote?.timestamp);
+  }
+  if (!snapshot.data_sufficient) reasons.push("PROVIDER_DATA_INSUFFICIENT");
+
+  const incomplete = reasons.some((reason) =>
+    reason.startsWith("MISSING_") ||
+    reason.startsWith("INVALID_") ||
+    reason === "DUPLICATE_OPTION_QUOTE" ||
+    reason === "PROVIDER_DATA_INSUFFICIENT"
+  );
+  const futureLimit = now.getTime() + futureToleranceSeconds * 1000;
+  for (const input of requiredTimestamps) {
+    if (input.milliseconds > futureLimit) {
+      reasons.push("MARKET_TIMESTAMP_FROM_FUTURE", `${input.label}_TIMESTAMP_FROM_FUTURE`);
+    }
+  }
+  const oldest = requiredTimestamps.reduce<typeof requiredTimestamps[number] | null>(
+    (current, input) => current === null || input.milliseconds < current.milliseconds ? input : current,
+    null,
+  );
+  const oldestOption = requiredTimestamps
+    .filter((input) => input.label.startsWith("OPTION:"))
+    .reduce<typeof requiredTimestamps[number] | null>(
+      (current, input) => current === null || input.milliseconds < current.milliseconds ? input : current,
+      null,
+    );
+  const staleLimit = now.getTime() - staleSeconds * 1000;
+  for (const input of requiredTimestamps) {
+    if (input.milliseconds < staleLimit) reasons.push(`${input.label}_DATA_STALE`);
+  }
+  const hasFutureTimestamp = reasons.includes("MARKET_TIMESTAMP_FROM_FUTURE");
+  const hasStaleTimestamp = reasons.some((reason) => reason.endsWith("_DATA_STALE"));
+  const status = incomplete
+    ? "INSUFFICIENT_DATA"
+    : hasFutureTimestamp
+      ? "INVALID"
+      : hasStaleTimestamp
+        ? "STALE"
+        : "FRESH";
+  return {
+    effective_timestamp: incomplete ? null : oldest?.value ?? null,
+    underlying_timestamp: snapshot.underlying_timestamp,
+    oldest_option_timestamp: oldestOption?.value ?? null,
+    option_timestamps: optionTimestamps,
+    fx_timestamp: sameCurrency ? null : snapshot.fx_timestamp,
+    combo_timestamp: liquidationMode === "COMBO_QUOTE" ? snapshot.combo_quote?.timestamp ?? null : null,
+    age_seconds: incomplete || oldest === null ? null : (now.getTime() - oldest.milliseconds) / 1000,
+    status,
+    reasons: [...new Set(reasons)],
+  };
+}
+
 function evaluateMonitorAction(
   dossier: CloudPositionDossier,
   snapshot: ProviderSnapshot,
   liquidationReturn: number | null,
   mtmReturn: number,
-  fresh: boolean,
+  freshness: ProjectionFreshness,
   now: Date,
   peakLiquidationValue: number | null,
   liquidationValue: number | null,
 ): { action: MonitorAction; reasons: string[] } {
-  if (!snapshot.data_sufficient) return { action: "BLOCKED_INSUFFICIENT_DATA", reasons: ["data_insufficient"] };
-  if (!fresh) return { action: "DATA_STALE", reasons: ["data_stale"] };
+  if (freshness.status === "INSUFFICIENT_DATA" || freshness.status === "INVALID") {
+    return { action: "BLOCKED_INSUFFICIENT_DATA", reasons: freshness.reasons };
+  }
+  if (freshness.status === "STALE") return { action: "DATA_STALE", reasons: freshness.reasons };
   if (snapshot.thesis_invalidated) return { action: "THESIS_INVALIDATED", reasons: ["fundamental_invalidation"] };
   const plan = dossier.exit_plan;
   if (plan.status !== "CONFIGURED") return { action: "HOLD", reasons: ["exit_plan_not_configured"] };
@@ -129,7 +288,7 @@ function evaluateMonitorAction(
   }
   if (
     plan.trailing_drawdown !== null && peakLiquidationValue !== null && liquidationValue !== null &&
-    (peakLiquidationValue - liquidationValue) / dossier.actual_entry_cash >= plan.trailing_drawdown
+    (peakLiquidationValue - liquidationValue) / dossier.capital_required_policy >= plan.trailing_drawdown
   ) {
     return { action: "EXIT_REVIEW", reasons: ["trailing_drawdown"] };
   }
@@ -145,8 +304,12 @@ export function calculateProjection(
 ): PnlProjection {
   requireCondition(quantityRemaining > 0 && quantityRemaining <= dossier.quantity, "INVALID_REMAINING_QUANTITY");
   const quotes = quoteMap(snapshot);
+  const mode: PnlProjection["liquidation_estimate_mode"] = snapshot.combo_quote
+    ? "COMBO_QUOTE"
+    : "LEGWISE_CONSERVATIVE_ESTIMATE";
+  const freshness = calculateRequiredDataFreshness(dossier, snapshot, mode, now);
   let markNative = 0;
-  let liquidationNative = 0;
+  let grossCloseCashFlowNative = 0;
   for (const leg of dossier.legs) {
     const quote = quotes.get(leg.contract_identity);
     requireCondition(Boolean(quote), `MISSING_OPTION_QUOTE:${leg.contract_identity}`);
@@ -154,40 +317,42 @@ export function calculateProjection(
     const contracts = leg.ratio * quantityRemaining;
     const sign = leg.side === "LONG" ? 1 : -1;
     markNative += sign * ((quote!.bid + quote!.ask) / 2) * contracts * leg.multiplier;
-    liquidationNative += sign * (leg.side === "LONG" ? quote!.bid : quote!.ask) * contracts * leg.multiplier;
+    grossCloseCashFlowNative += sign * (leg.side === "LONG" ? quote!.bid : quote!.ask) * contracts * leg.multiplier;
   }
-  let mode: PnlProjection["liquidation_estimate_mode"] = "LEGWISE_CONSERVATIVE_ESTIMATE";
   if (snapshot.combo_quote) {
-    liquidationNative = snapshot.combo_quote.bid * quantityRemaining * dossier.multiplier;
-    mode = "COMBO_QUOTE";
+    const comboSign = snapshot.combo_quote.cash_flow_type === "CREDIT" ? 1 : -1;
+    grossCloseCashFlowNative = comboSign * snapshot.combo_quote.price * quantityRemaining * dossier.multiplier;
   }
   const sameCurrency = dossier.entry_native_currency === dossier.policy_currency;
   const fxRate = sameCurrency ? 1 : snapshot.fx_rate_to_policy_currency;
   requireCondition(fxRate !== null && fxRate > 0, "FX_RATE_UNAVAILABLE");
-  const entryBasis = dossier.actual_entry_cash * (quantityRemaining / dossier.quantity);
+  const quantityFraction = quantityRemaining / dossier.quantity;
+  const entryCashFlowRemaining = dossier.entry_cash_flow_policy * quantityFraction;
+  const capitalRequiredRemaining = dossier.capital_required_policy * quantityFraction;
+  requireCondition(capitalRequiredRemaining > 0, "CAPITAL_REQUIREMENT_UNAVAILABLE_FOR_RETURN");
   const marketValuePolicy = markNative * fxRate;
-  const grossLiquidationPolicy = liquidationNative * fxRate;
+  const grossCloseCashFlowPolicy = grossCloseCashFlowNative * fxRate;
   const exitCostsKnown =
     snapshot.estimated_exit_commission !== null &&
     snapshot.estimated_exit_slippage !== null &&
     (sameCurrency || snapshot.estimated_exit_fx_status !== "UNKNOWN") &&
     snapshot.estimated_exit_fx !== null;
-  const liquidationValue = exitCostsKnown
-    ? grossLiquidationPolicy - snapshot.estimated_exit_commission! - snapshot.estimated_exit_slippage! - snapshot.estimated_exit_fx!
+  const estimatedCloseCashFlowPolicy = exitCostsKnown
+    ? grossCloseCashFlowPolicy - snapshot.estimated_exit_commission! - snapshot.estimated_exit_slippage! - snapshot.estimated_exit_fx!
     : null;
-  const mtmPnl = marketValuePolicy - entryBasis;
-  const liquidationPnl = liquidationValue === null ? null : liquidationValue - entryBasis;
-  const ageSeconds = (now.getTime() - Date.parse(snapshot.timestamp)) / 1000;
-  const fresh = ageSeconds >= -5 && ageSeconds <= 120;
+  const mtmPnl = marketValuePolicy + entryCashFlowRemaining;
+  const liquidationPnl = estimatedCloseCashFlowPolicy === null
+    ? null
+    : estimatedCloseCashFlowPolicy + entryCashFlowRemaining;
   const action = evaluateMonitorAction(
     dossier,
     snapshot,
-    liquidationPnl === null ? null : liquidationPnl / entryBasis,
-    mtmPnl / entryBasis,
-    fresh,
+    liquidationPnl === null ? null : liquidationPnl / capitalRequiredRemaining,
+    mtmPnl / capitalRequiredRemaining,
+    freshness,
     now,
     peakLiquidationValue,
-    liquidationValue,
+    estimatedCloseCashFlowPolicy,
   );
   return {
     timestamp: snapshot.timestamp,
@@ -195,10 +360,11 @@ export function calculateProjection(
     market_value_native: markNative,
     market_value_policy: marketValuePolicy,
     mtm_pnl: mtmPnl,
-    mtm_return: mtmPnl / entryBasis,
-    liquidation_value: liquidationValue,
+    mtm_return: mtmPnl / capitalRequiredRemaining,
+    estimated_close_cash_flow_policy: estimatedCloseCashFlowPolicy,
+    liquidation_value: estimatedCloseCashFlowPolicy,
     liquidation_pnl: liquidationPnl,
-    liquidation_return: liquidationPnl === null ? null : liquidationPnl / entryBasis,
+    liquidation_return: liquidationPnl === null ? null : liquidationPnl / capitalRequiredRemaining,
     liquidation_estimate_mode: mode,
     estimated_exit_commission: snapshot.estimated_exit_commission,
     estimated_exit_slippage: snapshot.estimated_exit_slippage,
@@ -207,7 +373,8 @@ export function calculateProjection(
     current_greeks: snapshot.current_greeks,
     monitor_action: action.action,
     monitor_reasons: action.reasons,
-    data_freshness: fresh ? "FRESH" : "STALE",
+    data_freshness: freshness.status,
+    required_data_freshness: freshness,
     provider: snapshot.provider,
   };
 }

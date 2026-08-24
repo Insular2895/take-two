@@ -4,7 +4,7 @@ export function syntheticDemoDossier(now = new Date()): CloudPositionDossier {
   const timestamp = now.toISOString();
   const expiration = "2027-01-15T21:00:00.000Z";
   return {
-    schema_version: "1.0",
+    schema_version: "1.1",
     fixture_status: "SYNTHETIC_DEMO",
     dossier_id: "synthetic-ttwo-bull-call-spread-v1",
     position_id: "synthetic-ttwo-position-v1",
@@ -60,7 +60,8 @@ export function syntheticDemoDossier(now = new Date()): CloudPositionDossier {
     multiplier: 100,
     entry_native_currency: "USD",
     policy_currency: "EUR",
-    actual_entry_cash: 1023,
+    entry_cash_flow_policy: -1023,
+    capital_required_policy: 1023,
     actual_entry_fx: {
       rate_to_policy_currency: 0.92,
       rate_source: "SYNTHETIC_DEMO",
@@ -109,7 +110,12 @@ export function syntheticDemoDossier(now = new Date()): CloudPositionDossier {
       scope: "FIXTURE_ONLY",
       timestamp,
     },
-    budget_diagnostics: { status: "SYNTHETIC_DEMO", target_budget: 1000, actual_entry_cash: 1023 },
+    budget_diagnostics: {
+      status: "SYNTHETIC_DEMO",
+      target_budget: 1000,
+      entry_cash_flow_policy: -1023,
+      effective_capital_requirement: 1023,
+    },
     exit_plan: {
       status: "CONFIGURED",
       profit_target: 0.50,
@@ -127,6 +133,7 @@ export function syntheticDemoDossier(now = new Date()): CloudPositionDossier {
     },
     last_imported_snapshot: {
       timestamp,
+      underlying_timestamp: timestamp,
       provider: "SYNTHETIC_DEMO",
       source: "FIXTURE_ONLY",
       quality: "SYNTHETIC",
@@ -176,5 +183,105 @@ export function syntheticDemoDossier(now = new Date()): CloudPositionDossier {
     what_if: true,
     human_confirmation_required: true,
     order_capability: "forbidden",
+  };
+}
+
+export function syntheticCreditSpreadDossier(now = new Date()): CloudPositionDossier {
+  const timestamp = now.toISOString();
+  const expiration = "2027-01-15T21:00:00.000Z";
+  const dossier = syntheticDemoDossier(now);
+  return {
+    ...dossier,
+    dossier_id: "synthetic-ttwo-credit-spread-v1",
+    position_id: "synthetic-ttwo-credit-position-v1",
+    structure_name: "TTWO Bear Call Credit Spread",
+    structure_type: "BEAR_CALL_CREDIT_SPREAD",
+    quantity: 1,
+    entry_native_currency: "EUR",
+    policy_currency: "EUR",
+    entry_cash_flow_policy: 300,
+    capital_required_policy: 700,
+    legs: [
+      {
+        ...dossier.legs[0]!,
+        leg_id: "short-call-250",
+        side: "SHORT",
+        close_action: "BUY_TO_CLOSE",
+        ratio: 1,
+        quantity: 1,
+        entry_bid: 10.0,
+        entry_ask: 10.1,
+        entry_mid: 10.05,
+        entry_executable_price: 10.0,
+      },
+      {
+        ...dossier.legs[1]!,
+        leg_id: "long-call-300",
+        side: "LONG",
+        close_action: "SELL_TO_CLOSE",
+        ratio: 1,
+        quantity: 1,
+        entry_bid: 6.9,
+        entry_ask: 7.0,
+        entry_mid: 6.95,
+        entry_executable_price: 7.0,
+      },
+    ],
+    actual_entry_fx: {
+      rate_to_policy_currency: null,
+      rate_source: null,
+      rate_timestamp: null,
+      transaction_cost: 0,
+      transaction_cost_status: "NOT_APPLICABLE",
+      transaction_cost_source: "SAME_CURRENCY",
+    },
+    budget_diagnostics: {
+      status: "SYNTHETIC_DEMO",
+      target_budget: 700,
+      entry_cash_flow_policy: 300,
+      effective_capital_requirement: 700,
+    },
+    last_imported_snapshot: {
+      timestamp,
+      underlying_timestamp: timestamp,
+      provider: "SYNTHETIC_DEMO",
+      source: "FIXTURE_ONLY",
+      quality: "SYNTHETIC",
+      synthetic: true,
+      spot: 268,
+      option_quotes: [
+        {
+          contract_identity: "TTWO  270115C00250000",
+          bid: 2.45,
+          ask: 2.55,
+          timestamp,
+          provider: "SYNTHETIC_DEMO",
+          source: "FIXTURE_ONLY",
+          quality: "SYNTHETIC",
+        },
+        {
+          contract_identity: "TTWO  270115C00300000",
+          bid: 1.25,
+          ask: 1.35,
+          timestamp,
+          provider: "SYNTHETIC_DEMO",
+          source: "FIXTURE_ONLY",
+          quality: "SYNTHETIC",
+        },
+      ],
+      fx_rate_to_policy_currency: null,
+      fx_source: null,
+      fx_timestamp: null,
+      estimated_exit_commission: 2,
+      estimated_exit_slippage: 3,
+      estimated_exit_fx: 0,
+      estimated_exit_fx_status: "NOT_APPLICABLE",
+      current_iv: 0.37,
+      current_greeks: {},
+      thesis_invalidated: false,
+      data_sufficient: true,
+      combo_quote: { price: 1.0, cash_flow_type: "DEBIT", timestamp },
+    },
+    expirations: [expiration],
   };
 }

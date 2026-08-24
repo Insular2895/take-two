@@ -183,6 +183,7 @@ class CloudQuote(StrictModel):
 
 class CloudImportedMonitoringSnapshot(StrictModel):
     timestamp: datetime
+    underlying_timestamp: datetime
     provider: str = Field(min_length=1)
     source: str = Field(min_length=1)
     quality: str = Field(min_length=1)
@@ -203,7 +204,7 @@ class CloudImportedMonitoringSnapshot(StrictModel):
 
 
 class CloudPositionDossier(StrictModel):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.1"] = "1.1"
     fixture_status: Literal[
         "CANONICAL_EXPORT",
         "SYNTHETIC_DEMO",
@@ -221,7 +222,18 @@ class CloudPositionDossier(StrictModel):
     multiplier: float = Field(gt=0)
     entry_native_currency: str = Field(min_length=3, max_length=3)
     policy_currency: str = Field(min_length=3, max_length=3)
-    actual_entry_cash: float
+    entry_cash_flow_policy: float = Field(
+        description=(
+            "Signed opening account cash flow in policy currency: positive cash received, "
+            "negative cash paid; all known entry costs are included exactly once."
+        )
+    )
+    capital_required_policy: float = Field(
+        ge=0,
+        description=(
+            "Governed non-negative capital requirement in policy currency; never a PnL basis."
+        ),
+    )
     actual_entry_fx: CloudFXContext
     actual_entry_commissions: float = Field(ge=0)
     actual_entry_slippage: float = Field(ge=0)

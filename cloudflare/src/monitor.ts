@@ -1,7 +1,7 @@
 import { activePosition, audit, incrementUsage, persistProjection } from "./db";
-import { calculateProjection, randomId } from "./domain";
+import { calculateProjection, randomId, validateDossier } from "./domain";
 import { fetchProviderSnapshot, marketDataProvider } from "./provider";
-import type { CloudPositionDossier, ProviderSnapshot } from "./types";
+import type { ProviderSnapshot } from "./types";
 
 function intervalMilliseconds(env: Env, conservation: boolean): number {
   const now = new Date();
@@ -69,7 +69,7 @@ export class TTWOPositionMonitor {
         return;
       }
       await incrementUsage(this.env.DB, "monitor_alarm_executions");
-      const dossier = JSON.parse(position.canonical_dossier_json) as CloudPositionDossier;
+      const dossier = validateDossier(JSON.parse(position.canonical_dossier_json));
       const provider = marketDataProvider(this.env);
       let snapshot: ProviderSnapshot | null = null;
       let providerError: string | null = null;
@@ -95,7 +95,7 @@ export class TTWOPositionMonitor {
       }
       if (!snapshot) return;
       const peak = await this.env.DB.prepare(
-        "SELECT max(liquidation_value) AS value FROM pnl_snapshots WHERE position_id=?",
+        "SELECT max(estimated_close_cash_flow_policy) AS value FROM pnl_snapshots WHERE position_id=?",
       ).bind(position.id).first<{ value: number | null }>();
       const projection = calculateProjection(dossier, snapshot, position.quantity_remaining, new Date(), peak?.value ?? null);
       const latest = await this.env.DB.prepare(
@@ -106,8 +106,15 @@ export class TTWOPositionMonitor {
       const snapshotDue = !latest || Date.parse(projection.timestamp) - Date.parse(latest.timestamp) >= snapshotInterval;
       if (statusChanged || snapshotDue) await persistProjection(this.env.DB, position.id, projection);
       if (projection.data_freshness === "STALE") {
-        await monitoringEvent(this.env.DB, position.id, "DATA_STALE", "WARNING", { quote_timestamp: projection.timestamp }, `stale:${position.id}:${projection.timestamp}`);
-        if (statusChanged) await audit(this.env.DB, "DATA_STALE", "monitor", position.id, { quote_timestamp: projection.timestamp });
+        const detail = { required_data_freshness: projection.required_data_freshness };
+        await monitoringEvent(this.env.DB, position.id, "DATA_STALE", "WARNING", detail, `stale:${position.id}:${projection.required_data_freshness.effective_timestamp}`);
+        if (statusChanged) await audit(this.env.DB, "DATA_STALE", "monitor", position.id, detail);
+      }
+      if (["INVALID", "INSUFFICIENT_DATA"].includes(projection.data_freshness)) {
+        const eventType = projection.data_freshness === "INVALID" ? "DATA_INVALID" : "DATA_INSUFFICIENT";
+        const detail = { required_data_freshness: projection.required_data_freshness };
+        await monitoringEvent(this.env.DB, position.id, eventType, "WARNING", detail, `${eventType.toLowerCase()}:${position.id}:${projection.timestamp}`);
+        if (statusChanged) await audit(this.env.DB, eventType, "monitor", position.id, detail);
       }
       if (statusChanged && projection.monitor_action === "WATCH") {
         await audit(this.env.DB, "WATCH_TRIGGERED", "monitor", position.id, { reasons: projection.monitor_reasons });

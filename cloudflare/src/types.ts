@@ -16,6 +16,21 @@ export type MonitorAction =
   | "DATA_STALE"
   | "BLOCKED_INSUFFICIENT_DATA";
 
+export type CashFlowType = "CREDIT" | "DEBIT";
+export type ProjectionFreshnessStatus = "FRESH" | "STALE" | "INVALID" | "INSUFFICIENT_DATA";
+
+export interface ProjectionFreshness {
+  effective_timestamp: string | null;
+  underlying_timestamp: string | null;
+  oldest_option_timestamp: string | null;
+  option_timestamps: Record<string, string | null>;
+  fx_timestamp: string | null;
+  combo_timestamp: string | null;
+  age_seconds: number | null;
+  status: ProjectionFreshnessStatus;
+  reasons: string[];
+}
+
 export interface CloudLeg {
   leg_id: string;
   contract_identity: string;
@@ -38,7 +53,7 @@ export interface CloudLeg {
 }
 
 export interface CloudPositionDossier {
-  schema_version: "1.0";
+  schema_version: "1.1";
   fixture_status: "CANONICAL_EXPORT" | "SYNTHETIC_DEMO";
   dossier_id: string;
   position_id: string;
@@ -53,7 +68,8 @@ export interface CloudPositionDossier {
   multiplier: number;
   entry_native_currency: string;
   policy_currency: string;
-  actual_entry_cash: number;
+  entry_cash_flow_policy: number;
+  capital_required_policy: number;
   actual_entry_fx: {
     rate_to_policy_currency: number | null;
     rate_source: string | null;
@@ -113,7 +129,7 @@ export interface OptionQuote {
   contract_identity: string;
   bid: number;
   ask: number;
-  timestamp: string;
+  timestamp: string | null;
   provider: string;
   source: string;
   quality: string;
@@ -122,7 +138,9 @@ export interface OptionQuote {
 }
 
 export interface ProviderSnapshot {
+  /** Legacy ordering timestamp; canonical freshness never derives from this field. */
   timestamp: string;
+  underlying_timestamp: string | null;
   provider: string;
   source: string;
   quality: string;
@@ -140,7 +158,7 @@ export interface ProviderSnapshot {
   current_greeks: Record<string, number>;
   thesis_invalidated: boolean;
   data_sufficient: boolean;
-  combo_quote?: { bid: number; ask: number; timestamp: string };
+  combo_quote?: { price: number; cash_flow_type: CashFlowType; timestamp: string | null };
 }
 
 export interface PnlProjection {
@@ -150,6 +168,8 @@ export interface PnlProjection {
   market_value_policy: number;
   mtm_pnl: number;
   mtm_return: number;
+  estimated_close_cash_flow_policy: number | null;
+  /** @deprecated compatibility alias for estimated_close_cash_flow_policy. */
   liquidation_value: number | null;
   liquidation_pnl: number | null;
   liquidation_return: number | null;
@@ -161,8 +181,18 @@ export interface PnlProjection {
   current_greeks: Record<string, number>;
   monitor_action: MonitorAction;
   monitor_reasons: string[];
-  data_freshness: "FRESH" | "STALE";
+  data_freshness: ProjectionFreshnessStatus;
+  required_data_freshness: ProjectionFreshness;
   provider: string;
+}
+
+export interface LegacyCloudPositionDossierV10
+  extends Omit<
+    CloudPositionDossier,
+    "schema_version" | "entry_cash_flow_policy" | "capital_required_policy"
+  > {
+  schema_version: "1.0";
+  actual_entry_cash: number;
 }
 
 export interface AuthContext {

@@ -5,7 +5,11 @@ export interface MarketDataProvider {
   getOptionQuotes(dossier: CloudPositionDossier): Promise<OptionQuote[]>;
   getFxQuote(dossier: CloudPositionDossier): Promise<{ rate: number | null; timestamp: string | null; source: string | null }>;
   getProviderStatus(): Promise<{ status: "READY" | "NOT_CONFIGURED" | "ERROR"; provider: string }>;
-  getComboQuote?(dossier: CloudPositionDossier): Promise<{ bid: number; ask: number; timestamp: string } | null>;
+  getComboQuote?(dossier: CloudPositionDossier): Promise<{
+    price: number;
+    cash_flow_type: "CREDIT" | "DEBIT";
+    timestamp: string | null;
+  } | null>;
 }
 
 class HttpMarketDataProvider implements MarketDataProvider {
@@ -40,7 +44,11 @@ class HttpMarketDataProvider implements MarketDataProvider {
   }
 
   getComboQuote(dossier: CloudPositionDossier) {
-    return this.get<{ bid: number; ask: number; timestamp: string } | null>(`/combo/${encodeURIComponent(dossier.position_id)}`);
+    return this.get<{
+      price: number;
+      cash_flow_type: "CREDIT" | "DEBIT";
+      timestamp: string | null;
+    } | null>(`/combo/${encodeURIComponent(dossier.position_id)}`);
   }
 }
 
@@ -64,10 +72,13 @@ export async function fetchProviderSnapshot(
 ): Promise<ProviderSnapshot | null> {
   const status = await provider.getProviderStatus();
   if (status.status !== "READY") return null;
+  const sameCurrency = dossier.entry_native_currency === dossier.policy_currency;
   const [underlying, options, fx, combo] = await Promise.all([
     provider.getUnderlyingQuote(dossier),
     provider.getOptionQuotes(dossier),
-    provider.getFxQuote(dossier),
+    sameCurrency
+      ? Promise.resolve({ rate: null, timestamp: null, source: null })
+      : provider.getFxQuote(dossier),
     provider.getComboQuote ? provider.getComboQuote(dossier) : Promise.resolve(null),
   ]);
   const ivValues = options.flatMap((quote) => quote.iv === undefined ? [] : [quote.iv]);
@@ -83,6 +94,7 @@ export async function fetchProviderSnapshot(
   const imported = dossier.last_imported_snapshot;
   const snapshot: ProviderSnapshot = {
     timestamp: underlying.timestamp,
+    underlying_timestamp: underlying.timestamp,
     provider: status.provider,
     source: underlying.source,
     quality: underlying.quality,

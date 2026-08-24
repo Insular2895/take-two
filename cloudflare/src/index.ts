@@ -38,7 +38,11 @@ function apiError(error: unknown): Response {
   if (["CSRF_INVALID", "ACTION_PASSWORD_REQUIRED", "ACTION_PASSWORD_INVALID"].includes(message)) status = 403;
   else if (message === "ACTION_PASSWORD_RATE_LIMITED") status = 429;
   else if (message === "ACTION_PASSWORD_NOT_CONFIGURED") status = 503;
-  else if (message.startsWith("INVALID_") || message.startsWith("COMBO_") || message.startsWith("MISSING_") || message === "FX_RATE_UNAVAILABLE") status = 400;
+  else if (
+    message.startsWith("INVALID_") || message.startsWith("COMBO_") ||
+    message.startsWith("MISSING_") || message.startsWith("ENTRY_") ||
+    message.startsWith("CAPITAL_") || message === "FX_RATE_UNAVAILABLE"
+  ) status = 400;
   return Response.json({ error: message }, { status });
 }
 
@@ -160,20 +164,39 @@ async function createClosePreview(request: Request, env: Env, auth: AuthContext)
   }
   const legs = inverseStructureLegs(dossier, quantity);
   const scale = quantity / position.quantity_remaining;
+  const effectiveTimestamp = projection.required_data_effective_timestamp === null
+    ? String(projection.timestamp)
+    : String(projection.required_data_effective_timestamp);
+  const freshnessReasons = (() => {
+    try { return JSON.parse(String(projection.freshness_reasons_json ?? "[]")) as string[]; }
+    catch { return ["FRESHNESS_REASONS_UNREADABLE"]; }
+  })();
+  const requiredDataFreshness = {
+    effective_timestamp: projection.required_data_effective_timestamp,
+    underlying_timestamp: projection.underlying_timestamp,
+    oldest_option_timestamp: projection.oldest_option_timestamp,
+    fx_timestamp: projection.fx_timestamp,
+    combo_timestamp: projection.combo_timestamp,
+    age_seconds: projection.required_data_age_seconds,
+    status: projection.data_freshness,
+    reasons: freshnessReasons,
+  };
   const previewId = randomId("preview");
   const createdAt = new Date().toISOString();
   await env.DB.prepare(
     `INSERT INTO close_previews(preview_id,position_id,created_at,quantity,pre_close_market_value,
      pre_close_liquidation_value,estimated_pnl,estimated_return,estimated_commission,estimated_slippage,
-     estimated_fx,engine_action,quote_timestamp,quote_provider,legs_json,status)
-     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'CREATED')`,
+     estimated_fx,engine_action,quote_timestamp,quote_provider,legs_json,status,estimated_close_cash_flow_policy)
+     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'CREATED',?)`,
   ).bind(
     previewId, position.id, createdAt, quantity, Number(projection.market_value_policy) * scale,
     Number(projection.liquidation_value) * scale, Number(projection.liquidation_pnl) * scale,
     Number(projection.liquidation_return), projection.estimated_exit_commission === null ? null : Number(projection.estimated_exit_commission) * scale,
     projection.estimated_exit_slippage === null ? null : Number(projection.estimated_exit_slippage) * scale,
     projection.estimated_exit_fx === null ? null : Number(projection.estimated_exit_fx) * scale,
-    String(projection.monitor_action), String(projection.timestamp), String(projection.provider), JSON.stringify(legs),
+    String(projection.monitor_action), effectiveTimestamp,
+    String(projection.provider), JSON.stringify(legs),
+    Number(projection.estimated_close_cash_flow_policy) * scale,
   ).run();
   await audit(env.DB, "CLOSE_PREVIEW_CREATED", auth.actor, position.id, { preview_id: previewId, quantity });
   return Response.json({
@@ -183,11 +206,13 @@ async function createClosePreview(request: Request, env: Env, auth: AuthContext)
     structure_name: position.structure_name,
     legs,
     market_value: Number(projection.market_value_policy) * scale,
+    estimated_close_cash_flow_policy: Number(projection.estimated_close_cash_flow_policy) * scale,
     liquidation_value: Number(projection.liquidation_value) * scale,
     estimated_pnl: Number(projection.liquidation_pnl) * scale,
     estimated_return: Number(projection.liquidation_return),
     engine_action: projection.monitor_action,
-    quote_timestamp: projection.timestamp,
+    quote_timestamp: projection.required_data_effective_timestamp,
+    required_data_freshness: requiredDataFreshness,
     quote_provider: projection.provider,
     safety: { transmit: false, what_if: true, order_capability: "forbidden", security_type: "BAG" },
   }, { status: 201 });
@@ -223,6 +248,7 @@ async function reportManualClose(request: Request, env: Env, auth: AuthContext, 
 interface FillRequest {
   timestamp?: string;
   combo_fill_price?: number;
+  close_cash_flow_type?: "CREDIT" | "DEBIT";
   quantity_closed?: number;
   commission?: number;
   fx_cost?: number;
@@ -241,20 +267,26 @@ async function reconcileFill(request: Request, env: Env, auth: AuthContext, prev
   const timestamp = body.timestamp ?? "";
   const quantity = body.quantity_closed ?? 0;
   const fillPrice = body.combo_fill_price ?? Number.NaN;
+  const closeCashFlowType = body.close_cash_flow_type;
   const commission = body.commission ?? Number.NaN;
   const fxCost = body.fx_cost ?? Number.NaN;
   if (!Number.isFinite(Date.parse(timestamp)) || !Number.isInteger(quantity) || quantity <= 0 || quantity > Number(position.quantity_remaining) || quantity > Number(preview.quantity)) {
     throw new Error("INVALID_FILL_IDENTITY_OR_QUANTITY");
   }
-  if (![fillPrice, commission, fxCost].every(Number.isFinite) || fillPrice < 0 || commission < 0 || fxCost < 0) throw new Error("INVALID_FILL_ECONOMICS");
+  if (
+    ![fillPrice, commission, fxCost].every(Number.isFinite) || fillPrice < 0 ||
+    commission < 0 || fxCost < 0 || !closeCashFlowType ||
+    !["CREDIT", "DEBIT"].includes(closeCashFlowType)
+  ) throw new Error("INVALID_FILL_ECONOMICS");
   const dossier = validateDossier(JSON.parse(String(position.canonical_dossier_json)));
   const sameCurrency = dossier.entry_native_currency === dossier.policy_currency;
   const fxRate = sameCurrency ? 1 : body.actual_fx_rate;
   if (!fxRate || fxRate <= 0) throw new Error("FX_RATE_UNAVAILABLE");
-  const nativeProceeds = fillPrice * quantity * dossier.multiplier;
-  const policyProceeds = nativeProceeds * fxRate - commission - fxCost;
-  const entryBasis = dossier.actual_entry_cash * quantity / dossier.quantity;
-  const realized = policyProceeds - entryBasis;
+  const closeSign = closeCashFlowType === "CREDIT" ? 1 : -1;
+  const signedGrossCloseCashFlowNative = closeSign * fillPrice * quantity * dossier.multiplier;
+  const signedCloseCashFlowPolicy = signedGrossCloseCashFlowNative * fxRate - commission - fxCost;
+  const allocatedEntryCashFlow = dossier.entry_cash_flow_policy * quantity / dossier.quantity;
+  const realized = allocatedEntryCashFlow + signedCloseCashFlowPolicy;
   const estimated = Number(preview.estimated_pnl) * quantity / Number(preview.quantity);
   const estimateError = realized - estimated;
   const remaining = Number(position.quantity_remaining) - quantity;
@@ -264,9 +296,15 @@ async function reconcileFill(request: Request, env: Env, auth: AuthContext, prev
   await env.DB.batch([
     env.DB.prepare(
       `INSERT INTO fills(fill_id,position_id,preview_id,timestamp,quantity_closed,combo_fill_price,native_proceeds,
-       policy_proceeds,commission,fx_cost,actual_realized_pnl,estimate_error,broker_reference,source,created_at)
-       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,'MANUAL_IBKR_RECONCILIATION',?)`,
-    ).bind(fillId, position.id, previewId, timestamp, quantity, fillPrice, nativeProceeds, policyProceeds, commission, fxCost, realized, estimateError, body.broker_reference ?? null, now),
+       policy_proceeds,commission,fx_cost,actual_realized_pnl,estimate_error,broker_reference,source,created_at,
+       close_cash_flow_type,signed_close_cash_flow_policy)
+       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,'MANUAL_IBKR_RECONCILIATION',?,?,?)`,
+    ).bind(
+      fillId, position.id, previewId, timestamp, quantity, fillPrice,
+      signedGrossCloseCashFlowNative, signedCloseCashFlowPolicy, commission, fxCost, realized,
+      estimateError, body.broker_reference ?? null, now, closeCashFlowType,
+      signedCloseCashFlowPolicy,
+    ),
     env.DB.prepare(
       "UPDATE positions SET quantity_remaining=?,realized_pnl=coalesce(realized_pnl,0)+?,state=?,closed_at=?,updated_at=? WHERE id=?",
     ).bind(remaining, realized, newState, remaining === 0 ? timestamp : null, now, position.id),
@@ -287,7 +325,8 @@ async function reconcileFill(request: Request, env: Env, auth: AuthContext, prev
     fill_id: fillId,
     state: newState,
     quantity_remaining: remaining,
-    actual_proceeds: policyProceeds,
+    actual_close_cash_flow_policy: signedCloseCashFlowPolicy,
+    actual_proceeds: signedCloseCashFlowPolicy,
     actual_realized_pnl: realized,
     estimated_pnl: estimated,
     estimate_error: estimateError,
@@ -299,7 +338,7 @@ async function exportData(env: Env, auth: AuthContext): Promise<Response> {
   const results = await env.DB.batch(tables.map((table) => env.DB.prepare(`SELECT * FROM ${table}`)));
   const payload = Object.fromEntries(tables.map((table, index) => [table, results[index]?.results ?? []]));
   await audit(env.DB, "DATA_EXPORTED", auth.actor, null, { format: "json", secrets_included: false });
-  return new Response(JSON.stringify({ exported_at: new Date().toISOString(), schema_version: "1.0", ...payload }, null, 2), {
+  return new Response(JSON.stringify({ exported_at: new Date().toISOString(), schema_version: "1.1", ...payload }, null, 2), {
     headers: { "Content-Type": "application/json", "Content-Disposition": `attachment; filename="take-two-control-${new Date().toISOString().slice(0, 10)}.json"` },
   });
 }

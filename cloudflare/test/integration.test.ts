@@ -1,7 +1,7 @@
 import { env } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
 
-import { syntheticDemoDossier } from "../src/demo";
+import { syntheticCreditSpreadDossier, syntheticDemoDossier } from "../src/demo";
 import { verifyActionPassword } from "../src/auth";
 import { handleRequest } from "../src/index";
 
@@ -246,6 +246,7 @@ describe("preview-only close and actual fill reconciliation", () => {
     const reconciliation = await request(`/api/close-previews/${preview.preview_id}/reconcile`, session, "POST", {
       timestamp: "2026-08-24T15:00:00.000Z",
       combo_fill_price: 7.864130434782608,
+      close_cash_flow_type: "CREDIT",
       quantity_closed: 2,
       commission: 2,
       fx_cost: 5,
@@ -272,6 +273,7 @@ describe("preview-only close and actual fill reconciliation", () => {
     await request(`/api/close-previews/${preview.preview_id}/manual-close-reported`, session, "POST", {});
     const response = await request(`/api/close-previews/${preview.preview_id}/reconcile`, session, "POST", {
       timestamp: "2026-08-24T15:00:00.000Z", combo_fill_price: 7.864130434782608,
+      close_cash_flow_type: "CREDIT",
       quantity_closed: 1, commission: 1, fx_cost: 2.5, actual_fx_rate: 0.92,
     });
     const result = await response.json<Record<string, number | string>>();
@@ -280,5 +282,88 @@ describe("preview-only close and actual fill reconciliation", () => {
     const position = await env.DB.prepare("SELECT quantity_initial,quantity_remaining,state,realized_pnl FROM positions").first<Record<string, number | string>>();
     expect(position).toMatchObject({ quantity_initial: 2, quantity_remaining: 1, state: "PARTIAL_CLOSE" });
     expect(position?.realized_pnl).not.toBeNull();
+  });
+
+  it("reconciles a credit entry closed for a debit without using capital as PnL basis", async () => {
+    const session = await accessSession();
+    const credit = syntheticCreditSpreadDossier();
+    expect((await request("/api/positions/import", session, "POST", credit)).status).toBe(201);
+    const preview = await (await request("/api/close-previews", session, "POST", { quantity: 1 })).json<Record<string, any>>();
+    expect(preview.estimated_close_cash_flow_policy).toBeCloseTo(-105, 8);
+    await request(`/api/close-previews/${preview.preview_id}/acknowledge`, session, "POST", {});
+    await request(`/api/close-previews/${preview.preview_id}/manual-close-reported`, session, "POST", {});
+    const response = await request(`/api/close-previews/${preview.preview_id}/reconcile`, session, "POST", {
+      timestamp: "2026-08-24T15:00:00.000Z",
+      combo_fill_price: 1.00,
+      close_cash_flow_type: "DEBIT",
+      quantity_closed: 1,
+      commission: 2,
+      fx_cost: 0,
+    });
+    expect(response.status).toBe(201);
+    const result = await response.json<Record<string, number | string>>();
+    expect(result.actual_close_cash_flow_policy).toBeCloseTo(-102, 8);
+    expect(result.actual_realized_pnl).toBeCloseTo(198, 8);
+    const stored = await env.DB.prepare(
+      "SELECT close_cash_flow_type,signed_close_cash_flow_policy,actual_realized_pnl FROM fills",
+    ).first<Record<string, number | string>>();
+    expect(stored).toMatchObject({ close_cash_flow_type: "DEBIT" });
+    expect(stored?.signed_close_cash_flow_policy).toBeCloseTo(-102, 8);
+    expect(stored?.actual_realized_pnl).toBeCloseTo(198, 8);
+  });
+
+  it("records a losing credit close with costs in the same negative direction", async () => {
+    const session = await accessSession();
+    const credit = syntheticCreditSpreadDossier();
+    expect((await request("/api/positions/import", session, "POST", credit)).status).toBe(201);
+    const preview = await (await request("/api/close-previews", session, "POST", { quantity: 1 })).json<Record<string, any>>();
+    await request(`/api/close-previews/${preview.preview_id}/acknowledge`, session, "POST", {});
+    await request(`/api/close-previews/${preview.preview_id}/manual-close-reported`, session, "POST", {});
+    const result = await (await request(`/api/close-previews/${preview.preview_id}/reconcile`, session, "POST", {
+      timestamp: "2026-08-24T15:00:00.000Z",
+      combo_fill_price: 6.50,
+      close_cash_flow_type: "DEBIT",
+      quantity_closed: 1,
+      commission: 10,
+      fx_cost: 0,
+    })).json<Record<string, number>>();
+    expect(result.actual_close_cash_flow_policy).toBeCloseTo(-660, 8);
+    expect(result.actual_realized_pnl).toBeCloseTo(-360, 8);
+  });
+
+  it("allocates signed entry cash flow pro rata on a partial credit close", async () => {
+    const session = await accessSession();
+    const base = syntheticCreditSpreadDossier();
+    const credit = {
+      ...base,
+      dossier_id: "synthetic-ttwo-credit-partial-v1",
+      position_id: "synthetic-ttwo-credit-partial-position-v1",
+      quantity: 2,
+      entry_cash_flow_policy: 600,
+      capital_required_policy: 1400,
+      legs: base.legs.map((leg) => ({ ...leg, quantity: 2 })),
+    };
+    expect((await request("/api/positions/import", session, "POST", credit)).status).toBe(201);
+    const preview = await (await request("/api/close-previews", session, "POST", { quantity: 1 })).json<Record<string, any>>();
+    await request(`/api/close-previews/${preview.preview_id}/acknowledge`, session, "POST", {});
+    await request(`/api/close-previews/${preview.preview_id}/manual-close-reported`, session, "POST", {});
+    const result = await (await request(`/api/close-previews/${preview.preview_id}/reconcile`, session, "POST", {
+      timestamp: "2026-08-24T15:00:00.000Z",
+      combo_fill_price: 1.10,
+      close_cash_flow_type: "DEBIT",
+      quantity_closed: 1,
+      commission: 3,
+      fx_cost: 2,
+    })).json<Record<string, number | string>>();
+    expect(result.actual_close_cash_flow_policy).toBeCloseTo(-115, 8);
+    expect(result.actual_realized_pnl).toBeCloseTo(185, 8);
+    expect(result.quantity_remaining).toBe(1);
+    const position = await env.DB.prepare(
+      "SELECT quantity_remaining,realized_pnl,entry_cash_flow_policy,capital_required_policy FROM positions",
+    ).first<Record<string, number>>();
+    expect(position?.quantity_remaining).toBe(1);
+    expect(position?.realized_pnl).toBeCloseTo(185, 8);
+    expect(position?.entry_cash_flow_policy).toBe(600);
+    expect(position?.capital_required_policy).toBe(1400);
   });
 });

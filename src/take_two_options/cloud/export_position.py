@@ -115,6 +115,50 @@ def _model_snapshot(ticket: TradeEconomicsTicket) -> CloudModelSnapshot | None:
     )
 
 
+def _signed_entry_cash_flow_policy(ticket: TradeEconomicsTicket) -> float:
+    """Return the opening account cash flow using receipt-positive semantics.
+
+    TradeEconomicsTicket uses the established cost convention where a debit is positive and a
+    credit is negative.  The cloud control plane uses the account convention, so the final value
+    is its additive inverse after the canonical policy-currency conversion and FX execution cost.
+    """
+    native_cost_flow = ticket.entry_cost.total_entry_cash_flow
+    if native_cost_flow is None or not math.isfinite(native_cost_flow):
+        raise ValueError("ENTRY_CASH_FLOW_SIGN_UNPROVEN")
+    diagnostics = ticket.budget_diagnostics
+    policy_currency = diagnostics.currency if diagnostics is not None else ticket.currency
+    if policy_currency == ticket.currency:
+        return -native_cost_flow
+    if (
+        diagnostics is None
+        or diagnostics.native_entry_cash is None
+        or diagnostics.fx_rate_to_policy_currency is None
+        or diagnostics.entry_fx_cost is None
+    ):
+        raise ValueError("ENTRY_CASH_FLOW_SIGN_UNPROVEN")
+    expected_native_before_policy_fx = native_cost_flow - (ticket.entry_cost.entry_fx_cost or 0.0)
+    if not math.isclose(
+        diagnostics.native_entry_cash,
+        expected_native_before_policy_fx,
+        rel_tol=0.0,
+        abs_tol=1e-8,
+    ):
+        raise ValueError("ENTRY_CASH_FLOW_SIGN_UNPROVEN")
+    policy_cost_flow = (
+        diagnostics.native_entry_cash * diagnostics.fx_rate_to_policy_currency
+        + diagnostics.entry_fx_cost
+    )
+    return -policy_cost_flow
+
+
+def _capital_required_policy(ticket: TradeEconomicsTicket) -> float:
+    diagnostics = ticket.budget_diagnostics
+    requirement = diagnostics.effective_capital_requirement if diagnostics is not None else None
+    if requirement is None or not math.isfinite(requirement) or requirement < 0:
+        raise ValueError("CAPITAL_REQUIREMENT_UNPROVEN")
+    return requirement
+
+
 def build_cloud_position_dossier(
     ticket: TradeEconomicsTicket,
     *,
@@ -166,13 +210,8 @@ def build_cloud_position_dossier(
         raise ValueError("cloud dossier requires one consistent contract multiplier")
     diagnostics = ticket.budget_diagnostics
     policy_currency = diagnostics.currency if diagnostics is not None else ticket.currency
-    actual_entry_cash = (
-        diagnostics.required_entry_cash_after_fx
-        if diagnostics is not None and diagnostics.required_entry_cash_after_fx is not None
-        else ticket.entry_cost.total_entry_cash_flow
-    )
-    if actual_entry_cash is None:
-        raise ValueError("ticket does not contain canonical actual entry cash")
+    entry_cash_flow_policy = _signed_entry_cash_flow_policy(ticket)
+    capital_required_policy = _capital_required_policy(ticket)
     fx_status = (
         diagnostics.entry_fx_cost_status.value
         if diagnostics is not None and diagnostics.entry_fx_cost_status is not None
@@ -234,7 +273,8 @@ def build_cloud_position_dossier(
         multiplier=multiplier,
         entry_native_currency=ticket.currency,
         policy_currency=policy_currency,
-        actual_entry_cash=actual_entry_cash,
+        entry_cash_flow_policy=entry_cash_flow_policy,
+        capital_required_policy=capital_required_policy,
         actual_entry_fx=CloudFXContext(
             rate_to_policy_currency=(diagnostics.fx_rate if diagnostics else None),
             rate_source=(diagnostics.fx_rate_source if diagnostics else None),

@@ -520,10 +520,16 @@
           "format": "date-time",
           "title": "Timestamp",
           "type": "string"
+        },
+        "underlying_timestamp": {
+          "format": "date-time",
+          "title": "Underlying Timestamp",
+          "type": "string"
         }
       },
       "required": [
         "timestamp",
+        "underlying_timestamp",
         "provider",
         "source",
         "quality",
@@ -861,10 +867,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
-    "actual_entry_cash": {
-      "title": "Actual Entry Cash",
-      "type": "number"
-    },
     "actual_entry_commissions": {
       "minimum": 0,
       "title": "Actual Entry Commissions",
@@ -882,6 +884,12 @@
       "additionalProperties": true,
       "title": "Budget Diagnostics",
       "type": "object"
+    },
+    "capital_required_policy": {
+      "description": "Governed non-negative capital requirement in policy currency; never a PnL basis.",
+      "minimum": 0,
+      "title": "Capital Required Policy",
+      "type": "number"
     },
     "config_hash": {
       "pattern": "^[a-f0-9]{64}$",
@@ -902,6 +910,11 @@
       "minLength": 1,
       "title": "Dossier Id",
       "type": "string"
+    },
+    "entry_cash_flow_policy": {
+      "description": "Signed opening account cash flow in policy currency: positive cash received, negative cash paid; all known entry costs are included exactly once.",
+      "title": "Entry Cash Flow Policy",
+      "type": "number"
     },
     "entry_native_currency": {
       "maxLength": 3,
@@ -1120,8 +1133,8 @@
       "type": "boolean"
     },
     "schema_version": {
-      "const": "1.0",
-      "default": "1.0",
+      "const": "1.1",
+      "default": "1.1",
       "title": "Schema Version",
       "type": "string"
     },
@@ -1177,7 +1190,8 @@
     "multiplier",
     "entry_native_currency",
     "policy_currency",
-    "actual_entry_cash",
+    "entry_cash_flow_policy",
+    "capital_required_policy",
     "actual_entry_fx",
     "actual_entry_commissions",
     "actual_entry_slippage",

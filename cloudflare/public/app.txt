@@ -106,13 +106,13 @@ function render(data) {
   $("#structure-name").textContent = position.structure_name;
   $("#remaining-quantity").textContent = `${position.quantity_remaining} / ${position.quantity_initial} remaining`;
   $("#structure-legs").textContent = dossier.legs.map((leg) => `${leg.side === "LONG" ? "+" : "−"}${leg.ratio * position.quantity_remaining} ${leg.option_right} ${leg.strike} · ${leg.expiration.slice(0, 10)}`).join("  |  ");
-  $("#invested").textContent = amount(position.entry_cash, currency);
+  $("#invested").textContent = amount(position.capital_required_policy, currency);
   setEconomicValue("#mtm-pnl", pnl?.mtm_pnl, (value) => money(value, currency));
   $("#mtm-return").textContent = percent(pnl?.mtm_return);
   setEconomicValue("#liquidation-pnl", pnl?.liquidation_pnl, (value) => money(value, currency));
   $("#liquidation-return").textContent = percent(pnl?.liquidation_return);
   $("#mark-value").textContent = amount(pnl?.market_value_policy, currency);
-  $("#liquidation-value").textContent = amount(pnl?.liquidation_value, currency);
+  setEconomicValue("#liquidation-value", pnl?.estimated_close_cash_flow_policy, (value) => money(value, currency));
   $("#realized-pnl").textContent = money(position.realized_pnl, currency);
   const totalPnl = position.realized_pnl === null ? pnl?.mtm_pnl : Number(position.realized_pnl) + Number(pnl?.mtm_pnl ?? 0);
   $("#total-pnl").textContent = money(totalPnl, currency);
@@ -122,7 +122,9 @@ function render(data) {
   const modelAge = model ? age(model.timestamp) : "N/A — no promoted model snapshot";
   $("#model-age").textContent = model ? `Model snapshot ${model.timestamp} · ${modelAge}${Date.now() - Date.parse(model.timestamp) > 86400000 ? " · STALE MODEL SNAPSHOT" : ""}` : modelAge;
   $("#market-source").textContent = pnl?.provider || "NONE";
-  $("#last-quote").textContent = age(pnl?.timestamp);
+  $("#last-quote").textContent = pnl
+    ? `${pnl.data_freshness} · oldest required input ${age(pnl.required_data_effective_timestamp)}`
+    : "N/A";
   const minDte = Math.min(...dossier.expirations.map((date) => Math.ceil((Date.parse(date) - Date.now()) / 86400000)));
   const initialIv = Object.values(dossier.initial_iv).reduce((sum, value) => sum + value, 0) / Object.values(dossier.initial_iv).length;
   const flat = dossier.flat_spot_diagnostics;
@@ -153,7 +155,9 @@ function render(data) {
     ...["delta", "gamma", "theta", "vega", "rho", "vanna", "vomma"].map((key) => [key[0].toUpperCase() + key.slice(1), greeks[key] ?? "N/A", greekSource]),
   ]);
   $("#engine-action").textContent = pnl?.monitor_action || "BLOCKED_INSUFFICIENT_DATA";
-  $("#engine-reason").textContent = pnl ? `${pnl.data_freshness} · ${pnl.provider}` : "No monitoring snapshot.";
+  let freshnessReasons = [];
+  try { freshnessReasons = JSON.parse(pnl?.freshness_reasons_json || "[]"); } catch { freshnessReasons = ["FRESHNESS_REASONS_UNREADABLE"]; }
+  $("#engine-reason").textContent = pnl ? `${pnl.data_freshness} · ${pnl.provider}${freshnessReasons.length ? ` · ${freshnessReasons.join(", ")}` : ""}` : "No monitoring snapshot.";
   const scores = dossier.five_scores;
   $("#scores").innerHTML = scores ? ["opportunity", "risk", "evidence", "model_agreement", "execution_quality"].map((key) => `<div class="score"><span>${h(key.replaceAll("_", " "))}</span><strong>${h(scores[key].score_value)}</strong><small>${h(Math.round(scores[key].coverage * 100))}% coverage</small></div>`).join("") : "N/A — no canonical five-score snapshot";
   renderChart(data.pnl_history);
@@ -212,7 +216,8 @@ $("#close-structure").addEventListener("click", async () => {
     const preview = await api("/api/close-previews", { method: "POST", body: JSON.stringify({ quantity: state.data.position.quantity_remaining }) });
     state.preview = preview;
     $("#preview-title").textContent = `${preview.structure_name} · ${preview.quantity} structure(s)`;
-    $("#preview-economics").innerHTML = [["CURRENT MARKET VALUE", amount(preview.market_value)], ["EXPECTED PROCEEDS", amount(preview.liquidation_value)], ["ESTIMATED PNL", money(preview.estimated_pnl)], ["ESTIMATED RETURN", percent(preview.estimated_return)], ["ENGINE", preview.engine_action], ["DATA", `${preview.quote_provider} · ${age(preview.quote_timestamp)}`]].map(([label, value]) => `<div><span>${h(label)}</span><strong>${h(value)}</strong></div>`).join("");
+    const closeFlow = Number(preview.estimated_close_cash_flow_policy);
+    $("#preview-economics").innerHTML = [["CURRENT MARKET VALUE", money(preview.market_value)], ["ESTIMATED CLOSE CASH FLOW", money(closeFlow)], [closeFlow >= 0 ? "CASH RECEIVED" : "CASH REQUIRED TO CLOSE", money(Math.abs(closeFlow))], ["ESTIMATED PNL", money(preview.estimated_pnl)], ["ESTIMATED RETURN", percent(preview.estimated_return)], ["ENGINE", preview.engine_action], ["DATA", `${preview.required_data_freshness.status} · oldest required input ${age(preview.quote_timestamp)}`]].map(([label, value]) => `<div><span>${h(label)}</span><strong>${h(value)}</strong></div>`).join("");
     $("#preview-legs").innerHTML = preview.legs.map((leg) => `<div class="preview-leg"><strong>${h(leg.action)}</strong><span>${h(leg.quantity)} × ${h(leg.option_right)} ${h(leg.strike)} · ${h(leg.expiration.slice(0, 10))}<br><small>${h(leg.contract_identity)}</small></span></div>`).join("");
     $("#close-dialog").showModal();
   } catch (error) { alert(error.message); }
@@ -243,6 +248,7 @@ $("#fill-form").addEventListener("submit", async (event) => {
   try {
     const result = await protectedMutation(`/api/close-previews/${encodeURIComponent(state.preview.preview_id)}/reconcile`, {
       timestamp: new Date(String(form.get("timestamp"))).toISOString(), combo_fill_price: value("combo_fill_price"),
+      close_cash_flow_type: String(form.get("close_cash_flow_type")),
       quantity_closed: value("quantity_closed"), actual_fx_rate: form.get("actual_fx_rate") ? value("actual_fx_rate") : undefined,
       commission: value("commission"), fx_cost: value("fx_cost"), broker_reference: String(form.get("broker_reference") || "") || undefined,
     }, "CONFIRMER L’ENREGISTREMENT DU PRIX D’EXÉCUTION");
