@@ -33,10 +33,10 @@ Python canonical ticket -> CloudPositionDossier -> authenticated Worker -> D1
 ```
 
 D1 tables: `system_state`, `positions`, `position_legs`, `fills`, `pnl_snapshots`,
-`model_snapshots`, `close_previews`, `monitoring_events`, `audit_events`, and `daily_usage` are
-active. The legacy `sessions` and `login_attempts` tables remain unused for non-destructive schema
-compatibility. Audit events are append-only by trigger; close-preview economics cannot be mutated
-after creation.
+`model_snapshots`, `close_previews`, `monitoring_events`, `audit_events`, `daily_usage`, and
+`action_password_attempts` are active. The legacy `sessions` and `login_attempts` tables remain
+unused for non-destructive schema compatibility. Audit events are append-only by trigger;
+close-preview economics cannot be mutated after creation.
 
 ## User interface
 
@@ -62,10 +62,10 @@ There is one primary `CLOSE STRUCTURE` button. Its preview reverses every exact 
 strike, right, ratio, multiplier, and quantity as one BAG-shaped structure. Missing completeness
 returns `COMBO_CLOSE_PREVIEW_UNAVAILABLE`; no individual-leg fallback exists.
 
-Acknowledgement is protected by CSRF and requires a Cloudflare Access authentication timestamp no
-older than five minutes. It stores only `CLOSE_PREVIEW_READY` and tells the human to close the
-complete combo manually in IBKR. It cannot send, cancel, modify, exercise, retry, or mark a trade
-closed.
+Acknowledgement is protected by CSRF, requires a Cloudflare Access authentication timestamp no
+older than five minutes, and requires the separate action password. It stores only
+`CLOSE_PREVIEW_READY` and tells the human to close the complete combo manually in IBKR. It cannot
+send, cancel, modify, exercise, retry, or mark a trade closed.
 
 Manual fill reconciliation captures timestamp, combo price, quantity, commission, FX cost/rate,
 and optional broker reference. The original estimate stays immutable. The acceptance fixture
@@ -79,6 +79,11 @@ remaining yields `CLOSED`.
   Worker traffic.
 - The Worker requires a direct `ctx.access` identity with an email and returns `403` otherwise.
 - Private UI resources are bundled into the Worker so Access context reaches application code.
+- Sensitive control-plane mutations require a second, reusable action password after Access. Its
+  keyed HMAC verifier is held only as an encrypted Worker secret; the password and verifier never
+  enter D1, browser storage, logs, assets, or Git.
+- Action-password failures are reserved atomically in D1 per verified Access identity and limited
+  to five attempts per rolling 15 minutes. Missing verifier configuration fails closed.
 - A random 256-bit `__Host-ttwo_csrf` cookie is `HttpOnly; Secure; SameSite=Strict; Path=/` and must
   match the mutation header.
 - Cloudflare Access logout and session revocation replace application password/session endpoints.
@@ -121,20 +126,22 @@ row-write/day quotas; it does not promise future limits or provider costs. Offic
 
 ## Verification
 
-- Cloudflare: `npm run check` — TypeScript, safety scan, and 28 Vitest tests.
+- Cloudflare: `npm run check` — TypeScript, safety scan, and 33 Vitest tests.
 - Cross-language: shared `monitoring_parity.json` covers PnL, HOLD, WATCH, profit, stop, time, IV,
   theta, trailing drawdown, stale data, thesis invalidation, and insufficient data.
 - Python exporter: strict schema/safety/hash/identity tests and CLI smoke export.
 - D1/Worker integration: missing/invalid Access identity denial, bundled private assets, removed
-  password endpoints, CSRF, Access freshness, import, runtime-independent reads, alarms, provider
-  absence, duplicate/concurrent alarms, SAFE MODE, pause/resume, immutable preview, actual
-  reconciliation, identity-aware audits, and partial close.
+  password endpoints, CSRF, Access freshness, action-password absence/success/failure/atomic rate
+  limiting, import, runtime-independent reads, alarms, provider absence, duplicate/concurrent
+  alarms, SAFE MODE, pause/resume, immutable preview, actual reconciliation, identity-aware audits,
+  and partial close.
 - Repository cloud safety scan rejects broker-order capability tokens and `transmit: true`.
 
 Final local gate: 346 Python tests passed; Ruff and strict mypy passed; 29 generated schemas and the
-offline artifact validator passed. The 28 Worker tests, safety scan, TypeScript compiler, and
-Wrangler production dry-run passed. GitHub CI remains a publication-time check and now runs both the
-Python and Cloudflare gates.
+offline artifact validator passed. The 33 Worker tests, safety scan, TypeScript compiler, Wrangler
+production dry-run, remote D1 migration, Worker secret presence check, deployment, and unauthenticated
+Access redirect passed. GitHub CI remains a publication-time check and runs both the Python and
+Cloudflare gates.
 
 ## Recovery and domain
 
@@ -159,6 +166,7 @@ Access **All traffic** coverage must be verified before use. See `docs/cloudflar
 CF0_CONTROL_PLANE=READY
 CF0_WEB_UI=READY
 CF0_AUTH=READY
+CF0_ACTION_PASSWORD=READY
 CF0_PERSISTENCE=READY
 CF0_MONITOR_SCHEDULER=READY
 CF0_STRUCTURE_CLOSE_PREVIEW=READY

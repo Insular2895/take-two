@@ -25,14 +25,17 @@ python -m take_two_options.cloud.export_position \
   --output cloud_position.json
 cd cloudflare
 npm install
+npm run action-password:set-local
 npm run db:local
 npm run dev
 ```
 
 For a €0 Cloudflare Free deployment: log in with Wrangler, create the D1 database, replace its ID
 in `wrangler.jsonc`, apply remote migrations, deploy, then protect **All traffic** with a Worker-level
-Cloudflare Access policy for account members. There is no application password. Wrangler returns
-the real `take-two-control.<account>.workers.dev` URL. A custom domain is optional later. See the
+Cloudflare Access policy for account members. There is no application password for login; a
+separate action password confirms sensitive mutations and is stored only as a keyed Cloudflare
+secret verifier. Wrangler returns the real `take-two-control.<account>.workers.dev` URL. A custom
+domain is optional later. See the
 [`zero-cost deployment guide`](docs/cloudflare/ZERO_COST_DEPLOYMENT.md) and
 [`CF0 architecture`](docs/cloudflare/ARCHITECTURE.md).
 

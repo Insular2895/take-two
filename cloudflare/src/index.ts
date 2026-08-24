@@ -1,4 +1,10 @@
-import { attachCsrfCookie, authenticateAccess, hasFreshSensitiveAuth, requireCsrf } from "./auth";
+import {
+  attachCsrfCookie,
+  authenticateAccess,
+  hasFreshSensitiveAuth,
+  requireActionPassword,
+  requireCsrf,
+} from "./auth";
 import { activePosition, audit, importDossier, incrementUsage, latestProjection, persistProjection } from "./db";
 import { syntheticDemoDossier } from "./demo";
 import { calculateProjection, estimateDailyUsage, inverseStructureLegs, randomId, validateDossier } from "./domain";
@@ -28,9 +34,11 @@ function withSecurity(response: Response): Response {
 
 function apiError(error: unknown): Response {
   const message = error instanceof Error ? error.message : "INTERNAL_ERROR";
-  const status = message === "CSRF_INVALID" ? 403
-    : message.startsWith("INVALID_") || message.startsWith("COMBO_") || message.startsWith("MISSING_") || message === "FX_RATE_UNAVAILABLE" ? 400
-      : 500;
+  let status = 500;
+  if (["CSRF_INVALID", "ACTION_PASSWORD_REQUIRED", "ACTION_PASSWORD_INVALID"].includes(message)) status = 403;
+  else if (message === "ACTION_PASSWORD_RATE_LIMITED") status = 429;
+  else if (message === "ACTION_PASSWORD_NOT_CONFIGURED") status = 503;
+  else if (message.startsWith("INVALID_") || message.startsWith("COMBO_") || message.startsWith("MISSING_") || message === "FX_RATE_UNAVAILABLE") status = 400;
   return Response.json({ error: message }, { status });
 }
 
@@ -93,6 +101,7 @@ async function dashboardPayload(env: Env, auth: AuthContext): Promise<Response> 
 
 async function setSafeMode(request: Request, env: Env, auth: AuthContext): Promise<Response> {
   requireCsrf(request, auth);
+  await requireActionPassword(request, env, auth, "SET_SAFE_MODE");
   const body = await jsonBody<{ enabled?: boolean }>(request);
   if (typeof body.enabled !== "boolean") throw new Error("INVALID_SAFE_MODE_VALUE");
   const now = new Date().toISOString();
@@ -103,6 +112,7 @@ async function setSafeMode(request: Request, env: Env, auth: AuthContext): Promi
 
 async function setMonitoring(request: Request, env: Env, auth: AuthContext, paused: boolean): Promise<Response> {
   requireCsrf(request, auth);
+  await requireActionPassword(request, env, auth, paused ? "PAUSE_MONITORING" : "RESUME_MONITORING");
   const now = new Date().toISOString();
   await env.DB.prepare("UPDATE system_state SET monitoring_paused=?,updated_at=? WHERE singleton=1").bind(paused ? 1 : 0, now).run();
   await monitorStub(env).fetch(`https://monitor/${paused ? "pause" : "resume"}`, { method: "POST" });
@@ -112,6 +122,7 @@ async function setMonitoring(request: Request, env: Env, auth: AuthContext, paus
 
 async function importPosition(request: Request, env: Env, auth: AuthContext, demo = false): Promise<Response> {
   requireCsrf(request, auth);
+  await requireActionPassword(request, env, auth, demo ? "IMPORT_SYNTHETIC_DEMO" : "IMPORT_POSITION");
   const state = await env.DB.prepare("SELECT safe_mode FROM system_state WHERE singleton=1").first<{ safe_mode: number }>();
   if (state?.safe_mode) return Response.json({ error: "SAFE_MODE_BLOCKS_IMPORT" }, { status: 409 });
   const existing = await activePosition(env.DB);
@@ -185,6 +196,7 @@ async function createClosePreview(request: Request, env: Env, auth: AuthContext)
 async function acknowledgeClose(request: Request, env: Env, auth: AuthContext, previewId: string): Promise<Response> {
   requireCsrf(request, auth);
   if (!hasFreshSensitiveAuth(auth)) return Response.json({ error: "SENSITIVE_ACCESS_REAUTH_REQUIRED" }, { status: 403 });
+  await requireActionPassword(request, env, auth, "ACKNOWLEDGE_CLOSE_PREVIEW");
   const acknowledgedAt = new Date().toISOString();
   const result = await env.DB.prepare(
     "UPDATE close_previews SET acknowledged_at=?,status='ACKNOWLEDGED' WHERE preview_id=? AND status='CREATED'",
@@ -197,6 +209,7 @@ async function acknowledgeClose(request: Request, env: Env, auth: AuthContext, p
 
 async function reportManualClose(request: Request, env: Env, auth: AuthContext, previewId: string): Promise<Response> {
   requireCsrf(request, auth);
+  await requireActionPassword(request, env, auth, "REPORT_MANUAL_CLOSE");
   const preview = await env.DB.prepare("SELECT position_id,status FROM close_previews WHERE preview_id=?").bind(previewId).first<{ position_id: string; status: string }>();
   if (!preview || preview.status !== "ACKNOWLEDGED") return Response.json({ error: "ACKNOWLEDGED_PREVIEW_REQUIRED" }, { status: 409 });
   await env.DB.batch([
@@ -219,6 +232,7 @@ interface FillRequest {
 
 async function reconcileFill(request: Request, env: Env, auth: AuthContext, previewId: string): Promise<Response> {
   requireCsrf(request, auth);
+  await requireActionPassword(request, env, auth, "RECONCILE_ACTUAL_FILL");
   const body = await jsonBody<FillRequest>(request);
   const preview = await env.DB.prepare("SELECT * FROM close_previews WHERE preview_id=?").bind(previewId).first<Record<string, unknown>>();
   if (!preview || preview.status !== "RECONCILIATION_REQUIRED") return Response.json({ error: "RECONCILIATION_NOT_READY" }, { status: 409 });

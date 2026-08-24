@@ -16,7 +16,7 @@ function scan(path) {
   for (const entry of readdirSync(path)) {
     const target = join(path, entry);
     if (statSync(target).isDirectory()) scan(target);
-    else if (/\.(ts|js|html)$/.test(entry)) {
+    else if (/\.(ts|js|html|txt)$/.test(entry)) {
       const contents = readFileSync(target, "utf8");
       for (const expression of forbidden) if (expression.test(contents)) violations.push(`${target}: ${expression}`);
     }

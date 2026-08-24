@@ -33,9 +33,9 @@ position, SAFE MODE, PnL history, preview, fill, or audit event.
 - Python owns pricing, calibration, distributions, promoted model snapshots, five scores,
   historical research, and validation.
 - Cloudflare Access owns identity authentication and account-member authorization. The Worker
-  requires `ctx.access`, enforces CSRF, and owns dossier validation/import, cached reads, PnL display,
-  conservative liquidation projection, advisory exit checks, manual-close reconciliation, and
-  export.
+  requires `ctx.access`, enforces CSRF plus a separately rate-limited action password on sensitive
+  mutations, and owns dossier validation/import, cached reads, PnL display, conservative
+  liquidation projection, advisory exit checks, manual-close reconciliation, and export.
 - The Durable Object owns one alarm loop and concurrency serialization. Every wake reads D1,
   performs bounded work, persists when due or on a transition, schedules the next alarm, and exits.
 - The browser polls persisted state every 10 seconds only while visible; it never causes an external

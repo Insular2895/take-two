@@ -16,7 +16,9 @@ If any complete inverse leg is missing or invalid, CF0 returns
 Acknowledgement requires a Cloudflare Access authentication no older than five minutes. A stale
 identity is logged out and must sign in again before retrying. Acknowledgement produces only
 `CLOSE_PREVIEW_READY` plus the instruction to close the entire combo manually in IBKR; it does not
-change broker truth or display “order sent”.
+change broker truth or display “order sent”. A separate action password is required for
+acknowledgement, the subsequent declaration of a manual IBKR close, and final fill reconciliation.
+The browser requests it for each sensitive mutation and never saves it.
 
 ## Reconciliation
 

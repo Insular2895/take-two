@@ -4,7 +4,8 @@
 
 Production authentication is provided only by Cloudflare Access. The Worker-level policy must
 cover **All traffic** and allow only approved Cloudflare account members. There is no application
-username, password, registration, login endpoint, or password secret.
+username, registration, login endpoint, or application session. A separate action password is not
+a login mechanism: it is required only after Access authentication for sensitive mutations.
 
 The Worker also fails closed: every request requires a direct `ctx.access` context and an Access
 identity containing an email address. This application deliberately bundles its private HTML, CSS,
@@ -24,6 +25,12 @@ without a verified Access context.
   match the `X-CSRF-Token` header on every mutation.
 - Close-preview acknowledgement requires the Access identity login timestamp to be no older than
   five minutes. A stale session is logged out through `/cdn-cgi/access/logout` before retry.
+- Imports, SAFE MODE, monitoring pause/resume, close acknowledgement, manual-close reporting, and
+  actual-fill reconciliation also require `X-Action-Password` server-side. The browser prompts for
+  every action and never saves the supplied password.
+- The Worker permits at most five failed action-password checks per verified Access identity in a
+  rolling 15-minute window. Failures, rate limiting, and successful confirmations are audited
+  without logging the password.
 - The logout button uses Cloudflare Access logout; no application logout endpoint exists.
 - AJAX calls send `X-Requested-With: XMLHttpRequest` so an expired Access session can return `401`
   and force a browser refresh.
@@ -31,7 +38,10 @@ without a verified Access context.
 All private HTML, JavaScript, CSS, and API responses require Access. Security headers include a
 same-origin CSP, `no-store`, clickjacking protection, no referrer, and disabled sensitive browser
 permissions. The legacy `sessions` and `login_attempts` tables may remain in an existing D1 schema
-for non-destructive compatibility, but the runtime does not read or write them.
+for non-destructive compatibility, but the runtime does not read or write them. The separate
+`action_password_attempts` table contains only a hashed Access identity, timestamps, and action
+labels for rate limiting. Each request atomically reserves one of five attempt slots before secret
+verification, preventing a concurrent burst from bypassing the limit.
 
 ## Trading boundary
 
@@ -42,7 +52,14 @@ automatic retry, individual-leg close, or silent legging route.
 
 ## Secrets
 
-Cloudflare Access removes the application password secrets. Use `wrangler secret put` only for
-future provider credentials. Never put API keys, credentials, Access tokens, production database
-exports, or private identity data in Git. The authenticated export omits legacy auth tables, daily
-security identities, and every secret.
+Cloudflare Access removes the application login password. `ACTION_PASSWORD_VERIFIER` is a keyed
+HMAC-SHA-256 verifier stored as an encrypted Worker secret; it contains no plaintext password and
+is fast enough for Workers Free. Generate and install it only with `npm run action-password:set`,
+which prompts without echo and also writes the verifier—not the password—to ignored `.dev.vars`.
+Never put API keys, credentials, Access tokens, production database exports, or private identity
+data in Git. The authenticated export omits authentication/rate-limit tables, daily security
+identities, and every secret.
+
+The action password is defense in depth for an unlocked or stolen Access browser session. It does
+not protect against a complete Cloudflare account takeover capable of replacing Worker code or
+secrets. The no-order boundary remains the primary financial blast-radius control.

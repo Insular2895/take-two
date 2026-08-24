@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.12.5 — 2026-08-24
+
+### Sensitive-action password
+
+- Kept Cloudflare Access as the only login while adding a separate action password for imports,
+  SAFE MODE, monitoring changes, close acknowledgement, manual-close reporting, and fill
+  reconciliation.
+- Stored only a keyed HMAC-SHA-256 verifier as a Cloudflare Worker secret, never the plaintext
+  password, and added a masked setup/rotation command for remote and ignored local configuration.
+- Added per-Access-identity D1 throttling at five failures per 15 minutes, secret-free audit events,
+  a reusable password dialog, negative integration coverage, and retained the strict no-order
+  boundary.
+
 ## 0.12.4 — 2026-08-24
 
 ### Cloudflare Access production authentication

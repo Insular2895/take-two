@@ -2,11 +2,14 @@
 
 D1 is the source of truth for system state, positions and legs, fills, PnL and model snapshots,
 immutable close previews, monitoring events, append-only audit events, and daily usage. Cloudflare
-Access owns authentication sessions. Durable Object memory is never authoritative.
+Access owns authentication sessions. `ACTION_PASSWORD_VERIFIER` remains a Worker secret rather
+than D1 state; the `action_password_attempts` table retains only short-lived rate-limit evidence.
+Durable Object memory is never authoritative.
 
 The authenticated `EXPORT DATA` action downloads JSON containing positions, legs, fills, PnL/model
 snapshots, close previews, monitoring events, and audit events. It excludes legacy auth tables,
-Access identities/tokens, credentials, secrets, and API keys. Store exports in an encrypted location.
+action-password attempts, Access identities/tokens, credentials, secrets, and API keys. Store
+exports in an encrypted location.
 
 On runtime/isolate disappearance, the next request reconstructs the dashboard from D1. The alarm
 reconstructs its work from `system_state` and the active position. SAFE MODE, monitoring pause,

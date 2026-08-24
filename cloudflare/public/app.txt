@@ -1,6 +1,6 @@
 import { selectTrackedClosePreview } from "/preview-state.js";
 
-const state = { csrf: "", data: null, preview: null, range: "all" };
+const state = { csrf: "", data: null, preview: null, range: "all", actionPrompt: null };
 const $ = (selector) => document.querySelector(selector);
 const h = (value) => String(value ?? "—").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 const money = (value, currency = "EUR") => value === null || value === undefined ? "N/A" : new Intl.NumberFormat("fr-FR", { style: "currency", currency, maximumFractionDigits: 0, signDisplay: "exceptZero" }).format(Number(value));
@@ -23,6 +23,40 @@ async function api(path, options = {}) {
   const payload = response.headers.get("Content-Type")?.includes("json") ? await response.json() : null;
   if (!response.ok) { const error = new Error(payload?.error || `HTTP_${response.status}`); error.status = response.status; throw error; }
   return payload;
+}
+
+const actionErrorMessages = {
+  ACTION_PASSWORD_REQUIRED: "Mot de passe d’action requis.",
+  ACTION_PASSWORD_INVALID: "Mot de passe incorrect.",
+  ACTION_PASSWORD_RATE_LIMITED: "Trop d’essais incorrects. Réessaie dans 15 minutes.",
+  ACTION_PASSWORD_NOT_CONFIGURED: "Le mot de passe d’action n’est pas encore configuré sur Cloudflare.",
+};
+
+function actionErrorMessage(error) { return actionErrorMessages[error.message] || error.message; }
+function reportActionError(error, target = null) {
+  if (error.message === "ACTION_CANCELLED") return;
+  if (target) target.textContent = actionErrorMessage(error);
+  else alert(actionErrorMessage(error));
+}
+
+function finishActionPrompt(value, error = null) {
+  const pending = state.actionPrompt;
+  if (!pending) return;
+  state.actionPrompt = null;
+  const input = $("#action-password");
+  input.value = "";
+  $("#action-password-dialog").close();
+  if (error) pending.reject(error); else pending.resolve(value);
+}
+
+function requestActionPassword(actionLabel, feedback = "") {
+  if (state.actionPrompt) return Promise.reject(new Error("ACTION_PASSWORD_PROMPT_ALREADY_OPEN"));
+  $("#action-password-title").textContent = actionLabel;
+  $("#action-password-error").textContent = feedback;
+  $("#action-password").value = "";
+  $("#action-password-dialog").showModal();
+  $("#action-password").focus();
+  return new Promise((resolve, reject) => { state.actionPrompt = { resolve, reject }; });
 }
 
 function setEconomicValue(selector, value, format = money) {
@@ -140,15 +174,36 @@ function render(data) {
 
 async function refresh() { try { render(await api("/api/dashboard")); } catch (error) { console.error(error); } }
 
-async function mutation(path, body = {}) { const result = await api(path, { method: "POST", body: JSON.stringify(body) }); await refresh(); return result; }
+async function mutation(path, body = {}, headers = {}) { const result = await api(path, { method: "POST", headers, body: JSON.stringify(body) }); await refresh(); return result; }
+async function protectedMutation(path, body, actionLabel) {
+  let feedback = "";
+  while (true) {
+    const password = await requestActionPassword(actionLabel, feedback);
+    try {
+      return await mutation(path, body, { "X-Action-Password": password });
+    } catch (error) {
+      if (error.message === "ACTION_PASSWORD_INVALID") { feedback = actionErrorMessage(error); continue; }
+      throw error;
+    }
+  }
+}
+
+$("#action-password-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  finishActionPrompt($("#action-password").value);
+});
+$("#action-password-cancel").addEventListener("click", () => finishActionPrompt("", new Error("ACTION_CANCELLED")));
+$("#action-password-dialog").addEventListener("cancel", (event) => { event.preventDefault(); finishActionPrompt("", new Error("ACTION_CANCELLED")); });
 
 $("#dossier-file").addEventListener("change", async (event) => {
   const file = event.target.files[0]; if (!file) return;
-  try { await mutation("/api/positions/import", JSON.parse(await file.text())); } catch (error) { alert(error.message); }
+  try { await protectedMutation("/api/positions/import", JSON.parse(await file.text()), "CONFIRMER L’IMPORT DE LA POSITION"); }
+  catch (error) { reportActionError(error); }
+  finally { event.target.value = ""; }
 });
-$("#demo-import").addEventListener("click", () => mutation("/api/demo/import").catch((error) => alert(error.message)));
-$("#safe-mode").addEventListener("click", () => mutation("/api/safe-mode", { enabled: !Boolean(state.data.system.safe_mode) }).catch((error) => alert(error.message)));
-$("#monitor-toggle").addEventListener("click", () => mutation(state.data.system.monitoring_paused ? "/api/monitor/resume" : "/api/monitor/pause").catch((error) => alert(error.message)));
+$("#demo-import").addEventListener("click", () => protectedMutation("/api/demo/import", {}, "CONFIRMER L’IMPORT DE LA DÉMO").catch(reportActionError));
+$("#safe-mode").addEventListener("click", () => protectedMutation("/api/safe-mode", { enabled: !Boolean(state.data.system.safe_mode) }, "CONFIRMER LE CHANGEMENT SAFE MODE").catch(reportActionError));
+$("#monitor-toggle").addEventListener("click", () => protectedMutation(state.data.system.monitoring_paused ? "/api/monitor/resume" : "/api/monitor/pause", {}, "CONFIRMER LE CHANGEMENT DU MONITORING").catch(reportActionError));
 $("#logout").addEventListener("click", () => { window.location.assign("/cdn-cgi/access/logout"); });
 $("#export-data").addEventListener("click", () => window.location.assign("/api/export"));
 
@@ -167,32 +222,32 @@ async function acknowledge() {
   try {
     const previewId = state.preview?.preview_id;
     if (!previewId) throw new Error("CLOSE_PREVIEW_CONTEXT_LOST — reopen the close preview.");
-    await mutation(`/api/close-previews/${encodeURIComponent(previewId)}/acknowledge`);
+    await protectedMutation(`/api/close-previews/${encodeURIComponent(previewId)}/acknowledge`, {}, "CONFIRMER LA PRÉPARATION DE FERMETURE");
     $("#close-dialog").close();
     alert("CLOSE_PREVIEW_READY — Close this entire combo manually in IBKR. Nothing was transmitted.");
   } catch (error) {
     if (error.message === "SENSITIVE_ACCESS_REAUTH_REQUIRED") { $("#close-dialog").close(); $("#reauth-dialog").showModal(); }
-    else alert(error.message);
+    else reportActionError(error);
   }
 }
 $("#preview-ack").addEventListener("click", acknowledge);
 $("#reauth-cancel").addEventListener("click", () => $("#reauth-dialog").close());
 $("#reauth-submit").addEventListener("click", () => { window.location.assign("/cdn-cgi/access/logout"); });
 $("#manual-close-reported").addEventListener("click", async () => {
-  try { await mutation(`/api/close-previews/${encodeURIComponent(state.preview.preview_id)}/manual-close-reported`); $("#fill-dialog").showModal(); }
-  catch (error) { alert(error.message); }
+  try { await protectedMutation(`/api/close-previews/${encodeURIComponent(state.preview.preview_id)}/manual-close-reported`, {}, "CONFIRMER LA FERMETURE MANUELLE DANS IBKR"); $("#fill-dialog").showModal(); }
+  catch (error) { reportActionError(error); }
 });
 $("#fill-cancel").addEventListener("click", () => $("#fill-dialog").close());
 $("#fill-form").addEventListener("submit", async (event) => {
   event.preventDefault(); const form = new FormData(event.target); const value = (name) => Number(form.get(name));
   try {
-    const result = await mutation(`/api/close-previews/${encodeURIComponent(state.preview.preview_id)}/reconcile`, {
+    const result = await protectedMutation(`/api/close-previews/${encodeURIComponent(state.preview.preview_id)}/reconcile`, {
       timestamp: new Date(String(form.get("timestamp"))).toISOString(), combo_fill_price: value("combo_fill_price"),
       quantity_closed: value("quantity_closed"), actual_fx_rate: form.get("actual_fx_rate") ? value("actual_fx_rate") : undefined,
       commission: value("commission"), fx_cost: value("fx_cost"), broker_reference: String(form.get("broker_reference") || "") || undefined,
-    });
+    }, "CONFIRMER L’ENREGISTREMENT DU PRIX D’EXÉCUTION");
     $("#fill-dialog").close(); alert(`ACTUAL REALIZED PNL ${money(result.actual_realized_pnl)} · ESTIMATE ERROR ${money(result.estimate_error)}`);
-  } catch (error) { $("#fill-error").textContent = error.message; }
+  } catch (error) { reportActionError(error, $("#fill-error")); }
 });
 document.querySelectorAll("[data-range]").forEach((button) => button.addEventListener("click", () => { state.range = button.dataset.range; renderChart(state.data.pnl_history); }));
 

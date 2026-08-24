@@ -9,6 +9,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit && node scripts/safety-scan.mjs",
+    "action-password:set": "node scripts/set-action-password.mjs",
+    "action-password:set-local": "node scripts/set-action-password.mjs --local-only",
     "db:local": "wrangler d1 migrations apply take-two-control --local",
     "db:remote": "wrangler d1 migrations apply take-two-control --remote",
     "check": "npm run typecheck && npm run lint && npm test"

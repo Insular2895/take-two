@@ -2,6 +2,7 @@ import { env } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
 
 import { syntheticDemoDossier } from "../src/demo";
+import { verifyActionPassword } from "../src/auth";
 import { handleRequest } from "../src/index";
 
 interface AccessSession {
@@ -13,6 +14,8 @@ const TEST_ACCESS = {
   aud: "local-take-two-control",
   getIdentity: async () => ({ email: "local-admin@take-two.invalid" }),
 } as CloudflareAccessContext;
+const TEST_ACTION_PASSWORD = "test-action-password-123!";
+const TEST_ACTION_PASSWORD_VERIFIER = "v1$hmac-sha256$BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc$yXxGMhJsIjUD7xzr7aV5eTPfQ7gtwCXYw7O0nKMJtMw";
 
 async function accessSession(): Promise<AccessSession> {
   const response = await handleRequest(new Request("https://control.test/api/session"), env, TEST_ACCESS);
@@ -23,13 +26,20 @@ async function accessSession(): Promise<AccessSession> {
   return { cookie, csrf: payload.csrf_token };
 }
 
-function request(path: string, session: AccessSession, method = "GET", body?: unknown): Promise<Response> {
+function request(
+  path: string,
+  session: AccessSession,
+  method = "GET",
+  body?: unknown,
+  actionPassword: string | null = method === "GET" ? null : TEST_ACTION_PASSWORD,
+): Promise<Response> {
   return handleRequest(new Request(`https://control.test${path}`, {
     method,
     headers: {
       Cookie: session.cookie,
       "X-Requested-With": "XMLHttpRequest",
       ...(method === "GET" ? {} : { "X-CSRF-Token": session.csrf, "Content-Type": "application/json" }),
+      ...(actionPassword === null ? {} : { "X-Action-Password": actionPassword }),
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   }), env, TEST_ACCESS);
@@ -42,6 +52,12 @@ async function importAndMonitor(session: AccessSession): Promise<void> {
 }
 
 describe("private Cloudflare Access boundary", () => {
+  it("verifies the keyed action-password format without storing a plaintext password", async () => {
+    expect(await verifyActionPassword(TEST_ACTION_PASSWORD, TEST_ACTION_PASSWORD_VERIFIER)).toBe(true);
+    expect(await verifyActionPassword("wrong-action-password", TEST_ACTION_PASSWORD_VERIFIER)).toBe(false);
+    expect(await verifyActionPassword(TEST_ACTION_PASSWORD, "malformed")).toBe(false);
+  });
+
   it("reveals no dashboard or API data without a verified Access context", async () => {
     const dashboard = await handleRequest(new Request("https://control.test/dashboard"), env, undefined);
     expect(dashboard.status).toBe(403);
@@ -55,7 +71,9 @@ describe("private Cloudflare Access boundary", () => {
     const session = await accessSession();
     const dashboard = await request("/dashboard", session);
     expect(dashboard.status).toBe(200);
-    expect(await dashboard.text()).toContain("TTWO — POSITION CONTROL");
+    const dashboardHtml = await dashboard.text();
+    expect(dashboardHtml).toContain("TTWO — POSITION CONTROL");
+    expect(dashboardHtml).toContain("action-password-dialog");
     expect((await request("/styles.css", session)).headers.get("Content-Type")).toContain("text/css");
     expect((await request("/app.js", session)).headers.get("Content-Type")).toContain("text/javascript");
   });
@@ -75,6 +93,63 @@ describe("private Cloudflare Access boundary", () => {
     expect(csrfFailure.status).toBe(403);
     expect((await request("/api/login", session, "POST", {})).status).toBe(404);
     expect((await request("/api/reauth", session, "POST", {})).status).toBe(404);
+  });
+
+  it("requires the separate action password for sensitive mutations", async () => {
+    const session = await accessSession();
+    const missing = await request("/api/demo/import", session, "POST", {}, null);
+    expect(missing.status).toBe(403);
+    expect(await missing.json()).toEqual({ error: "ACTION_PASSWORD_REQUIRED" });
+
+    const invalid = await request("/api/demo/import", session, "POST", {}, "wrong-action-password");
+    expect(invalid.status).toBe(403);
+    expect(await invalid.json()).toEqual({ error: "ACTION_PASSWORD_INVALID" });
+
+    const accepted = await request("/api/demo/import", session, "POST", {});
+    expect(accepted.status).toBe(201);
+  });
+
+  it("fails closed when the action-password secret is absent", async () => {
+    const session = await accessSession();
+    const missingSecretEnv = Object.create(env) as Env;
+    Object.defineProperty(missingSecretEnv, "ACTION_PASSWORD_VERIFIER", { value: "" });
+    const response = await handleRequest(new Request("https://control.test/api/safe-mode", {
+      method: "POST",
+      headers: {
+        Cookie: session.cookie,
+        "Content-Type": "application/json",
+        "X-CSRF-Token": session.csrf,
+        "X-Action-Password": TEST_ACTION_PASSWORD,
+      },
+      body: "{\"enabled\":true}",
+    }), missingSecretEnv, TEST_ACCESS);
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: "ACTION_PASSWORD_NOT_CONFIGURED" });
+  });
+
+  it("rate-limits action-password guessing after five failures", async () => {
+    const session = await accessSession();
+    for (let attempt = 1; attempt <= 4; attempt += 1) {
+      const response = await request("/api/safe-mode", session, "POST", { enabled: true }, `wrong-${attempt}-password`);
+      expect(response.status).toBe(403);
+      expect(await response.json()).toEqual({ error: "ACTION_PASSWORD_INVALID" });
+    }
+    const fifth = await request("/api/safe-mode", session, "POST", { enabled: true }, "wrong-fifth-password");
+    expect(fifth.status).toBe(429);
+    expect(await fifth.json()).toEqual({ error: "ACTION_PASSWORD_RATE_LIMITED" });
+    const stillBlocked = await request("/api/safe-mode", session, "POST", { enabled: true });
+    expect(stillBlocked.status).toBe(429);
+  });
+
+  it("atomically caps a concurrent action-password guessing burst", async () => {
+    const session = await accessSession();
+    const responses = await Promise.all(Array.from({ length: 12 }, (_, index) => (
+      request("/api/safe-mode", session, "POST", { enabled: true }, `concurrent-wrong-password-${index}`)
+    )));
+    expect(responses.every((response) => response.status === 403 || response.status === 429)).toBe(true);
+    const attempts = await env.DB.prepare("SELECT count(*) AS total FROM action_password_attempts").first<{ total: number }>();
+    expect(attempts?.total).toBe(5);
+    expect((await request("/api/safe-mode", session, "POST", { enabled: true })).status).toBe(429);
   });
 });
 

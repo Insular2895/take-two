@@ -22,12 +22,18 @@ existing production database ID.
 npx wrangler d1 migrations apply take-two-control --remote
 npm run check
 npm run deploy
+npm run action-password:set
 ```
 
 The Worker fails closed with `403 ACCESS_REQUIRED` until Access is active. In the Cloudflare
 dashboard, open **Workers & Pages → take-two-control → Access**, choose **Protect this Worker behind
 Access**, select **All traffic**, allow only **Cloudflare account members**, and apply the policy.
-No `ADMIN_USERNAME` or `ADMIN_PASSWORD_HASH` secret is required.
+No `ADMIN_USERNAME` or `ADMIN_PASSWORD_HASH` secret is required. `npm run action-password:set`
+prompts twice without echo, derives a keyed verifier, stores only that verifier in the encrypted
+`ACTION_PASSWORD_VERIFIER` Worker secret, and keeps the same verifier in ignored local `.dev.vars`.
+For an existing deployment, run the action-password command before deploying code that requires
+it. For a first deployment, the runtime returns `503 ACTION_PASSWORD_NOT_CONFIGURED` only on
+sensitive mutations until the command completes; reads remain behind Access.
 
 The deployment output supplies the real URL:
 
@@ -45,12 +51,20 @@ private browser window. The Cloudflare sign-in page must appear before any dashb
 ```bash
 cd cloudflare
 npm install
+npm run action-password:set-local
 npm run db:local
 npm run dev
 ```
 
-No local application password is needed. `.dev.vars` is reserved for future local provider secrets
-and remains ignored by Git. Run the complete Worker gate with `npm run check`.
+The local command prompts without echo and writes only the verifier to `.dev.vars`, which remains
+ignored by Git. Re-entering the same password generates a new random verifier while preserving the
+same user-facing password. Run the complete Worker gate with `npm run check`.
+
+## Rotate the action password
+
+From `cloudflare/`, run `npm run action-password:set` again. The old verifier is replaced remotely
+and locally, so the old password stops working immediately. The script never prints either the
+password or verifier. Confirm the new password in the dashboard after deployment.
 
 ## Market data later
 
