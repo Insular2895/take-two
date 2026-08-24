@@ -13,8 +13,9 @@ right, multiplier, ratio, and remaining quantity, and reverses directions:
 
 If any complete inverse leg is missing or invalid, CF0 returns
 `COMBO_CLOSE_PREVIEW_UNAVAILABLE`. It never offers “easy leg first” or an individual-leg fallback.
-Acknowledgement may require the password again after five minutes and produces only
-`CLOSE_PREVIEW_READY` plus the instruction to close the entire combo manually in IBKR. It does not
+Acknowledgement requires a Cloudflare Access authentication no older than five minutes. A stale
+identity is logged out and must sign in again before retrying. Acknowledgement produces only
+`CLOSE_PREVIEW_READY` plus the instruction to close the entire combo manually in IBKR; it does not
 change broker truth or display “order sent”.
 
 ## Reconciliation

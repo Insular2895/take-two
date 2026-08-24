@@ -2,16 +2,19 @@
 
 ## Decision
 
-CF0 is one TypeScript Worker deployment with static assets, an authenticated API, one D1
-database, and one SQLite-backed Durable Object class named `TTWOPositionMonitor`. The existing
-Python engine remains canonical and exports an immutable `CloudPositionDossier`; CF0 performs only
-lightweight post-entry projection.
+CF0 is one TypeScript Worker deployment behind Cloudflare Access with private UI text modules, an
+authenticated API, one D1 database, and one SQLite-backed Durable Object class named
+`TTWOPositionMonitor`. The existing Python engine remains canonical and exports an immutable
+`CloudPositionDossier`; CF0 performs only lightweight post-entry projection.
 
 ```text
 browser (Mac / iPhone / iPad)
              |
              v
- Cloudflare Worker + assets
+      Cloudflare Access
+             |
+             v
+ Cloudflare Worker + bundled UI
        |             |
        v             v
       D1     TTWOPositionMonitor
@@ -29,7 +32,8 @@ position, SAFE MODE, PnL history, preview, fill, or audit event.
 
 - Python owns pricing, calibration, distributions, promoted model snapshots, five scores,
   historical research, and validation.
-- The Worker owns authentication, dossier validation/import, cached reads, PnL display,
+- Cloudflare Access owns identity authentication and account-member authorization. The Worker
+  requires `ctx.access`, enforces CSRF, and owns dossier validation/import, cached reads, PnL display,
   conservative liquidation projection, advisory exit checks, manual-close reconciliation, and
   export.
 - The Durable Object owns one alarm loop and concurrency serialization. Every wake reads D1,

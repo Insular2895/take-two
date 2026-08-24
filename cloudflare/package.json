@@ -9,7 +9,6 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit && node scripts/safety-scan.mjs",
-    "password:hash": "node scripts/hash-password.mjs",
     "db:local": "wrangler d1 migrations apply take-two-control --local",
     "db:remote": "wrangler d1 migrations apply take-two-control --remote",
     "check": "npm run typecheck && npm run lint && npm test"

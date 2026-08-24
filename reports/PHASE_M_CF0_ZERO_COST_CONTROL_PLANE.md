@@ -4,12 +4,14 @@ Date: 2026-08-24
 
 Branch: `codex/v10-quantitative-validation-and-robust-decision-engine`
 
-Deployment: **not performed** (no account mutation, database creation, or secret request)
+Deployment: **active** at `https://take-two-control.lpertusa2895.workers.dev`, with D1 and a
+Worker-level Cloudflare Access **All traffic** account-member policy.
 
 ## Outcome
 
-CF0 now provides a private, responsive, single-user control plane using one TypeScript Worker,
-one D1 database, one SQLite-backed `TTWOPositionMonitor` Durable Object, and vanilla static assets.
+CF0 now provides a private, responsive, single-user control plane using one TypeScript Worker
+behind Cloudflare Access, one D1 database, one SQLite-backed `TTWOPositionMonitor` Durable Object,
+and UI resources bundled as Worker text modules.
 It needs no VPS, production Docker, PostgreSQL, Redis, reverse proxy, paid Cloudflare component, or
 always-on Mac.
 
@@ -30,10 +32,11 @@ Python canonical ticket -> CloudPositionDossier -> authenticated Worker -> D1
                                               HTTPS provider adapter
 ```
 
-D1 tables: `sessions`, `system_state`, `positions`, `position_legs`, `fills`, `pnl_snapshots`,
-`model_snapshots`, `close_previews`, `monitoring_events`, `audit_events`, `daily_usage`, and
-`login_attempts`. Audit events are append-only by trigger; close-preview economics cannot be
-mutated after creation.
+D1 tables: `system_state`, `positions`, `position_legs`, `fills`, `pnl_snapshots`,
+`model_snapshots`, `close_previews`, `monitoring_events`, `audit_events`, and `daily_usage` are
+active. The legacy `sessions` and `login_attempts` tables remain unused for non-destructive schema
+compatibility. Audit events are append-only by trigger; close-preview economics cannot be mutated
+after creation.
 
 ## User interface
 
@@ -59,9 +62,10 @@ There is one primary `CLOSE STRUCTURE` button. Its preview reverses every exact 
 strike, right, ratio, multiplier, and quantity as one BAG-shaped structure. Missing completeness
 returns `COMBO_CLOSE_PREVIEW_UNAVAILABLE`; no individual-leg fallback exists.
 
-Acknowledgement is protected by CSRF and five-minute sensitive reauthentication, stores only
-`CLOSE_PREVIEW_READY`, and tells the human to close the complete combo manually in IBKR. It cannot
-send, cancel, modify, exercise, retry, or mark a trade closed.
+Acknowledgement is protected by CSRF and requires a Cloudflare Access authentication timestamp no
+older than five minutes. It stores only `CLOSE_PREVIEW_READY` and tells the human to close the
+complete combo manually in IBKR. It cannot send, cancel, modify, exercise, retry, or mark a trade
+closed.
 
 Manual fill reconciliation captures timestamp, combo price, quantity, commission, FX cost/rate,
 and optional broker reference. The original estimate stays immutable. The acceptance fixture
@@ -71,10 +75,13 @@ remaining yields `CLOSED`.
 
 ## Authentication and controls
 
-- Wrangler-secret username and versioned PBKDF2-HMAC-SHA256 hash (600,000 iterations).
-- Random 256-bit session token; D1 stores SHA-256 only.
-- `HttpOnly; Secure; SameSite=Strict` 12-hour cookie.
-- Session-bound 256-bit CSRF token and D1-backed 5-failures/10-minute login throttle.
+- Cloudflare Access is the only production login and authorizes Cloudflare account members on all
+  Worker traffic.
+- The Worker requires a direct `ctx.access` identity with an email and returns `403` otherwise.
+- Private UI resources are bundled into the Worker so Access context reaches application code.
+- A random 256-bit `__Host-ttwo_csrf` cookie is `HttpOnly; Secure; SameSite=Strict; Path=/` and must
+  match the mutation header.
+- Cloudflare Access logout and session revocation replace application password/session endpoints.
 - SAFE MODE and monitoring pause persist independently. SAFE MODE preserves existing monitoring
   but blocks imports; pause never implies a financial close.
 - Same-origin CSP, `no-store`, frame denial, no-referrer, and no browser delivery of secrets.
@@ -114,17 +121,18 @@ row-write/day quotas; it does not promise future limits or provider costs. Offic
 
 ## Verification
 
-- Cloudflare: `npm run check` — TypeScript, safety scan, and 25 Vitest tests.
+- Cloudflare: `npm run check` — TypeScript, safety scan, and 28 Vitest tests.
 - Cross-language: shared `monitoring_parity.json` covers PnL, HOLD, WATCH, profit, stop, time, IV,
   theta, trailing drawdown, stale data, thesis invalidation, and insufficient data.
 - Python exporter: strict schema/safety/hash/identity tests and CLI smoke export.
-- D1/Worker integration: unauthenticated denial, password outcomes, expiry, logout, CSRF, throttle,
-  sensitive reauth, import, runtime-independent reads, alarms, provider absence, duplicate/concurrent
-  alarms, SAFE MODE, pause/resume, immutable preview, actual reconciliation, and partial close.
+- D1/Worker integration: missing/invalid Access identity denial, bundled private assets, removed
+  password endpoints, CSRF, Access freshness, import, runtime-independent reads, alarms, provider
+  absence, duplicate/concurrent alarms, SAFE MODE, pause/resume, immutable preview, actual
+  reconciliation, identity-aware audits, and partial close.
 - Repository cloud safety scan rejects broker-order capability tokens and `transmit: true`.
 
 Final local gate: 346 Python tests passed; Ruff and strict mypy passed; 29 generated schemas and the
-offline artifact validator passed. The 25 Worker tests, safety scan, TypeScript compiler, and
+offline artifact validator passed. The 28 Worker tests, safety scan, TypeScript compiler, and
 Wrangler production dry-run passed. GitHub CI remains a publication-time check and now runs both the
 Python and Cloudflare gates.
 
@@ -134,17 +142,16 @@ Python and Cloudflare gates.
 plan currently exposes seven days of Time Travel. Standard Wrangler migrations are non-destructive.
 See `docs/cloudflare/RECOVERY.md`.
 
-The first real deploy returns the workers.dev hostname. A future registrar domain is added to
-Cloudflare and attached as `trade.example.com` without rebuilding or changing architecture. Access
-may then be added as defense in depth. See `docs/cloudflare/CUSTOM_DOMAIN.md`.
+The real deployment uses the workers.dev hostname. A future registrar domain can be added to
+Cloudflare and attached as `trade.example.com` without changing application architecture, but the
+Access **All traffic** coverage must be verified before use. See `docs/cloudflare/CUSTOM_DOMAIN.md`.
 
 ## Limitations and status
 
-- No deployment was performed; therefore no real workers.dev URL exists yet.
+- Cloudflare Access policy is external account state and must remain enabled for **All traffic**.
 - `LIVE_MARKET_DATA=NOT_CONFIGURED`; demo/last-imported data remain labelled.
 - `BROKER_LIVE_SYNC=NOT_CONFIGURED`; actual fills require manual IBKR reconciliation.
 - The UTC expected-session cadence is not a substitute for an exchange calendar.
-- Secure PBKDF2 behavior must be observed on the target Free account; never reduce the work factor.
 - OPRA/provider/broker/FX/domain costs are outside the €0 Cloudflare-hosting claim.
 - The final holdout remains unopened. No V10 retuning or Phase M market validation occurred.
 

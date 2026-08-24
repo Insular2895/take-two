@@ -1,12 +1,12 @@
 # Persistence, export, and recovery
 
-D1 is the source of truth for sessions, system state, positions and legs, fills, PnL and model
-snapshots, immutable close previews, monitoring events, append-only audit events, and daily usage.
-Durable Object memory is never authoritative.
+D1 is the source of truth for system state, positions and legs, fills, PnL and model snapshots,
+immutable close previews, monitoring events, append-only audit events, and daily usage. Cloudflare
+Access owns authentication sessions. Durable Object memory is never authoritative.
 
 The authenticated `EXPORT DATA` action downloads JSON containing positions, legs, fills, PnL/model
-snapshots, close previews, monitoring events, and audit events. It excludes sessions, login
-attempts, credentials, secrets, and API keys. Store exports in an encrypted location.
+snapshots, close previews, monitoring events, and audit events. It excludes legacy auth tables,
+Access identities/tokens, credentials, secrets, and API keys. Store exports in an encrypted location.
 
 On runtime/isolate disappearance, the next request reconstructs the dashboard from D1. The alarm
 reconstructs its work from `system_state` and the active position. SAFE MODE, monitoring pause,

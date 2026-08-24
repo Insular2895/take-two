@@ -2,33 +2,36 @@
 
 ## Authentication
 
-There is no registration. `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` are Wrangler secrets. The hash
-format is:
+Production authentication is provided only by Cloudflare Access. The Worker-level policy must
+cover **All traffic** and allow only approved Cloudflare account members. There is no application
+username, password, registration, login endpoint, or password secret.
 
-```text
-v1$pbkdf2-sha256$iterations$salt_base64$derived_key_base64
-```
+The Worker also fails closed: every request requires a direct `ctx.access` context and an Access
+identity containing an email address. This application deliberately bundles its private HTML, CSS,
+and JavaScript as Worker text modules instead of using the Static Assets router, because that router
+does not propagate `ctx.access` to the user Worker. Assets and APIs therefore share the same
+application-level Access check.
 
-`npm run password:hash` uses a random 128-bit salt, PBKDF2-HMAC-SHA256, 600,000 iterations, and a
-256-bit derived key. Verification uses Web Crypto and constant-time byte comparison. Do not lower
-the work factor to fit a runtime. Confirm production login CPU behavior on the actual Free account;
-if secure verification is demonstrated incompatible, treat this as a deployment blocker and add
-Cloudflare Access after attaching a domain instead of weakening the hash.
+The Access dashboard policy remains external configuration. Removing or bypassing it is an
+operational security change, even though the Worker would continue returning `403 ACCESS_REQUIRED`
+without a verified Access context.
 
 ## Sessions and request protection
 
-- The browser receives a random 256-bit session token.
-- D1 stores only its SHA-256 hash.
-- Cookie: `HttpOnly; Secure; SameSite=Strict; Path=/`, default 12-hour expiry.
-- A separate 256-bit CSRF token is tied to the D1 session and required on mutations.
-- Close-preview acknowledgement requires sensitive authentication no older than five minutes.
-- Five failed logins per identity in ten minutes cause a temporary D1-backed block.
-- Logout revokes the D1 session before expiring the browser cookie.
+- Cloudflare Access owns authentication tokens, authorization, expiry, and revocation.
+- The Worker records the verified Access email as the actor for human audit events.
+- A random 256-bit `__Host-ttwo_csrf` cookie is `HttpOnly; Secure; SameSite=Strict; Path=/` and must
+  match the `X-CSRF-Token` header on every mutation.
+- Close-preview acknowledgement requires the Access identity login timestamp to be no older than
+  five minutes. A stale session is logged out through `/cdn-cgi/access/logout` before retry.
+- The logout button uses Cloudflare Access logout; no application logout endpoint exists.
+- AJAX calls send `X-Requested-With: XMLHttpRequest` so an expired Access session can return `401`
+  and force a browser refresh.
 
-All API endpoints except login return `401` without a valid session. `/dashboard` redirects to the
-login screen. Static JavaScript and CSS contain no dossier or user data. Security headers include a
-same-origin CSP, no-store caching, clickjacking protection, no referrer, and disabled sensitive
-browser permissions.
+All private HTML, JavaScript, CSS, and API responses require Access. Security headers include a
+same-origin CSP, `no-store`, clickjacking protection, no referrer, and disabled sensitive browser
+permissions. The legacy `sessions` and `login_attempts` tables may remain in an existing D1 schema
+for non-destructive compatibility, but the runtime does not read or write them.
 
 ## Trading boundary
 
@@ -39,6 +42,7 @@ automatic retry, individual-leg close, or silent legging route.
 
 ## Secrets
 
-Use `wrangler secret put`. Never put API keys, usernames, plaintext passwords, hashes, or production
-database exports in Git. The authenticated export omits sessions, login attempts, daily security
-identities, and every secret.
+Cloudflare Access removes the application password secrets. Use `wrangler secret put` only for
+future provider credentials. Never put API keys, credentials, Access tokens, production database
+exports, or private identity data in Git. The authenticated export omits legacy auth tables, daily
+security identities, and every secret.

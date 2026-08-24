@@ -16,10 +16,10 @@ const age = (timestamp) => {
 };
 
 async function api(path, options = {}) {
-  const headers = { ...(options.body ? { "Content-Type": "application/json" } : {}), ...(options.headers || {}) };
+  const headers = { "X-Requested-With": "XMLHttpRequest", ...(options.body ? { "Content-Type": "application/json" } : {}), ...(options.headers || {}) };
   if (options.method && options.method !== "GET") headers["X-CSRF-Token"] = state.csrf;
   const response = await fetch(path, { ...options, headers });
-  if (response.status === 401) { window.location.assign("/"); throw new Error("UNAUTHORIZED"); }
+  if (response.status === 401) { window.location.assign("/"); throw new Error("ACCESS_SESSION_EXPIRED"); }
   const payload = response.headers.get("Content-Type")?.includes("json") ? await response.json() : null;
   if (!response.ok) { const error = new Error(payload?.error || `HTTP_${response.status}`); error.status = response.status; throw error; }
   return payload;
@@ -149,7 +149,7 @@ $("#dossier-file").addEventListener("change", async (event) => {
 $("#demo-import").addEventListener("click", () => mutation("/api/demo/import").catch((error) => alert(error.message)));
 $("#safe-mode").addEventListener("click", () => mutation("/api/safe-mode", { enabled: !Boolean(state.data.system.safe_mode) }).catch((error) => alert(error.message)));
 $("#monitor-toggle").addEventListener("click", () => mutation(state.data.system.monitoring_paused ? "/api/monitor/resume" : "/api/monitor/pause").catch((error) => alert(error.message)));
-$("#logout").addEventListener("click", async () => { await api("/api/logout", { method: "POST", body: "{}" }); window.location.assign("/"); });
+$("#logout").addEventListener("click", () => { window.location.assign("/cdn-cgi/access/logout"); });
 $("#export-data").addEventListener("click", () => window.location.assign("/api/export"));
 
 $("#close-structure").addEventListener("click", async () => {
@@ -171,16 +171,13 @@ async function acknowledge() {
     $("#close-dialog").close();
     alert("CLOSE_PREVIEW_READY — Close this entire combo manually in IBKR. Nothing was transmitted.");
   } catch (error) {
-    if (error.message === "SENSITIVE_REAUTH_REQUIRED") { $("#close-dialog").close(); $("#reauth-dialog").showModal(); }
+    if (error.message === "SENSITIVE_ACCESS_REAUTH_REQUIRED") { $("#close-dialog").close(); $("#reauth-dialog").showModal(); }
     else alert(error.message);
   }
 }
 $("#preview-ack").addEventListener("click", acknowledge);
 $("#reauth-cancel").addEventListener("click", () => $("#reauth-dialog").close());
-$("#reauth-submit").addEventListener("click", async () => {
-  try { await mutation("/api/reauth", { password: $("#reauth-password").value }); $("#reauth-dialog").close(); await acknowledge(); }
-  catch (error) { $("#reauth-error").textContent = error.message; }
-});
+$("#reauth-submit").addEventListener("click", () => { window.location.assign("/cdn-cgi/access/logout"); });
 $("#manual-close-reported").addEventListener("click", async () => {
   try { await mutation(`/api/close-previews/${encodeURIComponent(state.preview.preview_id)}/manual-close-reported`); $("#fill-dialog").showModal(); }
   catch (error) { alert(error.message); }

@@ -52,7 +52,7 @@ export async function activePosition(db: D1Database): Promise<PositionRow | null
   ).first<PositionRow>();
 }
 
-export async function importDossier(db: D1Database, dossier: CloudPositionDossier): Promise<void> {
+export async function importDossier(db: D1Database, dossier: CloudPositionDossier, actor = "system"): Promise<void> {
   const now = new Date().toISOString();
   const statements: D1PreparedStatement[] = [
     db.prepare(
@@ -85,7 +85,7 @@ export async function importDossier(db: D1Database, dossier: CloudPositionDossie
     ));
   }
   await db.batch(statements);
-  await audit(db, "POSITION_IMPORTED", "admin", dossier.position_id, { dossier_id: dossier.dossier_id, fixture_status: dossier.fixture_status });
+  await audit(db, "POSITION_IMPORTED", actor, dossier.position_id, { dossier_id: dossier.dossier_id, fixture_status: dossier.fixture_status });
 }
 
 export async function latestProjection(db: D1Database, positionId: string): Promise<Record<string, unknown> | null> {

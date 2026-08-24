@@ -1,9 +1,13 @@
-import { authenticate, hasFreshSensitiveAuth, login, logout, reauthenticate, requireCsrf } from "./auth";
+import { attachCsrfCookie, authenticateAccess, hasFreshSensitiveAuth, requireCsrf } from "./auth";
 import { activePosition, audit, importDossier, incrementUsage, latestProjection, persistProjection } from "./db";
 import { syntheticDemoDossier } from "./demo";
 import { calculateProjection, estimateDailyUsage, inverseStructureLegs, randomId, validateDossier } from "./domain";
 import { TTWOPositionMonitor } from "./monitor";
 import type { AuthContext, CloudPositionDossier } from "./types";
+import dashboardHtml from "../public/dashboard.txt";
+import appJavaScript from "../public/app.txt";
+import previewStateJavaScript from "../public/preview-state.txt";
+import stylesCss from "../public/styles.txt";
 
 export { TTWOPositionMonitor };
 
@@ -40,10 +44,17 @@ function monitorStub(env: Env): DurableObjectStub {
   return env.MONITOR.get(env.MONITOR.idFromName("single-ttwo-position-monitor"));
 }
 
-async function serveAsset(env: Env, request: Request, pathname: string): Promise<Response> {
-  const url = new URL(request.url);
-  url.pathname = pathname;
-  return env.ASSETS.fetch(new Request(url, request));
+const STATIC_ASSETS: Record<string, { body: string; contentType: string }> = {
+  "/dashboard.html": { body: dashboardHtml, contentType: "text/html; charset=utf-8" },
+  "/app.js": { body: appJavaScript, contentType: "text/javascript; charset=utf-8" },
+  "/preview-state.js": { body: previewStateJavaScript, contentType: "text/javascript; charset=utf-8" },
+  "/styles.css": { body: stylesCss, contentType: "text/css; charset=utf-8" },
+};
+
+function serveAsset(pathname: string): Response {
+  const asset = STATIC_ASSETS[pathname];
+  if (!asset) return new Response("Not found", { status: 404 });
+  return new Response(asset.body, { headers: { "Content-Type": asset.contentType } });
 }
 
 async function dashboardPayload(env: Env, auth: AuthContext): Promise<Response> {
@@ -62,7 +73,8 @@ async function dashboardPayload(env: Env, auth: AuthContext): Promise<Response> 
   const system = await env.DB.prepare("SELECT * FROM system_state WHERE singleton=1").first<Record<string, unknown>>();
   const usage = await env.DB.prepare("SELECT * FROM daily_usage WHERE date=?").bind(new Date().toISOString().slice(0, 10)).first<Record<string, unknown>>();
   return Response.json({
-    csrf_token: auth.session.csrfToken,
+    csrf_token: auth.csrfToken,
+    identity: { email: auth.email },
     system,
     position: position
       ? { ...position, canonical_dossier: JSON.parse(String(position.canonical_dossier_json)), canonical_dossier_json: undefined }
@@ -85,7 +97,7 @@ async function setSafeMode(request: Request, env: Env, auth: AuthContext): Promi
   if (typeof body.enabled !== "boolean") throw new Error("INVALID_SAFE_MODE_VALUE");
   const now = new Date().toISOString();
   await env.DB.prepare("UPDATE system_state SET safe_mode=?,updated_at=? WHERE singleton=1").bind(body.enabled ? 1 : 0, now).run();
-  await audit(env.DB, body.enabled ? "SAFE_MODE_ENABLED" : "SAFE_MODE_DISABLED", "admin");
+  await audit(env.DB, body.enabled ? "SAFE_MODE_ENABLED" : "SAFE_MODE_DISABLED", auth.actor);
   return Response.json({ safe_mode: body.enabled });
 }
 
@@ -94,7 +106,7 @@ async function setMonitoring(request: Request, env: Env, auth: AuthContext, paus
   const now = new Date().toISOString();
   await env.DB.prepare("UPDATE system_state SET monitoring_paused=?,updated_at=? WHERE singleton=1").bind(paused ? 1 : 0, now).run();
   await monitorStub(env).fetch(`https://monitor/${paused ? "pause" : "resume"}`, { method: "POST" });
-  await audit(env.DB, paused ? "MONITOR_PAUSED" : "MONITOR_RESUMED", "admin");
+  await audit(env.DB, paused ? "MONITOR_PAUSED" : "MONITOR_RESUMED", auth.actor);
   return Response.json({ monitoring_paused: paused });
 }
 
@@ -107,7 +119,7 @@ async function importPosition(request: Request, env: Env, auth: AuthContext, dem
   const raw = demo ? syntheticDemoDossier() : await jsonBody<unknown>(request);
   const dossier = validateDossier(raw);
   if (dossier.ticker !== "TTWO") throw new Error("INVALID_DOSSIER: CF0 supports TTWO only");
-  await importDossier(env.DB, dossier);
+  await importDossier(env.DB, dossier, auth.actor);
   if (dossier.initial_position_state !== "PLANNED") {
     if (dossier.last_imported_snapshot) {
       await persistProjection(
@@ -118,7 +130,7 @@ async function importPosition(request: Request, env: Env, auth: AuthContext, dem
     }
     await env.DB.prepare("UPDATE system_state SET monitoring_paused=0,updated_at=? WHERE singleton=1").bind(new Date().toISOString()).run();
     await monitorStub(env).fetch("https://monitor/start", { method: "POST" });
-    await audit(env.DB, "MONITOR_STARTED", "admin", dossier.position_id, { trigger: "POSITION_IMPORT" });
+    await audit(env.DB, "MONITOR_STARTED", auth.actor, dossier.position_id, { trigger: "POSITION_IMPORT" });
   }
   return Response.json({ imported: true, position_id: dossier.position_id, fixture_status: dossier.fixture_status }, { status: 201 });
 }
@@ -152,7 +164,7 @@ async function createClosePreview(request: Request, env: Env, auth: AuthContext)
     projection.estimated_exit_fx === null ? null : Number(projection.estimated_exit_fx) * scale,
     String(projection.monitor_action), String(projection.timestamp), String(projection.provider), JSON.stringify(legs),
   ).run();
-  await audit(env.DB, "CLOSE_PREVIEW_CREATED", "admin", position.id, { preview_id: previewId, quantity });
+  await audit(env.DB, "CLOSE_PREVIEW_CREATED", auth.actor, position.id, { preview_id: previewId, quantity });
   return Response.json({
     preview_id: previewId,
     status: "CREATED",
@@ -172,14 +184,14 @@ async function createClosePreview(request: Request, env: Env, auth: AuthContext)
 
 async function acknowledgeClose(request: Request, env: Env, auth: AuthContext, previewId: string): Promise<Response> {
   requireCsrf(request, auth);
-  if (!hasFreshSensitiveAuth(auth)) return Response.json({ error: "SENSITIVE_REAUTH_REQUIRED" }, { status: 403 });
+  if (!hasFreshSensitiveAuth(auth)) return Response.json({ error: "SENSITIVE_ACCESS_REAUTH_REQUIRED" }, { status: 403 });
   const acknowledgedAt = new Date().toISOString();
   const result = await env.DB.prepare(
     "UPDATE close_previews SET acknowledged_at=?,status='ACKNOWLEDGED' WHERE preview_id=? AND status='CREATED'",
   ).bind(acknowledgedAt, previewId).run();
   if (!result.meta.changes) return Response.json({ error: "PREVIEW_NOT_ACKNOWLEDGEABLE" }, { status: 409 });
   const preview = await env.DB.prepare("SELECT position_id FROM close_previews WHERE preview_id=?").bind(previewId).first<{ position_id: string }>();
-  await audit(env.DB, "CLOSE_PREVIEW_ACKNOWLEDGED", "admin", preview?.position_id ?? null, { preview_id: previewId });
+  await audit(env.DB, "CLOSE_PREVIEW_ACKNOWLEDGED", auth.actor, preview?.position_id ?? null, { preview_id: previewId });
   return Response.json({ status: "CLOSE_PREVIEW_READY", instruction: "Close this entire combo manually in IBKR.", transmitted: false });
 }
 
@@ -191,7 +203,7 @@ async function reportManualClose(request: Request, env: Env, auth: AuthContext, 
     env.DB.prepare("UPDATE close_previews SET status='RECONCILIATION_REQUIRED' WHERE preview_id=?").bind(previewId),
     env.DB.prepare("UPDATE positions SET state='RECONCILIATION_REQUIRED',updated_at=? WHERE id=?").bind(new Date().toISOString(), preview.position_id),
   ]);
-  await audit(env.DB, "MANUAL_CLOSE_REPORTED", "admin", preview.position_id, { preview_id: previewId });
+  await audit(env.DB, "MANUAL_CLOSE_REPORTED", auth.actor, preview.position_id, { preview_id: previewId });
   return Response.json({ status: "RECONCILIATION_REQUIRED" });
 }
 
@@ -255,8 +267,8 @@ async function reconcileFill(request: Request, env: Env, auth: AuthContext, prev
     );
     await persistProjection(env.DB, String(position.id), remainingProjection);
   }
-  await audit(env.DB, "FILL_RECONCILED", "admin", String(position.id), { fill_id: fillId, preview_id: previewId, actual_realized_pnl: realized, estimate_error: estimateError });
-  await audit(env.DB, remaining === 0 ? "POSITION_CLOSED" : "POSITION_PARTIALLY_CLOSED", "admin", String(position.id), { quantity_closed: quantity, quantity_remaining: remaining });
+  await audit(env.DB, "FILL_RECONCILED", auth.actor, String(position.id), { fill_id: fillId, preview_id: previewId, actual_realized_pnl: realized, estimate_error: estimateError });
+  await audit(env.DB, remaining === 0 ? "POSITION_CLOSED" : "POSITION_PARTIALLY_CLOSED", auth.actor, String(position.id), { quantity_closed: quantity, quantity_remaining: remaining });
   return Response.json({
     fill_id: fillId,
     state: newState,
@@ -268,11 +280,11 @@ async function reconcileFill(request: Request, env: Env, auth: AuthContext, prev
   }, { status: 201 });
 }
 
-async function exportData(env: Env): Promise<Response> {
+async function exportData(env: Env, auth: AuthContext): Promise<Response> {
   const tables = ["positions", "position_legs", "fills", "pnl_snapshots", "model_snapshots", "close_previews", "monitoring_events", "audit_events"] as const;
   const results = await env.DB.batch(tables.map((table) => env.DB.prepare(`SELECT * FROM ${table}`)));
   const payload = Object.fromEntries(tables.map((table, index) => [table, results[index]?.results ?? []]));
-  await audit(env.DB, "DATA_EXPORTED", "admin", null, { format: "json", secrets_included: false });
+  await audit(env.DB, "DATA_EXPORTED", auth.actor, null, { format: "json", secrets_included: false });
   return new Response(JSON.stringify({ exported_at: new Date().toISOString(), schema_version: "1.0", ...payload }, null, 2), {
     headers: { "Content-Type": "application/json", "Content-Disposition": `attachment; filename="take-two-control-${new Date().toISOString().slice(0, 10)}.json"` },
   });
@@ -280,10 +292,8 @@ async function exportData(env: Env): Promise<Response> {
 
 async function routeAuthenticated(request: Request, env: Env, auth: AuthContext, path: string): Promise<Response> {
   await incrementUsage(env.DB, "worker_api_requests");
-  if (path === "/api/session" && request.method === "GET") return Response.json({ authenticated: true, csrf_token: auth.session.csrfToken });
+  if (path === "/api/session" && request.method === "GET") return Response.json({ authenticated: true, csrf_token: auth.csrfToken, identity: { email: auth.email } });
   if (path === "/api/dashboard" && request.method === "GET") return dashboardPayload(env, auth);
-  if (path === "/api/logout" && request.method === "POST") { requireCsrf(request, auth); return logout(auth, env); }
-  if (path === "/api/reauth" && request.method === "POST") { requireCsrf(request, auth); return reauthenticate(request, auth, env); }
   if (path === "/api/positions/import" && request.method === "POST") return importPosition(request, env, auth);
   if (path === "/api/demo/import" && request.method === "POST") return importPosition(request, env, auth, true);
   if (path === "/api/safe-mode" && request.method === "POST") return setSafeMode(request, env, auth);
@@ -296,35 +306,40 @@ async function routeAuthenticated(request: Request, env: Env, auth: AuthContext,
   if (reported && request.method === "POST") return reportManualClose(request, env, auth, decodeURIComponent(reported[1]!));
   const reconcile = path.match(/^\/api\/close-previews\/([^/]+)\/reconcile$/);
   if (reconcile && request.method === "POST") return reconcileFill(request, env, auth, decodeURIComponent(reconcile[1]!));
-  if (path === "/api/export" && request.method === "GET") return exportData(env);
+  if (path === "/api/export" && request.method === "GET") return exportData(env, auth);
   if (path === "/api/usage-estimate" && request.method === "GET") return Response.json(estimateDailyUsage());
   return Response.json({ error: "NOT_FOUND" }, { status: 404 });
 }
 
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    try {
-      const path = new URL(request.url).pathname;
-      if (path === "/api/login" && request.method === "POST") return withSecurity(await login(request, env));
-      const auth = await authenticate(request, env);
-      if (path === "/") {
-        if (auth) return withSecurity(Response.redirect(new URL("/dashboard", request.url), 302));
-        return withSecurity(await serveAsset(env, request, "/login.html"));
-      }
-      if (path === "/dashboard.html") {
-        return withSecurity(Response.redirect(new URL(auth ? "/dashboard" : "/", request.url), 302));
-      }
-      if (path === "/dashboard") {
-        if (!auth) return withSecurity(Response.redirect(new URL("/", request.url), 302));
-        return withSecurity(await env.ASSETS.fetch(request));
-      }
-      if (path.startsWith("/api/")) {
-        if (!auth) return withSecurity(Response.json({ error: "UNAUTHORIZED" }, { status: 401 }));
-        return withSecurity(await routeAuthenticated(request, env, auth, path));
-      }
-      return withSecurity(await env.ASSETS.fetch(request));
-    } catch (error) {
-      return withSecurity(apiError(error));
+export async function handleRequest(
+  request: Request,
+  env: Env,
+  access: CloudflareAccessContext | undefined,
+): Promise<Response> {
+  try {
+    const path = new URL(request.url).pathname;
+    const auth = await authenticateAccess(request, access);
+    if (!auth) {
+      const denied = path.startsWith("/api/")
+        ? Response.json({ error: "ACCESS_REQUIRED" }, { status: 403 })
+        : new Response("Cloudflare Access required", { status: 403 });
+      return withSecurity(denied);
     }
+
+    let response: Response;
+    if (path === "/") response = Response.redirect(new URL("/dashboard", request.url), 302);
+    else if (path === "/dashboard.html") response = Response.redirect(new URL("/dashboard", request.url), 302);
+    else if (path === "/dashboard") response = serveAsset("/dashboard.html");
+    else if (path.startsWith("/api/")) response = await routeAuthenticated(request, env, auth, path);
+    else response = serveAsset(path);
+    return withSecurity(attachCsrfCookie(response, auth));
+  } catch (error) {
+    return withSecurity(apiError(error));
+  }
+}
+
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    return handleRequest(request, env, ctx.access);
   },
 } satisfies ExportedHandler<Env>;

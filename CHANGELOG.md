@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.12.4 — 2026-08-24
+
+### Cloudflare Access production authentication
+
+- Replaced the incompatible Worker PBKDF2 login with Worker-level Cloudflare Access for all traffic;
+  the application now fails closed unless a direct verified `ctx.access` identity contains an email.
+- Bundled the private HTML, CSS, and JavaScript as Worker text modules so the Static Assets router
+  cannot hide the Access context from application code.
+- Retained mutation CSRF with a 256-bit `__Host-` cookie and changed sensitive close-preview
+  reauthentication to require a Cloudflare Access login timestamp no older than five minutes.
+- Removed application password endpoints, secrets, UI, and tooling; Access logout and identity-aware
+  audit actors now replace the legacy D1 session flow without adding order capability.
+
 ## 0.12.3 — 2026-08-24
 
 ### M0.2.1 final budget semantics cleanup

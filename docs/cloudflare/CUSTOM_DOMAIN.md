@@ -8,12 +8,13 @@ optional and does not change the Worker, D1, Durable Object, API, dashboard, or 
 3. At the registrar, replace nameservers with the pair Cloudflare provides; wait for activation.
 4. In Cloudflare, create/confirm the DNS hostname, for example `trade.example.com`.
 5. Open **Workers & Pages → take-two-control → Settings → Domains & Routes → Add → Custom domain**.
-6. Attach `trade.example.com` and verify HTTPS/login before changing bookmarks.
+6. Attach `trade.example.com` and verify HTTPS/Access before changing bookmarks.
 
 Cloudflare documents the current procedure at
 [Worker custom domains](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/).
 Do not hard-code the hostname in the application; cookies use `Path=/` without a fixed domain.
 
-After the hostname works, Cloudflare Access may be added as defense in depth. Application
-authentication remains enabled. Test login, logout, CSRF, export, SAFE MODE, monitor controls, and
-close-preview reauthentication after the routing change.
+Cloudflare Access is mandatory, not optional defense in depth. Confirm that the Worker-level
+**All traffic** policy covers the new hostname before using it. Test Access login/logout, the
+Worker's fail-closed `ctx.access` check, CSRF, export, SAFE MODE, monitor controls, and close-preview
+reauthentication after the routing change.

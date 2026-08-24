@@ -163,14 +163,10 @@ export interface PnlProjection {
   provider: string;
 }
 
-export interface Session {
-  id: string;
-  csrfToken: string;
-  expiresAt: string;
-  sensitiveAuthenticatedAt: string;
-}
-
 export interface AuthContext {
-  session: Session;
-  cookieToken: string;
+  actor: string;
+  email: string;
+  csrfToken: string;
+  csrfCookieNeedsSet: boolean;
+  accessIssuedAt: number;
 }
