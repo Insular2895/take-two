@@ -219,6 +219,50 @@
     "BudgetDiagnostics": {
       "additionalProperties": false,
       "properties": {
+        "account_available_capital": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Account Available Capital"
+        },
+        "account_deployable_capital": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Account Deployable Capital"
+        },
+        "account_headroom_after_trade": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Account Headroom After Trade"
+        },
+        "account_liquidity_reserve": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Account Liquidity Reserve",
+          "type": "number"
+        },
         "budget_delta_percentage": {
           "anyOf": [
             {
@@ -258,7 +302,7 @@
           "$ref": "#/$defs/BudgetStatus"
         },
         "buying_power_cap_effective": {
-          "exclusiveMinimum": 0,
+          "minimum": 0,
           "title": "Buying Power Cap Effective",
           "type": "number"
         },
@@ -304,6 +348,32 @@
           "default": null,
           "title": "Capital Utilization Of Target"
         },
+        "configured_hard_authorized_ceiling": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Configured Hard Authorized Ceiling"
+        },
+        "converted_entry_cash_before_fx_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Converted Entry Cash Before Fx Cost"
+        },
         "currency": {
           "maxLength": 3,
           "minLength": 3,
@@ -323,9 +393,83 @@
           "default": null,
           "title": "Effective Capital Requirement"
         },
+        "effective_hard_budget_ceiling": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective Hard Budget Ceiling"
+        },
         "eligible": {
           "title": "Eligible",
           "type": "boolean"
+        },
+        "entry_fx_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entry Fx Cost"
+        },
+        "entry_fx_cost_status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FXExecutionCostStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "fx_cost_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Cost Source"
+        },
+        "fx_rate": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Rate"
+        },
+        "fx_rate_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Rate Source"
         },
         "fx_rate_to_policy_currency": {
           "anyOf": [
@@ -396,12 +540,38 @@
           "title": "Maximum Loss"
         },
         "maximum_loss_cap_effective": {
-          "exclusiveMinimum": 0,
+          "minimum": 0,
           "title": "Maximum Loss Cap Effective",
           "type": "number"
         },
         "minimum_spend_policy": {
           "$ref": "#/$defs/MinimumSpendPolicy"
+        },
+        "native_currency": {
+          "anyOf": [
+            {
+              "maxLength": 3,
+              "minLength": 3,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Native Currency"
+        },
+        "native_entry_cash": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Native Entry Cash"
         },
         "paper_eligible": {
           "title": "Paper Eligible",
@@ -431,6 +601,19 @@
           ],
           "default": null,
           "title": "Required Entry Cash"
+        },
+        "required_entry_cash_after_fx": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Required Entry Cash After Fx"
         },
         "research_eligible": {
           "title": "Research Eligible",
@@ -1389,6 +1572,16 @@
       "title": "FXAttribution",
       "type": "object"
     },
+    "FXExecutionCostStatus": {
+      "enum": [
+        "NOT_APPLICABLE",
+        "KNOWN",
+        "ESTIMATED",
+        "UNKNOWN"
+      ],
+      "title": "FXExecutionCostStatus",
+      "type": "string"
+    },
     "FXHandlingMode": {
       "enum": [
         "CONVERT_AT_ENTRY_AND_EXIT",
@@ -2235,6 +2428,30 @@
           "title": "Entry Cash Required",
           "type": "number"
         },
+        "lifecycle_config_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lifecycle Config Source"
+        },
+        "lifecycle_config_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lifecycle Config Version"
+        },
         "managed_exit_deadline": {
           "anyOf": [
             {
@@ -2247,6 +2464,19 @@
             }
           ],
           "title": "Managed Exit Deadline"
+        },
+        "mixed_expiry_close_buffer_calendar_days": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mixed Expiry Close Buffer Calendar Days"
         },
         "policy": {
           "const": "CLOSE_BEFORE_FIRST_EXPIRY",
@@ -3968,6 +4198,30 @@
       ],
       "default": null
     },
+    "lifecycle_config_source": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lifecycle Config Source"
+    },
+    "lifecycle_config_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lifecycle Config Version"
+    },
     "lifecycle_policy": {
       "default": "SAME_EXPIRY_HOLD_TO_EXPIRY",
       "title": "Lifecycle Policy",
@@ -4021,6 +4275,31 @@
       ],
       "default": null,
       "title": "Maximum Profit"
+    },
+    "mixed_expiry_close_buffer_calendar_days": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mixed Expiry Close Buffer Calendar Days"
+    },
+    "mixed_expiry_lifecycle_policy": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mixed Expiry Lifecycle Policy"
     },
     "order_capability": {
       "const": "forbidden",

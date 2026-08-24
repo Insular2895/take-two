@@ -11,7 +11,10 @@ from typing import Any, Literal
 
 from pydantic import Field, model_validator
 
-from take_two_options.budget import FlexibleBudgetPolicyV2
+from take_two_options.budget import (
+    FlexibleBudgetPolicyV2,
+    MixedExpiryLifecycleConfiguration,
+)
 from take_two_options.domain import StrictModel
 from take_two_options.knowledge.schemas import Architecture, SourceReference
 from take_two_options.trade_economics_models import TradeEconomicsConfiguration
@@ -249,6 +252,9 @@ class ProspectiveBudgetConfig(StrictModel):
     schema_version: Literal["2.0"] = "2.0"
     phase: Literal["M_PROSPECTIVE_NOT_STARTED"] = "M_PROSPECTIVE_NOT_STARTED"
     budget_policy: FlexibleBudgetPolicyV2
+    mixed_expiry_lifecycle: MixedExpiryLifecycleConfiguration = Field(
+        default_factory=MixedExpiryLifecycleConfiguration
+    )
     holdout_status: Literal["UNOPENED"] = "UNOPENED"
     opra_status: Literal["NOT_STARTED"] = "NOT_STARTED"
     read_only: Literal[True] = True

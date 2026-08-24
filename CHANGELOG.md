@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.12.3 — 2026-08-24
+
+### M0.2.1 final budget semantics cleanup
+
+- Made the explicit account liquidity reserve economically active through known available capital,
+  deployable capital, an effective hard ceiling, AUTO caps, diagnostics, config, and CLI inputs.
+- Replaced the candidate factory's one-day mixed-expiry literal with one injected typed lifecycle
+  configuration shared through ticket, scenario, breakeven, and target-arrival validation.
+- Separated point-in-time FX rate from evidenced FX execution cost, supporting fixed/bps values and
+  fail-closed unknown-cost paper eligibility without inventing a zero.
+- Kept V2 at 2.0 and ticket schema at 1.2 through optional compatible fields; preserved historical
+  hashes, five scores, unopened holdout, `OPRA=NOT_STARTED`, and the no-order boundary.
+
 ## 0.12.2 — 2026-08-24
 
 ### M0.2 flexible budget configurator and capital safety

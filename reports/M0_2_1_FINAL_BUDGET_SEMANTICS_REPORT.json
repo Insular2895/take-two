@@ -1,0 +1,104 @@
+{
+  "report_id": "m0-2-1-final-budget-semantics-2026-08-24",
+  "generated_on": "2026-08-24",
+  "scope": "minimal_offline_pre_opra_budget_semantics_cleanup",
+  "initial_issues": [
+    {
+      "issue": "account_liquidity_reserve_not_economically_applied",
+      "audit_status": "CONFIRMED"
+    },
+    {
+      "issue": "mixed_expiry_factory_hardcoded_one_day_buffer",
+      "audit_status": "CONFIRMED"
+    },
+    {
+      "issue": "fx_rate_present_but_fx_execution_cost_not_explicit_in_budget",
+      "audit_status": "PARTIAL"
+    }
+  ],
+  "account_reserve": {
+    "positive_reserve_requires_known_account_capital": true,
+    "deployable_formula": "max(0, account_available_capital - account_liquidity_reserve)",
+    "effective_ceiling_formula": "min(configured_hard_ceiling, account_deployable_capital)",
+    "auto_caps_use_effective_ceiling": true,
+    "hidden_v2_reserve": false
+  },
+  "mixed_expiry": {
+    "policy": "CLOSE_BEFORE_FIRST_EXPIRY",
+    "typed_configuration": "MixedExpiryLifecycleConfiguration",
+    "factory_business_literal_removed": true,
+    "shared_consumers": [
+      "candidate_generation",
+      "lifecycle_capital_requirement",
+      "trade_economics_ticket",
+      "scenario_clipping",
+      "breakeven_clock",
+      "target_arrival"
+    ],
+    "mismatch_status": "MIXED_EXPIRY_LIFECYCLE_CONFIG_MISMATCH"
+  },
+  "fx": {
+    "rate_and_execution_cost_separate": true,
+    "fixed_amount_supported": true,
+    "basis_points_supported": true,
+    "known_cost_added_after_conversion": true,
+    "unknown_cost_treated_as_zero": false,
+    "unknown_cost_budget_guarantee": "UNPROVEN",
+    "unknown_cost_research_eligible": true,
+    "unknown_cost_paper_eligible": false,
+    "unknown_cost_reason": "FX_EXECUTION_COST_UNKNOWN",
+    "explicit_not_applicable_zero_supported": true
+  },
+  "compatibility": {
+    "budget_policy_v1_changed": false,
+    "flexible_budget_policy_version": "2.0",
+    "trade_economics_ticket_schema": "1.2",
+    "historical_validation_regenerated": false,
+    "five_scores_changed": false,
+    "m0_2_report_sha256": {
+      "json": "04fdce78ccc07717632c2d7d192ece4a69783f9626ac7bd50db94c8be16be977",
+      "markdown": "15304095bc67d474c0f691698e615325956231b92913fd97f4c1a9abedec6065"
+    }
+  },
+  "validation": {
+    "pytest": {"status": "passed", "tests": 332},
+    "ruff": "passed",
+    "mypy": {"status": "passed", "source_files": 187},
+    "schemas": {"status": "passed", "count": 28},
+    "offline_artifacts": "passed",
+    "research_lineage": "passed",
+    "phase10_release_audit": "passed",
+    "phase11_extension_gate": "passed",
+    "security": {
+      "status": "passed",
+      "python_files_scanned": 166,
+      "forbidden_order_imports": 0,
+      "transmit_true_literals": 0
+    },
+    "dependency_consistency": "passed",
+    "deterministic_fixture_generation": "passed",
+    "historical_artifact_hashes_unchanged": true
+  },
+  "safety": {
+    "holdout": "UNOPENED",
+    "opra": "NOT_STARTED",
+    "read_only": true,
+    "transmit": false,
+    "what_if": true,
+    "order_capability": "forbidden"
+  },
+  "remaining_phase_m_dependencies": [
+    "actual IBKR FX fee",
+    "actual broker conversion route",
+    "validated account USD cash",
+    "actual buying power",
+    "actual combo margin",
+    "actual live commissions",
+    "authorized OPRA/NBBO and combo quotes",
+    "prospective shadow/paper fills"
+  ],
+  "M0_2_1_STATUS": "COMPLETE",
+  "BUDGET_SEMANTICS": "FINALIZED",
+  "PRE_OPRA_LOGIC_STATUS": "COMPLETE_AND_FROZEN",
+  "NEXT_PHASE": "M — OPRA READ-ONLY + SHADOW/PAPER VALIDATION"
+}

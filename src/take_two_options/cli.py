@@ -164,6 +164,8 @@ def _budget_policy_from_cli(
     max_loss: str,
     buying_power_cap: str,
     maximum_contracts: int,
+    account_capital: float | None,
+    liquidity_reserve: float,
 ) -> FlexibleBudgetPolicyV2:
     return FlexibleBudgetPolicyV2(
         currency=budget_currency,
@@ -177,6 +179,8 @@ def _budget_policy_from_cli(
             option_name="--buying-power-cap",
         ),
         maximum_contracts=maximum_contracts,
+        account_available_capital=account_capital,
+        account_liquidity_reserve=liquidity_reserve,
     )
 
 
@@ -199,6 +203,14 @@ def trade_budget(
         int,
         typer.Option("--maximum-contracts", min=1),
     ] = 4,
+    account_capital: Annotated[
+        float | None,
+        typer.Option("--account-capital", min=0),
+    ] = None,
+    liquidity_reserve: Annotated[
+        float,
+        typer.Option("--liquidity-reserve", min=0),
+    ] = 0,
     json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
 ) -> None:
     """Build and display a prospective V2 budget policy; no market connection."""
@@ -212,6 +224,8 @@ def trade_budget(
             max_loss=max_loss,
             buying_power_cap=buying_power_cap,
             maximum_contracts=maximum_contracts,
+            account_capital=account_capital,
+            liquidity_reserve=liquidity_reserve,
         )
     except ValueError as error:
         raise typer.BadParameter(str(error)) from error
@@ -605,6 +619,14 @@ def trade_analyze(
         int,
         typer.Option("--maximum-contracts", min=1),
     ] = 4,
+    account_capital: Annotated[
+        float | None,
+        typer.Option("--account-capital", min=0),
+    ] = None,
+    liquidity_reserve: Annotated[
+        float,
+        typer.Option("--liquidity-reserve", min=0),
+    ] = 0,
 ) -> None:
     """Run the complete read-only decision pipeline."""
     budget_policy = None
@@ -619,6 +641,8 @@ def trade_analyze(
                 max_loss=max_loss,
                 buying_power_cap=buying_power_cap,
                 maximum_contracts=maximum_contracts,
+                account_capital=account_capital,
+                liquidity_reserve=liquidity_reserve,
             )
         except ValueError as error:
             raise typer.BadParameter(str(error)) from error

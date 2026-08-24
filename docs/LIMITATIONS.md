@@ -1,5 +1,17 @@
 # Limitations
 
+## M0.2.1 final budget semantics
+
+- Account deployability is only as reliable as supplied account capital. A positive reserve
+  cannot be configured without it, but M0.2.1 does not query a broker balance.
+- FX rate and execution cost are separate. A cross-currency trade with an unknown required FX
+  cost remains research-visible but has an `UNPROVEN` guarantee and is paper-blocked. No broker
+  minimum fee or conversion route is invented.
+- `NOT_APPLICABLE = 0` requires explicit evidence of no entry conversion, including validated
+  maintained underlying-currency cash where used. Actual account USD cash is not known offline.
+- The mixed-expiry buffer is unified, but lifecycle after first expiry remains intentionally
+  excluded: no assignment, delivery, roll, or transformed-position model was added.
+
 ## M0.2 flexible budget and capital safety
 
 - `FlexibleBudgetPolicyV2` is an offline product/capital contract, not advice about how much a
@@ -15,8 +27,8 @@
   architecture-specific lifecycle bound. Scenario-grid losses are diagnostics only; they cannot
   prove a maximum. Such candidates are research-visible but paper-blocked.
 - V2 does not subtract a hidden safety reserve. Its explicit `account_liquidity_reserve` defaults
-  to zero and does not invent account capital. V1 retains its old reserve semantics solely for
-  reproducibility.
+  to zero and, when positive, is applied only to explicitly supplied account capital. V1 retains
+  its old reserve semantics solely for reproducibility.
 - Budget eligibility is a hard gate and diagnostic, not a score. No V10 parameter, five-score
   component, OOS result, final holdout content, or paper threshold was recalibrated.
 

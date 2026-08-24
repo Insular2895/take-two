@@ -12,7 +12,9 @@ from pydantic import Field
 from take_two_options.budget import (
     BrokerCapitalContext,
     FlexibleBudgetPolicyV2,
+    FXExecutionCost,
     FXRate,
+    MixedExpiryLifecycleConfiguration,
 )
 from take_two_options.candidate_generation.factory import build_candidate
 from take_two_options.candidate_generation.search_space import (
@@ -42,7 +44,9 @@ class EnumerationResult(StrictModel):
 class _BudgetContext:
     policy: FlexibleBudgetPolicyV2 | None
     fx: FXRate | None
+    fx_cost: FXExecutionCost | None
     broker: BrokerCapitalContext | None
+    mixed_expiry_lifecycle: MixedExpiryLifecycleConfiguration
 
 
 def _width_allowed(width: float, search_space: StrategySearchSpace) -> bool:
@@ -101,7 +105,9 @@ def _emit(
             horizon_compatible=horizon_compatible,
             budget_policy=budget_context.policy,
             fx=budget_context.fx,
+            fx_cost=budget_context.fx_cost,
             broker_context=budget_context.broker,
+            mixed_expiry_lifecycle=budget_context.mixed_expiry_lifecycle,
         )
         target[candidate.candidate_id] = candidate
 
@@ -366,13 +372,21 @@ def enumerate_candidates(
     *,
     budget_policy: FlexibleBudgetPolicyV2 | None = None,
     fx: FXRate | None = None,
+    fx_cost: FXExecutionCost | None = None,
     broker_context: BrokerCapitalContext | None = None,
+    mixed_expiry_lifecycle: MixedExpiryLifecycleConfiguration | None = None,
 ) -> EnumerationResult:
     candidates: dict[str, CompiledStrategyCandidate] = {}
     spaces: list[StrategySearchSpace] = []
     warnings: list[str] = []
     counts: dict[str, int] = {}
-    budget_context = _BudgetContext(budget_policy, fx, broker_context)
+    budget_context = _BudgetContext(
+        budget_policy,
+        fx,
+        fx_cost,
+        broker_context,
+        mixed_expiry_lifecycle or MixedExpiryLifecycleConfiguration(),
+    )
     for recipe in catalog.recipes:
         if recipe.architecture not in request.allowed_structures:
             continue

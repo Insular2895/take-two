@@ -32,6 +32,7 @@ capacité, jamais une promesse de rendement.
 | M0 marge et FX | `experimental_offline` | Architecture explicite ; marge broker et mode FX réel restent à confirmer. |
 | M0.2 FlexibleBudgetPolicyV2 et diagnostics | `production_ready_offline` | Contrats/gates testés ; ne valide ni capital broker réel ni décision financière. |
 | M0.2 capital mixed-expiry | `experimental_offline` | Fail-closed sans what-if broker ou borne analytique validée ; scenario grids non probants. |
+| M0.2.1 sémantique réserve/lifecycle/FX | `production_ready_offline` | Logique déterministe gelée ; contexte compte et coûts broker réels restent Phase M. |
 | Moteur contractuel V10.1 et contrôle américain QuantLib | `production_ready_offline` | Dépend encore de la qualité des quotes d’entrée. |
 | Provenance et cutoff | `production_ready_offline` | La complétude dépend des connecteurs fournis. |
 | Normalisation déterministe des événements | `experimental_offline` | Revue humaine et calibration des règles requises. |
@@ -91,3 +92,17 @@ dépendances externes de promotion.
 
 `NEXT_PHASE = M — OPRA READ-ONLY + SHADOW/PAPER VALIDATION`. M0.2 prépare sa configuration mais
 ne lance aucune connexion ni activité paper.
+
+## Readiness M0.2.1
+
+`M0_2_1_STATUS = COMPLETE`, `BUDGET_SEMANTICS = FINALIZED` et
+`PRE_OPRA_LOGIC_STATUS = COMPLETE_AND_FROZEN` signifient que la réserve de compte contraint
+désormais le plafond effectif, qu'un seul objet lifecycle gouverne toutes les deadlines
+mixed-expiry et que les frais de transaction FX sont distincts du taux. Un coût FX requis mais
+inconnu reste nul, rend la garantie `UNPROVEN` et bloque le paper.
+
+Cette clôture ne fournit pas les données broker : frais/route FX IBKR, cash USD validé, buying
+power, marge combo, commissions et exécution restent à observer en Phase M. Le holdout reste
+`UNOPENED`, OPRA `NOT_STARTED` et aucune capacité d'ordre n'existe.
+
+`NEXT_PHASE = M — OPRA READ-ONLY + SHADOW/PAPER VALIDATION`.

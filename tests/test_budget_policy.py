@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import hashlib
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -10,15 +10,20 @@ from pydantic import ValidationError
 from take_two_options.budget import (
     BrokerCapitalContext,
     BudgetCandidate,
+    BudgetGuaranteeStatus,
     BudgetPolicyV1Legacy,
     BudgetStatus,
     CapitalCap,
     CapitalCapMode,
     CapitalRequirementStatus,
     FlexibleBudgetPolicyV2,
+    FXAccountMode,
+    FXExecutionCost,
+    FXExecutionCostStatus,
     FXRate,
     LifecycleCapitalStatus,
     MinimumSpendPolicy,
+    MixedExpiryLifecycleConfiguration,
     evaluate_budget_policy,
 )
 from take_two_options.candidate_generation.factory import build_candidate
@@ -43,6 +48,12 @@ LEGACY_ARTIFACT_HASHES = {
     ),
     "reports/M0_1_FINAL_PRE_OPRA_CORRECTION_REPORT.json": (
         "5dfcbddaa840fae19a97986190f6284caeb90a00146bdae27363f38164456430"
+    ),
+    "reports/M0_2_FLEXIBLE_BUDGET_REPORT.json": (
+        "04fdce78ccc07717632c2d7d192ece4a69783f9626ac7bd50db94c8be16be977"
+    ),
+    "reports/M0_2_FLEXIBLE_BUDGET_REPORT.md": (
+        "15304095bc67d474c0f691698e615325956231b92913fd97f4c1a9abedec6065"
     ),
     "validation/final_holdout_ledger.jsonl": (
         "7081cdd91b9dfac1acdaae219ba3eecc8133c25da0d1ad63c92d1537e6c2929a"
@@ -117,6 +128,10 @@ def test_prospective_phase_m_config_is_v2_and_does_not_start_opra() -> None:
     )
     assert config.budget_policy.preferred_lower_bound == 800
     assert config.budget_policy.hard_authorized_ceiling == 1_500
+    assert config.budget_policy.account_available_capital is None
+    assert config.budget_policy.account_liquidity_reserve == 0
+    assert config.budget_policy.effective_hard_budget_ceiling == 1_500
+    assert config.mixed_expiry_lifecycle.close_buffer_calendar_days == 1
     assert config.holdout_status == "UNOPENED"
     assert config.opra_status == "NOT_STARTED"
     assert config.read_only is True
@@ -151,6 +166,76 @@ def test_policy_clips_lower_bound_and_rejects_negative_inputs() -> None:
             max_overspend=0,
             maximum_contracts=1,
         )
+
+
+def test_account_reserve_constrains_effective_ceiling_and_auto_caps() -> None:
+    policy = FlexibleBudgetPolicyV2(
+        currency="EUR",
+        target_budget=1_000,
+        under_target_tolerance=200,
+        max_overspend=500,
+        maximum_contracts=4,
+        account_available_capital=1_600,
+        account_liquidity_reserve=300,
+    )
+
+    assert policy.account_deployable_capital == 1_300
+    assert policy.hard_authorized_ceiling == 1_500
+    assert policy.effective_hard_budget_ceiling == 1_300
+    assert policy.maximum_loss_cap_effective == 1_300
+    assert policy.buying_power_cap_effective == 1_300
+    assert _evaluate(_candidate(1_200), policy).eligible
+    blocked = _evaluate(_candidate(1_400), policy)
+    assert blocked.budget_status is BudgetStatus.EXCEEDS_HARD_BUDGET_CEILING
+    assert "ACCOUNT_DEPLOYABLE_CAPITAL_EXCEEDED" in blocked.reason_codes
+    assert blocked.account_headroom_after_trade == -100
+
+    tighter_account = policy.model_copy(
+        update={"account_available_capital": 1_500, "account_liquidity_reserve": 300}
+    )
+    max_loss_blocked = _evaluate(
+        _candidate(1_000, maximum_loss=1_250),
+        tighter_account,
+    )
+    assert tighter_account.maximum_loss_cap_effective == 1_200
+    assert tighter_account.buying_power_cap_effective == 1_200
+    assert not max_loss_blocked.eligible
+
+
+def test_positive_reserve_requires_account_capital() -> None:
+    with pytest.raises(ValidationError, match="account_available_capital"):
+        FlexibleBudgetPolicyV2(
+            currency="EUR",
+            target_budget=1_000,
+            under_target_tolerance=200,
+            max_overspend=500,
+            maximum_contracts=4,
+            account_liquidity_reserve=300,
+        )
+
+
+def test_reserve_above_account_blocks_positive_trade_but_not_no_position() -> None:
+    policy = FlexibleBudgetPolicyV2(
+        currency="EUR",
+        target_budget=1_000,
+        under_target_tolerance=200,
+        max_overspend=500,
+        maximum_contracts=4,
+        account_available_capital=200,
+        account_liquidity_reserve=300,
+    )
+    assert policy.account_deployable_capital == 0
+    assert not _evaluate(_candidate(1), policy).eligible
+    no_position = BudgetCandidate(
+        candidate_id="no-position-account-zero",
+        architecture="no_position",
+        currency="EUR",
+        required_entry_cash=0,
+        maximum_loss=0,
+        quantity=0,
+        is_no_position=True,
+    )
+    assert _evaluate(no_position, policy).eligible
 
 
 @pytest.mark.parametrize(
@@ -260,9 +345,11 @@ def test_factory_evaluates_540_per_unit_as_distinct_whole_contract_candidates() 
         (Architecture.CALL_DIAGONAL, 110.0),
     ],
 )
+@pytest.mark.parametrize("buffer_days", [0, 3])
 def test_factory_mixed_expiry_v2_excludes_common_expiry_proxy(
     architecture: Architecture,
     front_strike: float,
+    buffer_days: int,
 ) -> None:
     request = load_trade_request(
         ROOT / "configs/trades/ttwo_gta6_1000eur.yaml"
@@ -303,6 +390,11 @@ def test_factory_mixed_expiry_v2_excludes_common_expiry_proxy(
         ask=2.20,
         **common_quote,
     )
+    lifecycle = MixedExpiryLifecycleConfiguration(
+        close_buffer_calendar_days=buffer_days,
+        source="unit-test-buffer",
+        version="test-v1",
+    )
     candidate = build_candidate(
         architecture=architecture,
         recipe=recipe,
@@ -314,6 +406,7 @@ def test_factory_mixed_expiry_v2_excludes_common_expiry_proxy(
         request=request,
         horizon_compatible=True,
         budget_policy=_policy().model_copy(update={"currency": "USD"}),
+        mixed_expiry_lifecycle=lifecycle,
     )
 
     assert candidate.risk.maximum_loss > 0  # Legacy proxy retained for V1 reproduction.
@@ -326,7 +419,22 @@ def test_factory_mixed_expiry_v2_excludes_common_expiry_proxy(
     assert candidate.lifecycle_capital_requirement.calculation_status is (
         LifecycleCapitalStatus.UNKNOWN
     )
+    assert candidate.lifecycle_capital_requirement.managed_exit_deadline == (
+        date(2027, 8, 20) - timedelta(days=buffer_days)
+    )
+    assert (
+        candidate.lifecycle_capital_requirement.mixed_expiry_close_buffer_calendar_days
+        == buffer_days
+    )
+    assert candidate.lifecycle_capital_requirement.lifecycle_config_source == "unit-test-buffer"
     assert "BLOCKED_MIXED_EXPIRY_CAPITAL_UNPROVEN" in candidate.research_restrictions
+
+
+def test_factory_contains_no_hardcoded_one_day_mixed_expiry_buffer() -> None:
+    source = (ROOT / "src/take_two_options/candidate_generation/factory.py").read_text(
+        encoding="utf-8"
+    )
+    assert "timedelta(days=1)" not in source
 
 
 def test_debit_entry_cash_uses_executable_premium_plus_all_entry_costs() -> None:
@@ -394,6 +502,11 @@ def test_unknown_maximum_loss_remains_null_and_cannot_authorize_paper() -> None:
 def test_mixed_expiry_v2_never_uses_legacy_common_expiry_proxy(
     architecture: str,
 ) -> None:
+    lifecycle = MixedExpiryLifecycleConfiguration(
+        close_buffer_calendar_days=1,
+        source="unit-test",
+        version="test-v1",
+    )
     candidate = BudgetCandidate(
         candidate_id=architecture,
         architecture=architecture,
@@ -403,7 +516,9 @@ def test_mixed_expiry_v2_never_uses_legacy_common_expiry_proxy(
         buying_power_required=True,
         buying_power_status=CapitalRequirementStatus.UNKNOWN,
         mixed_expiry=True,
+        first_expiry=date(2027, 1, 15),
         managed_exit_deadline=date(2027, 1, 14),
+        mixed_expiry_lifecycle=lifecycle,
         legacy_common_expiry_maximum_loss=200,
     )
     evaluation = evaluate_budget_policy(candidate, _policy(), None, None)
@@ -425,6 +540,11 @@ def test_mixed_expiry_v2_never_uses_legacy_common_expiry_proxy(
 
 
 def test_validated_broker_buying_power_can_prove_mixed_expiry_capital() -> None:
+    lifecycle = MixedExpiryLifecycleConfiguration(
+        close_buffer_calendar_days=1,
+        source="unit-test",
+        version="test-v1",
+    )
     candidate = BudgetCandidate(
         candidate_id="calendar",
         architecture="call_calendar",
@@ -434,7 +554,9 @@ def test_validated_broker_buying_power_can_prove_mixed_expiry_capital() -> None:
         buying_power_status=CapitalRequirementStatus.UNKNOWN,
         as_of=datetime(2026, 8, 24, 20, tzinfo=UTC),
         mixed_expiry=True,
+        first_expiry=date(2027, 1, 15),
         managed_exit_deadline=date(2027, 1, 14),
+        mixed_expiry_lifecycle=lifecycle,
     )
     broker = BrokerCapitalContext(
         buying_power_requirement=900,
@@ -490,6 +612,148 @@ def test_fx_is_required_then_applied_with_point_in_time_provenance() -> None:
     stronger_euro = fx.model_copy(update={"rate_to_policy_currency": 1.3})
     reclassified = evaluate_budget_policy(candidate, _policy(), stronger_euro, None).diagnostics
     assert reclassified.budget_status is BudgetStatus.EXCEEDS_HARD_BUDGET_CEILING
+
+
+def test_known_fx_cost_is_added_after_conversion_and_can_cross_ceiling() -> None:
+    cutoff = datetime(2026, 8, 24, 20, tzinfo=UTC)
+    fx = FXRate(
+        source_currency="USD",
+        policy_currency="EUR",
+        rate_to_policy_currency=0.92,
+        timestamp=datetime(2026, 8, 24, 12, tzinfo=UTC),
+        source="PIT test FX",
+    )
+    cost = FXExecutionCost(
+        mode=FXAccountMode.CONVERT_AT_ENTRY_AND_EXIT,
+        status=FXExecutionCostStatus.KNOWN,
+        cost_amount=6,
+        currency="EUR",
+        source="broker-preview-fixture",
+        timestamp=datetime(2026, 8, 24, 12, tzinfo=UTC),
+    )
+    candidate = BudgetCandidate(
+        candidate_id="fx-crosses-ceiling",
+        architecture="long_call",
+        currency="USD",
+        required_entry_cash=1497 / 0.92,
+        maximum_loss=1497 / 0.92,
+        as_of=cutoff,
+    )
+    diagnostics = evaluate_budget_policy(candidate, _policy(), fx, None, cost).diagnostics
+
+    assert diagnostics.native_entry_cash == pytest.approx(1497 / 0.92)
+    assert diagnostics.converted_entry_cash_before_fx_cost == pytest.approx(1497)
+    assert diagnostics.entry_fx_cost == 6
+    assert diagnostics.required_entry_cash_after_fx == pytest.approx(1503)
+    assert diagnostics.budget_status is BudgetStatus.EXCEEDS_HARD_BUDGET_CEILING
+
+
+def test_known_fx_cost_below_limit_and_bps_representation_are_eligible() -> None:
+    cutoff = datetime(2026, 8, 24, 20, tzinfo=UTC)
+    fx = FXRate(
+        source_currency="USD",
+        policy_currency="EUR",
+        rate_to_policy_currency=0.92,
+        timestamp=datetime(2026, 8, 24, 12, tzinfo=UTC),
+        source="PIT test FX",
+    )
+    candidate = BudgetCandidate(
+        candidate_id="fx-below-limit",
+        architecture="long_call",
+        currency="USD",
+        required_entry_cash=1480 / 0.92,
+        maximum_loss=1480 / 0.92,
+        as_of=cutoff,
+    )
+    fixed = FXExecutionCost(
+        mode=FXAccountMode.CONVERT_AT_ENTRY_AND_EXIT,
+        status=FXExecutionCostStatus.KNOWN,
+        cost_amount=10,
+        currency="EUR",
+        source="broker-preview-fixture",
+        timestamp=datetime(2026, 8, 24, 12, tzinfo=UTC),
+    )
+    fixed_result = evaluate_budget_policy(candidate, _policy(), fx, None, fixed).diagnostics
+    assert fixed_result.required_entry_cash == pytest.approx(1490)
+    assert fixed_result.paper_eligible
+
+    bps = fixed.model_copy(update={"cost_amount": None, "cost_basis_points": 15})
+    bps_result = evaluate_budget_policy(candidate, _policy(), fx, None, bps).diagnostics
+    assert bps_result.entry_fx_cost == pytest.approx(2.22)
+    assert bps_result.paper_eligible
+
+
+def test_unknown_required_fx_cost_is_unproven_and_blocks_paper() -> None:
+    cutoff = datetime(2026, 8, 24, 20, tzinfo=UTC)
+    candidate = BudgetCandidate(
+        candidate_id="fx-cost-unknown",
+        architecture="long_call",
+        currency="USD",
+        required_entry_cash=1_400,
+        maximum_loss=1_400,
+        as_of=cutoff,
+    )
+    fx = FXRate(
+        source_currency="USD",
+        policy_currency="EUR",
+        rate_to_policy_currency=0.8,
+        timestamp=datetime(2026, 8, 24, 12, tzinfo=UTC),
+        source="PIT test FX",
+    )
+    diagnostics = evaluate_budget_policy(candidate, _policy(), fx, None).diagnostics
+
+    assert diagnostics.entry_fx_cost is None
+    assert diagnostics.entry_fx_cost_status is FXExecutionCostStatus.UNKNOWN
+    assert diagnostics.research_eligible
+    assert not diagnostics.paper_eligible
+    assert diagnostics.budget_guarantee_status is BudgetGuaranteeStatus.UNPROVEN
+    assert "FX_EXECUTION_COST_UNKNOWN" in diagnostics.reason_codes
+
+    with pytest.raises(ValidationError, match="UNKNOWN FX cost must remain null"):
+        FXExecutionCost(
+            mode=FXAccountMode.UNKNOWN,
+            status=FXExecutionCostStatus.UNKNOWN,
+            cost_amount=0,
+        )
+
+
+def test_fx_cost_not_applicable_is_explicit_for_same_currency_or_validated_usd_cash() -> None:
+    same_currency = _evaluate(_candidate(900))
+    assert same_currency.entry_fx_cost == 0
+    assert same_currency.entry_fx_cost_status is FXExecutionCostStatus.NOT_APPLICABLE
+    assert same_currency.paper_eligible
+
+    cutoff = datetime(2026, 8, 24, 20, tzinfo=UTC)
+    candidate = BudgetCandidate(
+        candidate_id="existing-usd-cash",
+        architecture="long_call",
+        currency="USD",
+        required_entry_cash=1_000,
+        maximum_loss=1_000,
+        as_of=cutoff,
+    )
+    fx = FXRate(
+        source_currency="USD",
+        policy_currency="EUR",
+        rate_to_policy_currency=0.9,
+        timestamp=datetime(2026, 8, 24, 12, tzinfo=UTC),
+        source="PIT test FX",
+    )
+    existing_cash = FXExecutionCost(
+        mode=FXAccountMode.MAINTAIN_UNDERLYING_CURRENCY_CASH,
+        status=FXExecutionCostStatus.NOT_APPLICABLE,
+        cost_amount=0,
+        currency="EUR",
+        source="validated-account-cash-fixture",
+        timestamp=datetime(2026, 8, 24, 12, tzinfo=UTC),
+        validated_underlying_currency_cash=True,
+    )
+    diagnostics = evaluate_budget_policy(
+        candidate, _policy(), fx, None, existing_cash
+    ).diagnostics
+    assert diagnostics.entry_fx_cost == 0
+    assert diagnostics.entry_fx_cost_status is FXExecutionCostStatus.NOT_APPLICABLE
+    assert diagnostics.paper_eligible
 
 
 def test_fees_and_slippage_can_push_entry_above_hard_ceiling() -> None:

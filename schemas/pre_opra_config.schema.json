@@ -1278,6 +1278,18 @@
           "title": "Mixed Expiry Close Buffer Calendar Days",
           "type": "integer"
         },
+        "mixed_expiry_lifecycle_config_source": {
+          "default": "TradeEconomicsConfiguration",
+          "minLength": 1,
+          "title": "Mixed Expiry Lifecycle Config Source",
+          "type": "string"
+        },
+        "mixed_expiry_lifecycle_config_version": {
+          "default": "1.1",
+          "minLength": 1,
+          "title": "Mixed Expiry Lifecycle Config Version",
+          "type": "string"
+        },
         "mixed_expiry_lifecycle_policy": {
           "$ref": "#/$defs/MixedExpiryLifecyclePolicy",
           "default": "CLOSE_BEFORE_FIRST_EXPIRY"

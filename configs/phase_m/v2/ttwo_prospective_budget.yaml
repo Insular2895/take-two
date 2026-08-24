@@ -15,7 +15,14 @@ budget_policy:
     mode: AUTO
     value: null
   maximum_contracts: 4
+  account_available_capital: null
   account_liquidity_reserve: 0
+
+mixed_expiry_lifecycle:
+  policy: CLOSE_BEFORE_FIRST_EXPIRY
+  close_buffer_calendar_days: 1
+  source: configs/pre_opra/v1/ttwo_research.yaml#trade_economics
+  version: "1.1"
 
 holdout_status: UNOPENED
 opra_status: NOT_STARTED

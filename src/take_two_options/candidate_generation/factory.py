@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 from take_two_options.budget import (
     BrokerCapitalContext,
@@ -11,7 +11,9 @@ from take_two_options.budget import (
     BudgetStatus,
     CapitalRequirementStatus,
     FlexibleBudgetPolicyV2,
+    FXExecutionCost,
     FXRate,
+    MixedExpiryLifecycleConfiguration,
     evaluate_budget_policy,
 )
 from take_two_options.candidate_generation.registry import ARCHITECTURE_REGISTRY
@@ -110,7 +112,9 @@ def build_candidate(
     horizon_compatible: bool,
     budget_policy: FlexibleBudgetPolicyV2 | None = None,
     fx: FXRate | None = None,
+    fx_cost: FXExecutionCost | None = None,
     broker_context: BrokerCapitalContext | None = None,
+    mixed_expiry_lifecycle: MixedExpiryLifecycleConfiguration | None = None,
 ) -> CompiledStrategyCandidate:
     legs = [
         CandidateLeg(
@@ -197,6 +201,11 @@ def build_candidate(
     else:
         expirations = sorted({leg.quote.expiration for leg in legs})
         mixed_expiry = len(expirations) > 1
+        lifecycle_configuration = (
+            mixed_expiry_lifecycle or MixedExpiryLifecycleConfiguration()
+        )
+        if mixed_expiry:
+            identity["mixed_expiry_lifecycle"] = lifecycle_configuration.model_dump(mode="json")
         if fx is None and budget_policy.currency == request.currency:
             if budget_policy.currency == "USD":
                 fx = None
@@ -235,7 +244,13 @@ def build_candidate(
             quantity=quantity,
             as_of=max(leg.quote.quote_timestamp for leg in legs),
             mixed_expiry=mixed_expiry,
-            managed_exit_deadline=(expirations[0] - timedelta(days=1) if mixed_expiry else None),
+            first_expiry=(expirations[0] if mixed_expiry else None),
+            managed_exit_deadline=(
+                lifecycle_configuration.managed_exit_deadline(expirations[0])
+                if mixed_expiry
+                else None
+            ),
+            mixed_expiry_lifecycle=(lifecycle_configuration if mixed_expiry else None),
             analytical_loss_bound=None,
             analytical_bound_validated=False,
             legacy_common_expiry_maximum_loss=(risk.maximum_loss if mixed_expiry else None),
@@ -245,6 +260,7 @@ def build_candidate(
             budget_policy,
             fx,
             broker_context,
+            fx_cost,
         )
         budget_diagnostics = budget_evaluation.diagnostics
         lifecycle_capital_requirement = budget_evaluation.lifecycle_capital_requirement

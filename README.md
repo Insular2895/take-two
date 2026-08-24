@@ -10,6 +10,23 @@ constraints, runs separate conditional simulations, validates hard gates, then
 uses Pareto ranking. `NO_TRADE` and `BLOCKED_INSUFFICIENT_DATA` are first-class
 outcomes.
 
+## M0.2.1 — Final budget semantics cleanup
+
+The pre-OPRA budget logic is now finalized and frozen. A positive account
+liquidity reserve requires known available capital and constrains the effective
+hard ceiling and AUTO caps. One typed mixed-expiry lifecycle configuration now
+controls the candidate, ticket, scenario, breakeven, and target-arrival
+deadline. FX rate and FX execution cost are distinct; an unknown required FX
+cost is never treated as zero and blocks paper eligibility while preserving
+research analysis.
+
+V2 remains version 2.0 and the trade-economics ticket remains 1.2 through
+optional backward-compatible fields. Historical artifacts and the five scores
+are unchanged. See
+[`M0_2_1_BUDGET_SEMANTICS_CLEANUP.md`](docs/specs/M0_2_1_BUDGET_SEMANTICS_CLEANUP.md)
+and the
+[`M0.2.1 report`](reports/M0_2_1_FINAL_BUDGET_SEMANTICS_REPORT.md).
+
 ## M0.2 — Flexible budget and capital safety
 
 Prospective research can now opt into `FlexibleBudgetPolicyV2`: a target budget, an asymmetric
@@ -29,7 +46,9 @@ ttwo-options trade budget \
   --budget 1000 \
   --budget-currency EUR \
   --allow-under 200 \
-  --allow-over 500
+  --allow-over 500 \
+  --account-capital 2000 \
+  --liquidity-reserve 500
 ```
 
 The prospective configuration is

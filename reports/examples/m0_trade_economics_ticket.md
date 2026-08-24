@@ -20,19 +20,32 @@
 - Target: $5,000.00
 - Preferred lower: $0.00
 - Allowed overspend: $0.00
-- Hard ceiling: $5,000.00
+- Configured hard ceiling: $5,000.00
+- Account available: UNKNOWN
+- Required account reserve: $0.00
+- Account deployable: UNKNOWN
+- Effective hard ceiling: $5,000.00
 - Maximum loss cap: $5,000.00
 - Buying-power cap: $5,000.00
 
 ## This trade — Budget
 
-- Entry cash: $3,002.15
+- Native executable entry: $3,002.15
+- Converted entry before FX cost: $3,002.15
+- Entry FX transaction cost: $0.00 (`NOT_APPLICABLE`)
+- **REQUIRED ENTRY CASH AFTER FX: $3,002.15**
+- FX rate: `UNKNOWN`
+- FX rate source: `NOT_APPLICABLE`
+- FX cost source: `no_entry_conversion`
 - Maximum loss: $3,002.15
 - Buying power: UNKNOWN
 - Effective capital: $3,002.15
 - Delta vs target: $-1,997.85 (-39.96%)
 - Headroom: +$1,997.85
+- Account headroom after trade: UNKNOWN
 - Status: `WITHIN_PREFERRED_RANGE`
+- Budget guarantee: `PROVEN`
+- Reason codes: `[]`
 - Eligible / research / paper: `True` / `True` / `True`
 
 ## Legs

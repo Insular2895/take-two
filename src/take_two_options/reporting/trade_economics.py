@@ -64,11 +64,27 @@ def render_trade_economics_markdown(
             "- Calendar/diagonal lifecycle after the first leg expiry is intentionally not "
             "modeled. M0.1 assumes managed closure before first expiry."
         )
+        lines.extend(
+            [
+                "- Mixed-expiry lifecycle policy: "
+                f"`{ticket.mixed_expiry_lifecycle_policy or 'UNKNOWN'}`",
+                "- Mixed-expiry close buffer: "
+                f"`{ticket.mixed_expiry_close_buffer_calendar_days}` calendar days",
+                "- Lifecycle config source / version: "
+                f"`{ticket.lifecycle_config_source or 'UNKNOWN'}` / "
+                f"`{ticket.lifecycle_config_version or 'UNKNOWN'}`",
+            ]
+        )
 
     if ticket.budget_diagnostics is not None:
         budget = ticket.budget_diagnostics
         budget_currency = budget.currency
         allowed_overspend = budget.hard_authorized_ceiling - budget.target_budget
+        account_headroom = _budget_amount(
+            budget.account_headroom_after_trade,
+            budget_currency,
+            signed=True,
+        )
         lines.extend(
             [
                 "",
@@ -80,8 +96,16 @@ def render_trade_economics_markdown(
                 "- Preferred lower: "
                 f"{_budget_amount(budget.preferred_lower_bound, budget_currency)}",
                 f"- Allowed overspend: {_budget_amount(allowed_overspend, budget_currency)}",
-                "- Hard ceiling: "
+                "- Configured hard ceiling: "
                 f"{_budget_amount(budget.hard_authorized_ceiling, budget_currency)}",
+                "- Account available: "
+                f"{_budget_amount(budget.account_available_capital, budget_currency)}",
+                "- Required account reserve: "
+                f"{_budget_amount(budget.account_liquidity_reserve, budget_currency)}",
+                "- Account deployable: "
+                f"{_budget_amount(budget.account_deployable_capital, budget_currency)}",
+                "- Effective hard ceiling: "
+                f"{_budget_amount(budget.effective_hard_budget_ceiling, budget_currency)}",
                 "- Maximum loss cap: "
                 f"{_budget_amount(budget.maximum_loss_cap_effective, budget_currency)}",
                 "- Buying-power cap: "
@@ -89,7 +113,18 @@ def render_trade_economics_markdown(
                 "",
                 f"{h2} This trade — Budget",
                 "",
-                f"- Entry cash: {_budget_amount(budget.required_entry_cash, budget_currency)}",
+                "- Native executable entry: "
+                f"{_budget_amount(budget.native_entry_cash, budget.native_currency or currency)}",
+                "- Converted entry before FX cost: "
+                f"{_budget_amount(budget.converted_entry_cash_before_fx_cost, budget_currency)}",
+                "- Entry FX transaction cost: "
+                f"{_budget_amount(budget.entry_fx_cost, budget_currency)} "
+                f"(`{budget.entry_fx_cost_status or 'UNKNOWN'}`)",
+                "- **REQUIRED ENTRY CASH AFTER FX: "
+                f"{_budget_amount(budget.required_entry_cash_after_fx, budget_currency)}**",
+                f"- FX rate: `{_number(budget.fx_rate, 8)}`",
+                f"- FX rate source: `{budget.fx_rate_source or 'NOT_APPLICABLE'}`",
+                f"- FX cost source: `{budget.fx_cost_source or 'NOT_APPLICABLE'}`",
                 f"- Maximum loss: {_budget_amount(budget.maximum_loss, budget_currency)}",
                 "- Buying power: "
                 f"{_budget_amount(budget.buying_power_requirement, budget_currency)}",
@@ -100,7 +135,11 @@ def render_trade_economics_markdown(
                 f"({_percentage(budget.budget_delta_percentage)})",
                 "- Headroom: "
                 f"{_budget_amount(budget.headroom_to_hard_ceiling, budget_currency, signed=True)}",
+                "- Account headroom after trade: "
+                f"{account_headroom}",
                 f"- Status: `{budget.budget_status.value}`",
+                f"- Budget guarantee: `{budget.budget_guarantee_status.value}`",
+                f"- Reason codes: `{budget.reason_codes}`",
                 f"- Eligible / research / paper: `{budget.eligible}` / "
                 f"`{budget.research_eligible}` / `{budget.paper_eligible}`",
             ]
@@ -115,6 +154,10 @@ def render_trade_economics_markdown(
                     f"`{lifecycle_capital.calculation_status.value}`",
                     "- Lifecycle effective requirement: "
                     f"{_budget_amount(lifecycle_effective, budget_currency)}",
+                    "- Lifecycle buffer / source / version: "
+                    f"`{lifecycle_capital.mixed_expiry_close_buffer_calendar_days}` / "
+                    f"`{lifecycle_capital.lifecycle_config_source or 'UNKNOWN'}` / "
+                    f"`{lifecycle_capital.lifecycle_config_version or 'UNKNOWN'}`",
                 ]
             )
 

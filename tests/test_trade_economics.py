@@ -769,10 +769,13 @@ def test_event_iv_crush_uses_event_date_and_event_to_expiry_tenor() -> None:
 
 
 @pytest.mark.parametrize("calendar", [True, False])
+@pytest.mark.parametrize("buffer_days", [0, 3])
 def test_mixed_expiry_calendar_and_diagonal_stop_at_managed_deadline(
     calendar: bool,
+    buffer_days: int,
 ) -> None:
     bundle = _fast_bundle()
+    bundle.trade_economics.mixed_expiry_close_buffer_calendar_days = buffer_days
     bundle.trade_economics.scenario_horizons_days = [7, 400]
     bundle.trade_economics.time_decay_horizons_days = [1, 7, 400]
     candidate = next(
@@ -786,8 +789,14 @@ def test_mixed_expiry_calendar_and_diagonal_stop_at_managed_deadline(
         second_quote.contract.strike = first_quote.contract.strike
     analyze_risk(candidate, bundle)
     ticket = build_trade_economics_ticket(candidate, bundle)
-    deadline = first_quote.contract.expiration - timedelta(days=1)
+    deadline = first_quote.contract.expiration - timedelta(days=buffer_days)
     assert ticket.managed_exit_deadline == deadline
+    assert ticket.mixed_expiry_lifecycle_policy == "CLOSE_BEFORE_FIRST_EXPIRY"
+    assert ticket.mixed_expiry_close_buffer_calendar_days == buffer_days
+    assert ticket.lifecycle_config_source == "TradeEconomicsConfiguration"
+    assert ticket.lifecycle_config_version == "1.1"
+    assert ticket.lifecycle_capital_requirement is not None
+    assert ticket.lifecycle_capital_requirement.managed_exit_deadline == deadline
     assert ticket.expiration_breakevens == []
     assert ticket.time_decay is not None
     assert max(point.valuation_time for point in ticket.time_decay.time_decay_curve) <= deadline
@@ -811,6 +820,20 @@ def test_mixed_expiry_calendar_and_diagonal_stop_at_managed_deadline(
         result.breakeven_type == "MANAGED_EXIT_BREAKEVEN"
         for result in ticket.breakeven_clock.results
     )
+    assert all(result.valuation_time <= deadline for result in ticket.breakeven_clock.results)
+    assert all(
+        target.managed_exit_deadline == deadline
+        and (
+            target.latest_profitable_arrival_date is None
+            or target.latest_profitable_arrival_date <= deadline
+        )
+        for target in ticket.target_arrivals
+    )
+    if calendar and buffer_days == 3:
+        mismatched = ticket.model_dump(mode="python")
+        mismatched["managed_exit_deadline"] = deadline + timedelta(days=1)
+        with pytest.raises(ValidationError, match="MIXED_EXPIRY_LIFECYCLE_CONFIG_MISMATCH"):
+            TradeEconomicsTicket.model_validate(mismatched)
     assert "intentionally not modeled" in render_trade_economics_markdown(ticket)
 
 

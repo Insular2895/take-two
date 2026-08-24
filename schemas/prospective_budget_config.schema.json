@@ -36,6 +36,19 @@
       "additionalProperties": false,
       "description": "Explicit target budget with asymmetric lower and upper tolerances.",
       "properties": {
+        "account_available_capital": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Account Available Capital"
+        },
         "account_liquidity_reserve": {
           "default": 0.0,
           "minimum": 0,
@@ -103,6 +116,37 @@
       ],
       "title": "MinimumSpendPolicy",
       "type": "string"
+    },
+    "MixedExpiryLifecycleConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "close_buffer_calendar_days": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Close Buffer Calendar Days",
+          "type": "integer"
+        },
+        "policy": {
+          "const": "CLOSE_BEFORE_FIRST_EXPIRY",
+          "default": "CLOSE_BEFORE_FIRST_EXPIRY",
+          "title": "Policy",
+          "type": "string"
+        },
+        "source": {
+          "default": "trade_economics_configuration",
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "version": {
+          "default": "1.1",
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "title": "MixedExpiryLifecycleConfiguration",
+      "type": "object"
     }
   },
   "$id": "https://schemas.take-two-options.invalid/v11.1/prospective_budget_config.schema.json",
@@ -118,6 +162,9 @@
       "default": "UNOPENED",
       "title": "Holdout Status",
       "type": "string"
+    },
+    "mixed_expiry_lifecycle": {
+      "$ref": "#/$defs/MixedExpiryLifecycleConfiguration"
     },
     "opra_status": {
       "const": "NOT_STARTED",

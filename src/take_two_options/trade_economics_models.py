@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from enum import StrEnum
 from typing import Literal
 
 from pydantic import Field, model_validator
 
-from take_two_options.budget import BudgetDiagnostics, LifecycleCapitalRequirement
+from take_two_options.budget import (
+    BudgetDiagnostics,
+    LifecycleCapitalRequirement,
+    MixedExpiryLifecycleConfiguration,
+)
 from take_two_options.models import StrictModel
 
 
@@ -454,6 +458,11 @@ class TradeEconomicsConfiguration(StrictModel):
         MixedExpiryLifecyclePolicy.CLOSE_BEFORE_FIRST_EXPIRY
     )
     mixed_expiry_close_buffer_calendar_days: int = Field(default=1, ge=0)
+    mixed_expiry_lifecycle_config_source: str = Field(
+        default="TradeEconomicsConfiguration",
+        min_length=1,
+    )
+    mixed_expiry_lifecycle_config_version: str = Field(default="1.1", min_length=1)
     breakeven_solver: BreakevenSolverConfiguration = Field(
         default_factory=BreakevenSolverConfiguration
     )
@@ -488,6 +497,15 @@ class TradeEconomicsConfiguration(StrictModel):
         ):
             raise ValueError("known FX handling modes require entry and scenario FX rates")
         return self
+
+    @property
+    def mixed_expiry_lifecycle_configuration(self) -> MixedExpiryLifecycleConfiguration:
+        return MixedExpiryLifecycleConfiguration(
+            policy=self.mixed_expiry_lifecycle_policy.value,
+            close_buffer_calendar_days=self.mixed_expiry_close_buffer_calendar_days,
+            source=self.mixed_expiry_lifecycle_config_source,
+            version=self.mixed_expiry_lifecycle_config_version,
+        )
 
 
 class GreekConfidence(StrictModel):
@@ -1107,6 +1125,10 @@ class TradeEconomicsTicket(StrictModel):
     lifecycle_policy: str = "SAME_EXPIRY_HOLD_TO_EXPIRY"
     first_expiry: datetime | None = None
     managed_exit_deadline: datetime | None = None
+    mixed_expiry_lifecycle_policy: str | None = None
+    mixed_expiry_close_buffer_calendar_days: int | None = Field(default=None, ge=0)
+    lifecycle_config_source: str | None = None
+    lifecycle_config_version: str | None = None
     intraday_precision_status: IntradayPrecisionStatus
     intraday_precision_warning: str | None = None
     legs: list[LegEconomics]
@@ -1144,3 +1166,49 @@ class TradeEconomicsTicket(StrictModel):
     transmit: Literal[False] = False
     what_if: Literal[True] = True
     order_capability: Literal["forbidden"] = "forbidden"
+
+    @model_validator(mode="after")
+    def validate_mixed_expiry_lifecycle_consistency(self) -> TradeEconomicsTicket:
+        buffer_days = self.mixed_expiry_close_buffer_calendar_days
+        if buffer_days is None:
+            return self
+        if (
+            self.first_expiry is None
+            or self.managed_exit_deadline is None
+            or self.mixed_expiry_lifecycle_policy != "CLOSE_BEFORE_FIRST_EXPIRY"
+            or self.lifecycle_config_source is None
+            or self.lifecycle_config_version is None
+        ):
+            raise ValueError("MIXED_EXPIRY_LIFECYCLE_CONFIG_MISMATCH")
+        expected = self.first_expiry - timedelta(days=buffer_days)
+        if self.managed_exit_deadline != expected:
+            raise ValueError("MIXED_EXPIRY_LIFECYCLE_CONFIG_MISMATCH")
+        requirement = self.lifecycle_capital_requirement
+        if requirement is not None:
+            if (
+                requirement.managed_exit_deadline != expected
+                or requirement.mixed_expiry_close_buffer_calendar_days != buffer_days
+                or requirement.lifecycle_config_source != self.lifecycle_config_source
+                or requirement.lifecycle_config_version != self.lifecycle_config_version
+            ):
+                raise ValueError("MIXED_EXPIRY_LIFECYCLE_CONFIG_MISMATCH")
+        if any(
+            cell.valuation_time > expected
+            for matrix in self.scenario_matrices
+            for cell in matrix.cells
+        ):
+            raise ValueError("MIXED_EXPIRY_LIFECYCLE_CONFIG_MISMATCH")
+        if self.breakeven_clock is not None and any(
+            result.valuation_time > expected for result in self.breakeven_clock.results
+        ):
+            raise ValueError("MIXED_EXPIRY_LIFECYCLE_CONFIG_MISMATCH")
+        if any(
+            target.managed_exit_deadline != expected
+            or (
+                target.latest_profitable_arrival_date is not None
+                and target.latest_profitable_arrival_date > expected
+            )
+            for target in self.target_arrivals
+        ):
+            raise ValueError("MIXED_EXPIRY_LIFECYCLE_CONFIG_MISMATCH")
+        return self

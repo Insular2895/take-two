@@ -23,9 +23,13 @@ from take_two_options.budget import (
     BudgetStatus,
     CapitalRequirementStatus,
     FlexibleBudgetPolicyV2,
+    FXAccountMode,
+    FXExecutionCost,
+    FXExecutionCostStatus,
     FXRate,
     LifecycleCapitalRequirement,
     LifecycleCapitalStatus,
+    MixedExpiryLifecycleConfiguration,
     evaluate_budget_policy,
 )
 from take_two_options.decision.quality_scores import FiveScoreReport, QualityScore
@@ -124,6 +128,7 @@ class _Lifecycle:
     managed_exit_deadline: datetime | None
     mixed_expiry: bool
     policy: str
+    configuration: MixedExpiryLifecycleConfiguration | None = None
 
 
 @dataclass(frozen=True)
@@ -162,10 +167,10 @@ def _lifecycle(candidate: StrategyCandidate, bundle: MarketDataBundle) -> _Lifec
     policy = bundle.trade_economics.mixed_expiry_lifecycle_policy
     if policy is not MixedExpiryLifecyclePolicy.CLOSE_BEFORE_FIRST_EXPIRY:
         raise ValueError("unsupported mixed-expiry lifecycle policy")
-    deadline = first_expiry - timedelta(
-        days=bundle.trade_economics.mixed_expiry_close_buffer_calendar_days
-    )
-    return _Lifecycle(first_expiry, deadline, True, policy.value)
+    configuration = bundle.trade_economics.mixed_expiry_lifecycle_configuration
+    deadline = configuration.managed_exit_deadline(first_expiry)
+    assert isinstance(deadline, datetime)
+    return _Lifecycle(first_expiry, deadline, True, policy.value, configuration)
 
 
 def _effective_scenario_time(
@@ -2596,6 +2601,7 @@ def build_trade_economics_ticket(
     five_score_config_hash: str | None = None,
     budget_policy: BudgetPolicy | None = None,
     budget_fx: FXRate | None = None,
+    budget_fx_cost: FXExecutionCost | None = None,
     broker_context: BrokerCapitalContext | None = None,
 ) -> TradeEconomicsTicket:
     """Build one reconciled M0 ticket without creating any execution capability."""
@@ -2877,6 +2883,28 @@ def build_trade_economics_ticket(
     uses_v2_mixed_expiry = isinstance(effective_budget_policy, FlexibleBudgetPolicyV2) and (
         lifecycle.mixed_expiry
     )
+    native_budget_entry_cash = candidate.execution_estimate.total_entry_cash_flow or 0.0
+    if (
+        isinstance(effective_budget_policy, FlexibleBudgetPolicyV2)
+        and effective_budget_policy.currency != bundle.underlying.currency
+        and candidate.execution_estimate.fx_conversion_cost is not None
+    ):
+        native_budget_entry_cash -= candidate.execution_estimate.fx_conversion_cost
+        if budget_fx_cost is None and budget_fx is not None:
+            budget_fx_cost = FXExecutionCost(
+                mode=FXAccountMode.CONVERT_AT_ENTRY_AND_EXIT,
+                status=FXExecutionCostStatus.ESTIMATED,
+                cost_amount=(
+                    candidate.execution_estimate.fx_conversion_cost
+                    * budget_fx.rate_to_policy_currency
+                ),
+                currency=effective_budget_policy.currency,
+                source="ExecutionEstimate.fx_conversion_cost",
+                timestamp=bundle.analysis_timestamp,
+                assumptions=[
+                    "Configured execution estimate converted to policy currency; not observed."
+                ],
+            )
     buying_power_required = (
         has_short_option and margin.status is not MarginStatus.NOT_REQUIRED
     ) or (
@@ -2894,7 +2922,7 @@ def build_trade_economics_ticket(
         candidate_id=candidate.id,
         architecture=candidate.kind.value,
         currency=bundle.underlying.currency,
-        required_entry_cash=candidate.execution_estimate.total_entry_cash_flow or 0.0,
+        required_entry_cash=native_budget_entry_cash,
         maximum_loss=(None if uses_v2_mixed_expiry else candidate.risk_metrics.max_loss),
         buying_power_requirement=(
             margin.buying_power_usage if margin.status is MarginStatus.ESTIMATED else None
@@ -2904,7 +2932,9 @@ def build_trade_economics_ticket(
         quantity=max((leg.quantity for leg in candidate.legs), default=0),
         as_of=bundle.analysis_timestamp,
         mixed_expiry=uses_v2_mixed_expiry,
+        first_expiry=(lifecycle.first_expiry if uses_v2_mixed_expiry else None),
         managed_exit_deadline=(lifecycle.managed_exit_deadline if uses_v2_mixed_expiry else None),
+        mixed_expiry_lifecycle=(lifecycle.configuration if uses_v2_mixed_expiry else None),
         legacy_common_expiry_maximum_loss=(
             candidate.risk_metrics.max_loss if lifecycle.mixed_expiry else None
         ),
@@ -2915,6 +2945,7 @@ def build_trade_economics_ticket(
         effective_budget_policy,
         budget_fx,
         broker_context,
+        budget_fx_cost,
     )
     budget_diagnostics = budget_evaluation.diagnostics
     lifecycle_capital_requirement = budget_evaluation.lifecycle_capital_requirement
@@ -2930,6 +2961,17 @@ def build_trade_economics_ticket(
             broker_buying_power=margin.buying_power_usage,
             effective_budget_requirement=candidate.risk_metrics.max_loss,
             calculation_status=LifecycleCapitalStatus.LEGACY_COMMON_EXPIRY_PROXY,
+            mixed_expiry_close_buffer_calendar_days=(
+                lifecycle.configuration.close_buffer_calendar_days
+                if lifecycle.configuration is not None
+                else None
+            ),
+            lifecycle_config_source=(
+                lifecycle.configuration.source if lifecycle.configuration is not None else None
+            ),
+            lifecycle_config_version=(
+                lifecycle.configuration.version if lifecycle.configuration is not None else None
+            ),
             warnings=[
                 "LEGACY_COMMON_EXPIRY_PROXY is retained only for BudgetPolicyV1Legacy "
                 "reproduction and cannot authorize BudgetPolicyV2."
@@ -2994,6 +3036,18 @@ def build_trade_economics_ticket(
         lifecycle_policy=lifecycle.policy,
         first_expiry=lifecycle.first_expiry,
         managed_exit_deadline=(lifecycle.managed_exit_deadline if lifecycle.mixed_expiry else None),
+        mixed_expiry_lifecycle_policy=(lifecycle.policy if lifecycle.mixed_expiry else None),
+        mixed_expiry_close_buffer_calendar_days=(
+            lifecycle.configuration.close_buffer_calendar_days
+            if lifecycle.configuration is not None
+            else None
+        ),
+        lifecycle_config_source=(
+            lifecycle.configuration.source if lifecycle.configuration is not None else None
+        ),
+        lifecycle_config_version=(
+            lifecycle.configuration.version if lifecycle.configuration is not None else None
+        ),
         intraday_precision_status=intraday_status,
         intraday_precision_warning=intraday_warning,
         legs=legs,
