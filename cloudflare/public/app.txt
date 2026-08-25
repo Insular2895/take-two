@@ -1,6 +1,21 @@
 import { selectTrackedClosePreview } from "/preview-state.js";
+import {
+  METRIC_METADATA,
+  filterCandidateUniverse,
+  paginateCandidates,
+  percentileHeatmap,
+  sortCandidates,
+} from "/research-state.js";
 
-const state = { csrf: "", data: null, preview: null, range: "all", actionPrompt: null };
+const state = {
+  csrf: "", data: null, preview: null, range: "all", actionPrompt: null,
+  workspace: "research",
+  research: {
+    analyses: [], analysis: null, candidates: [], selectedAnalysisId: null,
+    view: "best", sort: "engine_rank", sortDirection: null,
+    page: 1, pageSize: 20, compare: new Set(),
+  },
+};
 const $ = (selector) => document.querySelector(selector);
 const h = (value) => String(value ?? "—").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 const money = (value, currency = "EUR") => value === null || value === undefined ? "N/A" : new Intl.NumberFormat("fr-FR", { style: "currency", currency, maximumFractionDigits: 0, signDisplay: "exceptZero" }).format(Number(value));
@@ -257,9 +272,271 @@ $("#fill-form").addEventListener("submit", async (event) => {
 });
 document.querySelectorAll("[data-range]").forEach((button) => button.addEventListener("click", () => { state.range = button.dataset.range; renderChart(state.data.pnl_history); }));
 
+function switchWorkspace(workspace) {
+  state.workspace = workspace;
+  $("#research-view").classList.toggle("hidden", workspace !== "research");
+  $("#position-view").classList.toggle("hidden", workspace !== "position");
+  $("#nav-research").classList.toggle("active", workspace === "research");
+  $("#nav-position").classList.toggle("active", workspace === "position");
+  if (workspace === "research") refreshResearch();
+}
+
+function researchStatusText(analysis) {
+  if (!analysis) return "Aucune analyse sélectionnée.";
+  const counts = analysis.total_generated === null || analysis.total_generated === undefined
+    ? "univers en attente"
+    : `${analysis.total_generated} générés · ${analysis.total_pruned} écartés · ${analysis.total_paper_eligible} paper eligible`;
+  return `${analysis.status} · ${analysis.market_data_mode} · ${counts}`;
+}
+
+function renderResearchHistory() {
+  const analyses = state.research.analyses;
+  $("#analysis-history").innerHTML = analyses.length ? analyses.map((analysis) => `
+    <li><button data-analysis-id="${h(analysis.analysis_request_id)}">
+      <strong>${h(analysis.status)}</strong><span>${h(new Date(analysis.created_at).toLocaleString("fr-FR"))}</span>
+      <small>${h(analysis.market_data_mode)} · ${h(amount(analysis.target_budget))}</small>
+    </button></li>`).join("") : "<li>Aucun historique.</li>";
+  document.querySelectorAll("[data-analysis-id]").forEach((button) => button.addEventListener("click", () => loadAnalysis(button.dataset.analysisId)));
+}
+
+function candidateFilters() {
+  const ranges = {};
+  document.querySelectorAll("[data-range-field]").forEach((input) => {
+    const field = input.dataset.rangeField;
+    ranges[field] ||= { min: null, max: null };
+    ranges[field][input.dataset.bound] = input.value === "" ? null : Number(input.value);
+  });
+  return {
+    view: state.research.view,
+    search: $("#filter-search").value.trim(),
+    architectures: [...$("#filter-architecture").selectedOptions].map((option) => option.value),
+    budgetStatus: $("#filter-budget").value,
+    entryType: $("#filter-entry-type").value,
+    freshness: $("#filter-freshness").value,
+    expiryType: $("#filter-expiry").value,
+    ranges,
+  };
+}
+
+function candidateMetric(value, format = (item) => String(item)) {
+  return value === null || value === undefined ? "N/A" : format(value);
+}
+
+function heatClass(heat, metric) {
+  const tone = heat?.[metric]?.tone || "neutral";
+  return `metric-cell heat-${tone}`;
+}
+
+function renderCandidates() {
+  const all = state.research.candidates;
+  const filters = candidateFilters();
+  const filtered = filterCandidateUniverse(all, filters);
+  const sorted = sortCandidates(filtered, state.research.sort, state.research.sortDirection);
+  const heatmap = percentileHeatmap(
+    sorted,
+    [state.research.sort],
+    { [state.research.sort]: state.research.sortDirection },
+  );
+  const userRanks = new Map(sorted.map((candidate, index) => [candidate.candidate_id, index + 1]));
+  const page = paginateCandidates(sorted, state.research.page, state.research.pageSize);
+  state.research.page = page.page;
+  $("#candidate-count").textContent = `${page.total} visibles / ${all.length} persistés · aucun candidat masqué par une limite serveur`;
+  $("#page-label").textContent = `Page ${page.page} / ${page.pages}`;
+  $("#page-previous").disabled = page.page <= 1;
+  $("#page-next").disabled = page.page >= page.pages;
+  const metric = state.research.sort;
+  const direction = METRIC_METADATA[metric]?.direction || "NEUTRAL";
+  $("#candidate-list").innerHTML = page.items.length ? page.items.map((candidate) => {
+    const heat = heatmap[candidate.candidate_id];
+    const selected = state.research.compare.has(candidate.candidate_id);
+    const activeTone = heat?.[metric]?.tone || "neutral";
+    return `<article class="candidate-card candidate-rank-${h(activeTone)} ${candidate.pruned ? "candidate-pruned" : ""}">
+      <div class="candidate-head"><div><span class="eyebrow">ENGINE #${h(candidate.engine_rank)} · ${h(METRIC_METADATA[metric]?.label || metric).toUpperCase()} RANK #${h(userRanks.get(candidate.candidate_id))}</span><h3>${h(candidate.architecture)} · ${h(candidate.strategy_name)}</h3></div><label class="compare-check"><input type="checkbox" data-compare-id="${h(candidate.candidate_id)}" ${selected ? "checked" : ""}> Compare</label></div>
+      <p class="candidate-id">${h(candidate.candidate_id)} · ${h(candidate.quantity)} structure(s) · ${h(candidate.expiration)} · DTE ${h(candidate.dte)}</p>
+      <p class="candidate-legs">${h(candidate.leg_summary)}</p>
+      <div class="candidate-metrics">
+        <div class="metric-cell heat-neutral"><span>${h(candidate.entry_cash_flow_type)} ENTRY</span><strong>${h(candidateMetric(candidate.signed_entry_cash_flow, money))}</strong></div>
+        <div class="metric-cell heat-neutral"><span>CAPITAL</span><strong>${h(candidateMetric(candidate.capital_required, money))}</strong></div>
+        <div class="metric-cell heat-neutral"><span>MAX LOSS</span><strong>${h(candidateMetric(candidate.maximum_loss, money))}</strong></div>
+        <div class="metric-cell heat-neutral"><span>MAX GAIN</span><strong>${h(candidateMetric(candidate.maximum_gain, money))}</strong></div>
+        <div class="${heatClass(heat, metric)}"><span>${h(METRIC_METADATA[metric]?.label || metric)} · ${h(direction)}</span><strong>${h(candidateMetric(candidate[metric], (value) => Number(value).toFixed(3)))}</strong></div>
+        <div class="metric-cell heat-neutral"><span>BREAKEVEN</span><strong>${h(candidate.break_even_points.length ? candidate.break_even_points.join(" · ") : "N/A")}</strong></div>
+      </div>
+      <div class="candidate-flags"><span class="pill">${h(candidate.budget_status)}</span><span>${candidate.paper_eligible ? "PAPER ELIGIBLE" : candidate.research_eligible ? "RESEARCH ONLY" : "BLOCKED"}</span><span>${h(candidate.data_freshness)}</span></div>
+      <p class="note">${h(candidate.reason_codes.length ? candidate.reason_codes.join(" · ") : "Aucun hard veto")}</p>
+      <details><summary>Metrics avancées et five scores</summary><dl>${dlRows([
+        ["Expected PnL", money(candidate.expected_pnl)], ["Probability profit", percent(candidate.probability_profit)],
+        ["CVaR 95", money(candidate.cvar_95)], ["Net delta", candidateMetric(candidate.net_delta)],
+        ["Net theta", candidateMetric(candidate.net_theta)], ["Average IV", percent(candidate.average_implied_volatility)],
+        ["Relative spread", percent(candidate.maximum_relative_spread)], ["Open interest min", candidateMetric(candidate.minimum_open_interest)],
+        ["Score Opportunity", candidateMetric(candidate.score_opportunity)], ["Score Risk", candidateMetric(candidate.score_risk)],
+        ["Score Evidence", candidateMetric(candidate.score_evidence)], ["Score Model Agreement", candidateMetric(candidate.score_model_agreement)],
+        ["Score Execution Quality", candidateMetric(candidate.score_execution_quality)],
+      ])}</dl></details>
+      <div class="actions"><button data-detail-id="${h(candidate.candidate_id)}">DETAIL</button><button data-select-id="${h(candidate.candidate_id)}" ${candidate.paper_eligible && !candidate.pruned ? "" : "disabled"}>SELECT</button></div>
+    </article>`;
+  }).join("") : "<p class='empty-result'>Aucun candidat ne correspond aux filtres.</p>";
+  document.querySelectorAll("[data-detail-id]").forEach((button) => button.addEventListener("click", () => openCandidateDetail(button.dataset.detailId)));
+  document.querySelectorAll("[data-select-id]").forEach((button) => button.addEventListener("click", () => selectResearchCandidate(button.dataset.selectId)));
+  document.querySelectorAll("[data-compare-id]").forEach((input) => input.addEventListener("change", (event) => {
+    const id = event.target.dataset.compareId;
+    if (event.target.checked && state.research.compare.size >= 4) { event.target.checked = false; alert("Maximum 4 candidats."); return; }
+    if (event.target.checked) state.research.compare.add(id); else state.research.compare.delete(id);
+    $("#compare-open").disabled = state.research.compare.size < 2;
+    $("#compare-open").textContent = `COMPARER (${state.research.compare.size}/4)`;
+  }));
+  renderActiveFilterChips(filters);
+}
+
+function renderActiveFilterChips(filters) {
+  const chips = [];
+  if (filters.search) chips.push(`Search: ${filters.search}`);
+  if (filters.architectures.length) chips.push(`Structure: ${filters.architectures.join(", ")}`);
+  if (filters.budgetStatus) chips.push(`Budget: ${filters.budgetStatus}`);
+  if (filters.entryType) chips.push(`Cash flow: ${filters.entryType}`);
+  if (filters.freshness) chips.push("Fresh only");
+  if (filters.expiryType) chips.push(`${filters.expiryType} expiry`);
+  for (const [metric, bounds] of Object.entries(filters.ranges)) {
+    if (bounds.min !== null) chips.push(`${METRIC_METADATA[metric]?.label || metric} ≥ ${bounds.min}`);
+    if (bounds.max !== null) chips.push(`${METRIC_METADATA[metric]?.label || metric} ≤ ${bounds.max}`);
+  }
+  $("#active-filter-chips").innerHTML = chips.map((chip) => `<span>${h(chip)}</span>`).join("");
+}
+
+function populateCandidateFilters() {
+  const candidates = state.research.candidates;
+  const options = (values) => [...new Set(values)].sort().map((value) => `<option value="${h(value)}">${h(value)}</option>`).join("");
+  $("#filter-architecture").innerHTML = options(candidates.map((item) => item.architecture));
+  $("#filter-budget").innerHTML = `<option value="">Tous</option>${options(candidates.map((item) => item.budget_status))}`;
+}
+
+async function loadAnalysis(analysisId) {
+  try {
+    state.research.selectedAnalysisId = analysisId;
+    const payload = await api(`/api/research/analyses/${encodeURIComponent(analysisId)}`);
+    state.research.analysis = payload.analysis;
+    $("#analysis-status").textContent = researchStatusText(payload.analysis);
+    const terminal = ["COMPLETE", "NO_TRADE"].includes(payload.analysis.status);
+    $("#candidate-workbench").classList.toggle("hidden", !terminal);
+    if (terminal) {
+      const candidates = await api(`/api/research/analyses/${encodeURIComponent(analysisId)}/candidates`);
+      state.research.candidates = candidates.candidates;
+      state.research.compare.clear();
+      populateCandidateFilters();
+      renderCandidates();
+      if (payload.analysis.status === "NO_TRADE") $("#analysis-status").textContent += " · NO_TRADE est le verdict de première classe.";
+    }
+  } catch (error) { $("#research-error").textContent = error.message; }
+}
+
+async function refreshResearch() {
+  try {
+    const payload = await api("/api/research/analyses");
+    state.research.analyses = payload.analyses;
+    renderResearchHistory();
+    const selected = state.research.selectedAnalysisId || payload.analyses[0]?.analysis_request_id;
+    if (selected) await loadAnalysis(selected);
+  } catch (error) { $("#research-error").textContent = error.message; }
+}
+
+async function openCandidateDetail(candidateId) {
+  const analysisId = state.research.selectedAnalysisId;
+  try {
+    const payload = await api(`/api/research/analyses/${encodeURIComponent(analysisId)}/candidates/${encodeURIComponent(candidateId)}`);
+    const { summary, detail } = payload;
+    $("#candidate-detail-content").innerHTML = `<h2>${h(summary.architecture)} · ENGINE #${h(summary.engine_rank)}</h2>
+      <div class="modal-economics"><div><span>ENTRY CASH FLOW</span><strong>${h(money(summary.signed_entry_cash_flow))}</strong></div><div><span>CAPITAL REQUIRED</span><strong>${h(money(summary.capital_required))}</strong></div><div><span>MAX LOSS</span><strong>${h(money(summary.maximum_loss))}</strong></div><div><span>MAX GAIN</span><strong>${h(money(summary.maximum_gain))}</strong></div></div>
+      <h2>LEGS</h2><div class="preview-legs">${detail.legs.map((leg) => `<div class="preview-leg"><strong>${h(leg.side)}</strong><span>${h(leg.quantity)} × ${h(leg.option_type)} ${h(leg.strike)} · ${h(leg.expiration)}<br><small>${h(leg.symbol)} · bid ${h(leg.bid)} / ask ${h(leg.ask)}</small></span></div>`).join("")}</div>
+      <h2>PAYOFF / EXPLICATION / LIMITES</h2><p>Break-evens: ${h(detail.payoff.break_even_points.join(" · ") || "N/A")} · Flat spots: ${h(detail.payoff.flat_spots)}</p><p>${h(detail.explanation.join(" "))}</p><ul>${detail.limitations.map((item) => `<li>${h(item)}</li>`).join("")}</ul>
+      <p class="note">Ticket hash: ${h(summary.trade_economics_ticket_hash)}<br>Context: ${h(detail.phase_m_context_id)} · ${h(detail.phase_m_context_hash)}</p>`;
+    $("#candidate-detail-dialog").showModal();
+  } catch (error) { alert(error.message); }
+}
+
+async function selectResearchCandidate(candidateId) {
+  const analysisId = state.research.selectedAnalysisId;
+  try {
+    const result = await protectedMutation(
+      `/api/research/analyses/${encodeURIComponent(analysisId)}/candidates/${encodeURIComponent(candidateId)}/select`,
+      {}, "CONFIRMER LA SÉLECTION DU CANDIDAT",
+    );
+    alert(`${result.message}\nDossier ${result.dossier?.dossier_id || result.selection_id} créé en état PLANNED. Aucun ordre transmis.`);
+  } catch (error) { reportActionError(error); }
+}
+
+function openCompare() {
+  const candidates = state.research.candidates.filter((candidate) => state.research.compare.has(candidate.candidate_id));
+  $("#candidate-compare-content").innerHTML = candidates.map((candidate) => `<article><h2>${h(candidate.architecture)}</h2><p>Engine #${h(candidate.engine_rank)}</p><dl>${dlRows([
+    ["Capital", money(candidate.capital_required)], ["Max loss", money(candidate.maximum_loss)],
+    ["Max gain", money(candidate.maximum_gain)], ["Expected PnL", money(candidate.expected_pnl)],
+    ["Probability profit", percent(candidate.probability_profit)], ["CVaR 95", money(candidate.cvar_95)],
+    ["Budget", candidate.budget_status], ["Five scores", candidate.score_probability === null ? "N/A" : candidate.score_probability],
+  ])}</dl></article>`).join("");
+  $("#candidate-compare-dialog").showModal();
+}
+
+$("#nav-research").addEventListener("click", () => switchWorkspace("research"));
+$("#nav-position").addEventListener("click", () => switchWorkspace("position"));
+$("#research-refresh").addEventListener("click", refreshResearch);
+$("#research-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = new FormData(event.target);
+  const budget = {
+    preferred_budget: Number(form.get("preferred_budget")), target_budget: Number(form.get("target_budget")),
+    maximum_budget: Number(form.get("maximum_budget")), minimum_spend_policy: String(form.get("minimum_spend_policy")),
+    market_data_mode: String(form.get("market_data_mode")), currency: "EUR",
+  };
+  $("#research-error").textContent = "";
+  if (![budget.preferred_budget, budget.target_budget, budget.maximum_budget].every(Number.isFinite) || !(budget.preferred_budget <= budget.target_budget && budget.target_budget <= budget.maximum_budget)) {
+    $("#research-error").textContent = "Le budget doit respecter préféré ≤ cible ≤ maximum."; return;
+  }
+  try {
+    const result = await protectedMutation("/api/research/analyses", budget, "CONFIRMER LE LANCEMENT DE L’ANALYSE");
+    state.research.selectedAnalysisId = result.analysis_request_id;
+    await refreshResearch();
+  } catch (error) { reportActionError(error, $("#research-error")); }
+});
+$("#research-tabs").addEventListener("click", (event) => {
+  const view = event.target.dataset.view; if (!view) return;
+  state.research.view = view; state.research.page = 1;
+  document.querySelectorAll("#research-tabs button").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
+  renderCandidates();
+});
+$("#candidate-sort").innerHTML = Object.entries(METRIC_METADATA)
+  .map(([value, metadata]) => `<option value="${h(value)}">${h(metadata.label)}</option>`).join("");
+$("#candidate-sort").value = "engine_rank";
+for (const selector of ["#filter-architecture", "#filter-budget", "#filter-entry-type", "#filter-freshness", "#filter-expiry", "#candidate-sort", "#candidate-sort-direction", "#candidate-page-size"]) {
+  $(selector).addEventListener("change", () => {
+    state.research.sort = $("#candidate-sort").value;
+    state.research.sortDirection = $("#candidate-sort-direction").value || null;
+    state.research.pageSize = Number($("#candidate-page-size").value);
+    state.research.page = 1; renderCandidates();
+  });
+}
+$("#filter-search").addEventListener("input", () => { state.research.page = 1; renderCandidates(); });
+document.querySelectorAll("[data-range-field]").forEach((input) => input.addEventListener("input", () => { state.research.page = 1; renderCandidates(); }));
+$("#reset-filters").addEventListener("click", () => {
+  $("#filter-search").value = "";
+  [...$("#filter-architecture").options].forEach((option) => { option.selected = false; });
+  for (const selector of ["#filter-budget", "#filter-entry-type", "#filter-freshness", "#filter-expiry"]) $(selector).value = "";
+  document.querySelectorAll("[data-range-field]").forEach((input) => { input.value = ""; });
+  state.research.page = 1; renderCandidates();
+});
+$("#page-previous").addEventListener("click", () => { state.research.page -= 1; renderCandidates(); });
+$("#page-next").addEventListener("click", () => { state.research.page += 1; renderCandidates(); });
+$("#compare-open").addEventListener("click", openCompare);
+$("#execute-planned").addEventListener("click", async () => {
+  try {
+    const capability = await api("/api/research/execution-capability");
+    alert(`${capability.message}\nAucun ordre, tutoriel manuel ou fallback jambe par jambe n’est disponible.`);
+  } catch (error) { alert(error.message); }
+});
+
 refresh();
+refreshResearch();
 async function poll() {
   if (document.visibilityState === "visible") await refresh();
+  if (document.visibilityState === "visible" && state.workspace === "research") await refreshResearch();
   const delay = state.data?.system?.conservation_mode ? 30_000 : document.visibilityState === "visible" ? 10_000 : 60_000;
   setTimeout(poll, delay);
 }

@@ -10,6 +10,12 @@ from typing import Any
 from pydantic import BaseModel
 
 from take_two_options.cloud.contracts import CloudPositionDossier
+from take_two_options.cloud.research_contracts import (
+    AnalysisBudgetRequest,
+    CandidateDetail,
+    CandidateSummary,
+    ResearchAnalysisResult,
+)
 from take_two_options.config.contracts import PreOpraConfig, ProspectiveBudgetConfig
 from take_two_options.decision.engine_verdict import EngineVerdictReport
 from take_two_options.decision.quality_scores import FiveScoreReport
@@ -62,6 +68,10 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "prospective_budget_config.schema.json": ProspectiveBudgetConfig,
     "phase_m_decision_context.schema.json": PhaseMDecisionContext,
     "cloud_position_dossier.schema.json": CloudPositionDossier,
+    "analysis_budget_request.schema.json": AnalysisBudgetRequest,
+    "research_candidate_summary.schema.json": CandidateSummary,
+    "research_candidate_detail.schema.json": CandidateDetail,
+    "research_analysis_result.schema.json": ResearchAnalysisResult,
     "trade_economics_ticket.schema.json": TradeEconomicsTicket,
     "historical_dataset_manifest.schema.json": HistoricalDatasetManifest,
     "historical_option_dataset_summary.schema.json": HistoricalOptionDatasetSummary,

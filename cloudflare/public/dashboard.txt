@@ -8,10 +8,12 @@
   </head>
   <body>
     <header class="topbar">
-      <div><p class="eyebrow">PRIVATE CONTROL PLANE</p><h1>TTWO — POSITION CONTROL</h1></div>
+      <div><p class="eyebrow">PRIVATE CONTROL PLANE</p><h1>TTWO — POSITION CONTROL / RESEARCH</h1></div>
       <div class="safety-lock"><span>ORDER CAPABILITY</span><strong>FORBIDDEN</strong></div>
     </header>
     <main>
+      <nav class="workspace-nav" aria-label="Espace de travail"><button id="nav-research" class="active">RESEARCH</button><button id="nav-position">POSITION</button></nav>
+      <div id="position-view" class="hidden">
       <section id="demo-banner" class="banner demo hidden">SYNTHETIC DEMO — aucune implication de marché réel</section>
       <section id="conservation-banner" class="banner warning hidden">FREE_TIER_CONSERVATION_MODE — cadence réduite, événements de sécurité préservés</section>
       <section class="card system-card">
@@ -56,12 +58,69 @@
         <section class="card"><h2>CONTROLS</h2><div class="actions"><button id="safe-mode">SAFE MODE</button><button id="monitor-toggle">PAUSE MONITORING</button><button id="export-data">EXPORT DATA</button><button id="logout">LOGOUT</button></div><p class="note">SAFE MODE ne ferme rien. PAUSE MONITORING ne change aucune vérité broker.</p></section>
         <section class="card"><h2>RECENT EVENTS</h2><ol id="events" class="events"></ol></section>
       </div>
+      </div>
+
+      <section id="research-view">
+        <section class="banner demo">RESEARCH ONLY — aucune donnée live, aucun ordre, aucun conseil financier</section>
+        <section class="card research-launch">
+          <div class="section-title"><div><p class="eyebrow">PHASE M — CLOUD WORKBENCH</p><h2>NOUVELLE ANALYSE EXHAUSTIVE</h2></div><span class="pill">D1 + GITHUB ACTIONS</span></div>
+          <form id="research-form" class="budget-grid">
+            <label>Budget préféré (€)<input name="preferred_budget" type="number" min="1" step="0.01" value="800" required></label>
+            <label>Budget cible (€)<input name="target_budget" type="number" min="1" step="0.01" value="1000" required></label>
+            <label>Budget maximum (€)<input name="maximum_budget" type="number" min="1" step="0.01" value="1500" required></label>
+            <label>Minimum de dépense<select name="minimum_spend_policy"><option value="SOFT">SOFT — préférence</option><option value="HARD">HARD — veto</option></select></label>
+            <label>Données<select name="market_data_mode"><option value="SYNTHETIC_DEMO">SYNTHETIC DEMO</option><option value="LAST_GOVERNED_SNAPSHOT">LAST GOVERNED SNAPSHOT</option></select></label>
+            <div class="launch-action"><button type="submit" class="primary">LANCER L’ANALYSE</button></div>
+          </form>
+          <p id="research-error" class="error"></p>
+          <p class="note">Le navigateur envoie uniquement ces paramètres. Le dépôt, le workflow et la branche sont fixés côté Worker.</p>
+        </section>
+
+        <section class="card">
+          <div class="section-title"><h2>ÉTAT / HISTORIQUE IMMUABLE</h2><button id="research-refresh">ACTUALISER</button></div>
+          <div id="analysis-status" class="analysis-status">Aucune analyse sélectionnée.</div>
+          <ol id="analysis-history" class="analysis-history"></ol>
+        </section>
+
+        <section id="candidate-workbench" class="card hidden">
+          <div class="section-title"><div><p id="candidate-count" class="eyebrow">—</p><h2>UNIVERS COMPLET DES CANDIDATS</h2></div><div class="actions"><button id="compare-open" disabled>COMPARER (0/4)</button><button id="execute-planned" class="danger">EXÉCUTER</button></div></div>
+          <div class="research-tabs" id="research-tabs">
+            <button data-view="best" class="active">BEST OVERALL</button><button data-view="architecture">BY ARCHITECTURE</button><button data-view="top">TOP</button><button data-view="all">ALL</button><button data-view="paper">PAPER ELIGIBLE</button><button data-view="research">RESEARCH ONLY</button>
+          </div>
+          <div class="candidate-controls">
+            <label>Recherche<input id="filter-search" placeholder="architecture, strike, expiry, ID"></label>
+            <label>Architecture<select id="filter-architecture" multiple size="3"></select></label>
+            <label>Budget status<select id="filter-budget"><option value="">Tous</option></select></label>
+            <label>Tri utilisateur<select id="candidate-sort"></select></label>
+            <label>Direction<select id="candidate-sort-direction"><option value="">Logique par défaut</option><option value="ASC">Croissant</option><option value="DESC">Décroissant</option></select></label>
+            <label>Par page<select id="candidate-page-size"><option>20</option><option>50</option><option>100</option></select></label>
+          </div>
+          <details class="filter-drawer"><summary>FILTRES AVANCÉS</summary>
+            <div class="filter-sections">
+              <fieldset><legend>BUDGET</legend><label>Capital min<input type="number" data-range-field="capital_required" data-bound="min"></label><label>Capital max<input type="number" data-range-field="capital_required" data-bound="max"></label><label>Distance cible max<input type="number" data-range-field="distance_to_target_budget" data-bound="max"></label><label>Cash flow<select id="filter-entry-type"><option value="">Tous</option><option>DEBIT</option><option>CREDIT</option><option>FLAT</option></select></label></fieldset>
+              <fieldset><legend>RETURN</legend><label>Expected PnL min<input type="number" data-range-field="expected_pnl" data-bound="min"></label><label>Expected PnL max<input type="number" data-range-field="expected_pnl" data-bound="max"></label><label>Expected return min<input type="number" data-range-field="expected_return" data-bound="min" step="0.01"></label><label>Expected return max<input type="number" data-range-field="expected_return" data-bound="max" step="0.01"></label><label>Maximum profit min<input type="number" data-range-field="maximum_gain" data-bound="min"></label></fieldset>
+              <fieldset><legend>PROBABILITY</legend><label>P(profit) min<input type="number" data-range-field="probability_profit" data-bound="min" step="0.01"></label><label>P(loss &gt;50%) max<input type="number" data-range-field="probability_loss_50" data-bound="max" step="0.01"></label><label>P(loss &gt;70%) max<input type="number" data-range-field="probability_loss_70" data-bound="max" step="0.01"></label></fieldset>
+              <fieldset><legend>RISK</legend><label>Maximum loss max<input type="number" data-range-field="maximum_loss" data-bound="max"></label><label>VaR95 max<input type="number" data-range-field="var_95" data-bound="max"></label><label>CVaR95 max<input type="number" data-range-field="cvar_95" data-bound="max"></label></fieldset>
+              <fieldset><legend>TIME</legend><label>DTE min<input type="number" data-range-field="dte" data-bound="min"></label><label>DTE max<input type="number" data-range-field="dte" data-bound="max"></label><label>Theta min<input type="number" data-range-field="net_theta" data-bound="min" step="0.01"></label><label>Theta max<input type="number" data-range-field="net_theta" data-bound="max" step="0.01"></label><label>Flat Spot +7d min<input type="number" data-range-field="flat_spot_7d" data-bound="min"></label><label>Flat Spot +30d min<input type="number" data-range-field="flat_spot_30d" data-bound="min"></label><label>Flat Spot +60d min<input type="number" data-range-field="flat_spot_60d" data-bound="min"></label><label>Flat Spot +90d min<input type="number" data-range-field="flat_spot_90d" data-bound="min"></label></fieldset>
+              <fieldset><legend>MARKET</legend><label>IV min<input type="number" data-range-field="average_implied_volatility" data-bound="min" step="0.01"></label><label>IV max<input type="number" data-range-field="average_implied_volatility" data-bound="max" step="0.01"></label><label>Spread max<input type="number" data-range-field="maximum_relative_spread" data-bound="max" step="0.01"></label><label>Open interest min<input type="number" data-range-field="minimum_open_interest" data-bound="min"></label></fieldset>
+              <fieldset><legend>SCORES</legend><label>Opportunity min<input type="number" data-range-field="score_opportunity" data-bound="min"></label><label>Risk min<input type="number" data-range-field="score_risk" data-bound="min"></label><label>Evidence min<input type="number" data-range-field="score_evidence" data-bound="min"></label><label>Model Agreement min<input type="number" data-range-field="score_model_agreement" data-bound="min"></label><label>Execution Quality min<input type="number" data-range-field="score_execution_quality" data-bound="min"></label></fieldset>
+              <fieldset><legend>STATUS</legend><label>Freshness<select id="filter-freshness"><option value="">Toutes</option><option value="FRESH">Fresh only</option></select></label><label>Expiry<select id="filter-expiry"><option value="">Toutes</option><option value="COMMON">Common expiry</option><option value="MIXED">Mixed expiry</option></select></label></fieldset>
+            </div>
+            <div id="active-filter-chips" class="filter-chips"></div><button id="reset-filters" type="button">RESET FILTERS</button>
+          </details>
+          <p class="note">Le tri utilisateur ne modifie jamais le rang moteur. Les couleurs sont des percentiles recalculés sur les candidats visibles après filtres; N/A reste neutre.</p>
+          <div id="candidate-list" class="candidate-list"></div>
+          <div class="pagination"><button id="page-previous">PRÉCÉDENT</button><span id="page-label">—</span><button id="page-next">SUIVANT</button></div>
+        </section>
+      </section>
     </main>
 
     <dialog id="close-dialog"><form method="dialog"><button class="dialog-x" value="cancel" aria-label="Fermer">×</button></form><p class="eyebrow">CLOSE STRUCTURE — PREVIEW</p><h2 id="preview-title">—</h2><div id="preview-economics" class="modal-economics"></div><div id="preview-legs" class="preview-legs"></div><p class="warning-text">NO ORDER IS TRANSMITTED. Close all legs as one structure manually in IBKR.</p><div class="actions"><button id="preview-cancel">CANCEL</button><button id="preview-ack" class="danger">ACKNOWLEDGE CLOSE PREVIEW</button></div></dialog>
     <dialog id="reauth-dialog"><h2>Ré-authentification Cloudflare requise</h2><p>Ta connexion Cloudflare Access a plus de cinq minutes. Reconnecte-toi, puis ouvre de nouveau l’aperçu de clôture.</p><div class="actions"><button id="reauth-cancel">CANCEL</button><button id="reauth-submit" class="danger">SE RECONNECTER AVEC CLOUDFLARE</button></div></dialog>
     <dialog id="action-password-dialog"><form id="action-password-form"><p class="eyebrow">CONFIRMATION SENSIBLE</p><h2 id="action-password-title">Mot de passe d’action requis</h2><p>Ce mot de passe complète Cloudflare Access. Il n’est ni mémorisé par le site ni envoyé à IBKR.</p><label>Mot de passe d’action<input id="action-password" type="password" minlength="14" maxlength="128" autocomplete="off" autocapitalize="none" spellcheck="false" required></label><p id="action-password-error" class="error"></p><div class="actions"><button id="action-password-cancel" type="button">CANCEL</button><button type="submit" class="danger">CONFIRMER L’ACTION</button></div></form></dialog>
     <dialog id="fill-dialog"><h2>ACTUAL FILL RECONCILIATION</h2><p>L’estimation pré-close restera immuable.</p><form id="fill-form"><label>Actual close timestamp<input name="timestamp" type="datetime-local" required></label><label>Close cash flow type<select name="close_cash_flow_type" required><option value="CREDIT">CREDIT — cash received</option><option value="DEBIT">DEBIT — cash required to close</option></select></label><label>Actual combo fill price (positive absolute price)<input name="combo_fill_price" type="number" min="0" step="0.0001" required></label><label>Quantity closed<input name="quantity_closed" type="number" min="1" step="1" required></label><label>Actual FX rate<input name="actual_fx_rate" type="number" min="0" step="0.000001"></label><label>Commission<input name="commission" type="number" min="0" step="0.01" required></label><label>FX cost<input name="fx_cost" type="number" min="0" step="0.01" required></label><label>IBKR execution/reference id (optional)<input name="broker_reference"></label><p id="fill-error" class="error"></p><div class="actions"><button id="fill-cancel" type="button">CANCEL</button><button type="submit" class="danger">RECONCILE ACTUAL FILL</button></div></form></dialog>
+    <dialog id="candidate-detail-dialog"><form method="dialog"><button class="dialog-x" value="cancel" aria-label="Fermer">×</button></form><p class="eyebrow">CANDIDATE DETAIL</p><div id="candidate-detail-content"></div></dialog>
+    <dialog id="candidate-compare-dialog"><form method="dialog"><button class="dialog-x" value="cancel" aria-label="Fermer">×</button></form><p class="eyebrow">COMPARE — MAXIMUM 4</p><div id="candidate-compare-content" class="compare-grid"></div></dialog>
     <script src="/app.js" type="module"></script>
   </body>
 </html>

@@ -1,0 +1,46 @@
+name: Phase M research analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      analysis_request_id:
+        description: Immutable D1 analysis request identifier
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-m-research-${{ inputs.analysis_request_id }}
+  cancel-in-progress: false
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ANALYSIS_REQUEST_ID: ${{ inputs.analysis_request_id }}
+      ANALYSIS_WORKER_BASE_URL: ${{ secrets.ANALYSIS_WORKER_BASE_URL }}
+      ANALYSIS_CALLBACK_SECRET: ${{ secrets.ANALYSIS_CALLBACK_SECRET }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+      GOVERNED_SNAPSHOT_PATH: ${{ vars.GOVERNED_SNAPSHOT_PATH }}
+      PYTHONHASHSEED: "0"
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    steps:
+      - name: Check out governed revision
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install locked project range
+        run: python -m pip install -e .
+
+      - name: Run signed exhaustive research job
+        run: python scripts/run_cloud_research_analysis.py

@@ -9,6 +9,11 @@ export default defineConfig({
         bindings: {
           TEST_MIGRATIONS: await readD1Migrations("./migrations"),
           ACTION_PASSWORD_VERIFIER: "v1$hmac-sha256$BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc$yXxGMhJsIjUD7xzr7aV5eTPfQ7gtwCXYw7O0nKMJtMw",
+          ANALYSIS_CALLBACK_SECRET: "test-analysis-callback-secret-at-least-32-bytes",
+          GITHUB_ACTIONS_TOKEN: "github-test-token",
+          GITHUB_REPOSITORY: "Insular2895/take-two",
+          GITHUB_WORKFLOW: "phase-m-research-analysis.yml",
+          GITHUB_GOVERNED_REF: "main",
         },
       },
     })),

@@ -1,0 +1,632 @@
+{
+  "$id": "https://schemas.take-two-options.invalid/v11.1/research_candidate_summary.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "architecture": {
+      "title": "Architecture",
+      "type": "string"
+    },
+    "average_implied_volatility": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Average Implied Volatility"
+    },
+    "break_even_points": {
+      "items": {
+        "type": "number"
+      },
+      "title": "Break Even Points",
+      "type": "array"
+    },
+    "budget_status": {
+      "title": "Budget Status",
+      "type": "string"
+    },
+    "candidate_id": {
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "capital_required": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Capital Required"
+    },
+    "common_expiry": {
+      "title": "Common Expiry",
+      "type": "boolean"
+    },
+    "cvar_95": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cvar 95"
+    },
+    "data_freshness": {
+      "enum": [
+        "FRESH",
+        "STALE",
+        "UNKNOWN"
+      ],
+      "title": "Data Freshness",
+      "type": "string"
+    },
+    "distance_to_target_budget": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Distance To Target Budget"
+    },
+    "dte": {
+      "minimum": 0,
+      "title": "Dte",
+      "type": "integer"
+    },
+    "eligible": {
+      "title": "Eligible",
+      "type": "boolean"
+    },
+    "engine_rank": {
+      "exclusiveMinimum": 0,
+      "title": "Engine Rank",
+      "type": "integer"
+    },
+    "entry_cash_flow_type": {
+      "enum": [
+        "DEBIT",
+        "CREDIT",
+        "FLAT"
+      ],
+      "title": "Entry Cash Flow Type",
+      "type": "string"
+    },
+    "expected_pnl": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Pnl"
+    },
+    "expected_return": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Return"
+    },
+    "expiration": {
+      "title": "Expiration",
+      "type": "string"
+    },
+    "flat_spot_30d": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Flat Spot 30D"
+    },
+    "flat_spot_60d": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Flat Spot 60D"
+    },
+    "flat_spot_7d": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Flat Spot 7D"
+    },
+    "flat_spot_90d": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Flat Spot 90D"
+    },
+    "headroom_to_hard_maximum": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Headroom To Hard Maximum"
+    },
+    "leg_count": {
+      "exclusiveMinimum": 0,
+      "title": "Leg Count",
+      "type": "integer"
+    },
+    "leg_summary": {
+      "title": "Leg Summary",
+      "type": "string"
+    },
+    "maximum_gain": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Maximum Gain"
+    },
+    "maximum_loss": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Maximum Loss"
+    },
+    "maximum_relative_spread": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Maximum Relative Spread"
+    },
+    "minimum_open_interest": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Minimum Open Interest"
+    },
+    "net_delta": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Net Delta"
+    },
+    "net_gamma": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Net Gamma"
+    },
+    "net_theta": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Net Theta"
+    },
+    "net_vega": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Net Vega"
+    },
+    "paper_eligible": {
+      "title": "Paper Eligible",
+      "type": "boolean"
+    },
+    "pareto_rank": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pareto Rank"
+    },
+    "probability_loss_25": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Probability Loss 25"
+    },
+    "probability_loss_50": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Probability Loss 50"
+    },
+    "probability_loss_70": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Probability Loss 70"
+    },
+    "probability_profit": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Probability Profit"
+    },
+    "pruned": {
+      "title": "Pruned",
+      "type": "boolean"
+    },
+    "quantity": {
+      "exclusiveMinimum": 0,
+      "title": "Quantity",
+      "type": "integer"
+    },
+    "reason_codes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reason Codes",
+      "type": "array"
+    },
+    "recipe_id": {
+      "title": "Recipe Id",
+      "type": "string"
+    },
+    "research_eligible": {
+      "title": "Research Eligible",
+      "type": "boolean"
+    },
+    "return_on_capital": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Return On Capital"
+    },
+    "return_on_risk": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Return On Risk"
+    },
+    "risk_on_capital": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Risk On Capital"
+    },
+    "score_evidence": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Score Evidence"
+    },
+    "score_executability": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Score Executability"
+    },
+    "score_execution_quality": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Score Execution Quality"
+    },
+    "score_model_agreement": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Score Model Agreement"
+    },
+    "score_opportunity": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Score Opportunity"
+    },
+    "score_payoff": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Score Payoff"
+    },
+    "score_probability": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Score Probability"
+    },
+    "score_risk": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Score Risk"
+    },
+    "score_robustness": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Score Robustness"
+    },
+    "signed_entry_cash_flow": {
+      "title": "Signed Entry Cash Flow",
+      "type": "number"
+    },
+    "strategy_name": {
+      "title": "Strategy Name",
+      "type": "string"
+    },
+    "theta_per_capital_day": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Theta Per Capital Day"
+    },
+    "trade_economics_ticket_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Trade Economics Ticket Hash",
+      "type": "string"
+    },
+    "var_95": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Var 95"
+    }
+  },
+  "required": [
+    "candidate_id",
+    "architecture",
+    "recipe_id",
+    "strategy_name",
+    "leg_summary",
+    "engine_rank",
+    "quantity",
+    "leg_count",
+    "expiration",
+    "common_expiry",
+    "dte",
+    "signed_entry_cash_flow",
+    "entry_cash_flow_type",
+    "data_freshness",
+    "budget_status",
+    "eligible",
+    "research_eligible",
+    "paper_eligible",
+    "pruned",
+    "trade_economics_ticket_hash"
+  ],
+  "title": "CandidateSummary",
+  "type": "object"
+}

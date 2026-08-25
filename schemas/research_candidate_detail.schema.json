@@ -1,0 +1,149 @@
+{
+  "$id": "https://schemas.take-two-options.invalid/v11.1/research_candidate_detail.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "assumptions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Assumptions",
+      "type": "array"
+    },
+    "budget_diagnostics": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Budget Diagnostics"
+    },
+    "candidate_id": {
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "distribution": {
+      "additionalProperties": true,
+      "title": "Distribution",
+      "type": "object"
+    },
+    "economics": {
+      "additionalProperties": true,
+      "title": "Economics",
+      "type": "object"
+    },
+    "engine_rank_method": {
+      "const": "HARD_VETO_PARETO_BUDGET_DISTANCE_V1",
+      "title": "Engine Rank Method",
+      "type": "string"
+    },
+    "explanation": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Explanation",
+      "type": "array"
+    },
+    "legs": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Legs",
+      "type": "array"
+    },
+    "lifecycle_capital_requirement": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Lifecycle Capital Requirement"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "payoff": {
+      "additionalProperties": true,
+      "title": "Payoff",
+      "type": "object"
+    },
+    "phase_m_context_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Phase M Context Hash",
+      "type": "string"
+    },
+    "phase_m_context_id": {
+      "pattern": "^phase-m-context-[a-f0-9]{16}$",
+      "title": "Phase M Context Id",
+      "type": "string"
+    },
+    "scenario_matrix": {
+      "additionalProperties": true,
+      "title": "Scenario Matrix",
+      "type": "object"
+    },
+    "scores": {
+      "additionalProperties": true,
+      "title": "Scores",
+      "type": "object"
+    },
+    "time_decay": {
+      "additionalProperties": true,
+      "title": "Time Decay",
+      "type": "object"
+    },
+    "trade_economics_ticket": {
+      "additionalProperties": true,
+      "title": "Trade Economics Ticket",
+      "type": "object"
+    },
+    "uncertainties": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Uncertainties",
+      "type": "array"
+    },
+    "volatility": {
+      "additionalProperties": true,
+      "title": "Volatility",
+      "type": "object"
+    }
+  },
+  "required": [
+    "candidate_id",
+    "engine_rank_method",
+    "legs",
+    "economics",
+    "payoff",
+    "time_decay",
+    "scenario_matrix",
+    "volatility",
+    "distribution",
+    "scores",
+    "budget_diagnostics",
+    "lifecycle_capital_requirement",
+    "assumptions",
+    "uncertainties",
+    "limitations",
+    "explanation",
+    "phase_m_context_id",
+    "phase_m_context_hash",
+    "trade_economics_ticket"
+  ],
+  "title": "CandidateDetail",
+  "type": "object"
+}

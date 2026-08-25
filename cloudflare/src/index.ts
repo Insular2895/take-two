@@ -9,10 +9,12 @@ import { activePosition, audit, importDossier, incrementUsage, latestProjection,
 import { syntheticDemoDossier } from "./demo";
 import { calculateProjection, estimateDailyUsage, inverseStructureLegs, randomId, validateDossier } from "./domain";
 import { TTWOPositionMonitor } from "./monitor";
+import { routeInternalResearch, routeResearchAuthenticated } from "./research";
 import type { AuthContext, CloudPositionDossier } from "./types";
 import dashboardHtml from "../public/dashboard.txt";
 import appJavaScript from "../public/app.txt";
 import previewStateJavaScript from "../public/preview-state.txt";
+import researchStateJavaScript from "../public/research-state.txt";
 import stylesCss from "../public/styles.txt";
 
 export { TTWOPositionMonitor };
@@ -36,8 +38,19 @@ function apiError(error: unknown): Response {
   const message = error instanceof Error ? error.message : "INTERNAL_ERROR";
   let status = 500;
   if (["CSRF_INVALID", "ACTION_PASSWORD_REQUIRED", "ACTION_PASSWORD_INVALID"].includes(message)) status = 403;
+  else if (
+    message.startsWith("INVALID_CALLBACK") || message === "CALLBACK_BODY_HASH_MISMATCH" ||
+    message === "CALLBACK_TIMESTAMP_OUTSIDE_WINDOW"
+  ) status = 403;
   else if (message === "ACTION_PASSWORD_RATE_LIMITED") status = 429;
-  else if (message === "ACTION_PASSWORD_NOT_CONFIGURED") status = 503;
+  else if (message === "CALLBACK_BODY_TOO_LARGE") status = 413;
+  else if (message === "CALLBACK_REPLAY_DETECTED") status = 409;
+  else if (
+    message === "ACTION_PASSWORD_NOT_CONFIGURED" ||
+    message === "ANALYSIS_CALLBACK_SECRET_NOT_CONFIGURED" ||
+    message === "GITHUB_ACTIONS_TOKEN_NOT_CONFIGURED"
+  ) status = 503;
+  else if (message.startsWith("GITHUB_WORKFLOW_DISPATCH_FAILED_")) status = 502;
   else if (
     message.startsWith("INVALID_") || message.startsWith("COMBO_") ||
     message.startsWith("MISSING_") || message.startsWith("ENTRY_") ||
@@ -60,6 +73,7 @@ const STATIC_ASSETS: Record<string, { body: string; contentType: string }> = {
   "/dashboard.html": { body: dashboardHtml, contentType: "text/html; charset=utf-8" },
   "/app.js": { body: appJavaScript, contentType: "text/javascript; charset=utf-8" },
   "/preview-state.js": { body: previewStateJavaScript, contentType: "text/javascript; charset=utf-8" },
+  "/research-state.js": { body: researchStateJavaScript, contentType: "text/javascript; charset=utf-8" },
   "/styles.css": { body: stylesCss, contentType: "text/css; charset=utf-8" },
 };
 
@@ -334,7 +348,12 @@ async function reconcileFill(request: Request, env: Env, auth: AuthContext, prev
 }
 
 async function exportData(env: Env, auth: AuthContext): Promise<Response> {
-  const tables = ["positions", "position_legs", "fills", "pnl_snapshots", "model_snapshots", "close_previews", "monitoring_events", "audit_events"] as const;
+  const tables = [
+    "positions", "position_legs", "fills", "pnl_snapshots", "model_snapshots",
+    "close_previews", "monitoring_events", "audit_events", "analysis_requests",
+    "analysis_runs", "analysis_candidate_summaries", "analysis_candidate_details",
+    "candidate_selections", "planned_positions",
+  ] as const;
   const results = await env.DB.batch(tables.map((table) => env.DB.prepare(`SELECT * FROM ${table}`)));
   const payload = Object.fromEntries(tables.map((table, index) => [table, results[index]?.results ?? []]));
   await audit(env.DB, "DATA_EXPORTED", auth.actor, null, { format: "json", secrets_included: false });
@@ -345,6 +364,14 @@ async function exportData(env: Env, auth: AuthContext): Promise<Response> {
 
 async function routeAuthenticated(request: Request, env: Env, auth: AuthContext, path: string): Promise<Response> {
   await incrementUsage(env.DB, "worker_api_requests");
+  const research = await routeResearchAuthenticated(
+    request,
+    env,
+    auth,
+    path,
+    () => jsonBody<unknown>(request),
+  );
+  if (research) return research;
   if (path === "/api/session" && request.method === "GET") return Response.json({ authenticated: true, csrf_token: auth.csrfToken, identity: { email: auth.email } });
   if (path === "/api/dashboard" && request.method === "GET") return dashboardPayload(env, auth);
   if (path === "/api/positions/import" && request.method === "POST") return importPosition(request, env, auth);
@@ -371,6 +398,8 @@ export async function handleRequest(
 ): Promise<Response> {
   try {
     const path = new URL(request.url).pathname;
+    const internalResearch = await routeInternalResearch(request, env, path);
+    if (internalResearch) return withSecurity(internalResearch);
     const auth = await authenticateAccess(request, access);
     if (!auth) {
       const denied = path.startsWith("/api/")
