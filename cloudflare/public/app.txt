@@ -9,7 +9,7 @@ import {
 } from "/research-state.js";
 
 const state = {
-  csrf: "", data: null, preview: null, range: "all", actionPrompt: null,
+  csrf: "", data: null, broker: null, preview: null, range: "all", actionPrompt: null,
   workspace: "research",
   research: {
     analyses: [], analysis: null, candidates: [], selectedAnalysisId: null,
@@ -116,6 +116,30 @@ function render(data) {
   $("#dashboard-content").classList.toggle("hidden", noPosition);
   if (noPosition) return;
   const position = data.position; const dossier = position.canonical_dossier; const pnl = data.latest_pnl;
+  const broker = state.broker || {};
+  const brokerReady = Boolean(broker.dispatch_ready);
+  $("#broker-mode").textContent = broker.mode || "DISABLED";
+  $("#broker-bridge").textContent = broker.bridge_status || "NOT_CONFIGURED";
+  $("#broker-kill").textContent = broker.kill_switch === false ? "DISENGAGED" : "ENGAGED";
+  $("#broker-heartbeat").textContent = age(broker.last_heartbeat);
+  $("#broker-ready").textContent = brokerReady ? "PAPER READY" : "LOCKED";
+  $("#broker-ready").classList.toggle("ready", brokerReady);
+  $("#broker-explanation").textContent = brokerReady
+    ? "Pont paper sain. Une confirmation de clôture peut créer une intention idempotente pour la VM."
+    : "Aucune fermeture automatique n’est possible : adaptateur/VM non prêt ou kill switch engagé.";
+  $("#close-card-explanation").textContent = brokerReady
+    ? "Un seul aperçu du combo complet, puis une confirmation explicite avant mise en file paper. Aucun fallback jambe par jambe."
+    : "Un seul aperçu de combo complet. Aucun ordre n’est transmis et aucun fallback jambe par jambe n’existe.";
+  const policy = broker.exit_policy;
+  const policyForm = $("#exit-policy-form");
+  if (policy && policyForm.dataset.loadedFor !== position.id) {
+    policyForm.elements.warning_net_liquidation_value.value = policy.warning_net_liquidation_value;
+    policyForm.elements.automatic_exit_net_liquidation_value.value = policy.automatic_exit_net_liquidation_value;
+    policyForm.elements.maximum_exit_slippage_policy.value = policy.maximum_exit_slippage_policy;
+    policyForm.elements.maximum_quote_age_seconds.value = policy.maximum_quote_age_seconds;
+    policyForm.elements.automatic_exit_enabled.checked = Boolean(policy.automatic_exit_enabled);
+    policyForm.dataset.loadedFor = position.id;
+  }
   const currency = position.policy_currency;
   $("#demo-banner").classList.toggle("hidden", dossier.fixture_status !== "SYNTHETIC_DEMO");
   $("#position-state").textContent = position.state;
@@ -181,7 +205,8 @@ function render(data) {
   $("#events").innerHTML = events.map((event) => `<li><time>${h(new Date(event.timestamp).toLocaleString("fr-FR"))}</time><strong>${h(event.event_type)}</strong></li>`).join("") || "<li>No event</li>";
   const actionablePreview = data.close_previews.find((preview) => ["ACKNOWLEDGED", "RECONCILIATION_REQUIRED"].includes(preview.status));
   state.preview = selectTrackedClosePreview(data.close_previews);
-  $("#manual-close-reported").classList.toggle("hidden", actionablePreview?.status !== "ACKNOWLEDGED");
+  const queuedPaperClose = (broker.recent_intents || []).some((intent) => intent.intent_type === "MANUAL_CLOSE" && !["REJECTED", "CANCELLED", "EXPIRED", "FILLED"].includes(intent.status));
+  $("#manual-close-reported").classList.toggle("hidden", actionablePreview?.status !== "ACKNOWLEDGED" || queuedPaperClose);
   $("#close-status").textContent = actionablePreview ? `${actionablePreview.status} · ${actionablePreview.preview_id}` : "";
   if (position.state === "CLOSED") {
     $("#structure-name").textContent = "TTWO — CLOSED";
@@ -192,7 +217,13 @@ function render(data) {
   $("#close-structure").disabled = !pnl || pnl.liquidation_pnl === null || ["RECONCILIATION_REQUIRED", "CLOSED", "CANCELLED"].includes(position.state);
 }
 
-async function refresh() { try { render(await api("/api/dashboard")); } catch (error) { console.error(error); } }
+async function refresh() {
+  try {
+    const [dashboard, broker] = await Promise.all([api("/api/dashboard"), api("/api/broker/status")]);
+    state.broker = broker;
+    render(dashboard);
+  } catch (error) { console.error(error); }
+}
 
 async function mutation(path, body = {}, headers = {}) { const result = await api(path, { method: "POST", headers, body: JSON.stringify(body) }); await refresh(); return result; }
 async function protectedMutation(path, body, actionLabel) {
@@ -227,6 +258,25 @@ $("#monitor-toggle").addEventListener("click", () => protectedMutation(state.dat
 $("#logout").addEventListener("click", () => { window.location.assign("/cdn-cgi/access/logout"); });
 $("#export-data").addEventListener("click", () => window.location.assign("/api/export"));
 
+$("#exit-policy-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = new FormData(event.target);
+  const number = (name) => Number(form.get(name));
+  try {
+    await protectedMutation("/api/broker/exit-policy", {
+      warning_net_liquidation_value: number("warning_net_liquidation_value"),
+      automatic_exit_net_liquidation_value: number("automatic_exit_net_liquidation_value"),
+      maximum_exit_slippage_policy: number("maximum_exit_slippage_policy"),
+      maximum_quote_age_seconds: number("maximum_quote_age_seconds"),
+      automatic_exit_enabled: form.get("automatic_exit_enabled") === "on",
+    }, "CONFIRMER LA POLITIQUE DE SORTIE PAPER");
+    $("#exit-policy-error").textContent = "";
+  } catch (error) {
+    if (error.message === "SENSITIVE_ACCESS_REAUTH_REQUIRED") $("#reauth-dialog").showModal();
+    else reportActionError(error, $("#exit-policy-error"));
+  }
+});
+
 $("#close-structure").addEventListener("click", async () => {
   try {
     const preview = await api("/api/close-previews", { method: "POST", body: JSON.stringify({ quantity: state.data.position.quantity_remaining }) });
@@ -235,6 +285,11 @@ $("#close-structure").addEventListener("click", async () => {
     const closeFlow = Number(preview.estimated_close_cash_flow_policy);
     $("#preview-economics").innerHTML = [["CURRENT MARKET VALUE", money(preview.market_value)], ["ESTIMATED CLOSE CASH FLOW", money(closeFlow)], [closeFlow >= 0 ? "CASH RECEIVED" : "CASH REQUIRED TO CLOSE", money(Math.abs(closeFlow))], ["ESTIMATED PNL", money(preview.estimated_pnl)], ["ESTIMATED RETURN", percent(preview.estimated_return)], ["ENGINE", preview.engine_action], ["DATA", `${preview.required_data_freshness.status} · oldest required input ${age(preview.quote_timestamp)}`]].map(([label, value]) => `<div><span>${h(label)}</span><strong>${h(value)}</strong></div>`).join("");
     $("#preview-legs").innerHTML = preview.legs.map((leg) => `<div class="preview-leg"><strong>${h(leg.action)}</strong><span>${h(leg.quantity)} × ${h(leg.option_right)} ${h(leg.strike)} · ${h(leg.expiration.slice(0, 10))}<br><small>${h(leg.contract_identity)}</small></span></div>`).join("");
+    const paperReady = Boolean(state.broker?.dispatch_ready);
+    $("#preview-mode-warning").textContent = paperReady
+      ? "PAPER MODE: confirmation queues this whole combo for the VM bridge. Final price can differ within the configured slippage bound."
+      : "NO ORDER IS TRANSMITTED. Close all legs as one structure manually in IBKR.";
+    $("#preview-ack").textContent = paperReady ? "CONFIRMER ET ENVOYER EN PAPER" : "ACKNOWLEDGE CLOSE PREVIEW";
     $("#close-dialog").showModal();
   } catch (error) { alert(error.message); }
 });
@@ -243,9 +298,11 @@ async function acknowledge() {
   try {
     const previewId = state.preview?.preview_id;
     if (!previewId) throw new Error("CLOSE_PREVIEW_CONTEXT_LOST — reopen the close preview.");
-    await protectedMutation(`/api/close-previews/${encodeURIComponent(previewId)}/acknowledge`, {}, "CONFIRMER LA PRÉPARATION DE FERMETURE");
+    const result = await protectedMutation(`/api/close-previews/${encodeURIComponent(previewId)}/acknowledge`, {}, "CONFIRMER LA PRÉPARATION DE FERMETURE");
     $("#close-dialog").close();
-    alert("CLOSE_PREVIEW_READY — Close this entire combo manually in IBKR. Nothing was transmitted.");
+    alert(result.status === "PAPER_CLOSE_QUEUED"
+      ? `PAPER_CLOSE_QUEUED — ${result.intent.intent_id}. Le pont doit encore accepter puis exécuter la fermeture.`
+      : "CLOSE_PREVIEW_READY — Close this entire combo manually in IBKR. Nothing was transmitted.");
   } catch (error) {
     if (error.message === "SENSITIVE_ACCESS_REAUTH_REQUIRED") { $("#close-dialog").close(); $("#reauth-dialog").showModal(); }
     else reportActionError(error);

@@ -20,6 +20,7 @@ SCAN_DIRECTORIES = (
     "fixtures",
     "schemas",
     "scripts",
+    "services",
     ".github",
 )
 SECRET_PATTERNS = {

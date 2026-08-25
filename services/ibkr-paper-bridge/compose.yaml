@@ -1,0 +1,19 @@
+services:
+  bridge:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - bridge-data:/var/lib/ttwo-bridge
+    network_mode: host
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  bridge-data:

@@ -28,4 +28,4 @@ if (violations.length) {
   process.stderr.write(`Forbidden broker capability detected:\n${violations.join("\n")}\n`);
   process.exit(1);
 }
-process.stdout.write("Safety boundary scan passed: preview-only, transmit=false.\n");
+process.stdout.write("Worker scan passed: no direct broker SDK call or transmit:true literal.\n");

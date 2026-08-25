@@ -1,21 +1,23 @@
-# Future broker execution provider — NOT YET ENABLED
+# Broker execution provider — isolated PAPER foundation only
 
-Status: architecture marker only. No provider implementation or execution method exists.
+Status: the Phase M paper control/journal foundation exists, but the IBKR adapter is disabled and no
+broker submission is currently possible. Live execution does not exist.
 
-## Current boundary
+## Research-engine boundary
 
-`cloudflare/src/future-broker-types.ts` defines only inert descriptors for a future provider and a
-planned intent. Every capability is `NOT_CONFIGURED`, `NOT_IMPLEMENTED`, or `forbidden`; the planned
-intent has `provider=null`, actual entry fields null, and `transmitted=false`.
+The Python research engine and its reports retain the strict read-only boundary. The new code is an
+isolated service and D1 control plane; it does not weaken `src/take_two_options` or make research
+scores executable.
 
 The Research UI may create a `PLANNED` dossier from a paper-eligible candidate. The conceptual
 `EXÉCUTER` control reports `IBKR EXECUTION NOT CONFIGURED`. There is no API route that can preview,
 stage, place, modify, cancel, or transmit an opening order. There is also no manual opening fallback.
 
-## First intended provider — NOT YET ENABLED
+## First provider — IBKR paper, NOT YET WIRED
 
-IBKR is the intended first personal broker implementation. A later phase must separately decide and
-validate:
+IBKR paper is the approved first personal broker architecture. The persistence, HMAC, replay,
+idempotency, claim, kill-switch, and restart-journal layers are implemented. A later activation
+slice must still implement and validate:
 
 - authentication and minimum credential scopes;
 - combo/BAG contract identity and whole-structure semantics;
@@ -25,7 +27,8 @@ validate:
 - kill switches, rate limits, audit logs, incident response, and credential rotation;
 - paper/shadow validation before any real-money consideration.
 
-These are requirements to review, not an authorization to build or activate execution.
+See [`M_IBKR_PAPER_CONTROL_PLANE.md`](M_IBKR_PAPER_CONTROL_PLANE.md). The approval covers building
+the paper architecture, not deploying it or enabling live execution.
 
 ## Commercial per-user configuration — NOT YET ENABLED
 

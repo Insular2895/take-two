@@ -20,7 +20,8 @@
     "SNAPSHOT_INTERVAL_SECONDS": "60",
     "GITHUB_REPOSITORY": "Insular2895/take-two",
     "GITHUB_WORKFLOW": "phase-m-research-analysis.yml",
-    "GITHUB_GOVERNED_REF": "main"
+    "GITHUB_GOVERNED_REF": "main",
+    "BROKER_BRIDGE_ID": "oci-a1-paper-01"
   },
   "d1_databases": [
     {

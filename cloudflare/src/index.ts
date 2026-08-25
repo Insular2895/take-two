@@ -5,6 +5,7 @@ import {
   requireActionPassword,
   requireCsrf,
 } from "./auth";
+import { queueAcknowledgedPaperClose, routeBrokerAuthenticated, routeBrokerInternal } from "./broker-control";
 import { activePosition, audit, importDossier, incrementUsage, latestProjection, persistProjection } from "./db";
 import { syntheticDemoDossier } from "./demo";
 import { calculateProjection, estimateDailyUsage, inverseStructureLegs, randomId, validateDossier } from "./domain";
@@ -40,17 +41,26 @@ function apiError(error: unknown): Response {
   if (["CSRF_INVALID", "ACTION_PASSWORD_REQUIRED", "ACTION_PASSWORD_INVALID"].includes(message)) status = 403;
   else if (
     message.startsWith("INVALID_CALLBACK") || message === "CALLBACK_BODY_HASH_MISMATCH" ||
-    message === "CALLBACK_TIMESTAMP_OUTSIDE_WINDOW"
+    message === "CALLBACK_TIMESTAMP_OUTSIDE_WINDOW" ||
+    message.startsWith("INVALID_BROKER_BRIDGE") ||
+    message === "BROKER_BRIDGE_TIMESTAMP_OUTSIDE_WINDOW"
   ) status = 403;
   else if (message === "ACTION_PASSWORD_RATE_LIMITED") status = 429;
   else if (message === "CALLBACK_BODY_TOO_LARGE") status = 413;
-  else if (message === "CALLBACK_REPLAY_DETECTED") status = 409;
+  else if (message === "CALLBACK_REPLAY_DETECTED" || message === "BROKER_BRIDGE_REPLAY_DETECTED") status = 409;
+  else if (message === "BROKER_BRIDGE_BODY_TOO_LARGE") status = 413;
   else if (
     message === "ACTION_PASSWORD_NOT_CONFIGURED" ||
     message === "ANALYSIS_CALLBACK_SECRET_NOT_CONFIGURED" ||
-    message === "GITHUB_ACTIONS_TOKEN_NOT_CONFIGURED"
+    message === "GITHUB_ACTIONS_TOKEN_NOT_CONFIGURED" ||
+    message === "BROKER_BRIDGE_SECRET_NOT_CONFIGURED"
   ) status = 503;
   else if (message.startsWith("GITHUB_WORKFLOW_DISPATCH_FAILED_")) status = 502;
+  else if (
+    message.startsWith("PAPER_BROKER_") || message.startsWith("PAPER_CLOSE_") ||
+    message === "PAPER_EXIT_POLICY_REQUIRED" || message === "PAPER_POSITION_REQUIRED" ||
+    message === "ACKNOWLEDGED_PREVIEW_REQUIRED" || message === "PAPER_POSITION_INTENT_ALREADY_ACTIVE"
+  ) status = 409;
   else if (
     message.startsWith("INVALID_") || message.startsWith("COMBO_") ||
     message.startsWith("MISSING_") || message.startsWith("ENTRY_") ||
@@ -123,7 +133,14 @@ async function setSafeMode(request: Request, env: Env, auth: AuthContext): Promi
   const body = await jsonBody<{ enabled?: boolean }>(request);
   if (typeof body.enabled !== "boolean") throw new Error("INVALID_SAFE_MODE_VALUE");
   const now = new Date().toISOString();
-  await env.DB.prepare("UPDATE system_state SET safe_mode=?,updated_at=? WHERE singleton=1").bind(body.enabled ? 1 : 0, now).run();
+  await env.DB.prepare(
+    "UPDATE system_state SET safe_mode=?,broker_kill_switch=CASE WHEN ?=1 THEN 1 ELSE broker_kill_switch END,updated_at=? WHERE singleton=1",
+  ).bind(body.enabled ? 1 : 0, body.enabled ? 1 : 0, now).run();
+  if (body.enabled) {
+    await env.DB.prepare(
+      "UPDATE broker_execution_intents SET status='BLOCKED',completed_at=?,last_error_code='SAFE_MODE_ENABLED' WHERE status='READY'",
+    ).bind(now).run();
+  }
   await audit(env.DB, body.enabled ? "SAFE_MODE_ENABLED" : "SAFE_MODE_DISABLED", auth.actor);
   return Response.json({ safe_mode: body.enabled });
 }
@@ -243,6 +260,10 @@ async function acknowledgeClose(request: Request, env: Env, auth: AuthContext, p
   if (!result.meta.changes) return Response.json({ error: "PREVIEW_NOT_ACKNOWLEDGEABLE" }, { status: 409 });
   const preview = await env.DB.prepare("SELECT position_id FROM close_previews WHERE preview_id=?").bind(previewId).first<{ position_id: string }>();
   await audit(env.DB, "CLOSE_PREVIEW_ACKNOWLEDGED", auth.actor, preview?.position_id ?? null, { preview_id: previewId });
+  const queued = await queueAcknowledgedPaperClose(env, auth, previewId);
+  if (queued) {
+    return Response.json({ status: "PAPER_CLOSE_QUEUED", intent: queued, transmitted: false }, { status: 202 });
+  }
   return Response.json({ status: "CLOSE_PREVIEW_READY", instruction: "Close this entire combo manually in IBKR.", transmitted: false });
 }
 
@@ -352,7 +373,8 @@ async function exportData(env: Env, auth: AuthContext): Promise<Response> {
     "positions", "position_legs", "fills", "pnl_snapshots", "model_snapshots",
     "close_previews", "monitoring_events", "audit_events", "analysis_requests",
     "analysis_runs", "analysis_candidate_summaries", "analysis_candidate_details",
-    "candidate_selections", "planned_positions",
+    "candidate_selections", "planned_positions", "position_exit_policies",
+    "broker_execution_intents", "broker_execution_events", "broker_bridge_heartbeats",
   ] as const;
   const results = await env.DB.batch(tables.map((table) => env.DB.prepare(`SELECT * FROM ${table}`)));
   const payload = Object.fromEntries(tables.map((table, index) => [table, results[index]?.results ?? []]));
@@ -364,6 +386,14 @@ async function exportData(env: Env, auth: AuthContext): Promise<Response> {
 
 async function routeAuthenticated(request: Request, env: Env, auth: AuthContext, path: string): Promise<Response> {
   await incrementUsage(env.DB, "worker_api_requests");
+  const broker = await routeBrokerAuthenticated(
+    request,
+    env,
+    auth,
+    path,
+    () => jsonBody<unknown>(request),
+  );
+  if (broker) return broker;
   const research = await routeResearchAuthenticated(
     request,
     env,
@@ -398,6 +428,8 @@ export async function handleRequest(
 ): Promise<Response> {
   try {
     const path = new URL(request.url).pathname;
+    const internalBroker = await routeBrokerInternal(request, env, path);
+    if (internalBroker) return withSecurity(internalBroker);
     const internalResearch = await routeInternalResearch(request, env, path);
     if (internalResearch) return withSecurity(internalResearch);
     const auth = await authenticateAccess(request, access);
