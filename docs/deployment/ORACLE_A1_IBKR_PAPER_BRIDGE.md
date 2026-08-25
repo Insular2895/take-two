@@ -59,8 +59,16 @@ validation covers:
   absent from the bridge runtime, which still instantiates `DisabledGateway`.
 
 The adapter imports successfully against official `ibapi 10.49.2` and pinned `protobuf 5.29.5` in
-an isolated local installation. It has not yet been run from the project checkout on the VM, posted
-to Cloudflare, or used for an executable combo quote.
+an isolated local installation.
+
+On 2026-08-25, commit `c84e47964acf63f5c9617126dcc899cf0a0fdff7` was cloned to
+`~/apps/take-two` on the Oracle VM and the project package was installed into the dedicated official
+API environment at `~/.venvs/ibkr-api`. The project CLI completed a redacted `PAPER_READ_ONLY`
+snapshot against loopback port `4002`: server time was present, the account identifier remained
+absent, and the symbol scope remained `TTWO`. The paper account contained zero open TTWO positions,
+so this checkpoint does not yet validate per-leg quotes, position P&L, fee reconciliation, or combo
+grouping. The snapshot is not posted to Cloudflare and no persistent project service or executable
+combo adapter has been enabled.
 
 ## What the user will provide later
 

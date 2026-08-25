@@ -78,10 +78,15 @@ reconciled with final execution commissions and fees.
 
 ## Not implemented yet
 
-The following remain blocked pending project-adapter validation on the logged-in Oracle paper VM:
+The project-owned adapter was installed from commit `c84e47964acf63f5c9617126dcc899cf0a0fdff7`
+on the logged-in Oracle paper VM and completed a redacted `PAPER_READ_ONLY` snapshot on 2026-08-25.
+The snapshot proved the handshake, server time, single-paper-account guard, TTWO symbol restriction,
+and redaction boundary. The account had zero open TTWO positions, so per-leg quotes and position P&L
+remain unvalidated against a real paper position.
 
-1. run the project-owned read-only adapter on the VM and publish its redacted telemetry through a
-   signed, schema-validated Cloudflare route;
+The following remain blocked:
+
+1. publish the adapter's redacted telemetry through a signed, schema-validated Cloudflare route;
 2. group IBKR option legs into the governed Take Two position without guessing from symbols alone;
 3. combo quote refresh and tick-size validation immediately before dispatch;
 4. bounded BAG limit construction and paper submission;
