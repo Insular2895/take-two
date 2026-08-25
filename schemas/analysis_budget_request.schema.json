@@ -1,0 +1,57 @@
+{
+  "$defs": {
+    "MarketDataMode": {
+      "enum": [
+        "LAST_GOVERNED_SNAPSHOT",
+        "SYNTHETIC_DEMO"
+      ],
+      "title": "MarketDataMode",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/analysis_budget_request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The exact, immutable browser-to-Worker research request.",
+  "properties": {
+    "currency": {
+      "const": "EUR",
+      "default": "EUR",
+      "title": "Currency",
+      "type": "string"
+    },
+    "market_data_mode": {
+      "$ref": "#/$defs/MarketDataMode",
+      "default": "SYNTHETIC_DEMO"
+    },
+    "maximum_budget": {
+      "default": 1500.0,
+      "exclusiveMinimum": 0,
+      "title": "Maximum Budget",
+      "type": "number"
+    },
+    "minimum_spend_policy": {
+      "default": "SOFT",
+      "enum": [
+        "SOFT",
+        "HARD"
+      ],
+      "title": "Minimum Spend Policy",
+      "type": "string"
+    },
+    "preferred_budget": {
+      "default": 800.0,
+      "exclusiveMinimum": 0,
+      "title": "Preferred Budget",
+      "type": "number"
+    },
+    "target_budget": {
+      "default": 1000.0,
+      "exclusiveMinimum": 0,
+      "title": "Target Budget",
+      "type": "number"
+    }
+  },
+  "title": "AnalysisBudgetRequest",
+  "type": "object"
+}

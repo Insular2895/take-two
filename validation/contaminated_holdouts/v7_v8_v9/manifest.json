@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "declared_at": "2026-07-25",
+  "contaminated_holdouts": ["v7", "v8", "v9"],
+  "reason": "Results and holdout outcomes were inspected before the knowledge-driven optimizer run.",
+  "allowed_usage": [
+    "historical reproduction",
+    "non-regression testing",
+    "exploratory diagnostics",
+    "comparison with the new system"
+  ],
+  "forbidden_usage": [
+    "final locked holdout",
+    "eligibility authorization",
+    "model selection proof",
+    "paper or live trade authorization"
+  ],
+  "artifacts": {
+    "v7": "experiments/legacy/v7",
+    "v8": "experiments/legacy/v8",
+    "v9": "experiments/legacy/v9"
+  }
+}

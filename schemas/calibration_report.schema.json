@@ -1,0 +1,145 @@
+{
+  "$defs": {
+    "OfflineModelCalibration": {
+      "additionalProperties": false,
+      "properties": {
+        "calibration_error": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Calibration Error"
+        },
+        "diagnostics": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        },
+        "feller_condition_satisfied": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Feller Condition Satisfied"
+        },
+        "model": {
+          "enum": [
+            "gbm",
+            "local_volatility",
+            "heston",
+            "heston_jump"
+          ],
+          "title": "Model",
+          "type": "string"
+        },
+        "observations": {
+          "minimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Parameters",
+          "type": "object"
+        },
+        "status": {
+          "enum": [
+            "calibrated_pending_validation",
+            "experimental_fit",
+            "insufficient_data",
+            "blocked_synthetic_data"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "status",
+        "observations"
+      ],
+      "title": "OfflineModelCalibration",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/calibration_report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "cutoff": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cutoff"
+    },
+    "dataset_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dataset Hash"
+    },
+    "models": {
+      "items": {
+        "$ref": "#/$defs/OfflineModelCalibration"
+      },
+      "title": "Models",
+      "type": "array"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "CALIBRATION_FIT_PENDING_VALIDATION",
+        "BLOCKED_MISSING_CALIBRATION_DATA",
+        "BLOCKED_INVALID_CALIBRATION_DATA",
+        "FIXTURE_ONLY_NOT_CALIBRATED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "status"
+  ],
+  "title": "OfflineCalibrationReport",
+  "type": "object"
+}

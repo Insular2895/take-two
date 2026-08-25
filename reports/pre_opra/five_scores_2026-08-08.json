@@ -1,0 +1,535 @@
+{
+  "schema_version": "1.0",
+  "report_id": "ttwo-five-scores-v2",
+  "ticker": "TTWO",
+  "candidate_id": "engine_candidate",
+  "opportunity": {
+    "kind": "opportunity",
+    "formula_version": "pre-opra-v2",
+    "formula_status": "validated",
+    "score": 37.07072964641373,
+    "score_value": 37.07072964641373,
+    "score_coverage": 1.0,
+    "missing_components": [],
+    "confidence": "LOW",
+    "raw_metrics": [
+      {
+        "name": "expected_return",
+        "value": -0.012664664703304278,
+        "unit": "ratio",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "median_return",
+        "value": -0.072012523917203,
+        "unit": "ratio",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "probability_profit",
+        "value": 0.2,
+        "unit": "probability",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "probability_target",
+        "value": 0.1,
+        "unit": "probability",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "uplift_vs_buy_hold",
+        "value": -0.03711573280153989,
+        "unit": "ratio",
+        "source_id": "wf-oos",
+        "available": true
+      }
+    ],
+    "contributions": [
+      {
+        "metric_name": "expected_return",
+        "raw_value": -0.012664664703304278,
+        "normalized_value": 0.47467067059339146,
+        "weight": 0.25,
+        "points": 11.866766764834786
+      },
+      {
+        "metric_name": "median_return",
+        "raw_value": -0.072012523917203,
+        "normalized_value": 0.42798747608279697,
+        "weight": 0.2,
+        "points": 8.55974952165594
+      },
+      {
+        "metric_name": "probability_profit",
+        "raw_value": 0.2,
+        "normalized_value": 0.2,
+        "weight": 0.2,
+        "points": 4.0
+      },
+      {
+        "metric_name": "probability_target",
+        "raw_value": 0.1,
+        "normalized_value": 0.2,
+        "weight": 0.1,
+        "points": 2.0
+      },
+      {
+        "metric_name": "uplift_vs_buy_hold",
+        "raw_value": -0.03711573280153989,
+        "normalized_value": 0.4257685343969202,
+        "weight": 0.25,
+        "points": 10.644213359923004
+      }
+    ],
+    "sensitivity_interval": [
+      36.736009457268366,
+      37.32429885160703
+    ],
+    "unavailable_reasons": []
+  },
+  "risk": {
+    "kind": "risk",
+    "formula_version": "pre-opra-v2",
+    "formula_status": "validated",
+    "score": 49.46668008285406,
+    "score_value": 49.46668008285406,
+    "score_coverage": 1.0,
+    "missing_components": [],
+    "confidence": "LOW",
+    "raw_metrics": [
+      {
+        "name": "cvar_95",
+        "value": 0.8467353951890036,
+        "unit": "ratio",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "maximum_drawdown",
+        "value": 0.9747005381055908,
+        "unit": "ratio",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "probability_loss_25",
+        "value": 0.3,
+        "unit": "probability",
+        "source_id": "private-panel-aggregate",
+        "available": true
+      },
+      {
+        "name": "probability_loss_50",
+        "value": 0.2,
+        "unit": "probability",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "probability_loss_70",
+        "value": 0.1,
+        "unit": "probability",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "probability_loss_90",
+        "value": 0.0,
+        "unit": "probability",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "near_total_loss",
+        "value": 0.0,
+        "unit": "probability",
+        "source_id": "private-panel-aggregate",
+        "available": true
+      },
+      {
+        "name": "transaction_cost_fraction",
+        "value": 0.168257066461029,
+        "unit": "ratio",
+        "source_id": "wf-oos",
+        "available": true
+      }
+    ],
+    "contributions": [
+      {
+        "metric_name": "cvar_95",
+        "raw_value": 0.8467353951890036,
+        "normalized_value": 0.8467353951890036,
+        "weight": 0.25,
+        "points": 21.168384879725092
+      },
+      {
+        "metric_name": "maximum_drawdown",
+        "raw_value": 0.9747005381055908,
+        "normalized_value": 0.9747005381055908,
+        "weight": 0.2,
+        "points": 19.494010762111817
+      },
+      {
+        "metric_name": "probability_loss_25",
+        "raw_value": 0.3,
+        "normalized_value": 0.3,
+        "weight": 0.1,
+        "points": 3.0
+      },
+      {
+        "metric_name": "probability_loss_50",
+        "raw_value": 0.2,
+        "normalized_value": 0.2,
+        "weight": 0.1,
+        "points": 2.0
+      },
+      {
+        "metric_name": "probability_loss_70",
+        "raw_value": 0.1,
+        "normalized_value": 0.1,
+        "weight": 0.1,
+        "points": 1.0
+      },
+      {
+        "metric_name": "probability_loss_90",
+        "raw_value": 0.0,
+        "normalized_value": 0.0,
+        "weight": 0.1,
+        "points": 0.0
+      },
+      {
+        "metric_name": "near_total_loss",
+        "raw_value": 0.0,
+        "normalized_value": 0.0,
+        "weight": 0.1,
+        "points": 0.0
+      },
+      {
+        "metric_name": "transaction_cost_fraction",
+        "raw_value": 0.168257066461029,
+        "normalized_value": 0.56085688820343,
+        "weight": 0.05,
+        "points": 2.8042844410171504
+      }
+    ],
+    "sensitivity_interval": [
+      48.97691097312283,
+      50.40792270496593
+    ],
+    "unavailable_reasons": []
+  },
+  "evidence": {
+    "kind": "evidence",
+    "formula_version": "pre-opra-v2",
+    "formula_status": "validated",
+    "score": null,
+    "score_value": 40.32979003133478,
+    "score_coverage": 0.8,
+    "missing_components": [
+      "holdout_validation",
+      "rights_confirmation"
+    ],
+    "confidence": "LOW",
+    "raw_metrics": [
+      {
+        "name": "real_data_coverage",
+        "value": 0.5,
+        "unit": "ratio",
+        "source_id": "private-panel",
+        "available": true
+      },
+      {
+        "name": "point_in_time_integrity",
+        "value": 1.0,
+        "unit": "binary",
+        "source_id": "wf-manifest",
+        "available": true
+      },
+      {
+        "name": "oos_sample_size",
+        "value": 0.2,
+        "unit": "ratio",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "walk_forward_stability",
+        "value": 0.2222222222222222,
+        "unit": "ratio",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "holdout_validation",
+        "value": null,
+        "unit": "binary",
+        "source_id": "holdout-unopened",
+        "available": false
+      },
+      {
+        "name": "multiple_testing_strength",
+        "value": 0.05728179858800706,
+        "unit": "probability",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "surface_quality",
+        "value": 0.6467661691542289,
+        "unit": "ratio",
+        "source_id": "surface-v2",
+        "available": true
+      },
+      {
+        "name": "calibration_quality",
+        "value": 0.9941319593530843,
+        "unit": "ratio",
+        "source_id": "surface-v2",
+        "available": true
+      },
+      {
+        "name": "rights_confirmation",
+        "value": null,
+        "unit": "binary",
+        "source_id": "data-rights-v1",
+        "available": false
+      }
+    ],
+    "contributions": [
+      {
+        "metric_name": "real_data_coverage",
+        "raw_value": 0.5,
+        "normalized_value": 0.5,
+        "weight": 0.13,
+        "points": 6.5
+      },
+      {
+        "metric_name": "point_in_time_integrity",
+        "raw_value": 1.0,
+        "normalized_value": 1.0,
+        "weight": 0.13,
+        "points": 13.0
+      },
+      {
+        "metric_name": "oos_sample_size",
+        "raw_value": 0.2,
+        "normalized_value": 0.2,
+        "weight": 0.13,
+        "points": 2.6
+      },
+      {
+        "metric_name": "walk_forward_stability",
+        "raw_value": 0.2222222222222222,
+        "normalized_value": 0.2222222222222222,
+        "weight": 0.13,
+        "points": 2.888888888888889
+      },
+      {
+        "metric_name": "multiple_testing_strength",
+        "raw_value": 0.05728179858800706,
+        "normalized_value": 0.05728179858800706,
+        "weight": 0.1,
+        "points": 0.5728179858800706
+      },
+      {
+        "metric_name": "surface_quality",
+        "raw_value": 0.6467661691542289,
+        "normalized_value": 0.6467661691542289,
+        "weight": 0.09,
+        "points": 5.820895522388061
+      },
+      {
+        "metric_name": "calibration_quality",
+        "raw_value": 0.9941319593530843,
+        "normalized_value": 0.9941319593530843,
+        "weight": 0.09,
+        "points": 8.947187634177757
+      }
+    ],
+    "sensitivity_interval": [
+      39.88846600486201,
+      40.964123032063746
+    ],
+    "unavailable_reasons": [
+      "missing raw metric: holdout_validation",
+      "missing raw metric: rights_confirmation"
+    ]
+  },
+  "model_agreement": {
+    "kind": "model_agreement",
+    "formula_version": "pre-opra-v2",
+    "formula_status": "validated",
+    "score": null,
+    "score_value": 31.4613888021953,
+    "score_coverage": 0.5,
+    "missing_components": [
+      "option_expected_return_agreement",
+      "candidate_ranking_agreement"
+    ],
+    "confidence": "VERY_LOW",
+    "raw_metrics": [
+      {
+        "name": "volatility_qlike_spread",
+        "value": 0.24548478980468147,
+        "unit": "qlike",
+        "source_id": "empirical-v1",
+        "available": true
+      },
+      {
+        "name": "var_coverage_spread",
+        "value": 0.01904761904761905,
+        "unit": "ratio",
+        "source_id": "empirical-v1",
+        "available": true
+      },
+      {
+        "name": "option_expected_return_agreement",
+        "value": null,
+        "unit": "ratio",
+        "source_id": "pending-opra",
+        "available": false
+      },
+      {
+        "name": "candidate_ranking_agreement",
+        "value": null,
+        "unit": "ratio",
+        "source_id": "pending-opra",
+        "available": false
+      }
+    ],
+    "contributions": [
+      {
+        "metric_name": "volatility_qlike_spread",
+        "raw_value": 0.24548478980468147,
+        "normalized_value": 0.5090304203906371,
+        "weight": 0.3,
+        "points": 15.270912611719112
+      },
+      {
+        "metric_name": "var_coverage_spread",
+        "raw_value": 0.01904761904761905,
+        "normalized_value": 0.8095238095238095,
+        "weight": 0.2,
+        "points": 16.19047619047619
+      }
+    ],
+    "sensitivity_interval": [
+      31.1212076069502,
+      31.80811194350281
+    ],
+    "unavailable_reasons": [
+      "missing raw metric: option_expected_return_agreement",
+      "missing raw metric: candidate_ranking_agreement"
+    ]
+  },
+  "execution_quality": {
+    "kind": "execution_quality",
+    "formula_version": "pre-opra-v2",
+    "formula_status": "validated",
+    "score": null,
+    "score_value": 50.49182237441286,
+    "score_coverage": 0.75,
+    "missing_components": [
+      "live_execution_component"
+    ],
+    "confidence": "LOW",
+    "raw_metrics": [
+      {
+        "name": "historical_quote_pass_rate",
+        "value": 0.609101211751373,
+        "unit": "ratio",
+        "source_id": "surface-v2",
+        "available": true
+      },
+      {
+        "name": "transaction_cost_fraction",
+        "value": 0.168257066461029,
+        "unit": "ratio",
+        "source_id": "wf-oos",
+        "available": true
+      },
+      {
+        "name": "mean_active_legs",
+        "value": 1.1428571428571428,
+        "unit": "legs",
+        "source_id": "private-panel-aggregate",
+        "available": true
+      },
+      {
+        "name": "bid_ask_completeness",
+        "value": 1.0,
+        "unit": "ratio",
+        "source_id": "normalization-v1",
+        "available": true
+      },
+      {
+        "name": "live_execution_component",
+        "value": null,
+        "unit": "binary",
+        "source_id": "pending-opra",
+        "available": false
+      }
+    ],
+    "contributions": [
+      {
+        "metric_name": "historical_quote_pass_rate",
+        "raw_value": 0.609101211751373,
+        "normalized_value": 0.5113765146892162,
+        "weight": 0.2,
+        "points": 10.227530293784325
+      },
+      {
+        "metric_name": "transaction_cost_fraction",
+        "raw_value": 0.168257066461029,
+        "normalized_value": 0.43914311179656995,
+        "weight": 0.25,
+        "points": 10.97857779491425
+      },
+      {
+        "metric_name": "mean_active_legs",
+        "raw_value": 1.1428571428571428,
+        "normalized_value": 0.9523809523809524,
+        "weight": 0.15,
+        "points": 14.285714285714286
+      },
+      {
+        "metric_name": "bid_ask_completeness",
+        "raw_value": 1.0,
+        "normalized_value": 1.0,
+        "weight": 0.15,
+        "points": 15.0
+      }
+    ],
+    "sensitivity_interval": [
+      49.925496923133174,
+      50.97237487687536
+    ],
+    "unavailable_reasons": [
+      "missing raw metric: live_execution_component"
+    ]
+  },
+  "composite_score": null,
+  "classification": "AVOID",
+  "classification_rule_version": "pre-opra-v2",
+  "classification_status": "validated",
+  "classification_rationale": [
+    "The candidate has negative OOS expected return and negative uplift versus cash.",
+    "The full development panel also has expected return -0.034883.",
+    "Partial scores retain original weights; missing components are never renormalized.",
+    "Classification is a development diagnostic, not an investment recommendation."
+  ],
+  "failed_constraints": [
+    "formal walk-forward sample minimum not met",
+    "final holdout remains unopened",
+    "historical option-data rights require human confirmation",
+    "Heston calibration gate not passed",
+    "live execution component pending OPRA"
+  ],
+  "holdout_used": false,
+  "order_capability": "forbidden"
+}

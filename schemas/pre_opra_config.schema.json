@@ -1,0 +1,1823 @@
+{
+  "$defs": {
+    "AdvancedGreekPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "display_color": {
+          "default": true,
+          "title": "Display Color",
+          "type": "boolean"
+        },
+        "display_speed": {
+          "default": true,
+          "title": "Display Speed",
+          "type": "boolean"
+        },
+        "enabled": {
+          "const": true,
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        }
+      },
+      "title": "AdvancedGreekPolicy",
+      "type": "object"
+    },
+    "AnalysisMode": {
+      "enum": [
+        "screen",
+        "deep_analysis"
+      ],
+      "title": "AnalysisMode",
+      "type": "string"
+    },
+    "Architecture": {
+      "enum": [
+        "long_call",
+        "long_put",
+        "bull_call_spread",
+        "bear_put_spread",
+        "call_butterfly",
+        "put_butterfly",
+        "call_broken_wing_butterfly",
+        "put_broken_wing_butterfly",
+        "call_calendar",
+        "put_calendar",
+        "call_diagonal",
+        "put_diagonal",
+        "long_straddle",
+        "long_strangle",
+        "iron_condor"
+      ],
+      "title": "Architecture",
+      "type": "string"
+    },
+    "BreakevenSolverConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "grid_points": {
+          "default": 401,
+          "maximum": 5001,
+          "minimum": 51,
+          "title": "Grid Points",
+          "type": "integer"
+        },
+        "maximum_iterations": {
+          "default": 100,
+          "exclusiveMinimum": 0,
+          "title": "Maximum Iterations",
+          "type": "integer"
+        },
+        "maximum_spot_multiplier": {
+          "default": 3.0,
+          "exclusiveMinimum": 0,
+          "title": "Maximum Spot Multiplier",
+          "type": "number"
+        },
+        "minimum_spot_multiplier": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Minimum Spot Multiplier",
+          "type": "number"
+        },
+        "pnl_tolerance": {
+          "default": 0.0001,
+          "exclusiveMinimum": 0,
+          "title": "Pnl Tolerance",
+          "type": "number"
+        },
+        "root_tolerance": {
+          "default": 1e-05,
+          "exclusiveMinimum": 0,
+          "title": "Root Tolerance",
+          "type": "number"
+        }
+      },
+      "title": "BreakevenSolverConfiguration",
+      "type": "object"
+    },
+    "CapitalConstraintsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "exclusiveMinimum": 0,
+          "title": "Amount",
+          "type": "number"
+        },
+        "currency": {
+          "maxLength": 3,
+          "minLength": 3,
+          "title": "Currency",
+          "type": "string"
+        },
+        "fx_rate_as_of": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Rate As Of"
+        },
+        "fx_rate_to_usd": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Rate To Usd"
+        },
+        "maximum_contracts": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Contracts",
+          "type": "integer"
+        },
+        "maximum_loss": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Loss",
+          "type": "number"
+        },
+        "safety_reserve_fraction": {
+          "$ref": "#/$defs/GovernedValue"
+        }
+      },
+      "required": [
+        "amount",
+        "currency",
+        "maximum_loss",
+        "maximum_contracts",
+        "safety_reserve_fraction"
+      ],
+      "title": "CapitalConstraintsConfig",
+      "type": "object"
+    },
+    "ExecutionAssumptionsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "commission_per_contract_side": {
+          "$ref": "#/$defs/GovernedValue"
+        },
+        "long_entry_side": {
+          "const": "ask",
+          "title": "Long Entry Side",
+          "type": "string"
+        },
+        "long_exit_side": {
+          "const": "bid",
+          "title": "Long Exit Side",
+          "type": "string"
+        },
+        "order_capability": {
+          "const": "forbidden",
+          "title": "Order Capability",
+          "type": "string"
+        },
+        "preview_only": {
+          "const": true,
+          "title": "Preview Only",
+          "type": "boolean"
+        },
+        "quote_quality_required": {
+          "enum": [
+            "live_broker",
+            "combo",
+            "eod_bid_ask",
+            "indicative"
+          ],
+          "title": "Quote Quality Required",
+          "type": "string"
+        },
+        "scenario": {
+          "enum": [
+            "optimistic",
+            "base",
+            "conservative",
+            "stressed"
+          ],
+          "title": "Scenario",
+          "type": "string"
+        },
+        "short_entry_side": {
+          "const": "bid",
+          "title": "Short Entry Side",
+          "type": "string"
+        },
+        "short_exit_side": {
+          "const": "ask",
+          "title": "Short Exit Side",
+          "type": "string"
+        },
+        "slippage_per_contract_side": {
+          "$ref": "#/$defs/GovernedValue"
+        }
+      },
+      "required": [
+        "scenario",
+        "long_entry_side",
+        "short_entry_side",
+        "long_exit_side",
+        "short_exit_side",
+        "commission_per_contract_side",
+        "slippage_per_contract_side",
+        "quote_quality_required",
+        "preview_only",
+        "order_capability"
+      ],
+      "title": "ExecutionAssumptionsConfig",
+      "type": "object"
+    },
+    "ExecutionEstimateStatus": {
+      "enum": [
+        "INDICATIVE",
+        "ESTIMATED_CONFIGURED_EXECUTION_MODEL",
+        "OBSERVED",
+        "BLOCKED_MISSING_EXECUTION_DATA"
+      ],
+      "title": "ExecutionEstimateStatus",
+      "type": "string"
+    },
+    "ExitCostModelConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "assignment_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assignment Cost"
+        },
+        "assignment_or_exercise_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assignment Or Exercise Cost"
+        },
+        "closing_commission_multiplier": {
+          "default": 1.0,
+          "minimum": 0,
+          "title": "Closing Commission Multiplier",
+          "type": "number"
+        },
+        "exercise_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exercise Cost"
+        },
+        "fx_exit_cost_bps": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Exit Cost Bps"
+        },
+        "settlement_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Settlement Cost"
+        },
+        "slippage_cost_multiplier": {
+          "default": 1.0,
+          "minimum": 0,
+          "title": "Slippage Cost Multiplier",
+          "type": "number"
+        },
+        "spread_cost_multiplier": {
+          "default": 1.0,
+          "minimum": 0,
+          "title": "Spread Cost Multiplier",
+          "type": "number"
+        },
+        "status": {
+          "$ref": "#/$defs/ExecutionEstimateStatus",
+          "default": "ESTIMATED_CONFIGURED_EXECUTION_MODEL"
+        }
+      },
+      "title": "ExitCostModelConfiguration",
+      "type": "object"
+    },
+    "FXHandlingMode": {
+      "enum": [
+        "CONVERT_AT_ENTRY_AND_EXIT",
+        "MAINTAIN_UNDERLYING_CURRENCY_CASH",
+        "ACCOUNT_BASE_TRANSLATION_ONLY",
+        "UNKNOWN"
+      ],
+      "title": "FXHandlingMode",
+      "type": "string"
+    },
+    "GovernedValue": {
+      "additionalProperties": false,
+      "description": "A value that cannot be mistaken for a universal default.",
+      "properties": {
+        "origin": {
+          "enum": [
+            "official_source",
+            "authorized_market_data",
+            "derived",
+            "estimate",
+            "user_assumption"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "sourced",
+            "calibrated",
+            "calibration_required",
+            "draft_to_validate"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "value",
+        "origin",
+        "status",
+        "rationale"
+      ],
+      "title": "GovernedValue",
+      "type": "object"
+    },
+    "GreekBumpConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "grid_levels": {
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "title": "Grid Levels",
+          "type": "array"
+        },
+        "minimum_spot_bump": {
+          "default": 0.01,
+          "exclusiveMinimum": 0,
+          "title": "Minimum Spot Bump",
+          "type": "number"
+        },
+        "rate_bumps_basis_points": {
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "title": "Rate Bumps Basis Points",
+          "type": "array"
+        },
+        "spot_relative_bumps": {
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "title": "Spot Relative Bumps",
+          "type": "array"
+        },
+        "time_bump_calendar_days": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Time Bump Calendar Days",
+          "type": "integer"
+        },
+        "volatility_bumps_vol_points": {
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "title": "Volatility Bumps Vol Points",
+          "type": "array"
+        }
+      },
+      "title": "GreekBumpConfiguration",
+      "type": "object"
+    },
+    "MarketContextConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_cache_fallback": {
+          "title": "Allow Cache Fallback",
+          "type": "boolean"
+        },
+        "base_currency": {
+          "maxLength": 3,
+          "minLength": 3,
+          "title": "Base Currency",
+          "type": "string"
+        },
+        "data_providers": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Data Providers",
+          "type": "array"
+        },
+        "decision_cutoff": {
+          "format": "date-time",
+          "title": "Decision Cutoff",
+          "type": "string"
+        },
+        "historical_dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Historical Dataset Id"
+        },
+        "maximum_data_age_days": {
+          "$ref": "#/$defs/GovernedValue"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "decision_cutoff",
+        "base_currency",
+        "historical_dataset_id",
+        "data_providers",
+        "maximum_data_age_days",
+        "allow_cache_fallback"
+      ],
+      "title": "MarketContextConfig",
+      "type": "object"
+    },
+    "MixedExpiryLifecyclePolicy": {
+      "enum": [
+        "CLOSE_BEFORE_FIRST_EXPIRY"
+      ],
+      "title": "MixedExpiryLifecyclePolicy",
+      "type": "string"
+    },
+    "ModelDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "minLength": 1,
+          "title": "Family",
+          "type": "string"
+        },
+        "model_id": {
+          "minLength": 1,
+          "title": "Model Id",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "$ref": "#/$defs/GovernedValue"
+          },
+          "title": "Parameters",
+          "type": "object"
+        },
+        "status": {
+          "enum": [
+            "eligible",
+            "experimental",
+            "calibration_required",
+            "blocked"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "model_id",
+        "family",
+        "status"
+      ],
+      "title": "ModelDefinition",
+      "type": "object"
+    },
+    "ModelUniverseConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "model_addition_policy": {
+          "const": "deficiency_and_validation_required",
+          "title": "Model Addition Policy",
+          "type": "string"
+        },
+        "models": {
+          "items": {
+            "$ref": "#/$defs/ModelDefinition"
+          },
+          "minItems": 1,
+          "title": "Models",
+          "type": "array"
+        },
+        "selection_policy": {
+          "enum": [
+            "pre_registered",
+            "walk_forward_only"
+          ],
+          "title": "Selection Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "models",
+        "selection_policy",
+        "model_addition_policy"
+      ],
+      "title": "ModelUniverseConfig",
+      "type": "object"
+    },
+    "NumericalToleranceConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "greek_absolute_scale_floor": {
+          "default": 1e-08,
+          "exclusiveMinimum": 0,
+          "title": "Greek Absolute Scale Floor",
+          "type": "number"
+        },
+        "greek_high_relative_dispersion": {
+          "default": 0.01,
+          "minimum": 0,
+          "title": "Greek High Relative Dispersion",
+          "type": "number"
+        },
+        "greek_low_relative_dispersion": {
+          "default": 0.2,
+          "minimum": 0,
+          "title": "Greek Low Relative Dispersion",
+          "type": "number"
+        },
+        "greek_medium_relative_dispersion": {
+          "default": 0.05,
+          "minimum": 0,
+          "title": "Greek Medium Relative Dispersion",
+          "type": "number"
+        },
+        "price_grid_tolerance": {
+          "default": 0.02,
+          "minimum": 0,
+          "title": "Price Grid Tolerance",
+          "type": "number"
+        },
+        "reconciliation_tolerance": {
+          "default": 1e-05,
+          "exclusiveMinimum": 0,
+          "title": "Reconciliation Tolerance",
+          "type": "number"
+        }
+      },
+      "title": "NumericalToleranceConfiguration",
+      "type": "object"
+    },
+    "OptimizationObjectiveConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "no_single_magic_score": {
+          "const": true,
+          "title": "No Single Magic Score",
+          "type": "boolean"
+        },
+        "objective_type": {
+          "enum": [
+            "pareto_multi_objective",
+            "maximize_probability_target_return"
+          ],
+          "title": "Objective Type",
+          "type": "string"
+        },
+        "primary_metrics": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Primary Metrics",
+          "type": "array"
+        },
+        "secondary_ranking_weights": {
+          "additionalProperties": {
+            "$ref": "#/$defs/GovernedValue"
+          },
+          "title": "Secondary Ranking Weights",
+          "type": "object"
+        }
+      },
+      "required": [
+        "objective_type",
+        "primary_metrics",
+        "no_single_magic_score"
+      ],
+      "title": "OptimizationObjectiveConfig",
+      "type": "object"
+    },
+    "RateScenario": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "long_end_min_days": {
+          "default": 730,
+          "exclusiveMinimum": 0,
+          "title": "Long End Min Days",
+          "type": "integer"
+        },
+        "long_end_shift_basis_points": {
+          "default": 0.0,
+          "title": "Long End Shift Basis Points",
+          "type": "number"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "scenario_type": {
+          "$ref": "#/$defs/RateScenarioType"
+        },
+        "short_end_max_days": {
+          "default": 90,
+          "exclusiveMinimum": 0,
+          "title": "Short End Max Days",
+          "type": "integer"
+        },
+        "short_end_shift_basis_points": {
+          "default": 0.0,
+          "title": "Short End Shift Basis Points",
+          "type": "number"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "status": {
+          "const": "CONFIGURED_STRESS",
+          "default": "CONFIGURED_STRESS",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "scenario_type",
+        "source"
+      ],
+      "title": "RateScenario",
+      "type": "object"
+    },
+    "RateScenarioType": {
+      "enum": [
+        "BASE_CURVE",
+        "PARALLEL_UP",
+        "PARALLEL_DOWN",
+        "STEEPENING",
+        "FLATTENING"
+      ],
+      "title": "RateScenarioType",
+      "type": "string"
+    },
+    "ReportPolicyConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "display_raw_metrics": {
+          "const": true,
+          "title": "Display Raw Metrics",
+          "type": "boolean"
+        },
+        "display_score_components": {
+          "const": true,
+          "title": "Display Score Components",
+          "type": "boolean"
+        },
+        "formats": {
+          "items": {
+            "enum": [
+              "json",
+              "markdown",
+              "html"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Formats",
+          "type": "array"
+        },
+        "language": {
+          "enum": [
+            "fr",
+            "en"
+          ],
+          "title": "Language",
+          "type": "string"
+        },
+        "maximum_candidates": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Candidates",
+          "type": "integer"
+        },
+        "score_versions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "minProperties": 5,
+          "title": "Score Versions",
+          "type": "object"
+        }
+      },
+      "required": [
+        "formats",
+        "display_raw_metrics",
+        "display_score_components",
+        "maximum_candidates",
+        "language",
+        "score_versions"
+      ],
+      "title": "ReportPolicyConfig",
+      "type": "object"
+    },
+    "ResearchRequestConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "as_of": {
+          "format": "date",
+          "title": "As Of",
+          "type": "string"
+        },
+        "directional_thesis": {
+          "enum": [
+            "bullish",
+            "bearish",
+            "neutral",
+            "volatile"
+          ],
+          "title": "Directional Thesis",
+          "type": "string"
+        },
+        "invalidation_conditions": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Invalidation Conditions",
+          "type": "array"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "thesis_summary": {
+          "minLength": 1,
+          "title": "Thesis Summary",
+          "type": "string"
+        },
+        "ticker": {
+          "minLength": 1,
+          "title": "Ticker",
+          "type": "string"
+        }
+      },
+      "required": [
+        "request_id",
+        "ticker",
+        "as_of",
+        "directional_thesis",
+        "thesis_summary",
+        "invalidation_conditions"
+      ],
+      "title": "ResearchRequestConfig",
+      "type": "object"
+    },
+    "RiskProfileConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_missing_volume": {
+          "title": "Allow Missing Volume",
+          "type": "boolean"
+        },
+        "bounded_risk_only": {
+          "const": true,
+          "title": "Bounded Risk Only",
+          "type": "boolean"
+        },
+        "large_loss_threshold": {
+          "$ref": "#/$defs/GovernedValue"
+        },
+        "loss_ladder_thresholds": {
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "title": "Loss Ladder Thresholds",
+          "type": "array"
+        },
+        "maximum_relative_spread": {
+          "$ref": "#/$defs/GovernedValue"
+        },
+        "minimum_open_interest": {
+          "$ref": "#/$defs/GovernedValue"
+        },
+        "minimum_volume": {
+          "$ref": "#/$defs/GovernedValue"
+        },
+        "target_return": {
+          "$ref": "#/$defs/GovernedValue"
+        }
+      },
+      "required": [
+        "bounded_risk_only",
+        "loss_ladder_thresholds",
+        "large_loss_threshold",
+        "target_return",
+        "maximum_relative_spread",
+        "minimum_open_interest",
+        "minimum_volume",
+        "allow_missing_volume"
+      ],
+      "title": "RiskProfileConfig",
+      "type": "object"
+    },
+    "ScenarioDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "inputs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/GovernedValue"
+          },
+          "title": "Inputs",
+          "type": "object"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "probability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GovernedValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scenario_id": {
+          "minLength": 1,
+          "title": "Scenario Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "label",
+        "probability"
+      ],
+      "title": "ScenarioDefinition",
+      "type": "object"
+    },
+    "ScenarioSetConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "probability_measure": {
+          "enum": [
+            "P",
+            "Q",
+            "none"
+          ],
+          "title": "Probability Measure",
+          "type": "string"
+        },
+        "scenario_set_id": {
+          "minLength": 1,
+          "title": "Scenario Set Id",
+          "type": "string"
+        },
+        "scenarios": {
+          "items": {
+            "$ref": "#/$defs/ScenarioDefinition"
+          },
+          "minItems": 1,
+          "title": "Scenarios",
+          "type": "array"
+        }
+      },
+      "required": [
+        "scenario_set_id",
+        "scenarios",
+        "probability_measure"
+      ],
+      "title": "ScenarioSetConfig",
+      "type": "object"
+    },
+    "SourceReference": {
+      "additionalProperties": false,
+      "properties": {
+        "accessed_at": {
+          "format": "date",
+          "title": "Accessed At",
+          "type": "string"
+        },
+        "author": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Author"
+        },
+        "chapter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Chapter"
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "Confidence",
+          "type": "string"
+        },
+        "edition_or_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Edition Or Date"
+        },
+        "excerpt_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Excerpt Hash"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "source_id": {
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_type": {
+          "enum": [
+            "book",
+            "academic",
+            "official",
+            "company",
+            "broker",
+            "data_provider",
+            "internal"
+          ],
+          "title": "Source Type",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Uri"
+        }
+      },
+      "required": [
+        "source_id",
+        "title",
+        "accessed_at",
+        "source_type",
+        "confidence"
+      ],
+      "title": "SourceReference",
+      "type": "object"
+    },
+    "SpotGridConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "default": "spot_multipliers",
+          "enum": [
+            "spot_multipliers",
+            "absolute_spots"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "title": "SpotGridConfiguration",
+      "type": "object"
+    },
+    "StrategyUniverseConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_structures": {
+          "items": {
+            "$ref": "#/$defs/Architecture"
+          },
+          "minItems": 1,
+          "title": "Allowed Structures",
+          "type": "array"
+        },
+        "expiration_source": {
+          "const": "listed_chain",
+          "title": "Expiration Source",
+          "type": "string"
+        },
+        "forbidden_structures": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Forbidden Structures",
+          "type": "array"
+        },
+        "horizon_max_days": {
+          "exclusiveMinimum": 0,
+          "title": "Horizon Max Days",
+          "type": "integer"
+        },
+        "horizon_min_days": {
+          "exclusiveMinimum": 0,
+          "title": "Horizon Min Days",
+          "type": "integer"
+        },
+        "recipe_catalog_path": {
+          "minLength": 1,
+          "title": "Recipe Catalog Path",
+          "type": "string"
+        },
+        "strike_source": {
+          "const": "listed_chain",
+          "title": "Strike Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "allowed_structures",
+        "horizon_min_days",
+        "horizon_max_days",
+        "strike_source",
+        "expiration_source",
+        "recipe_catalog_path"
+      ],
+      "title": "StrategyUniverseConfig",
+      "type": "object"
+    },
+    "TradeEconomicsConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "advanced_greeks": {
+          "$ref": "#/$defs/AdvancedGreekPolicy"
+        },
+        "analysis_mode": {
+          "$ref": "#/$defs/AnalysisMode",
+          "default": "screen"
+        },
+        "breakeven_solver": {
+          "$ref": "#/$defs/BreakevenSolverConfiguration"
+        },
+        "deep_analysis_candidate_limit": {
+          "default": 3,
+          "exclusiveMinimum": 0,
+          "maximum": 20,
+          "title": "Deep Analysis Candidate Limit",
+          "type": "integer"
+        },
+        "display_policy": {
+          "$ref": "#/$defs/TradeEconomicsDisplayPolicy"
+        },
+        "entry_fx_rate_usd_per_base": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entry Fx Rate Usd Per Base"
+        },
+        "exit_cost_model": {
+          "$ref": "#/$defs/ExitCostModelConfiguration"
+        },
+        "fx_mode": {
+          "$ref": "#/$defs/FXHandlingMode",
+          "default": "UNKNOWN"
+        },
+        "greek_bumps": {
+          "$ref": "#/$defs/GreekBumpConfiguration"
+        },
+        "intensity_thresholds": {
+          "$ref": "#/$defs/TradeIntensityThresholds"
+        },
+        "leverage_denominator_floor": {
+          "default": 1.0,
+          "exclusiveMinimum": 0,
+          "title": "Leverage Denominator Floor",
+          "type": "number"
+        },
+        "mixed_expiry_close_buffer_calendar_days": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Mixed Expiry Close Buffer Calendar Days",
+          "type": "integer"
+        },
+        "mixed_expiry_lifecycle_config_source": {
+          "default": "TradeEconomicsConfiguration",
+          "minLength": 1,
+          "title": "Mixed Expiry Lifecycle Config Source",
+          "type": "string"
+        },
+        "mixed_expiry_lifecycle_config_version": {
+          "default": "1.1",
+          "minLength": 1,
+          "title": "Mixed Expiry Lifecycle Config Version",
+          "type": "string"
+        },
+        "mixed_expiry_lifecycle_policy": {
+          "$ref": "#/$defs/MixedExpiryLifecyclePolicy",
+          "default": "CLOSE_BEFORE_FIRST_EXPIRY"
+        },
+        "near_expiry_threshold_hours": {
+          "default": 48.0,
+          "exclusiveMinimum": 0,
+          "title": "Near Expiry Threshold Hours",
+          "type": "number"
+        },
+        "numerical_tolerances": {
+          "$ref": "#/$defs/NumericalToleranceConfiguration"
+        },
+        "rate_stresses": {
+          "items": {
+            "$ref": "#/$defs/RateScenario"
+          },
+          "minItems": 5,
+          "title": "Rate Stresses",
+          "type": "array"
+        },
+        "scenario_fx_rate_usd_per_base": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scenario Fx Rate Usd Per Base"
+        },
+        "scenario_horizons_days": {
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Scenario Horizons Days",
+          "type": "array"
+        },
+        "schema_version": {
+          "default": "1.1",
+          "enum": [
+            "1.0",
+            "1.1"
+          ],
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "spot_grid": {
+          "$ref": "#/$defs/SpotGridConfiguration"
+        },
+        "target_spots": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Target Spots",
+          "type": "array"
+        },
+        "time_decay_horizons_days": {
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Time Decay Horizons Days",
+          "type": "array"
+        },
+        "touch_targets": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Touch Targets",
+          "type": "array"
+        },
+        "volatility_scenarios": {
+          "items": {
+            "$ref": "#/$defs/VolatilityScenario"
+          },
+          "minItems": 3,
+          "title": "Volatility Scenarios",
+          "type": "array"
+        }
+      },
+      "title": "TradeEconomicsConfiguration",
+      "type": "object"
+    },
+    "TradeEconomicsDisplayPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "show_numerical_confidence": {
+          "const": true,
+          "default": true,
+          "title": "Show Numerical Confidence",
+          "type": "boolean"
+        },
+        "show_raw_greeks": {
+          "const": true,
+          "default": true,
+          "title": "Show Raw Greeks",
+          "type": "boolean"
+        },
+        "show_scenario_assumptions": {
+          "const": true,
+          "default": true,
+          "title": "Show Scenario Assumptions",
+          "type": "boolean"
+        }
+      },
+      "title": "TradeEconomicsDisplayPolicy",
+      "type": "object"
+    },
+    "TradeIntensityThresholds": {
+      "additionalProperties": false,
+      "properties": {
+        "extreme_effective_leverage": {
+          "default": 10.0,
+          "exclusiveMinimum": 0,
+          "title": "Extreme Effective Leverage",
+          "type": "number"
+        },
+        "extreme_flat_spot_30d_loss_fraction": {
+          "default": 0.4,
+          "exclusiveMinimum": 0,
+          "title": "Extreme Flat Spot 30D Loss Fraction",
+          "type": "number"
+        },
+        "extreme_round_trip_cost_fraction": {
+          "default": 0.15,
+          "exclusiveMinimum": 0,
+          "title": "Extreme Round Trip Cost Fraction",
+          "type": "number"
+        },
+        "high_effective_leverage": {
+          "default": 5.0,
+          "exclusiveMinimum": 0,
+          "title": "High Effective Leverage",
+          "type": "number"
+        },
+        "high_flat_spot_30d_loss_fraction": {
+          "default": 0.2,
+          "exclusiveMinimum": 0,
+          "title": "High Flat Spot 30D Loss Fraction",
+          "type": "number"
+        },
+        "high_round_trip_cost_fraction": {
+          "default": 0.08,
+          "exclusiveMinimum": 0,
+          "title": "High Round Trip Cost Fraction",
+          "type": "number"
+        }
+      },
+      "title": "TradeIntensityThresholds",
+      "type": "object"
+    },
+    "ValidationPolicyConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "embargo_days": {
+          "minimum": 0,
+          "title": "Embargo Days",
+          "type": "integer"
+        },
+        "final_holdout_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Final Holdout Id"
+        },
+        "holdout_must_be_unopened": {
+          "const": true,
+          "title": "Holdout Must Be Unopened",
+          "type": "boolean"
+        },
+        "minimum_economic_materiality": {
+          "$ref": "#/$defs/GovernedValue"
+        },
+        "minimum_holdout_observations": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum Holdout Observations",
+          "type": "integer"
+        },
+        "minimum_test_observations": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum Test Observations",
+          "type": "integer"
+        },
+        "minimum_train_observations": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum Train Observations",
+          "type": "integer"
+        },
+        "minimum_validation_observations": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum Validation Observations",
+          "type": "integer"
+        },
+        "multiple_testing_method": {
+          "enum": [
+            "holm",
+            "benjamini_hochberg"
+          ],
+          "title": "Multiple Testing Method",
+          "type": "string"
+        },
+        "purge_days": {
+          "minimum": 0,
+          "title": "Purge Days",
+          "type": "integer"
+        },
+        "require_oos": {
+          "const": true,
+          "title": "Require Oos",
+          "type": "boolean"
+        },
+        "significance_level": {
+          "$ref": "#/$defs/GovernedValue"
+        },
+        "walk_forward_method": {
+          "enum": [
+            "rolling",
+            "expanding"
+          ],
+          "title": "Walk Forward Method",
+          "type": "string"
+        }
+      },
+      "required": [
+        "require_oos",
+        "walk_forward_method",
+        "minimum_train_observations",
+        "minimum_validation_observations",
+        "minimum_test_observations",
+        "minimum_holdout_observations",
+        "purge_days",
+        "embargo_days",
+        "final_holdout_id",
+        "holdout_must_be_unopened",
+        "multiple_testing_method",
+        "significance_level",
+        "minimum_economic_materiality"
+      ],
+      "title": "ValidationPolicyConfig",
+      "type": "object"
+    },
+    "VolatilityScenario": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "parameters": {
+          "$ref": "#/$defs/VolatilityScenarioParameters"
+        },
+        "scenario_type": {
+          "$ref": "#/$defs/VolatilityScenarioType"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/VolatilityScenarioStatus",
+          "default": "CONFIGURED_STRESS"
+        },
+        "unit": {
+          "enum": [
+            "vol_points",
+            "multiplier",
+            "mixed",
+            "none"
+          ],
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "scenario_type",
+        "unit",
+        "source"
+      ],
+      "title": "VolatilityScenario",
+      "type": "object"
+    },
+    "VolatilityScenarioParameters": {
+      "additionalProperties": false,
+      "properties": {
+        "back_expiry_shift_vol_points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Back Expiry Shift Vol Points"
+        },
+        "front_expiry_shift_vol_points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Front Expiry Shift Vol Points"
+        },
+        "long_end_min_days": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Long End Min Days"
+        },
+        "mid_expiry_shift_vol_points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mid Expiry Shift Vol Points"
+        },
+        "parallel_shift_vol_points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parallel Shift Vol Points"
+        },
+        "relative_multiplier": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Relative Multiplier"
+        },
+        "relative_to_event_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Relative To Event Date"
+        },
+        "short_end_max_days": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Short End Max Days"
+        },
+        "skew_slope_vol_points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Skew Slope Vol Points"
+        },
+        "spot_multiplier": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spot Multiplier"
+        }
+      },
+      "title": "VolatilityScenarioParameters",
+      "type": "object"
+    },
+    "VolatilityScenarioStatus": {
+      "enum": [
+        "CONFIGURED_STRESS",
+        "LEG_LEVEL_STRESS_ONLY",
+        "SURFACE_STRESS_VALID",
+        "SURFACE_STRESS_INVALID"
+      ],
+      "title": "VolatilityScenarioStatus",
+      "type": "string"
+    },
+    "VolatilityScenarioType": {
+      "enum": [
+        "CONSTANT_LEG_IV",
+        "PARALLEL_ABSOLUTE_VOL_SHIFT",
+        "RELATIVE_VOL_MULTIPLIER",
+        "SKEW_STEEPENING",
+        "SKEW_FLATTENING",
+        "SHORT_END_CRUSH",
+        "LONG_END_STABLE",
+        "SHORT_END_EXPANSION",
+        "EVENT_IV_CRUSH",
+        "SPOT_UP_IV_DOWN",
+        "SPOT_DOWN_IV_UP"
+      ],
+      "title": "VolatilityScenarioType",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/pre_opra_config.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Governed pre-OPRA configuration with no execution capability.",
+  "properties": {
+    "capital_constraints": {
+      "$ref": "#/$defs/CapitalConstraintsConfig"
+    },
+    "execution_assumptions": {
+      "$ref": "#/$defs/ExecutionAssumptionsConfig"
+    },
+    "extensions": {
+      "additionalProperties": true,
+      "title": "Extensions",
+      "type": "object"
+    },
+    "market_context": {
+      "$ref": "#/$defs/MarketContextConfig"
+    },
+    "model_universe": {
+      "$ref": "#/$defs/ModelUniverseConfig"
+    },
+    "optimization_objective": {
+      "$ref": "#/$defs/OptimizationObjectiveConfig"
+    },
+    "report_policy": {
+      "$ref": "#/$defs/ReportPolicyConfig"
+    },
+    "research_request": {
+      "$ref": "#/$defs/ResearchRequestConfig"
+    },
+    "risk_profile": {
+      "$ref": "#/$defs/RiskProfileConfig"
+    },
+    "scenario_set": {
+      "$ref": "#/$defs/ScenarioSetConfig"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "strategy_universe": {
+      "$ref": "#/$defs/StrategyUniverseConfig"
+    },
+    "trade_economics": {
+      "$ref": "#/$defs/TradeEconomicsConfiguration"
+    },
+    "validation_policy": {
+      "$ref": "#/$defs/ValidationPolicyConfig"
+    }
+  },
+  "required": [
+    "schema_version",
+    "research_request",
+    "market_context",
+    "capital_constraints",
+    "risk_profile",
+    "strategy_universe",
+    "model_universe",
+    "scenario_set",
+    "execution_assumptions",
+    "validation_policy",
+    "optimization_objective",
+    "report_policy",
+    "trade_economics"
+  ],
+  "title": "PreOpraConfig",
+  "type": "object"
+}

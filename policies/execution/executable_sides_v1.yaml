@@ -1,0 +1,9 @@
+policy_id: executable-sides-eod-v1
+status: sourced_mechanics_calibration_required_costs
+long_entry_side: ask
+short_entry_side: bid
+long_exit_side: bid
+short_exit_side: ask
+commission_per_contract_side: 0.65
+slippage_per_contract_side: 0.05
+provenance: OCC/Cboe mechanics and IBKR account assumptions; verify before paper use.

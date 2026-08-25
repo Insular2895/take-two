@@ -1,0 +1,8 @@
+{
+  "status": "BLOCKED_NO_ADMISSIBLE_CANDIDATE",
+  "verdict": "NO_TRADE",
+  "ticket_created": false,
+  "transmit": false,
+  "order_capability": "forbidden",
+  "reason": "No candidate passed every hard and statistical gate."
+}

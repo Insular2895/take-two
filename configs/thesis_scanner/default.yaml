@@ -1,0 +1,58 @@
+policy_id: bullish-thesis-scanner-v10
+eur_usd_rate: 1.1435
+fx_rate_date: 2026-07-17
+fx_rate_source: European Central Bank reference rate snapshot (configuration input)
+maximum_fx_age_days: 14
+risk_free_rate: 0.04
+risk_free_rate_date: 2026-07-17
+risk_free_rate_source: US Treasury market proxy (configuration input)
+continuous_dividend_yield: 0.0
+dividend_source: TTWO configured as non-dividend-paying; verify before live use
+maximum_quote_age_days: 10
+minimum_open_interest: 20
+minimum_volume: 0
+maximum_relative_spread: 0.30
+commission_per_contract_side: 0.65
+slippage_per_contract_side: 0.05
+maximum_contracts: 4
+minimum_moneyness: 0.70
+maximum_moneyness: 1.70
+maximum_vertical_width: 80
+maximum_butterfly_wing_width: 50
+leaps_minimum_dte: 365
+iv_case_multipliers:
+  iv_down: 0.80
+  iv_stable: 1.00
+  iv_up: 1.20
+spot_grid_multipliers: [0.70, 0.80, 0.90, 1.00, 1.10, 1.20, 1.30, 1.40, 1.50, 1.60]
+historical_confidence: 0.35
+profile_weights:
+  prudent:
+    reduced_loss: 0.24
+    breakeven_proximity: 0.16
+    liquidity: 0.15
+    spread_quality: 0.14
+    theta_moderation: 0.12
+    bull_spread_preference: 0.10
+    scenario_breadth: 0.05
+    historical_confidence: 0.04
+  balanced:
+    payoff_ratio: 0.18
+    scenario_breadth: 0.16
+    liquidity: 0.14
+    bullish_exposure: 0.13
+    cost_quality: 0.12
+    breakeven_proximity: 0.10
+    theta_moderation: 0.09
+    spread_quality: 0.05
+    historical_confidence: 0.03
+  aggressive:
+    convexity: 0.22
+    modeled_return: 0.20
+    bullish_exposure: 0.18
+    scenario_breadth: 0.13
+    butterfly_targeting: 0.10
+    payoff_ratio: 0.08
+    liquidity: 0.05
+    historical_confidence: 0.04
+source_status: calibration_required

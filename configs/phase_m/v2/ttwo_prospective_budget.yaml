@@ -1,0 +1,31 @@
+schema_version: "2.0"
+phase: M_PROSPECTIVE_NOT_STARTED
+
+budget_policy:
+  version: "2.0"
+  currency: EUR
+  target_budget: 1000
+  under_target_tolerance: 200
+  max_overspend: 500
+  minimum_spend_policy: SOFT
+  maximum_loss_cap:
+    mode: AUTO
+    value: null
+  buying_power_cap:
+    mode: AUTO
+    value: null
+  maximum_contracts: 4
+  account_available_capital: null
+  account_liquidity_reserve: 0
+
+mixed_expiry_lifecycle:
+  policy: CLOSE_BEFORE_FIRST_EXPIRY
+  close_buffer_calendar_days: 1
+  source: configs/pre_opra/v1/ttwo_research.yaml#trade_economics
+  version: "1.1"
+
+holdout_status: UNOPENED
+opra_status: NOT_STARTED
+read_only: true
+transmit: false
+order_capability: forbidden

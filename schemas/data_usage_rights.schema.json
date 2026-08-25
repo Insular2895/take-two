@@ -1,0 +1,157 @@
+{
+  "$defs": {
+    "DataUsageRight": {
+      "additionalProperties": false,
+      "properties": {
+        "account_scope": {
+          "minLength": 1,
+          "title": "Account Scope",
+          "type": "string"
+        },
+        "aggregate_publication": {
+          "$ref": "#/$defs/UsagePermission"
+        },
+        "attribution_required": {
+          "title": "Attribution Required",
+          "type": "boolean"
+        },
+        "dataset_class": {
+          "minLength": 1,
+          "title": "Dataset Class",
+          "type": "string"
+        },
+        "deletion_on_termination": {
+          "title": "Deletion On Termination",
+          "type": "boolean"
+        },
+        "internal_derived_analysis": {
+          "$ref": "#/$defs/UsagePermission"
+        },
+        "local_private_research": {
+          "$ref": "#/$defs/UsagePermission"
+        },
+        "local_retention": {
+          "$ref": "#/$defs/UsagePermission"
+        },
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "raw_github": {
+          "$ref": "#/$defs/UsagePermission"
+        },
+        "raw_redistribution": {
+          "$ref": "#/$defs/UsagePermission"
+        },
+        "reviewed_at": {
+          "format": "date-time",
+          "title": "Reviewed At",
+          "type": "string"
+        },
+        "terms_urls": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Terms Urls",
+          "type": "array"
+        },
+        "unresolved": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unresolved",
+          "type": "array"
+        }
+      },
+      "required": [
+        "provider",
+        "dataset_class",
+        "account_scope",
+        "local_private_research",
+        "local_retention",
+        "internal_derived_analysis",
+        "raw_redistribution",
+        "aggregate_publication",
+        "raw_github",
+        "attribution_required",
+        "deletion_on_termination",
+        "terms_urls",
+        "reviewed_at",
+        "rationale"
+      ],
+      "title": "DataUsageRight",
+      "type": "object"
+    },
+    "UsagePermission": {
+      "enum": [
+        "allowed",
+        "conditional",
+        "forbidden",
+        "to_review"
+      ],
+      "title": "UsagePermission",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/data_usage_rights.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "legal_review_status": {
+      "const": "HUMAN_REVIEW_RECOMMENDED",
+      "default": "HUMAN_REVIEW_RECOMMENDED",
+      "title": "Legal Review Status",
+      "type": "string"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "raw_licensed_data_committed": {
+      "const": false,
+      "default": false,
+      "title": "Raw Licensed Data Committed",
+      "type": "boolean"
+    },
+    "records": {
+      "items": {
+        "$ref": "#/$defs/DataUsageRight"
+      },
+      "minItems": 1,
+      "title": "Records",
+      "type": "array"
+    },
+    "report_id": {
+      "minLength": 1,
+      "title": "Report Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "report_id",
+    "generated_at",
+    "records"
+  ],
+  "title": "DataUsageRightsReport",
+  "type": "object"
+}

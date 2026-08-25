@@ -6,11 +6,18 @@ from datetime import date, datetime
 from enum import StrEnum
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
-
-class StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+from take_two_options.models import StrictModel as StrictModel
+from take_two_options.trade_economics_models import (
+    DividendTreatmentMode,
+    ExecutionEstimateStatus,
+    IntradayPrecisionStatus,
+    MarginStatus,
+    RiskFreeCurve,
+    TradeEconomicsConfiguration,
+    TradeEconomicsTicket,
+)
 
 
 class OptionType(StrEnum):
@@ -340,6 +347,7 @@ class PortfolioState(StrictModel):
     stock_slippage_bps: float | None = Field(default=None, ge=0)
     margin_available: float | None = Field(default=None, ge=0)
     margin_known: bool = False
+    broker_margin_requirement: float | None = Field(default=None, gt=0)
     account_permissions: list[str] = Field(default_factory=list)
 
 
@@ -372,6 +380,77 @@ class ExecutionEstimate(StrictModel):
     margin_requirement: float | None = Field(default=None, ge=0)
     liquidity_score: float = Field(ge=0, le=1)
     notes: list[str] = Field(default_factory=list)
+    premium_paid: float = Field(default=0.0, ge=0)
+    premium_received: float = Field(default=0.0, ge=0)
+    net_premium: float = 0.0
+    bid_ask_cost: float = Field(default=0.0, ge=0)
+    fx_conversion_cost: float | None = Field(default=None, ge=0)
+    total_capital_required: float | None = Field(default=None, ge=0)
+    margin_status: MarginStatus = MarginStatus.NOT_REQUIRED
+    execution_status: ExecutionEstimateStatus = ExecutionEstimateStatus.INDICATIVE
+    combo_execution_status: Literal["INDICATIVE", "OBSERVED_COMBO"] = "INDICATIVE"
+    theoretical_mid_premium_paid: float | None = Field(default=None, ge=0)
+    theoretical_mid_premium_received: float | None = Field(default=None, ge=0)
+    theoretical_mid_net_premium: float | None = None
+    executable_premium_paid: float | None = Field(default=None, ge=0)
+    executable_premium_received: float | None = Field(default=None, ge=0)
+    executable_net_premium: float | None = None
+    total_entry_cash_flow: float | None = None
+
+    @model_validator(mode="after")
+    def reconcile_explicit_entry_economics(self) -> ExecutionEstimate:
+        theoretical_paid = (
+            self.theoretical_mid_premium_paid
+            if self.theoretical_mid_premium_paid is not None
+            else self.premium_paid
+        )
+        theoretical_received = (
+            self.theoretical_mid_premium_received
+            if self.theoretical_mid_premium_received is not None
+            else self.premium_received
+        )
+        theoretical_net = theoretical_paid - theoretical_received
+        theoretical_net_value = self.theoretical_mid_net_premium
+        if theoretical_net_value is None:
+            theoretical_net_value = theoretical_net
+            object.__setattr__(self, "theoretical_mid_net_premium", theoretical_net_value)
+        object.__setattr__(self, "theoretical_mid_premium_paid", theoretical_paid)
+        object.__setattr__(self, "theoretical_mid_premium_received", theoretical_received)
+        if abs(theoretical_net_value - theoretical_net) > 1e-8:
+            raise ValueError("theoretical midpoint premiums do not reconcile")
+        executable_paid = (
+            self.executable_premium_paid
+            if self.executable_premium_paid is not None
+            else theoretical_paid + (self.bid_ask_cost if theoretical_net >= 0 else 0.0)
+        )
+        executable_received = (
+            self.executable_premium_received
+            if self.executable_premium_received is not None
+            else theoretical_received - (self.bid_ask_cost if theoretical_net < 0 else 0.0)
+        )
+        executable_net = executable_paid - executable_received
+        executable_net_value = self.executable_net_premium
+        if executable_net_value is None:
+            executable_net_value = executable_net
+            object.__setattr__(self, "executable_net_premium", executable_net_value)
+        object.__setattr__(self, "executable_premium_paid", executable_paid)
+        object.__setattr__(self, "executable_premium_received", executable_received)
+        if abs(executable_net_value - executable_net) > 1e-8:
+            raise ValueError("executable premiums do not reconcile")
+        if abs(executable_net - theoretical_net - self.bid_ask_cost) > 1e-8:
+            raise ValueError("entry bid/ask cost does not reconcile")
+        known_cash_flow = (
+            executable_net + self.slippage + self.fees + (self.fx_conversion_cost or 0.0)
+        )
+        total_entry_cash_flow = self.total_entry_cash_flow
+        if total_entry_cash_flow is None:
+            total_entry_cash_flow = self.total_entry_cost
+            object.__setattr__(self, "total_entry_cash_flow", total_entry_cash_flow)
+        if abs(total_entry_cash_flow - known_cash_flow) > 1e-8:
+            raise ValueError("total entry cash flow does not reconcile")
+        if abs(self.total_entry_cost - total_entry_cash_flow) > 1e-8:
+            raise ValueError("deprecated total_entry_cost must equal total_entry_cash_flow")
+        return self
 
 
 class PayoffPoint(StrictModel):
@@ -431,6 +510,7 @@ class AmericanPricingResult(StrictModel):
     model: PricingModel
     price: float = Field(ge=0)
     european_benchmark: float = Field(ge=0)
+    analytic_european_benchmark_exact: float | None = Field(default=None, ge=0)
     early_exercise_premium: float
     delta: float
     gamma: float
@@ -439,6 +519,11 @@ class AmericanPricingResult(StrictModel):
     rho: float
     dividend_count: int = Field(ge=0)
     warnings: list[str] = Field(default_factory=list)
+    exact_time_to_expiry_years: float | None = Field(default=None, ge=0)
+    intraday_precision_status: IntradayPrecisionStatus = (
+        IntradayPrecisionStatus.APPROXIMATED_DATE_ENGINE
+    )
+    intraday_precision_warning: str | None = None
 
 
 class ExerciseRiskAssessment(StrictModel):
@@ -452,6 +537,8 @@ class ExerciseRiskAssessment(StrictModel):
     next_ex_dividend_date: date | None = None
     reasons: list[str] = Field(default_factory=list)
     human_review_required: bool = False
+    early_exercise_risk: RiskLevel = RiskLevel.UNKNOWN
+    adjusted_contract: bool = False
 
 
 class SurfaceDiagnostics(StrictModel):
@@ -503,6 +590,7 @@ class StrategyCandidate(StrictModel):
     failure_modes: list[str] = Field(default_factory=list)
     contradictions: list[str] = Field(default_factory=list)
     human_validation_required: bool = False
+    trade_economics: TradeEconomicsTicket | None = None
 
 
 class MarketDataBundle(StrictModel):
@@ -521,12 +609,18 @@ class MarketDataBundle(StrictModel):
     volatility_freshness: DataFreshness
     volatility_source: EvidenceReference
     continuous_dividend_yield: float = Field(default=0.0, ge=0, lt=1)
+    dividend_treatment_mode: DividendTreatmentMode = DividendTreatmentMode.DISCRETE_CASH
+    dividend_overlap_explanation: str | None = None
     dividend_yield_freshness: DataFreshness | None = None
     dividend_yield_source: EvidenceReference | None = None
     dividends: list[DividendForecast] = Field(default_factory=list)
     volatility_surface: VolatilitySurface | None = None
+    risk_free_curve: RiskFreeCurve | None = None
     pricing: PricingConfiguration = Field(default_factory=PricingConfiguration)
     simulation: SimulationConfiguration = Field(default_factory=SimulationConfiguration)
+    trade_economics: TradeEconomicsConfiguration = Field(
+        default_factory=TradeEconomicsConfiguration
+    )
 
 
 class DecisionReport(StrictModel):

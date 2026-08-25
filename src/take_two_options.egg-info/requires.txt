@@ -1,9 +1,13 @@
 alpaca-py<0.44,>=0.43.5
+numpy<3,>=2.1
 pydantic<3,>=2.10
+PyYAML<7,>=6.0
 QuantLib<1.44,>=1.43
 typer<1,>=0.15
 
 [dev]
+hypothesis<7,>=6.130
 mypy<2,>=1.14
 pytest<9,>=8.3
 ruff<1,>=0.9
+types-PyYAML<7,>=6.0

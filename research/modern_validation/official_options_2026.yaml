@@ -1,0 +1,100 @@
+objects:
+  - object_type: modern_validation
+    validation_id: official-listed-options-mechanics-2026-07-25
+    target_ids:
+      - executable-option-sides-v1
+      - bounded-risk-only-v1
+      - configured-minimums-never-lowered-v1
+      - long-call-v1
+      - long-put-v1
+      - bull-call-spread-v1
+      - bear-put-spread-v1
+      - call-butterfly-v1
+      - put-butterfly-v1
+      - call-broken-wing-butterfly-v1
+      - put-broken-wing-butterfly-v1
+      - call-calendar-v1
+      - put-calendar-v1
+      - call-diagonal-v1
+      - put-diagonal-v1
+      - long-straddle-v1
+      - long-strangle-v1
+      - iron-condor-v1
+    checked_at: 2026-07-25
+    sources:
+      - source_id: occ-odd-june-2024
+        author: Options Clearing Corporation
+        title: Characteristics and Risks of Standardized Options
+        edition_or_date: June 2024 plus June 2024 supplement
+        chapter: null
+        page: null
+        accessed_at: 2026-07-25
+        source_type: official
+        uri: https://www.theocc.com/company-information/documents-and-archives/options-disclosure-document
+        confidence: high
+        excerpt_hash: null
+      - source_id: cboe-equity-options-contracts-2026
+        author: Cboe
+        title: Exchange Traded Products and Stock Options
+        edition_or_date: accessed 2026-07-25
+        chapter: Stock options
+        page: null
+        accessed_at: 2026-07-25
+        source_type: official
+        uri: https://www.cboe.com/exchange-traded-stock
+        confidence: high
+        excerpt_hash: null
+      - source_id: ibkr-tws-api-reference-2026
+        author: Interactive Brokers
+        title: TWS API Reference
+        edition_or_date: accessed 2026-07-25
+        chapter: Order fields and combo legs
+        page: null
+        accessed_at: 2026-07-25
+        source_type: broker
+        uri: https://ibkrcampus.com/campus/ibkr-api-page/twsapi-ref/
+        confidence: high
+        excerpt_hash: null
+    checks:
+      - check_id: math-and-units
+        topic: mathematical validity and units
+        status: passed
+        book_statement: Standard option payoffs are expressed per share.
+        unchanged: Piecewise intrinsic payoffs remain structurally valid.
+        modernization: Listed multiplier is explicit and whole contracts are mandatory.
+        source_ids: [cboe-equity-options-contracts-2026]
+        notes: Profitability is not validated.
+      - check_id: american-exercise
+        topic: American exercise, assignment, and physical settlement
+        status: passed
+        book_statement: Short equity options can be assigned before expiration.
+        unchanged: Assignment and pin risk remain material.
+        modernization: Short American legs require human review; stock options are physically settled.
+        source_ids: [occ-odd-june-2024, cboe-equity-options-contracts-2026]
+        notes: Candidate-level assignment probabilities remain unknown.
+      - check_id: broker-combos
+        topic: broker combo definition and preview
+        status: passed
+        book_statement: Multi-leg structures require all legs.
+        unchanged: Exact sides, ratios, strikes, and expirations remain necessary.
+        modernization: IBKR BAG contracts require combo-leg details; preview artifacts force transmit=false and whatIf=true.
+        source_ids: [ibkr-tws-api-reference-2026]
+        notes: This repository never calls placeOrder.
+      - check_id: liquidity-and-costs
+        topic: executable bid/ask, commissions, and liquidity
+        status: passed
+        book_statement: Theoretical value is not necessarily executable.
+        unchanged: Bid/ask and costs remain integral to strategy economics.
+        modernization: Long entry uses ask and short entry uses bid unless a timestamped combo quote exists.
+        source_ids: [occ-odd-june-2024]
+        notes: EOD quotes remain screen-grade.
+      - check_id: empirical-edge
+        topic: modern empirical profitability
+        status: insufficient_data
+        book_statement: Structural descriptions are not evidence of current excess returns.
+        unchanged: null
+        modernization: Recipes retain empirical_status NOT_TESTED and cannot authorize a trade.
+        source_ids: []
+        notes: Requires uncontaminated nested walk-forward option history.
+    contradictions: []
+    overall_status: passed

@@ -1,0 +1,73 @@
+schema_version: "1.0"
+updated_on: "2026-08-08"
+policy:
+  open_errata_block_affected_claims: true
+  compatibility_names_do_not_define_semantics: true
+
+errata:
+  - erratum_id: ERR-BAYESIAN-NAME-001
+    status: mitigated
+    severity: high
+    scope: intelligence scenario updater
+    original_claim: "Legacy Bayesian* class and field names could be read as a fitted statistical posterior."
+    correction: "The active API and reports label the result configured_heuristic_belief; no fitted likelihood or posterior claim is permitted."
+    affected_files:
+      - src/take_two_options/intelligence/schemas.py
+      - src/take_two_options/intelligence/bayesian.py
+      - README.md
+    decision_impact: "Scenario weights remain sensitivity inputs and cannot promote a strategy empirically."
+
+  - erratum_id: ERR-HOLDOUT-CONTAMINATION-001
+    status: open_blocker
+    severity: critical
+    scope: historical V7-V9 evaluation
+    original_claim: "Historical output might be interpreted as fresh holdout evidence."
+    correction: "V7-V9 are explicitly contaminated; only a new hash-chained one-time ledger may represent a final holdout."
+    affected_files:
+      - docs/LIMITATIONS.md
+      - src/take_two_options/validation/holdout.py
+    decision_impact: "Empirical and holdout validation remain blocked."
+
+  - erratum_id: ERR-CONFIDENCE-LABEL-001
+    status: mitigated
+    severity: high
+    scope: configured scenario beliefs
+    original_claim: "confidence_level could be confused with probability calibration confidence."
+    correction: "The compatibility field is exposed as evidence_sufficiency_level; ±25% ranges are sensitivity bounds, not confidence intervals."
+    affected_files:
+      - src/take_two_options/intelligence/schemas.py
+      - src/take_two_options/intelligence/reporting.py
+    decision_impact: "No calibrated-probability claim follows from event count."
+
+  - erratum_id: ERR-BOOK-ALIAS-001
+    status: to_review
+    severity: medium
+    scope: documentary library inventory
+    original_claim: "The requested repository BOOK path was assumed to exist."
+    correction: "The inventory records /Users/insular/Desktop/book 📙 only as a high-confidence candidate alias requiring user confirmation."
+    affected_files:
+      - docs/research/book_inventory.json
+      - docs/research/book_inventory.md
+    decision_impact: "Bibliographic work remains usable read-only, but the path convention is not validated."
+
+  - erratum_id: ERR-PBO-FULLTEXT-001
+    status: to_review
+    severity: medium
+    scope: probability of backtest overfitting
+    original_claim: "The implementation could be read as full primary-paper conformance."
+    correction: "Primary metadata was inspected but full-text access was blocked; tie logic is tested, while complete conformance remains to_review."
+    affected_files:
+      - src/take_two_options/validation/pbo.py
+      - docs/research/source_registry.yaml
+    decision_impact: "PBO is diagnostic and cannot independently promote a strategy."
+
+  - erratum_id: ERR-OCC-CURRENTNESS-001
+    status: open_monitor
+    severity: medium
+    scope: option risk disclosure reference
+    original_claim: "A fixed ODD edition could be treated as permanently current."
+    correction: "The official OCC page identified the June 2024 ODD as current when checked on 2026-08-08; future reports must recheck the official page."
+    affected_files:
+      - docs/research/phase-9-documentary-research.md
+      - docs/research/source_registry.yaml
+    decision_impact: "Terminology/risk disclosure provenance has a currentness limit."

@@ -1,0 +1,139 @@
+book_source: &book_source
+  source_id: natenberg-options-volatility-2015
+  author: Sheldon Natenberg
+  title: Option Volatility and Pricing
+  edition_or_date: Second edition, 2015
+  chapter: Strategy chapters
+  page: null
+  accessed_at: 2026-07-25
+  source_type: book
+  uri: null
+  confidence: medium
+  excerpt_hash: null
+
+base: &base
+  object_type: strategy_recipe
+  lifecycle: COMPILABLE
+  market_validity: THEORETICALLY_VALID
+  empirical_status: NOT_TESTED
+  execution_status: RESEARCH_ONLY
+  sources: [*book_source]
+  assumptions:
+    - Standard listed equity-option contract semantics are verified before use.
+    - Experimental search grids are not claimed to be profitable book rules.
+  variables: [strike, expiration, bid, ask, quantity, exit_policy]
+  units:
+    strike: USD_per_share
+    expiration: date
+    bid: USD_per_share
+    ask: USD_per_share
+    quantity: whole_contracts
+  conditions:
+    - Maximum loss is calculated and does not exceed the trade request.
+    - Every leg is actually listed and passes the configured liquidity policy.
+  action: enumerate all listed combinations inside the declared search ranges
+  exceptions: []
+  risks:
+    - Early assignment and pin risk require human review for short American options.
+    - Leg-by-leg quotes do not establish a simultaneous combo fill.
+  contradictions: []
+  parameters_provided: []
+  parameters_missing: [profitable exit thresholds, stable sizing fraction]
+  parameters_to_calibrate: [profit target, stop, holding period, slippage]
+  validation_history:
+    - checked_at: 2026-07-25
+      status: passed
+      method: structural payoff and modern-contract validation
+      source_ids: [natenberg-options-volatility-2015]
+      notes: Structural validity only; empirical edge remains NOT_TESTED.
+  dte: {minimum: 30, maximum: 730, values: [], unit: calendar_days, origin: sourced, source_id: natenberg-options-volatility-2015}
+  moneyness: {minimum: 0.70, maximum: 1.30, values: [], unit: strike_over_spot, origin: experimental, source_id: null}
+  profit_targets: {minimum: null, maximum: null, values: [0.50, 0.80, 1.00], unit: return_on_maximum_loss, origin: calibration_required, source_id: null}
+  stops: {minimum: null, maximum: null, values: [0.40, 0.55, 0.70], unit: loss_on_maximum_loss, origin: calibration_required, source_id: null}
+  holding_days: {minimum: null, maximum: null, values: [60, 120, 180], unit: calendar_days, origin: calibration_required, source_id: null}
+  rolling_rules: [none, review_at_30_dte]
+  capital_recovery_rules: [none, close_whole_contracts_only]
+  bounded_risk_required: true
+
+objects:
+  - <<: *base
+    recipe_id: long-call-v1
+    architecture: long_call
+    name: Long call, including long-dated maturity classes
+    allowed_theses: [bullish]
+    legs:
+      - {leg_id: long_call, option_type: call, side: long, quantity_ratio: 1, expiration_role: same, strike_role: any}
+    spread_width: null
+
+  - <<: *base
+    recipe_id: long-put-v1
+    architecture: long_put
+    name: Long put, including long-dated maturity classes
+    allowed_theses: [bearish]
+    legs:
+      - {leg_id: long_put, option_type: put, side: long, quantity_ratio: 1, expiration_role: same, strike_role: any}
+    spread_width: null
+
+  - <<: *base
+    recipe_id: bull-call-spread-v1
+    architecture: bull_call_spread
+    name: Bull call spread
+    allowed_theses: [bullish]
+    legs:
+      - {leg_id: long_lower_call, option_type: call, side: long, quantity_ratio: 1, expiration_role: same, strike_role: lower}
+      - {leg_id: short_upper_call, option_type: call, side: short, quantity_ratio: 1, expiration_role: same, strike_role: upper}
+    spread_width: {minimum: null, maximum: null, values: [5, 10, 20, 30], unit: USD, origin: calibration_required, source_id: null}
+
+  - <<: *base
+    recipe_id: bear-put-spread-v1
+    architecture: bear_put_spread
+    name: Bear put spread
+    allowed_theses: [bearish]
+    legs:
+      - {leg_id: long_upper_put, option_type: put, side: long, quantity_ratio: 1, expiration_role: same, strike_role: upper}
+      - {leg_id: short_lower_put, option_type: put, side: short, quantity_ratio: 1, expiration_role: same, strike_role: lower}
+    spread_width: {minimum: null, maximum: null, values: [5, 10, 20, 30], unit: USD, origin: calibration_required, source_id: null}
+
+  - <<: *base
+    recipe_id: call-butterfly-v1
+    architecture: call_butterfly
+    name: Symmetric call butterfly
+    allowed_theses: [neutral, bullish]
+    legs:
+      - {leg_id: long_lower_call, option_type: call, side: long, quantity_ratio: 1, expiration_role: same, strike_role: lower}
+      - {leg_id: short_center_calls, option_type: call, side: short, quantity_ratio: 2, expiration_role: same, strike_role: center}
+      - {leg_id: long_upper_call, option_type: call, side: long, quantity_ratio: 1, expiration_role: same, strike_role: upper}
+    spread_width: {minimum: null, maximum: null, values: [5, 10, 20], unit: USD, origin: calibration_required, source_id: null}
+
+  - <<: *base
+    recipe_id: put-butterfly-v1
+    architecture: put_butterfly
+    name: Symmetric put butterfly
+    allowed_theses: [neutral, bearish]
+    legs:
+      - {leg_id: long_lower_put, option_type: put, side: long, quantity_ratio: 1, expiration_role: same, strike_role: lower}
+      - {leg_id: short_center_puts, option_type: put, side: short, quantity_ratio: 2, expiration_role: same, strike_role: center}
+      - {leg_id: long_upper_put, option_type: put, side: long, quantity_ratio: 1, expiration_role: same, strike_role: upper}
+    spread_width: {minimum: null, maximum: null, values: [5, 10, 20], unit: USD, origin: calibration_required, source_id: null}
+
+  - <<: *base
+    recipe_id: call-broken-wing-butterfly-v1
+    architecture: call_broken_wing_butterfly
+    name: Bounded-risk call broken-wing butterfly
+    allowed_theses: [neutral, bullish]
+    legs:
+      - {leg_id: long_lower_call, option_type: call, side: long, quantity_ratio: 1, expiration_role: same, strike_role: lower}
+      - {leg_id: short_center_calls, option_type: call, side: short, quantity_ratio: 2, expiration_role: same, strike_role: center}
+      - {leg_id: long_upper_call, option_type: call, side: long, quantity_ratio: 1, expiration_role: same, strike_role: upper}
+    spread_width: {minimum: null, maximum: null, values: [5, 10, 20], unit: USD, origin: calibration_required, source_id: null}
+
+  - <<: *base
+    recipe_id: put-broken-wing-butterfly-v1
+    architecture: put_broken_wing_butterfly
+    name: Bounded-risk put broken-wing butterfly
+    allowed_theses: [neutral, bearish]
+    legs:
+      - {leg_id: long_lower_put, option_type: put, side: long, quantity_ratio: 1, expiration_role: same, strike_role: lower}
+      - {leg_id: short_center_puts, option_type: put, side: short, quantity_ratio: 2, expiration_role: same, strike_role: center}
+      - {leg_id: long_upper_put, option_type: put, side: long, quantity_ratio: 1, expiration_role: same, strike_role: upper}
+    spread_width: {minimum: null, maximum: null, values: [5, 10, 20], unit: USD, origin: calibration_required, source_id: null}

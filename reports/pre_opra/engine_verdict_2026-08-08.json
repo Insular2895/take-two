@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "report_id": "ttwo-engine-value-verdict-v1",
+  "ticker": "TTWO",
+  "status": "DERIVED_DEVELOPMENT_VERDICT",
+  "verdict": "ENGINE_NOT_PROVEN_SUPERIOR",
+  "derivation_rule_version": "pre-opra-engine-value-v1",
+  "derivation_rule": "V10 underperforms cash in both full development and chronological OOS evidence.",
+  "engine_full_development": {
+    "dataset_role": "full_development",
+    "strategy": "engine_candidate",
+    "observations": 25,
+    "total_return": -0.9905068072897727,
+    "expected_return": -0.0348825331519038,
+    "cvar_95": 0.7454272634703221,
+    "maximum_drawdown": 0.9987413098745523,
+    "probability_profit": 0.24
+  },
+  "engine_walk_forward_oos": {
+    "dataset_role": "walk_forward_oos",
+    "strategy": "engine_candidate",
+    "observations": 10,
+    "total_return": -0.9041231874818685,
+    "expected_return": -0.012664664703304278,
+    "cvar_95": 0.8467353951890036,
+    "maximum_drawdown": 0.9747005381055908,
+    "probability_profit": 0.2
+  },
+  "best_simple_baseline_full": {
+    "dataset_role": "full_development",
+    "strategy": "buy_and_hold",
+    "observations": 25,
+    "total_return": 0.2696982983818763,
+    "expected_return": 0.010660809059761269,
+    "cvar_95": 0.08830302679183416,
+    "maximum_drawdown": 0.21001099973334192,
+    "probability_profit": 0.64
+  },
+  "best_simple_baseline_oos": {
+    "dataset_role": "walk_forward_oos",
+    "strategy": "buy_and_hold",
+    "observations": 10,
+    "total_return": 0.2512435006292011,
+    "expected_return": 0.024451068098235607,
+    "cvar_95": 0.07881911251146667,
+    "maximum_drawdown": 0.12438753523974566,
+    "probability_profit": 0.6
+  },
+  "compared_baselines": [
+    "cash",
+    "no_position",
+    "underlying",
+    "buy_and_hold",
+    "atm_long_call",
+    "fixed_delta_long_call",
+    "standard_bull_call_spread",
+    "random_admissible"
+  ],
+  "holm_superiority_rejections": 0,
+  "deflated_sharpe_probability": 0.05728179858800706,
+  "probability_backtest_overfitting": 0.7777777777777778,
+  "formal_sample_policy_satisfied": false,
+  "development_classification": "AVOID",
+  "no_position_recommended": true,
+  "blockers": [
+    "Formal strategy sample policy is not satisfied (25 available; 41 required).",
+    "The final holdout remains UNOPENED.",
+    "Historical option-data rights still require human confirmation.",
+    "Live OPRA execution evidence is absent by design."
+  ],
+  "holdout_state": "UNOPENED",
+  "holdout_used": false,
+  "order_capability": "forbidden"
+}

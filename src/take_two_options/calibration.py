@@ -16,6 +16,7 @@ from take_two_options.domain import (
     SimulationModel,
     StrictModel,
 )
+from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS
 
 
 class HistoricalPricePoint(StrictModel):
@@ -68,7 +69,7 @@ class CalibrationReport(StrictModel):
 
 
 def _annualized_volatility(returns: list[float]) -> float:
-    return stdev(returns) * math.sqrt(252.0)
+    return DEFAULT_QUANT_CONVENTIONS.annualize_volatility(stdev(returns))
 
 
 def calibrate_dataset(dataset: CalibrationDataset) -> CalibrationReport:
@@ -122,7 +123,9 @@ def calibrate_dataset(dataset: CalibrationDataset) -> CalibrationReport:
             status=evidence_status,
             observations=len(returns),
             parameters={
-                "jump_intensity": len(jump_returns) / len(returns) * 252.0,
+                "jump_intensity": len(jump_returns)
+                / len(returns)
+                * DEFAULT_QUANT_CONVENTIONS.trading_session_basis,
                 "jump_mean": fmean(jump_returns),
                 "jump_volatility": stdev(jump_returns),
                 "diffusion_volatility": _annualized_volatility(diffusion_returns),

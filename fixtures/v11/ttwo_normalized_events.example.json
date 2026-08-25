@@ -1,0 +1,17 @@
+[
+  {
+    "event_id": "example-release-date-maintained",
+    "event_type": "EVENT_RELEASE_DATE_MAINTAINED",
+    "family": "company_primary",
+    "occurred_at": "2026-07-24T12:00:00Z",
+    "observed_at": "2026-07-24T12:05:00Z",
+    "canonical_fact_id": "example-only-release-date-fact",
+    "source_ids": ["replace-with-official-source-id"],
+    "confidence": 0.9,
+    "direction": "supports",
+    "contradictory_source_ids": [],
+    "notes": [
+      "Schema example only. Replace with a verified, timestamped official event before use."
+    ]
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "ttwo-pre-opra-market-context-v1",
+  "generated_at": "2026-08-08T00:00:00Z",
+  "dataset_hash": "c7a1bbf2138c27a5a67b9faa62b7e70420a7212a727db52c3f5b5d2c28d89aee",
+  "underlying_bar_count": 631,
+  "underlying_start": "2024-02-01",
+  "underlying_end": "2026-08-07",
+  "underlying_fields": [
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "trade_count",
+    "vwap"
+  ],
+  "rate_curve_count": 385,
+  "rate_start": "2025-01-02",
+  "rate_end": "2026-07-17",
+  "fx_rate_count": 283,
+  "fx_start": "2025-07-01",
+  "fx_end": "2026-08-07",
+  "corporate_action_count": 0,
+  "cash_dividend_yield": 0.0,
+  "dividend_policy_status": "verified_zero_through_filing_date",
+  "source_hashes": {
+    "alpaca_underlying": "8c2af16b26d35f4eb6b9c4c968a9a2b928812248f806b66cc49cd35c6e3df442",
+    "alpaca_corporate_actions": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "treasury": "27da33916d147a913c3a18ffa9a42b1a07935fca4caab14dd77262eb65e7eef6",
+    "ecb_fx": "3332758da91f70250639a2e16d88ed27e237b47678b9609a806fdd1170c9af91",
+    "sec_dividend_policy": "31bc9ab323d370b20abb4e050a227b917f3a35a7ad012e773b60e670f694b67a"
+  },
+  "raw_location": "local_private",
+  "raw_data_committed": false,
+  "point_in_time_status": "VERIFIED_WITH_CONSERVATIVE_LAGS",
+  "order_capability": "forbidden",
+  "limitations": [
+    "Alpaca IEX is a single-exchange equity feed, not consolidated SIP.",
+    "Daily bars, Treasury curves, and ECB rates use a conservative next-day lag.",
+    "Treasury par yields are interpolated proxies, not option-specific funding curves.",
+    "The zero dividend yield is verified through the 2026-05-21 Form 10-K filing date."
+  ]
+}

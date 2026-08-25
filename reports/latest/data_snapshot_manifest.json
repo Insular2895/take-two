@@ -1,0 +1,33 @@
+{
+  "snapshot_id": "snapshot-611d19636658e43e",
+  "ticker": "TTWO",
+  "as_of": "2026-07-23T20:00:00+00:00",
+  "spot": 230.25,
+  "spot_timestamp": "2026-07-23T20:00:00+00:00",
+  "quote_quality": "eod_bid_ask",
+  "source_ids": [
+    "MARKETDATA-EOD-CHAIN-TTWO-20260723-20260725T093424Z"
+  ],
+  "contracts": 1024,
+  "expirations": [
+    "2026-07-24",
+    "2026-07-31",
+    "2026-08-07",
+    "2026-08-14",
+    "2026-08-21",
+    "2026-08-28",
+    "2026-09-18",
+    "2026-11-20",
+    "2026-12-18",
+    "2027-01-15",
+    "2027-03-19",
+    "2027-06-17",
+    "2028-01-21"
+  ],
+  "data_warnings": [
+    "End-of-day bid/ask does not prove an intraday or simultaneous combo fill",
+    "Contract multiplier is normalized to 100 and must be rechecked with the broker"
+  ],
+  "cache_path": "data/marketdata/snapshots/TTWO_2026-07-23.json",
+  "generated_at": "2026-07-25T09:49:41.825566+00:00"
+}

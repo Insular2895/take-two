@@ -1,0 +1,645 @@
+{
+  "schema_version": "1.0",
+  "report_id": "ttwo-strategy-walk-forward-v2",
+  "ticker": "TTWO",
+  "generated_at": "2026-08-08T20:00:00Z",
+  "dataset_hash": "e6815775c3cc9a2d44bb05bb3088aec4fb85e55241627264a4a6ee6cde569683",
+  "configuration_hash": "5e60bad8b757a6ee5ff9a1dfc1a9a45d8777413bad3652f7de2e4e54e542b3bc",
+  "method": "expanding",
+  "status": "DEVELOPMENT_ONLY_INSUFFICIENT_FINAL_SAMPLE",
+  "windows": [],
+  "strategy_windows": [
+    {
+      "window_id": "strategy-wf-001",
+      "train_start": "2025-07-21",
+      "train_end": "2025-11-25",
+      "validation_date": "2026-01-09",
+      "test_date": "2026-01-26",
+      "train_observations": 12,
+      "purged_observation_ids": [
+        "panel-2025-12-24"
+      ],
+      "embargoed_observation_ids": [
+        "panel-2026-01-16"
+      ],
+      "selected_training_leader": "buy_and_hold",
+      "frozen_policy_hash": "37b806569ba30972e8893a3db8c894388f676eb5fdade8d7f5692a6c37d62396",
+      "private_test_record_hash": "f2e8dbf934c3649d83000d4f80370bef09ce0e1b4713a8021762e48a793a9a40",
+      "recalibrated_after_test": false
+    },
+    {
+      "window_id": "strategy-wf-002",
+      "train_start": "2025-07-21",
+      "train_end": "2025-12-24",
+      "validation_date": "2026-01-16",
+      "test_date": "2026-02-02",
+      "train_observations": 13,
+      "purged_observation_ids": [
+        "panel-2026-01-09"
+      ],
+      "embargoed_observation_ids": [
+        "panel-2026-01-26"
+      ],
+      "selected_training_leader": "buy_and_hold",
+      "frozen_policy_hash": "d3ac64a4ac90cfeb6bfe84e213442e8709c9d8e705c4d5e9b5caecbcadd20dd3",
+      "private_test_record_hash": "9298b1370e99af3b0952ab4353f8f2c4ccfa9dc101700abf20d0801001df4e3f",
+      "recalibrated_after_test": false
+    },
+    {
+      "window_id": "strategy-wf-003",
+      "train_start": "2025-07-21",
+      "train_end": "2026-01-09",
+      "validation_date": "2026-01-26",
+      "test_date": "2026-02-09",
+      "train_observations": 14,
+      "purged_observation_ids": [
+        "panel-2026-01-16"
+      ],
+      "embargoed_observation_ids": [
+        "panel-2026-02-02"
+      ],
+      "selected_training_leader": "buy_and_hold",
+      "frozen_policy_hash": "98312f7b6ba1bcfc851e7405ac128688b12d00cbbcea50c50a50037f442d7ac3",
+      "private_test_record_hash": "eb6942d9b181f04f98d441db0e265735b4fb28d37bca3fe8b0538c3c0d2924bd",
+      "recalibrated_after_test": false
+    },
+    {
+      "window_id": "strategy-wf-004",
+      "train_start": "2025-07-21",
+      "train_end": "2026-01-16",
+      "validation_date": "2026-02-02",
+      "test_date": "2026-03-17",
+      "train_observations": 15,
+      "purged_observation_ids": [
+        "panel-2026-01-26"
+      ],
+      "embargoed_observation_ids": [
+        "panel-2026-02-09"
+      ],
+      "selected_training_leader": "buy_and_hold",
+      "frozen_policy_hash": "3469a4943bd1b3a4a53874b3d26273bf3983a2ae048897d278c2325617570fde",
+      "private_test_record_hash": "aebd243d72717f5a3767641db07c2af3ef39a8498d2ce31ec54209abbf87d2e5",
+      "recalibrated_after_test": false
+    },
+    {
+      "window_id": "strategy-wf-005",
+      "train_start": "2025-07-21",
+      "train_end": "2026-01-26",
+      "validation_date": "2026-02-09",
+      "test_date": "2026-03-31",
+      "train_observations": 16,
+      "purged_observation_ids": [
+        "panel-2026-02-02"
+      ],
+      "embargoed_observation_ids": [
+        "panel-2026-03-17"
+      ],
+      "selected_training_leader": "cash",
+      "frozen_policy_hash": "1573d73af8ff3a87a58c4de3c1cdf8347ae098989cb2fba26d71ff45e96700d3",
+      "private_test_record_hash": "9cf769752cbd0493153d708994f5489c86fc128ce2a9c13ad3c3e89318bd79c7",
+      "recalibrated_after_test": false
+    },
+    {
+      "window_id": "strategy-wf-006",
+      "train_start": "2025-07-21",
+      "train_end": "2026-02-02",
+      "validation_date": "2026-03-17",
+      "test_date": "2026-04-22",
+      "train_observations": 17,
+      "purged_observation_ids": [
+        "panel-2026-02-09"
+      ],
+      "embargoed_observation_ids": [
+        "panel-2026-03-31"
+      ],
+      "selected_training_leader": "cash",
+      "frozen_policy_hash": "78be0ee92887373279612eaed297e0fb3c9a0de718132beb72060d868e03081a",
+      "private_test_record_hash": "80b7e1bd530df5484f6ce5eb3b162087b8127cc6e8967542fea37e7dffdc1ecc",
+      "recalibrated_after_test": false
+    },
+    {
+      "window_id": "strategy-wf-007",
+      "train_start": "2025-07-21",
+      "train_end": "2026-02-09",
+      "validation_date": "2026-03-31",
+      "test_date": "2026-05-20",
+      "train_observations": 18,
+      "purged_observation_ids": [
+        "panel-2026-03-17"
+      ],
+      "embargoed_observation_ids": [
+        "panel-2026-04-22"
+      ],
+      "selected_training_leader": "cash",
+      "frozen_policy_hash": "16f499a8019065ad652ec39a43cd7be5e8eea430b92c592dce973c560e1f9dc6",
+      "private_test_record_hash": "afa32857ad70588d6a97940a0be03208f90bffa1efd70783b0cccb92108b7c29",
+      "recalibrated_after_test": false
+    },
+    {
+      "window_id": "strategy-wf-008",
+      "train_start": "2025-07-21",
+      "train_end": "2026-03-17",
+      "validation_date": "2026-04-22",
+      "test_date": "2026-05-28",
+      "train_observations": 19,
+      "purged_observation_ids": [
+        "panel-2026-03-31"
+      ],
+      "embargoed_observation_ids": [
+        "panel-2026-05-20"
+      ],
+      "selected_training_leader": "cash",
+      "frozen_policy_hash": "4b4241d5a7b3a7f71b39485a343079814acfc44ca74c7804aeeec5e0663ac811",
+      "private_test_record_hash": "c6789ac61e2bc2113a8548253a11ab769158d49b1527a21bf4b205bbbd3888f6",
+      "recalibrated_after_test": false
+    },
+    {
+      "window_id": "strategy-wf-009",
+      "train_start": "2025-07-21",
+      "train_end": "2026-03-31",
+      "validation_date": "2026-05-20",
+      "test_date": "2026-06-04",
+      "train_observations": 20,
+      "purged_observation_ids": [
+        "panel-2026-04-22"
+      ],
+      "embargoed_observation_ids": [
+        "panel-2026-05-28"
+      ],
+      "selected_training_leader": "buy_and_hold",
+      "frozen_policy_hash": "9493a2480915b1c4fb7bc5be1ff2a33fd96d21ccaf998b98202fe192c4ebf922",
+      "private_test_record_hash": "2f3f248fe6b7cc6cb7a2c76cc78b364609018a3d720f1e00a7db7d9df57bb5a4",
+      "recalibrated_after_test": false
+    },
+    {
+      "window_id": "strategy-wf-010",
+      "train_start": "2025-07-21",
+      "train_end": "2026-04-22",
+      "validation_date": "2026-05-28",
+      "test_date": "2026-06-18",
+      "train_observations": 21,
+      "purged_observation_ids": [
+        "panel-2026-05-20"
+      ],
+      "embargoed_observation_ids": [
+        "panel-2026-06-04"
+      ],
+      "selected_training_leader": "buy_and_hold",
+      "frozen_policy_hash": "10e030e9bdfbbb747dd708b10013dc1927795ebfb16ad6161a558243cdb3f81b",
+      "private_test_record_hash": "ca565fcc15cf579ec875983aaacbd5faeba8935ec3aca3344321bf949cb9322b",
+      "recalibrated_after_test": false
+    }
+  ],
+  "oos_strategy_comparison": {
+    "schema_version": "1.0",
+    "report_id": "ttwo-walk-forward-oos-comparison-v2",
+    "ticker": "TTWO",
+    "dataset_hash": "e6815775c3cc9a2d44bb05bb3088aec4fb85e55241627264a4a6ee6cde569683",
+    "status": "DIAGNOSTIC_ONLY_LICENSE_REVIEW",
+    "conventions": {
+      "horizon": "one signal-to-entry-to-exit chain interval",
+      "capital": 1000.0,
+      "currency": "EUR",
+      "fees": "same frozen per-contract round-trip fees as comparable panel",
+      "spread_assumption": "long ask/exit bid; short bid/exit ask",
+      "fx_policy": "point-in-time ECB EUR/USD reference rate",
+      "entry_convention": "next full-chain date after signal",
+      "exit_convention": "following full-chain date",
+      "target_return": 0.9,
+      "large_loss_threshold": 0.7
+    },
+    "rows": [
+      {
+        "strategy": "cash",
+        "role": "baseline",
+        "observations": 10,
+        "total_return": 0.0,
+        "expected_return": 0.0,
+        "median_return": 0.0,
+        "cvar_95": 0.0,
+        "maximum_drawdown": 0.0,
+        "probability_profit": 0.0,
+        "probability_target": 0.0,
+        "probability_large_loss": 0.0,
+        "probability_loss_50": 0.0,
+        "probability_loss_70": 0.0,
+        "probability_loss_90": 0.0,
+        "sharpe": null,
+        "sortino": null,
+        "transaction_costs": 0.0,
+        "evidence": "aligned_panel_input",
+        "status": "baseline"
+      },
+      {
+        "strategy": "no_position",
+        "role": "baseline",
+        "observations": 10,
+        "total_return": 0.0,
+        "expected_return": 0.0,
+        "median_return": 0.0,
+        "cvar_95": 0.0,
+        "maximum_drawdown": 0.0,
+        "probability_profit": 0.0,
+        "probability_target": 0.0,
+        "probability_large_loss": 0.0,
+        "probability_loss_50": 0.0,
+        "probability_loss_70": 0.0,
+        "probability_loss_90": 0.0,
+        "sharpe": null,
+        "sortino": null,
+        "transaction_costs": 0.0,
+        "evidence": "aligned_panel_input",
+        "status": "baseline"
+      },
+      {
+        "strategy": "underlying",
+        "role": "baseline",
+        "observations": 10,
+        "total_return": 0.2280819841795816,
+        "expected_return": 0.022551068098235604,
+        "median_return": 0.029965198746630728,
+        "cvar_95": 0.08081911251146667,
+        "maximum_drawdown": 0.12812696221625441,
+        "probability_profit": 0.6,
+        "probability_target": 0.0,
+        "probability_large_loss": 0.0,
+        "probability_loss_50": 0.0,
+        "probability_loss_70": 0.0,
+        "probability_loss_90": 0.0,
+        "sharpe": 0.35364862238416417,
+        "sortino": 0.7321126985504098,
+        "transaction_costs": 20.0,
+        "evidence": "aligned_panel_input",
+        "status": "baseline"
+      },
+      {
+        "strategy": "buy_and_hold",
+        "role": "baseline",
+        "observations": 10,
+        "total_return": 0.2512435006292011,
+        "expected_return": 0.024451068098235607,
+        "median_return": 0.03196519874663073,
+        "cvar_95": 0.07881911251146667,
+        "maximum_drawdown": 0.12438753523974566,
+        "probability_profit": 0.6,
+        "probability_target": 0.0,
+        "probability_large_loss": 0.0,
+        "probability_loss_50": 0.0,
+        "probability_loss_70": 0.0,
+        "probability_loss_90": 0.0,
+        "sharpe": 0.3840480323258037,
+        "sortino": 0.8206093975438661,
+        "transaction_costs": 1.0,
+        "evidence": "aligned_panel_input",
+        "status": "baseline"
+      },
+      {
+        "strategy": "atm_long_call",
+        "role": "baseline",
+        "observations": 10,
+        "total_return": -0.6549393805531625,
+        "expected_return": 0.10866203165158546,
+        "median_return": -0.013103481708255066,
+        "cvar_95": 0.6473871131405378,
+        "maximum_drawdown": 0.9197516171892423,
+        "probability_profit": 0.5,
+        "probability_target": 0.1,
+        "probability_large_loss": 0.0,
+        "probability_loss_50": 0.3,
+        "probability_loss_70": 0.0,
+        "probability_loss_90": 0.0,
+        "sharpe": 0.15150137936854163,
+        "sortino": 0.3017724083367115,
+        "transaction_costs": 1786.7679091115551,
+        "evidence": "aligned_panel_input",
+        "status": "baseline"
+      },
+      {
+        "strategy": "fixed_delta_long_call",
+        "role": "baseline",
+        "observations": 10,
+        "total_return": -0.9956493456978286,
+        "expected_return": -0.03478073183617572,
+        "median_return": -0.36730467526292615,
+        "cvar_95": 0.8467353951890036,
+        "maximum_drawdown": 0.9990707183950014,
+        "probability_profit": 0.3,
+        "probability_target": 0.1,
+        "probability_large_loss": 0.4,
+        "probability_loss_50": 0.5,
+        "probability_loss_70": 0.4,
+        "probability_loss_90": 0.0,
+        "sharpe": -0.03276963632090303,
+        "sortino": -0.06436854925302499,
+        "transaction_costs": 3474.1155088374567,
+        "evidence": "aligned_panel_input",
+        "status": "baseline"
+      },
+      {
+        "strategy": "standard_bull_call_spread",
+        "role": "baseline",
+        "observations": 10,
+        "total_return": -1.0,
+        "expected_return": -0.17541326819329423,
+        "median_return": -0.08166488311445394,
+        "cvar_95": 1.0,
+        "maximum_drawdown": 1.0,
+        "probability_profit": 0.5,
+        "probability_target": 0.1,
+        "probability_large_loss": 0.4,
+        "probability_loss_50": 0.4,
+        "probability_loss_70": 0.4,
+        "probability_loss_90": 0.4,
+        "sharpe": -0.23727736288666196,
+        "sortino": -0.2857802357489483,
+        "transaction_costs": 4413.881770483628,
+        "evidence": "aligned_panel_input",
+        "status": "baseline"
+      },
+      {
+        "strategy": "random_admissible",
+        "role": "baseline",
+        "observations": 10,
+        "total_return": -0.937242517223274,
+        "expected_return": -0.002635366900268496,
+        "median_return": -0.03313490034522168,
+        "cvar_95": 0.7464243647989232,
+        "maximum_drawdown": 0.9837486078896513,
+        "probability_profit": 0.4,
+        "probability_target": 0.1,
+        "probability_large_loss": 0.2,
+        "probability_loss_50": 0.4,
+        "probability_loss_70": 0.2,
+        "probability_loss_90": 0.0,
+        "sharpe": -0.0035601050145367802,
+        "sortino": -0.006119130132777439,
+        "transaction_costs": 3077.5303190394757,
+        "evidence": "aligned_panel_input",
+        "status": "baseline"
+      },
+      {
+        "strategy": "engine_candidate",
+        "role": "candidate",
+        "observations": 10,
+        "total_return": -0.9041231874818685,
+        "expected_return": -0.012664664703304278,
+        "median_return": -0.072012523917203,
+        "cvar_95": 0.8467353951890036,
+        "maximum_drawdown": 0.9747005381055908,
+        "probability_profit": 0.2,
+        "probability_target": 0.1,
+        "probability_large_loss": 0.1,
+        "probability_loss_50": 0.2,
+        "probability_loss_70": 0.1,
+        "probability_loss_90": 0.0,
+        "sharpe": -0.019338611318175478,
+        "sortino": -0.035062795290173907,
+        "transaction_costs": 1682.5706646102901,
+        "evidence": "aligned_panel_input",
+        "status": "candidate"
+      }
+    ],
+    "deltas": [
+      {
+        "baseline": "cash",
+        "candidate": "engine_candidate",
+        "observations": 10,
+        "return_uplift": -0.9041231874818685,
+        "expected_return_uplift": -0.012664664703304278,
+        "cvar_improvement": -0.8467353951890036,
+        "drawdown_improvement": -0.9747005381055908,
+        "probability_profit_uplift": 0.2,
+        "probability_target_uplift": 0.1,
+        "probability_large_loss_improvement": -0.1,
+        "sharpe_uplift": null,
+        "sortino_uplift": null,
+        "transaction_cost_difference": 1682.5706646102901,
+        "paired_mean_uplift_interval": [
+          -0.3545834098857419,
+          0.41050653989858754
+        ],
+        "raw_p_value": 0.9800049987503124,
+        "adjusted_p_value": 1.0,
+        "statistically_distinguishable": false,
+        "economically_material": false,
+        "classification": "worse_than_baseline"
+      },
+      {
+        "baseline": "no_position",
+        "candidate": "engine_candidate",
+        "observations": 10,
+        "return_uplift": -0.9041231874818685,
+        "expected_return_uplift": -0.012664664703304278,
+        "cvar_improvement": -0.8467353951890036,
+        "drawdown_improvement": -0.9747005381055908,
+        "probability_profit_uplift": 0.2,
+        "probability_target_uplift": 0.1,
+        "probability_large_loss_improvement": -0.1,
+        "sharpe_uplift": null,
+        "sortino_uplift": null,
+        "transaction_cost_difference": 1682.5706646102901,
+        "paired_mean_uplift_interval": [
+          -0.35241624715034436,
+          0.3913561887556356
+        ],
+        "raw_p_value": 0.9850037490627344,
+        "adjusted_p_value": 1.0,
+        "statistically_distinguishable": false,
+        "economically_material": false,
+        "classification": "worse_than_baseline"
+      },
+      {
+        "baseline": "underlying",
+        "candidate": "engine_candidate",
+        "observations": 10,
+        "return_uplift": -1.13220517166145,
+        "expected_return_uplift": -0.03521573280153988,
+        "cvar_improvement": -0.765916282677537,
+        "drawdown_improvement": -0.8465735758893363,
+        "probability_profit_uplift": -0.39999999999999997,
+        "probability_target_uplift": 0.1,
+        "probability_large_loss_improvement": -0.1,
+        "sharpe_uplift": -0.37298723370233966,
+        "sortino_uplift": -0.7671754938405837,
+        "transaction_cost_difference": 1662.5706646102901,
+        "paired_mean_uplift_interval": [
+          -0.34575392709462377,
+          0.34209061368424065
+        ],
+        "raw_p_value": 0.878780304923769,
+        "adjusted_p_value": 1.0,
+        "statistically_distinguishable": false,
+        "economically_material": false,
+        "classification": "worse_than_baseline"
+      },
+      {
+        "baseline": "buy_and_hold",
+        "candidate": "engine_candidate",
+        "observations": 10,
+        "return_uplift": -1.1553666881110696,
+        "expected_return_uplift": -0.03711573280153989,
+        "cvar_improvement": -0.767916282677537,
+        "drawdown_improvement": -0.8503130028658451,
+        "probability_profit_uplift": -0.39999999999999997,
+        "probability_target_uplift": 0.1,
+        "probability_large_loss_improvement": -0.1,
+        "sharpe_uplift": -0.4033866436439792,
+        "sortino_uplift": -0.85567219283404,
+        "transaction_cost_difference": 1681.5706646102901,
+        "paired_mean_uplift_interval": [
+          -0.3507792916096263,
+          0.3491645635154803
+        ],
+        "raw_p_value": 0.8512871782054486,
+        "adjusted_p_value": 1.0,
+        "statistically_distinguishable": false,
+        "economically_material": false,
+        "classification": "worse_than_baseline"
+      },
+      {
+        "baseline": "atm_long_call",
+        "candidate": "engine_candidate",
+        "observations": 10,
+        "return_uplift": -0.249183806928706,
+        "expected_return_uplift": -0.12132669635488973,
+        "cvar_improvement": -0.19934828204846589,
+        "drawdown_improvement": -0.05494892091634851,
+        "probability_profit_uplift": -0.3,
+        "probability_target_uplift": 0.0,
+        "probability_large_loss_improvement": -0.1,
+        "sharpe_uplift": -0.17083999068671712,
+        "sortino_uplift": -0.3368352036268854,
+        "transaction_cost_difference": -104.197244501265,
+        "paired_mean_uplift_interval": [
+          -0.31817100600274595,
+          0.09828673446511894
+        ],
+        "raw_p_value": 0.2756810797300675,
+        "adjusted_p_value": 1.0,
+        "statistically_distinguishable": false,
+        "economically_material": false,
+        "classification": "worse_than_baseline"
+      },
+      {
+        "baseline": "fixed_delta_long_call",
+        "candidate": "engine_candidate",
+        "observations": 10,
+        "return_uplift": 0.09152615821596011,
+        "expected_return_uplift": 0.022116067132871443,
+        "cvar_improvement": 0.0,
+        "drawdown_improvement": 0.024370180289410626,
+        "probability_profit_uplift": -0.09999999999999998,
+        "probability_target_uplift": 0.0,
+        "probability_large_loss_improvement": 0.30000000000000004,
+        "sharpe_uplift": 0.013431025002727554,
+        "sortino_uplift": 0.02930575396285108,
+        "transaction_cost_difference": -1791.5448442271665,
+        "paired_mean_uplift_interval": [
+          -0.3531694307664144,
+          0.34775686198454825
+        ],
+        "raw_p_value": 0.9057735566108472,
+        "adjusted_p_value": 1.0,
+        "statistically_distinguishable": false,
+        "economically_material": true,
+        "classification": "economically_material_not_statistically_distinguishable"
+      },
+      {
+        "baseline": "standard_bull_call_spread",
+        "candidate": "engine_candidate",
+        "observations": 10,
+        "return_uplift": 0.09587681251813152,
+        "expected_return_uplift": 0.16274860348998993,
+        "cvar_improvement": 0.15326460481099635,
+        "drawdown_improvement": 0.025299461894409236,
+        "probability_profit_uplift": -0.3,
+        "probability_target_uplift": 0.0,
+        "probability_large_loss_improvement": 0.30000000000000004,
+        "sharpe_uplift": 0.21793875156848647,
+        "sortino_uplift": 0.25071744045877437,
+        "transaction_cost_difference": -2731.3111058733384,
+        "paired_mean_uplift_interval": [
+          -0.09968209562841622,
+          0.4387360244797506
+        ],
+        "raw_p_value": 0.29517620594851285,
+        "adjusted_p_value": 1.0,
+        "statistically_distinguishable": false,
+        "economically_material": true,
+        "classification": "economically_material_not_statistically_distinguishable"
+      },
+      {
+        "baseline": "random_admissible",
+        "candidate": "engine_candidate",
+        "observations": 10,
+        "return_uplift": 0.03311932974140552,
+        "expected_return_uplift": -0.010029297803035783,
+        "cvar_improvement": -0.10031103039008049,
+        "drawdown_improvement": 0.009048069784060586,
+        "probability_profit_uplift": -0.2,
+        "probability_target_uplift": 0.0,
+        "probability_large_loss_improvement": 0.1,
+        "sharpe_uplift": -0.0157785063036387,
+        "sortino_uplift": -0.028943665157396468,
+        "transaction_cost_difference": -1394.9596544291855,
+        "paired_mean_uplift_interval": [
+          -0.2069290042852173,
+          0.19208735376395653
+        ],
+        "raw_p_value": 0.9150212446888278,
+        "adjusted_p_value": 1.0,
+        "statistically_distinguishable": false,
+        "economically_material": false,
+        "classification": "worse_than_baseline"
+      }
+    ],
+    "missing_strategies": [],
+    "regret_vs_best_simple_baseline": 1.1553666881110696,
+    "multiple_testing": {
+      "correction": "holm",
+      "alpha": 0.05,
+      "effective_search_space": {
+        "strategies_considered": 9,
+        "contracts_considered": 1,
+        "expirations_considered": 1,
+        "parameter_sets_considered": 1,
+        "model_sets_considered": 1,
+        "exit_rules_considered": 1,
+        "actual_trials": 9,
+        "cartesian_upper_bound": 9
+      },
+      "deflated_sharpe_probability": 0.05728179858800706,
+      "probability_backtest_overfitting": 0.7777777777777778,
+      "paired_permutation_samples": 4000,
+      "bootstrap_samples": 2000,
+      "seed": 20260808
+    },
+    "blockers": [
+      "Historical return panel licensing remains to_review."
+    ],
+    "holdout_used": false,
+    "order_capability": "forbidden"
+  },
+  "sample_adequacy": {
+    "available_observations": 25,
+    "diagnostic_train_observations": 12,
+    "diagnostic_validation_observations": 1,
+    "diagnostic_test_observations": 10,
+    "diagnostic_purge_observations": 1,
+    "diagnostic_embargo_observations": 1,
+    "formal_minimum_train_observations": 20,
+    "formal_minimum_validation_observations": 8,
+    "formal_minimum_test_observations": 8,
+    "formal_embargo_observations": 5,
+    "formal_policy_satisfied": false
+  },
+  "holdout_touched": false,
+  "license_status": "to_review",
+  "blockers": [
+    "Only 25 aligned option observations exist; the formal 20/8/5/8 policy needs 41.",
+    "Ten non-overlapping future test observations are development diagnostics only.",
+    "Historical option-data rights remain to_review.",
+    "The final holdout ledger remains UNOPENED and was not read by this protocol."
+  ],
+  "order_capability": "forbidden"
+}

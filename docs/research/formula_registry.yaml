@@ -1,0 +1,587 @@
+schema_version: "1.0"
+updated_on: "2026-08-08"
+policy:
+  summary_is_not_evidence: true
+  source_page_is_printed_page_unless_prefixed_pdf: true
+  p_q_transition_must_be_explicit: true
+  maximum_registry_claim: numerically_validated
+
+formulas:
+  - formula_id: FORM-MEASURE-CHANGE-001
+    name: Equivalent martingale measure and risk-neutral valuation boundary
+    statement: "Pricing expectations use Q; empirical forecasts remain under P unless an explicit sourced transition is supplied."
+    measure: P_and_Q
+    units: not_applicable
+    assumptions:
+      - equivalent probability measures on the relevant sigma algebra
+      - discounted traded assets are martingales under Q
+      - no-arbitrage model boundary
+    sources:
+      - source_id: book-bjork-arbitrage-theory
+        chapter: "10.2 and 12.2"
+        page: "141 and 175-176"
+      - source_id: book-andersen-piterbarg-interest-rate-modeling
+        chapter: "1.3 and 4.2.1"
+        page: "8 and 170"
+    implementation:
+      - file: src/take_two_options/quantitative/contracts.py
+        symbols: [Measure, MeasureTaggedSeries, MeasureTransition, require_measure]
+      - file: src/take_two_options/intelligence/stochastic.py
+        symbols: [StochasticPathSet]
+      - file: src/take_two_options/simulation/legacy_models.py
+        symbols: [SimulationPaths]
+    tests:
+      - file: tests/test_quantitative_foundations.py
+        symbols: [test_observed_value_and_measure_boundaries_are_fail_closed]
+    validation_status: tested
+
+  - formula_id: FORM-DISCOUNT-FACTOR-001
+    name: Continuous discount factor
+    statement: "D(t,T)=exp(-r*(T-t)) for a flat continuously compounded annual rate."
+    measure: Q_for_pricing
+    units: annual_decimal_rate_and_years
+    assumptions:
+      - flat rate over the interval
+      - continuous compounding
+      - Actual/365 Fixed year fraction in the current engine
+    sources:
+      - source_id: book-bjork-arbitrage-theory
+        chapter: "12.2"
+        page: "175"
+      - source_id: book-andersen-piterbarg-interest-rate-modeling
+        chapter: "4.2.1 and 5.A"
+        page: "170 and 221-223"
+    implementation:
+      - file: src/take_two_options/quantitative/contracts.py
+        symbols: [discount_factor]
+    tests:
+      - file: tests/test_quantitative_foundations.py
+        symbols: [test_conventions_separate_calendar_days_and_trading_sessions]
+    validation_status: tested
+
+  - formula_id: FORM-BS-PRICE-001
+    name: Black-Scholes European option value and first-order Greeks
+    statement: "European call/put value under lognormal Q dynamics with flat rate, dividend yield, and volatility."
+    measure: Q
+    units: price_per_share
+    assumptions:
+      - positive spot, strike, volatility, and time
+      - constant volatility, rate, and continuous dividend yield
+      - European exercise
+    sources:
+      - source_id: book-bjork-arbitrage-theory
+        chapter: "12.2"
+        page: "175-176"
+    implementation:
+      - file: src/take_two_options/pricing.py
+        symbols: [black_scholes_price_greeks]
+      - file: src/take_two_options/american.py
+        symbols: [european_scenario_value]
+    tests:
+      - file: tests/test_quantitative_foundations.py
+        symbols:
+          - test_black_scholes_matches_quantlib_european
+          - test_put_call_parity_and_finite_difference_convergence_report
+    validation_status: numerically_validated
+
+  - formula_id: FORM-FD-CONVERGENCE-001
+    name: Finite-difference refinement diagnostic
+    statement: "A numerical value is accepted only after strict grid refinement and a final successive difference within an explicit tolerance."
+    measure: not_applicable
+    units: output_dependent
+    assumptions:
+      - finite outputs
+      - strict non-decreasing time and price grids
+      - tolerance chosen in the same unit as the output
+    sources:
+      - source_id: book-suli-mayers-numerical-analysis
+        chapter: "1.6, 1.7, 2.7"
+        page: "28-29 and 58-71"
+      - source_id: book-andersen-piterbarg-interest-rate-modeling
+        chapter: "2.3 and 3.2.2"
+        page: "52 and 106"
+    implementation:
+      - file: src/take_two_options/quantitative/numerical_validation.py
+        symbols: [compare_values, assess_fd_convergence]
+    tests:
+      - file: tests/test_quantitative_foundations.py
+        symbols: [test_put_call_parity_and_finite_difference_convergence_report]
+    validation_status: tested
+
+  - formula_id: FORM-IV-ROOT-001
+    name: Diagnosed implied-volatility bisection
+    statement: "Solve model_price(volatility)-target_price=0 inside a verified positive bracket."
+    measure: Q
+    units: annual_decimal_volatility_and_price_per_share
+    assumptions:
+      - model price is finite and non-decreasing over the bracket
+      - target price lies inside the bracket prices
+      - price and volatility tolerances are explicit
+    sources:
+      - source_id: book-suli-mayers-numerical-analysis
+        chapter: "1.6"
+        page: "28-29"
+    implementation:
+      - file: src/take_two_options/quantitative/implied_volatility.py
+        symbols: [ImpliedVolResult, solve_implied_volatility]
+      - file: src/take_two_options/american.py
+        symbols: [historical_option_analytics]
+    tests:
+      - file: tests/test_implied_volatility_svi.py
+        symbols:
+          - test_diagnosed_iv_solver_recovers_black_scholes_volatility
+          - test_iv_solver_reports_bracket_failures_instead_of_returning_a_number
+          - test_diagnosed_iv_solver_handles_quantlib_european_short_maturity
+    validation_status: numerically_validated
+
+  - formula_id: FORM-SVI-RAW-001
+    name: Raw SVI total implied variance
+    statement: "w(k)=a+b*(rho*(k-m)+sqrt((k-m)^2+sigma^2))."
+    measure: Q
+    units: total_variance
+    assumptions:
+      - b is positive, absolute rho is below one, sigma is positive
+      - a+b*sigma*sqrt(1-rho^2) is non-negative
+      - k is log-forward-moneyness
+    sources:
+      - source_id: paper-gatheral-jacquier-svi
+        chapter: "3.1"
+        page: "5, equation 3.1"
+    implementation:
+      - file: src/take_two_options/quantitative/svi.py
+        symbols: [SVIParameters, raw_svi_total_variance, fit_svi_slice]
+    tests:
+      - file: tests/test_implied_volatility_svi.py
+        symbols: [test_svi_synthetic_slice_is_reconstructed_and_arbitrage_checked]
+    validation_status: tested
+
+  - formula_id: FORM-SVI-ARBITRAGE-001
+    name: SVI butterfly-density and calendar-spread checks
+    statement: "Each slice requires g(k)>=0 and total variance must not decrease across maturity."
+    measure: Q
+    units: dimensionless_density_condition_and_total_variance
+    assumptions:
+      - twice differentiable positive total-variance slice
+      - proportional-dividend setting for the calendar equivalence
+      - finite-grid diagnostics do not replace asymptotic proof
+    sources:
+      - source_id: paper-gatheral-jacquier-svi
+        chapter: "2.1-2.2"
+        page: "3-4, equation 2.1 and Lemmas 2.1-2.2"
+    implementation:
+      - file: src/take_two_options/quantitative/svi.py
+        symbols: [svi_arbitrage_report, calendar_arbitrage_report]
+    tests:
+      - file: tests/test_implied_volatility_svi.py
+        symbols: [test_svi_detects_known_butterfly_violation_and_calendar_crossing]
+    validation_status: tested
+
+  - formula_id: FORM-EWMA-001
+    name: Exponentially weighted conditional variance
+    statement: "h_t=lambda*h_(t-1)+(1-lambda)*r_(t-1)^2."
+    measure: P
+    units: squared_return_per_session
+    assumptions:
+      - zero or separately estimated conditional mean
+      - decay strictly between zero and one
+      - one-step forecast uses information through t-1 only
+    sources:
+      - source_id: book-tsay-analysis-financial-time-series
+        chapter: "3 and 10.1"
+        page: "110-139 and 506"
+    implementation:
+      - file: src/take_two_options/quantitative/calibration.py
+        symbols: [ewma_variances, fit_ewma]
+    tests:
+      - file: tests/test_quantitative_calibration.py
+        symbols: [test_ewma_is_lookahead_safe_deterministic_and_diagnosed]
+    validation_status: tested
+
+  - formula_id: FORM-GARCH-001
+    name: Stationary Gaussian GARCH(1,1)
+    statement: "h_t=omega+alpha*epsilon_(t-1)^2+beta*h_(t-1), with alpha+beta<1."
+    measure: P
+    units: squared_return_per_session
+    assumptions:
+      - finite unconditional variance
+      - Gaussian quasi-likelihood baseline
+      - standardized residuals require post-fit diagnostics
+    sources:
+      - source_id: book-tsay-analysis-financial-time-series
+        chapter: "3.5"
+        page: "131-139, equation 3.16"
+    implementation:
+      - file: src/take_two_options/quantitative/calibration.py
+        symbols: [fit_garch_11, compare_volatility_forecasts]
+    tests:
+      - file: tests/test_quantitative_calibration.py
+        symbols:
+          - test_garch_recovers_stationary_synthetic_parameters_with_diagnostics
+          - test_rolling_forecast_comparison_is_reproducible_and_labeled_synthetic
+    validation_status: tested
+
+  - formula_id: FORM-WILSON-001
+    name: Wilson binomial score interval
+    statement: "Invert the normal score test for an iid binomial proportion instead of using the symmetric Wald interval."
+    measure: not_applicable
+    units: probability
+    assumptions:
+      - independent identically distributed Bernoulli trials
+      - confidence strictly between zero and one
+      - weighted paths require another interval method
+    sources:
+      - source_id: paper-wilson-binomial-interval
+        chapter: "journal article"
+        page: "209-212; primary metadata inspected, full text blocked"
+    implementation:
+      - file: src/take_two_options/research_statistics.py
+        symbols: [wilson_interval]
+      - file: src/take_two_options/simulation/uncertainty.py
+        symbols: [estimate_probability, estimate_path_probabilities]
+    tests:
+      - file: tests/test_simulation_uncertainty.py
+        symbols:
+          - test_wilson_probability_exposes_rare_event_and_minimum_path_uncertainty
+          - test_all_canonical_path_probabilities_receive_uncertainty_sidecars
+    validation_status: tested
+
+  - formula_id: FORM-MC-SE-001
+    name: Independent-replication Monte Carlo standard error
+    statement: "For n independent replications, estimate the standard error of the sample mean as the sample standard deviation divided by sqrt(n)."
+    measure: P_or_Q_by_application
+    units: output_unit
+    assumptions:
+      - replications counted in n are independent
+      - the simulated outcome has finite variance
+      - paired antithetic paths count as one replication
+    sources:
+      - source_id: book-glasserman-monte-carlo
+        chapter: "1.1.1-1.1.3"
+        page: "1-10"
+    implementation:
+      - file: src/take_two_options/intelligence/valuation.py
+        symbols: [_empirical_metrics]
+      - file: src/take_two_options/simulation/uncertainty.py
+        symbols: [control_variate_estimate, antithetic_estimate]
+    tests:
+      - file: tests/test_intelligence_v11.py
+        symbols: [test_path_valuation_produces_full_risk_metrics_and_robustness]
+      - file: tests/test_simulation_uncertainty.py
+        symbols: [test_antithetic_pairs_are_independent_replications_for_standard_error]
+    validation_status: tested
+
+  - formula_id: FORM-MC-CI-001
+    name: Asymptotic Monte Carlo mean interval
+    statement: "Report the Monte Carlo sample mean plus or minus 1.96 estimated standard errors as an asymptotic 95% simulation-error interval."
+    measure: P_or_Q_by_application
+    units: output_unit
+    assumptions:
+      - independent finite-variance replications
+      - enough replications for the central-limit approximation
+      - interval represents Monte Carlo error, not model or parameter uncertainty
+    sources:
+      - source_id: book-glasserman-monte-carlo
+        chapter: "1.1.2-1.1.3"
+        page: "5-10"
+    implementation:
+      - file: src/take_two_options/intelligence/valuation.py
+        symbols: [_empirical_metrics]
+    tests:
+      - file: tests/test_intelligence_v11.py
+        symbols: [test_path_valuation_produces_full_risk_metrics_and_robustness]
+    validation_status: tested
+
+  - formula_id: FORM-BOOTSTRAP-001
+    name: IID percentile bootstrap interval
+    statement: "Resample observations with replacement, recompute the statistic, and use empirical alpha/2 and 1-alpha/2 quantiles of the bootstrap statistics."
+    measure: P
+    units: statistic_dependent
+    assumptions:
+      - observations are iid or exchangeable for the target statistic
+      - the empirical distribution is an adequate plug-in approximation
+      - the interval is approximate and sample size is adequate
+    sources:
+      - source_id: book-wasserman-all-statistics
+        chapter: "8.1-8.3"
+        page: "107-114"
+    implementation:
+      - file: src/take_two_options/research_statistics.py
+        symbols: [bootstrap_interval]
+    tests:
+      - file: tests/test_research_statistics.py
+        symbols: [test_intervals_and_tail_risk_are_deterministic]
+    validation_status: tested
+
+  - formula_id: FORM-CONTROL-VARIATE-001
+    name: Linear control-variate estimator
+    statement: "Y_cv=Y-b*(X-E[X]), with sample coefficient b=Cov(X,Y)/Var(X)."
+    measure: P_or_Q_by_application
+    units: payoff_or_statistic_unit
+    assumptions:
+      - aligned finite observations
+      - known expectation of the control
+      - non-zero control variance
+      - same-sample coefficient confidence intervals are asymptotic
+    sources:
+      - source_id: book-glasserman-monte-carlo
+        chapter: "4.1"
+        page: "186-201, equations 4.1-4.5 and output analysis"
+    implementation:
+      - file: src/take_two_options/simulation/uncertainty.py
+        symbols: [control_variate_estimate]
+    tests:
+      - file: tests/test_simulation_uncertainty.py
+        symbols: [test_control_variate_reports_measured_variance_reduction]
+    validation_status: tested
+
+  - formula_id: FORM-ANTITHETIC-001
+    name: Antithetic paired estimator
+    statement: "Average each law-preserving pair (Y,Y_tilde), then average the independent pair means."
+    measure: P_or_Q_by_application
+    units: payoff_or_statistic_unit
+    assumptions:
+      - each member of a pair has the target marginal law
+      - pairs are independent across replications
+      - benefit requires negative paired-output covariance
+    sources:
+      - source_id: book-glasserman-monte-carlo
+        chapter: "4.2"
+        page: "205-207, equations 4.27-4.29"
+    implementation:
+      - file: src/take_two_options/simulation/uncertainty.py
+        symbols: [antithetic_estimate]
+    tests:
+      - file: tests/test_simulation_uncertainty.py
+        symbols: [test_antithetic_pairs_are_independent_replications_for_standard_error]
+    validation_status: tested
+
+  - formula_id: FORM-BLOCK-BOOTSTRAP-001
+    name: Circular moving-block bootstrap percentile interval
+    statement: "Resample contiguous circular blocks until the original series length is restored, then take empirical statistic quantiles."
+    measure: P
+    units: statistic_dependent
+    assumptions:
+      - stationary dependent observations
+      - declared block length and bootstrap sample count
+      - percentile interval is adequate for the stated use
+    sources:
+      - source_id: paper-kunsch-block-bootstrap
+        chapter: "primary article metadata and abstract"
+        page: "1217-1241"
+    implementation:
+      - file: src/take_two_options/simulation/uncertainty.py
+        symbols: [circular_block_bootstrap]
+    tests:
+      - file: tests/test_simulation_uncertainty.py
+        symbols: [test_circular_block_bootstrap_is_seeded_and_preserves_dependency_blocks]
+    validation_status: tested
+
+  - formula_id: FORM-PREDICTIVE-MIXTURE-001
+    name: Model/parameter predictive mixture decomposition
+    statement: "For declared weights, aggregate member means and split predictive variance into weighted within-member variance plus between-member mean variance."
+    measure: P
+    units: output_unit_and_squared_output_unit
+    assumptions:
+      - declared member weights sum to one
+      - each member represents a distinct model/parameter predictive distribution
+      - member simulations are independent for the reported Monte Carlo standard error
+      - weights are not posterior model probabilities without independent validation
+    sources:
+      - source_id: book-mcelreath-statistical-rethinking
+        chapter: "3.3 and 7.5"
+        page: "61-68 and 229-239"
+    implementation:
+      - file: src/take_two_options/quantitative/model_uncertainty.py
+        symbols: [summarize_model_ensemble]
+      - file: src/take_two_options/intelligence/valuation.py
+        symbols: [summarize_valuation_ensemble]
+    tests:
+      - file: tests/test_model_uncertainty.py
+        symbols: [test_model_ensemble_separates_within_between_and_monte_carlo_uncertainty]
+      - file: tests/test_intelligence_v11.py
+        symbols: [test_path_valuation_produces_full_risk_metrics_and_robustness]
+    validation_status: tested
+
+  - formula_id: FORM-PROBABILITY-CALIBRATION-001
+    name: Binary forecast calibration and proper-score diagnostics
+    statement: "Compare aligned binary forecasts and outcomes using squared probability error, log loss, calibration bins and weighted absolute bin gaps."
+    measure: P
+    units: probability_score
+    assumptions:
+      - point-in-time forecasts precede aligned binary outcomes
+      - sample size and dataset role are explicit
+      - bin-level Wilson intervals require iid Bernoulli outcomes
+    sources:
+      - source_id: paper-brier-probability-forecast-verification
+        chapter: "primary article"
+        page: "1-3"
+      - source_id: book-mcelreath-statistical-rethinking
+        chapter: "7.2-7.5"
+        page: "206-239"
+    implementation:
+      - file: src/take_two_options/quantitative/probability_calibration.py
+        symbols: [evaluate_binary_calibration]
+      - file: src/take_two_options/intelligence/backtesting.py
+        symbols: [run_walk_forward]
+    tests:
+      - file: tests/test_model_uncertainty.py
+        symbols:
+          - test_calibration_curve_and_scores_distinguish_calibrated_synthetic_forecasts
+          - test_calibration_stays_insufficient_and_holdout_identity_is_mandatory
+    validation_status: tested
+
+  - formula_id: FORM-SCENARIO-MIXTURE-001
+    name: Conditional event-scenario mixture and bounded belief sensitivity
+    statement: "For exhaustive scenarios, E[X] is the sum of p_s times the conditional scenario outcome; lower and upper values optimize this linear mixture over normalized probability vectors inside declared bounds."
+    measure: P
+    units: outcome_unit_or_probability
+    assumptions:
+      - scenarios are mutually exclusive and exhaustive for the configured decision set
+      - central probabilities sum to one
+      - interval bounds admit at least one normalized probability vector
+      - conditional outcomes are priced upstream and remain fixed during belief sensitivity
+      - user/configured ranges are not confidence intervals
+    sources:
+      - source_id: book-blitzstein-hwang-introduction-probability
+        chapter: "2.3-2.4"
+        page: "54-60"
+    implementation:
+      - file: src/take_two_options/intelligence/event_scenarios.py
+        symbols: [evaluate_event_scenarios]
+    tests:
+      - file: tests/test_sequential_event_decision.py
+        symbols: [test_event_scenario_evaluation_propagates_belief_bounds_and_no_trade]
+    validation_status: tested
+
+  - formula_id: FORM-BELIEF-SWITCH-001
+    name: One-scenario expected-PnL preference threshold
+    statement: "Solve the linear expected-PnL difference for one scenario probability while preserving the central relative proportions of every residual scenario."
+    measure: P
+    units: probability
+    assumptions:
+      - the selected scenario probability is the only varied belief
+      - residual beliefs retain their central relative proportions
+      - conditional candidate PnLs remain fixed
+      - the threshold is reported only when the root lies in zero to one
+    sources:
+      - source_id: book-blitzstein-hwang-introduction-probability
+        chapter: "2.3-2.4"
+        page: "54-60"
+    implementation:
+      - file: src/take_two_options/intelligence/event_scenarios.py
+        symbols: [scenario_probability_switch_threshold]
+    tests:
+      - file: tests/test_sequential_event_decision.py
+        symbols: [test_belief_switch_threshold_is_analytic_and_explicit]
+    validation_status: tested
+
+  - formula_id: FORM-PARETO-DOMINANCE-001
+    name: Non-compensatory allocation Pareto dominance
+    statement: "Allocation A dominates B only when A is no worse on both return objectives and every risk/cost objective, and is strictly better on at least one."
+    measure: not_applicable
+    units: budget_normalized_objective_vector
+    assumptions:
+      - every compared point is integer-feasible under the same policy
+      - expected and worst-case returns are maximized
+      - volatility, CVaR, cost, maximum loss, execution risk and model dispersion are minimized
+      - the all-zero cash/NO_TRADE allocation belongs to the feasible set
+    sources:
+      - source_id: book-boyd-vandenberghe-convex-optimization
+        chapter: "4.7.3-4.7.5"
+        page: "177-184"
+    implementation:
+      - file: src/take_two_options/optimization/allocation_pareto.py
+        symbols: [dominates_allocation, allocation_pareto_frontier]
+    tests:
+      - file: tests/test_allocation_pareto.py
+        symbols: [test_exact_pareto_frontier_removes_dominated_points_and_preserves_cash]
+    validation_status: tested
+
+  - formula_id: FORM-ROBUST-ALLOCATION-OBJECTIVE-001
+    name: Versioned scalar allocation utility
+    statement: "Normalize selected expected return by budget and subtract declared variance, CVaR, execution and model-dispersion penalties."
+    measure: P_for_member_forecasts
+    units: dimensionless_utility
+    assumptions:
+      - objective kind and coefficient version are explicit
+      - scenario weights carry explicit heuristic or validated-OOS semantics
+      - scalar ranking does not replace the full Pareto frontier
+      - whole-contract constraints are enforced before scoring
+    sources:
+      - source_id: book-boyd-vandenberghe-convex-optimization
+        chapter: "4.7.4-4.7.5"
+        page: "178-184"
+    implementation:
+      - file: src/take_two_options/optimization/allocation_pareto.py
+        symbols: [OptimizationObjectiveContract, evaluate_scalar_objective]
+      - file: src/take_two_options/intelligence/optimizer.py
+        symbols: [optimize_allocations_with_frontier]
+    tests:
+      - file: tests/test_allocation_pareto.py
+        symbols: [test_versioned_objectives_select_weighted_or_worst_case_expectation]
+    validation_status: tested
+
+  - formula_id: FORM-PBO-001
+    name: Combinatorially symmetric probability of backtest overfitting diagnostic
+    statement: "Across symmetric train/test fold combinations, measure how often the in-sample winner ranks below the OOS median."
+    measure: not_applicable
+    units: probability
+    assumptions:
+      - strategies share the same even number of folds
+      - fold performance is comparable across strategies
+      - ties use order-invariant midranks and tied-winner averaging
+    sources:
+      - source_id: paper-bailey-borwein-lopez-zhu-pbo
+        chapter: "primary article metadata and method"
+        page: null
+    implementation:
+      - file: src/take_two_options/validation/pbo.py
+        symbols: [probability_of_backtest_overfitting]
+    tests:
+      - file: tests/test_validation_protocol_v10.py
+        symbols: [test_pbo_ties_are_order_invariant_and_midranked]
+    validation_status: tested
+
+  - formula_id: FORM-PLACEBO-001
+    name: Signal-alignment permutation placebo
+    statement: "Permute signal labels against fixed realized returns and compare the observed aligned statistic with the null distribution."
+    measure: P
+    units: return_per_observation
+    assumptions:
+      - signals and returns are aligned and equal length
+      - permutation exchangeability is defensible
+      - the full tested signal history is supplied
+    sources:
+      - source_id: book-wasserman-all-statistics
+        chapter: "resampling and hypothesis testing"
+        page: null
+    implementation:
+      - file: src/take_two_options/validation/placebo.py
+        symbols: [placebo_diagnostics]
+    tests:
+      - file: tests/test_validation_protocol_v10.py
+        symbols:
+          - test_placebo_uses_signal_alignment_and_has_power_on_synthetic_signal
+          - test_placebo_null_is_deterministic_and_not_forced_to_pass
+    validation_status: tested
+
+  - formula_id: FORM-DSR-001
+    name: Approximate deflated Sharpe probability
+    statement: "Adjust an observed Sharpe statistic for the number of trials, skewness and kurtosis."
+    measure: P
+    units: probability
+    assumptions:
+      - complete trial count
+      - at least three observed returns
+      - approximation documented by the implementation
+    sources:
+      - source_id: paper-bailey-lopez-deflated-sharpe
+        chapter: "primary article"
+        page: null
+    implementation:
+      - file: src/take_two_options/research_statistics.py
+        symbols: [deflated_sharpe_probability]
+    tests:
+      - file: tests/test_research_statistics.py
+        symbols: [test_win_rate_and_multiple_testing_diagnostics_are_bounded]
+    validation_status: tested

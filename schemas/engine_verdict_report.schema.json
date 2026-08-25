@@ -1,0 +1,219 @@
+{
+  "$defs": {
+    "EngineValueVerdict": {
+      "enum": [
+        "ENGINE_ADDS_VALUE",
+        "ENGINE_NOT_PROVEN_SUPERIOR",
+        "PROMISING_BUT_NOT_PROVEN",
+        "BLOCKED_BY_DATA",
+        "VALIDATION_FAILED"
+      ],
+      "title": "EngineValueVerdict",
+      "type": "string"
+    },
+    "VerdictMetricSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "cvar_95": {
+          "minimum": 0,
+          "title": "Cvar 95",
+          "type": "number"
+        },
+        "dataset_role": {
+          "enum": [
+            "full_development",
+            "walk_forward_oos"
+          ],
+          "title": "Dataset Role",
+          "type": "string"
+        },
+        "expected_return": {
+          "title": "Expected Return",
+          "type": "number"
+        },
+        "maximum_drawdown": {
+          "minimum": 0,
+          "title": "Maximum Drawdown",
+          "type": "number"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "probability_profit": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Profit",
+          "type": "number"
+        },
+        "strategy": {
+          "title": "Strategy",
+          "type": "string"
+        },
+        "total_return": {
+          "title": "Total Return",
+          "type": "number"
+        }
+      },
+      "required": [
+        "dataset_role",
+        "strategy",
+        "observations",
+        "total_return",
+        "expected_return",
+        "cvar_95",
+        "maximum_drawdown",
+        "probability_profit"
+      ],
+      "title": "VerdictMetricSnapshot",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/engine_verdict_report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "best_simple_baseline_full": {
+      "$ref": "#/$defs/VerdictMetricSnapshot"
+    },
+    "best_simple_baseline_oos": {
+      "$ref": "#/$defs/VerdictMetricSnapshot"
+    },
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "compared_baselines": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Compared Baselines",
+      "type": "array"
+    },
+    "deflated_sharpe_probability": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Deflated Sharpe Probability"
+    },
+    "derivation_rule": {
+      "title": "Derivation Rule",
+      "type": "string"
+    },
+    "derivation_rule_version": {
+      "const": "pre-opra-engine-value-v1",
+      "title": "Derivation Rule Version",
+      "type": "string"
+    },
+    "development_classification": {
+      "title": "Development Classification",
+      "type": "string"
+    },
+    "engine_full_development": {
+      "$ref": "#/$defs/VerdictMetricSnapshot"
+    },
+    "engine_walk_forward_oos": {
+      "$ref": "#/$defs/VerdictMetricSnapshot"
+    },
+    "formal_sample_policy_satisfied": {
+      "title": "Formal Sample Policy Satisfied",
+      "type": "boolean"
+    },
+    "holdout_state": {
+      "const": "UNOPENED",
+      "default": "UNOPENED",
+      "title": "Holdout State",
+      "type": "string"
+    },
+    "holdout_used": {
+      "const": false,
+      "default": false,
+      "title": "Holdout Used",
+      "type": "boolean"
+    },
+    "holm_superiority_rejections": {
+      "minimum": 0,
+      "title": "Holm Superiority Rejections",
+      "type": "integer"
+    },
+    "no_position_recommended": {
+      "title": "No Position Recommended",
+      "type": "boolean"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "probability_backtest_overfitting": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Probability Backtest Overfitting"
+    },
+    "report_id": {
+      "title": "Report Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "const": "DERIVED_DEVELOPMENT_VERDICT",
+      "title": "Status",
+      "type": "string"
+    },
+    "ticker": {
+      "title": "Ticker",
+      "type": "string"
+    },
+    "verdict": {
+      "$ref": "#/$defs/EngineValueVerdict"
+    }
+  },
+  "required": [
+    "report_id",
+    "ticker",
+    "status",
+    "verdict",
+    "derivation_rule_version",
+    "derivation_rule",
+    "engine_full_development",
+    "engine_walk_forward_oos",
+    "best_simple_baseline_full",
+    "best_simple_baseline_oos",
+    "compared_baselines",
+    "holm_superiority_rejections",
+    "formal_sample_policy_satisfied",
+    "development_classification",
+    "no_position_recommended",
+    "blockers"
+  ],
+  "title": "EngineVerdictReport",
+  "type": "object"
+}

@@ -1,0 +1,657 @@
+{
+  "$defs": {
+    "ChronologicalVolatilityComparison": {
+      "additionalProperties": false,
+      "properties": {
+        "best_by_predictive_nll": {
+          "title": "Best By Predictive Nll",
+          "type": "string"
+        },
+        "best_by_qlike": {
+          "title": "Best By Qlike",
+          "type": "string"
+        },
+        "evaluations": {
+          "items": {
+            "$ref": "#/$defs/VolatilityForecastEvaluation"
+          },
+          "minItems": 3,
+          "title": "Evaluations",
+          "type": "array"
+        },
+        "ewma_decay_selected_on_train": {
+          "exclusiveMaximum": 1,
+          "exclusiveMinimum": 0,
+          "title": "Ewma Decay Selected On Train",
+          "type": "number"
+        },
+        "final_holdout_used": {
+          "const": false,
+          "default": false,
+          "title": "Final Holdout Used",
+          "type": "boolean"
+        },
+        "historical_window": {
+          "exclusiveMinimum": 1,
+          "title": "Historical Window",
+          "type": "integer"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "method": {
+          "const": "single_frozen_train_then_sequential_forecast",
+          "title": "Method",
+          "type": "string"
+        },
+        "test_observations": {
+          "exclusiveMinimum": 0,
+          "title": "Test Observations",
+          "type": "integer"
+        },
+        "train_observations": {
+          "minimum": 100,
+          "title": "Train Observations",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "method",
+        "train_observations",
+        "test_observations",
+        "historical_window",
+        "ewma_decay_selected_on_train",
+        "evaluations",
+        "best_by_qlike",
+        "best_by_predictive_nll",
+        "limitations"
+      ],
+      "title": "ChronologicalVolatilityComparison",
+      "type": "object"
+    },
+    "EmpiricalReturnDiagnostics": {
+      "additionalProperties": false,
+      "properties": {
+        "annualized_log_mean": {
+          "title": "Annualized Log Mean",
+          "type": "number"
+        },
+        "annualized_realized_volatility": {
+          "minimum": 0,
+          "title": "Annualized Realized Volatility",
+          "type": "number"
+        },
+        "arithmetic_mean_daily": {
+          "title": "Arithmetic Mean Daily",
+          "type": "number"
+        },
+        "bootstrap_annualized_log_mean": {
+          "$ref": "#/$defs/Interval"
+        },
+        "bootstrap_annualized_volatility": {
+          "$ref": "#/$defs/Interval"
+        },
+        "bootstrap_block_size": {
+          "exclusiveMinimum": 0,
+          "title": "Bootstrap Block Size",
+          "type": "integer"
+        },
+        "bootstrap_draws": {
+          "exclusiveMinimum": 0,
+          "title": "Bootstrap Draws",
+          "type": "integer"
+        },
+        "bootstrap_maximum_drawdown": {
+          "$ref": "#/$defs/Interval"
+        },
+        "coverage_end": {
+          "format": "date-time",
+          "title": "Coverage End",
+          "type": "string"
+        },
+        "coverage_start": {
+          "format": "date-time",
+          "title": "Coverage Start",
+          "type": "string"
+        },
+        "excess_kurtosis": {
+          "title": "Excess Kurtosis",
+          "type": "number"
+        },
+        "largest_negative_gap": {
+          "title": "Largest Negative Gap",
+          "type": "number"
+        },
+        "largest_positive_gap": {
+          "title": "Largest Positive Gap",
+          "type": "number"
+        },
+        "log_mean_daily": {
+          "title": "Log Mean Daily",
+          "type": "number"
+        },
+        "maximum_drawdown": {
+          "minimum": 0,
+          "title": "Maximum Drawdown",
+          "type": "number"
+        },
+        "price_observations": {
+          "minimum": 0,
+          "title": "Price Observations",
+          "type": "integer"
+        },
+        "return_observations": {
+          "minimum": 0,
+          "title": "Return Observations",
+          "type": "integer"
+        },
+        "seed": {
+          "title": "Seed",
+          "type": "integer"
+        },
+        "skewness": {
+          "title": "Skewness",
+          "type": "number"
+        }
+      },
+      "required": [
+        "price_observations",
+        "return_observations",
+        "coverage_start",
+        "coverage_end",
+        "arithmetic_mean_daily",
+        "log_mean_daily",
+        "annualized_log_mean",
+        "annualized_realized_volatility",
+        "skewness",
+        "excess_kurtosis",
+        "largest_negative_gap",
+        "largest_positive_gap",
+        "maximum_drawdown",
+        "bootstrap_annualized_log_mean",
+        "bootstrap_annualized_volatility",
+        "bootstrap_maximum_drawdown",
+        "bootstrap_draws",
+        "bootstrap_block_size",
+        "seed"
+      ],
+      "title": "EmpiricalReturnDiagnostics",
+      "type": "object"
+    },
+    "Interval": {
+      "additionalProperties": false,
+      "properties": {
+        "central": {
+          "title": "Central",
+          "type": "number"
+        },
+        "lower": {
+          "title": "Lower",
+          "type": "number"
+        },
+        "upper": {
+          "title": "Upper",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lower",
+        "central",
+        "upper"
+      ],
+      "title": "Interval",
+      "type": "object"
+    },
+    "LjungBoxDiagnostic": {
+      "additionalProperties": false,
+      "properties": {
+        "lags": {
+          "exclusiveMinimum": 0,
+          "title": "Lags",
+          "type": "integer"
+        },
+        "p_value": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "P Value",
+          "type": "number"
+        },
+        "series": {
+          "enum": [
+            "standardized_residuals",
+            "squared_standardized_residuals"
+          ],
+          "title": "Series",
+          "type": "string"
+        },
+        "statistic": {
+          "minimum": 0,
+          "title": "Statistic",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lags",
+        "statistic",
+        "p_value",
+        "series"
+      ],
+      "title": "LjungBoxDiagnostic",
+      "type": "object"
+    },
+    "VarCoverageDiagnostic": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "exclusiveMaximum": 1,
+          "exclusiveMinimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "expected_breaches": {
+          "minimum": 0,
+          "title": "Expected Breaches",
+          "type": "number"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "observed_breaches": {
+          "minimum": 0,
+          "title": "Observed Breaches",
+          "type": "integer"
+        },
+        "observed_rate": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Observed Rate",
+          "type": "number"
+        }
+      },
+      "required": [
+        "confidence",
+        "observations",
+        "expected_breaches",
+        "observed_breaches",
+        "observed_rate"
+      ],
+      "title": "VarCoverageDiagnostic",
+      "type": "object"
+    },
+    "VolatilityForecastEvaluation": {
+      "additionalProperties": false,
+      "properties": {
+        "gaussian_predictive_nll": {
+          "title": "Gaussian Predictive Nll",
+          "type": "number"
+        },
+        "mean_squared_variance_error": {
+          "minimum": 0,
+          "title": "Mean Squared Variance Error",
+          "type": "number"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "qlike": {
+          "title": "Qlike",
+          "type": "number"
+        },
+        "var_95_breach_rate": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Var 95 Breach Rate",
+          "type": "number"
+        },
+        "var_95_breaches": {
+          "minimum": 0,
+          "title": "Var 95 Breaches",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "model_id",
+        "observations",
+        "mean_squared_variance_error",
+        "qlike",
+        "gaussian_predictive_nll",
+        "var_95_breaches",
+        "var_95_breach_rate"
+      ],
+      "title": "VolatilityForecastEvaluation",
+      "type": "object"
+    },
+    "VolatilityModelFit": {
+      "additionalProperties": false,
+      "properties": {
+        "aic": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Aic"
+        },
+        "bic": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bic"
+        },
+        "converged": {
+          "title": "Converged",
+          "type": "boolean"
+        },
+        "diagnostics": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        },
+        "family": {
+          "enum": [
+            "garch_11",
+            "gjr_garch_11"
+          ],
+          "title": "Family",
+          "type": "string"
+        },
+        "innovation": {
+          "enum": [
+            "gaussian",
+            "student_t"
+          ],
+          "title": "Innovation",
+          "type": "string"
+        },
+        "log_likelihood": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Log Likelihood"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "observations": {
+          "minimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "one_step_variance_forecast": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "One Step Variance Forecast"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Parameters",
+          "type": "object"
+        },
+        "residual_ljung_box": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LjungBoxDiagnostic"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "squared_residual_ljung_box": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LjungBoxDiagnostic"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "standard_error_status": {
+          "enum": [
+            "estimated",
+            "not_calculable"
+          ],
+          "title": "Standard Error Status",
+          "type": "string"
+        },
+        "standard_errors": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Standard Errors",
+          "type": "object"
+        },
+        "starts_evaluated": {
+          "minimum": 0,
+          "title": "Starts Evaluated",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "diagnostic_fit_license_blocked",
+            "fit_pending_walk_forward",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "var_coverage_95": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VarCoverageDiagnostic"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "model_id",
+        "family",
+        "innovation",
+        "status",
+        "observations",
+        "parameters",
+        "standard_errors",
+        "standard_error_status",
+        "log_likelihood",
+        "aic",
+        "bic",
+        "converged",
+        "starts_evaluated",
+        "residual_ljung_box",
+        "squared_residual_ljung_box",
+        "var_coverage_95",
+        "diagnostics"
+      ],
+      "title": "VolatilityModelFit",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/empirical_calibration.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "chronological_oos": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ChronologicalVolatilityComparison"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "dataset_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Dataset Hash",
+      "type": "string"
+    },
+    "dataset_role": {
+      "enum": [
+        "development_diagnostic",
+        "walk_forward",
+        "final_holdout"
+      ],
+      "title": "Dataset Role",
+      "type": "string"
+    },
+    "decision_cutoff": {
+      "format": "date-time",
+      "title": "Decision Cutoff",
+      "type": "string"
+    },
+    "empirical": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EmpiricalReturnDiagnostics"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "heston_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Heston Reasons",
+      "type": "array"
+    },
+    "heston_status": {
+      "const": "BLOCKED_INSUFFICIENT_CALIBRATION_DATA",
+      "title": "Heston Status",
+      "type": "string"
+    },
+    "license_status": {
+      "enum": [
+        "authorized_internal",
+        "to_review"
+      ],
+      "title": "License Status",
+      "type": "string"
+    },
+    "model_addition_decisions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Model Addition Decisions",
+      "type": "array"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "report_id": {
+      "title": "Report Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Source Ids",
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "DIAGNOSTIC_ONLY_LICENSE_REVIEW",
+        "FIT_PENDING_WALK_FORWARD",
+        "BLOCKED_INSUFFICIENT_DATA"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "ticker": {
+      "title": "Ticker",
+      "type": "string"
+    },
+    "volatility_models": {
+      "items": {
+        "$ref": "#/$defs/VolatilityModelFit"
+      },
+      "title": "Volatility Models",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "report_id",
+    "ticker",
+    "generated_at",
+    "decision_cutoff",
+    "source_ids",
+    "dataset_hash",
+    "dataset_role",
+    "license_status",
+    "status",
+    "empirical",
+    "volatility_models",
+    "heston_status",
+    "blockers"
+  ],
+  "title": "EmpiricalCalibrationReport",
+  "type": "object"
+}

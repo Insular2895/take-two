@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "report_date": "2026-08-24",
+  "phase": "M0_GREEKS_CARRY_TRADE_ECONOMICS",
+  "status": "COMPLETE_PRE_OPRA",
+  "next_phase": "M — OPRA READ-ONLY LIVE DATA + SHADOW/PAPER VALIDATION",
+  "boundaries": {
+    "research_only": true,
+    "opra_connection_attempted": false,
+    "paper_phase_started": false,
+    "holdout_dataset_accessed": false,
+    "holdout_ledger_state_verified": "UNOPENED",
+    "transmit": false,
+    "what_if": true,
+    "order_capability": "forbidden"
+  },
+  "initial_state": {
+    "foundation_present": true,
+    "status": "PARTIAL_FOUNDATION_PRESENT",
+    "audit": "docs/audits/M0_GREEKS_CARRY_CURRENT_STATE_AUDIT.md"
+  },
+  "features": [
+    "same-pricer advanced Greeks with numerical confidence",
+    "full-repriced flat-spot carry",
+    "Spot x Time x IV scenario matrices",
+    "generic multi-root breakeven clock and target timing",
+    "entry, exit and round-trip trade costs",
+    "null-safe margin and FX attribution",
+    "pathwise measure-P touch probability contract",
+    "exact Shapley full-repricing PnL attribution",
+    "dividend treatment and rate-curve guards",
+    "base, parallel and curve-shape rate stresses",
+    "versioned TradeEconomicsTicket and human renderer"
+  ],
+  "validation": {
+    "pytest": {
+      "status": "passed",
+      "tests_passed": 276,
+      "warnings": 1,
+      "warning_scope": "third-party websockets.legacy deprecation"
+    },
+    "ruff": "passed",
+    "mypy": {
+      "status": "passed",
+      "source_files": 165
+    },
+    "json_schemas": {
+      "status": "verified",
+      "count": 27
+    },
+    "quantlib_version": "1.43"
+  },
+  "golden_artifacts": [
+    "reports/examples/m0_trade_economics_ticket.json",
+    "reports/examples/m0_trade_economics_ticket.md"
+  ],
+  "documentation": [
+    "docs/specs/M0_GREEKS_CARRY_TRADE_ECONOMICS.md",
+    "docs/audits/M0_GREEKS_CARRY_CURRENT_STATE_AUDIT.md",
+    "docs/research/M0_GREEK_CONVENTIONS.md",
+    "docs/research/M0_2026_VALIDITY_AUDIT.md",
+    "docs/LIMITATIONS.md",
+    "docs/READINESS.md",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "book_sources": [
+    "B-NATENBERG-1994",
+    "B-PASSARELLI-2012",
+    "B-HULL-2021",
+    "B-GLASSERMAN-2003",
+    "R-GREEKS-001",
+    "R-GREEKS-002",
+    "R-GREEKS-003",
+    "R-GREEKS-004"
+  ],
+  "pending_opra_or_broker": [
+    "real-time NBBO and quote freshness",
+    "market depth and provider Greek conventions",
+    "observed combo quote and execution",
+    "broker what-if margin and commissions",
+    "account-specific FX handling"
+  ],
+  "pending_paper_validation": [
+    "actual fills and exit spread/slippage",
+    "prospective execution quality",
+    "touch-probability calibration",
+    "strategy-performance claims"
+  ]
+}

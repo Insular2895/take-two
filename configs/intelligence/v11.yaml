@@ -1,0 +1,277 @@
+policy_id: ttwo-probabilistic-strategy-intelligence-v11
+source_status: calibration_required
+
+# Experimental research priors. They are inputs to test, not observed frequencies.
+scenario_priors:
+  market_base: 0.35
+  gta_success: 0.35
+  delay_or_guidance_down: 0.20
+  rupture: 0.10
+scenario_regime_map:
+  market_base: neutral
+  gta_success: thesis
+  delay_or_guidance_down: adverse
+  rupture: rupture
+
+family_weight_caps:
+  company_primary: 1.00
+  regulatory: 0.80
+  fundamentals: 0.75
+  market: 0.60
+  options: 0.60
+  attention: 0.30
+  news: 0.25
+  social: 0.15
+
+# Deterministic rules only. Text/catalyst matches remain pending human review and
+# cannot update Bayes until an approved normalized event is supplied.
+event_normalization_rules:
+  - rule_id: trends-attention-up-v1
+    series_pattern: "GOOGLE_TRENDS.*"
+    event_type: EVENT_SEARCH_INTEREST_UP
+    family: attention
+    operator: greater_than
+    threshold: 60
+    expected_unit: consistently_scaled_search_interest
+    direction: supports
+    severity: 0.35
+    confidence: 0.40
+    ttl_days: 14
+    requires_human_review: false
+  - rule_id: option-iv-spike-v1
+    series_pattern: "option.*.implied_volatility"
+    event_type: EVENT_IV_SPIKE
+    family: options
+    operator: greater_than
+    threshold: 0.60
+    expected_unit: annual_decimal
+    direction: supports
+    severity: 0.55
+    confidence: 0.45
+    ttl_days: 5
+    requires_human_review: false
+  - rule_id: official-delay-text-v1
+    series_pattern: "TTWO.official_news"
+    event_type: EVENT_GTA_DELAY_CONFIRMED
+    family: company_primary
+    operator: contains_all_tokens
+    threshold: "Grand Theft Auto delay"
+    expected_unit: headline
+    direction: supports
+    severity: 1.0
+    confidence: 0.80
+    ttl_days: 90
+    requires_human_review: true
+    contradiction_group: gta_release_timing
+
+likelihood_rules:
+  - rule_id: likelihood-gta-delay-company-v1
+    event_type: EVENT_GTA_DELAY_CONFIRMED
+    family: company_primary
+    base_weight: 1.0
+    likelihood_by_scenario:
+      market_base: 0.05
+      gta_success: 0.01
+      delay_or_guidance_down: 0.90
+      rupture: 0.35
+  - rule_id: likelihood-release-maintained-company-v1
+    event_type: EVENT_RELEASE_DATE_MAINTAINED
+    family: company_primary
+    base_weight: 0.8
+    likelihood_by_scenario:
+      market_base: 0.55
+      gta_success: 0.80
+      delay_or_guidance_down: 0.15
+      rupture: 0.30
+  - rule_id: likelihood-guidance-up-fundamentals-v1
+    event_type: EVENT_GUIDANCE_UP
+    family: fundamentals
+    base_weight: 0.8
+    likelihood_by_scenario:
+      market_base: 0.45
+      gta_success: 0.80
+      delay_or_guidance_down: 0.10
+      rupture: 0.35
+  - rule_id: likelihood-guidance-down-fundamentals-v1
+    event_type: EVENT_GUIDANCE_DOWN
+    family: fundamentals
+    base_weight: 0.8
+    likelihood_by_scenario:
+      market_base: 0.25
+      gta_success: 0.08
+      delay_or_guidance_down: 0.80
+      rupture: 0.50
+  - rule_id: likelihood-insider-buy-regulatory-v1
+    event_type: EVENT_INSIDER_BUY
+    family: regulatory
+    base_weight: 0.4
+    likelihood_by_scenario:
+      market_base: 0.45
+      gta_success: 0.65
+      delay_or_guidance_down: 0.25
+      rupture: 0.35
+  - rule_id: likelihood-search-interest-attention-v1
+    event_type: EVENT_SEARCH_INTEREST_UP
+    family: attention
+    base_weight: 0.25
+    likelihood_by_scenario:
+      market_base: 0.50
+      gta_success: 0.65
+      delay_or_guidance_down: 0.35
+      rupture: 0.50
+  - rule_id: likelihood-iv-spike-options-v1
+    event_type: EVENT_IV_SPIKE
+    family: options
+    base_weight: 0.35
+    likelihood_by_scenario:
+      market_base: 0.30
+      gta_success: 0.55
+      delay_or_guidance_down: 0.50
+      rupture: 0.80
+  - rule_id: likelihood-options-flow-options-v1
+    event_type: EVENT_OPTIONS_FLOW_BULLISH
+    family: options
+    base_weight: 0.30
+    likelihood_by_scenario:
+      market_base: 0.45
+      gta_success: 0.65
+      delay_or_guidance_down: 0.25
+      rupture: 0.45
+
+simulation:
+  paths: 1000
+  horizon_days: 180
+  steps: 90
+  seed: 20260728
+  initial_volatility: 0.35
+  risk_free_rate: 0.04
+  dividend_yield: 0.0
+  models:
+    - black_scholes_gbm
+    - local_volatility
+    - heston
+    - heston_jump
+  regimes:
+    - regime: neutral
+      probability: 0.35
+      annual_drift: 0.06
+      volatility_multiplier: 1.0
+      initial_iv_shift: 0.0
+      jump:
+        intensity_per_year: 0.10
+        log_mean: 0.0
+        log_volatility: 0.05
+      description: Market-implied control with limited event jumps.
+    - regime: thesis
+      probability: 0.35
+      annual_drift: 0.18
+      volatility_multiplier: 1.05
+      initial_iv_shift: 0.10
+      jump:
+        intensity_per_year: 0.80
+        log_mean: 0.08
+        log_volatility: 0.10
+      description: User-thesis sensitivity case; not a validated forecast.
+    - regime: adverse
+      probability: 0.20
+      annual_drift: -0.15
+      volatility_multiplier: 1.30
+      initial_iv_shift: 0.25
+      jump:
+        intensity_per_year: 0.80
+        log_mean: -0.15
+        log_volatility: 0.12
+      description: Delay, guidance contraction, rates, and poor execution stress.
+    - regime: rupture
+      probability: 0.10
+      annual_drift: 0.0
+      volatility_multiplier: 1.80
+      initial_iv_shift: 0.50
+      jump:
+        intensity_per_year: 1.20
+        log_mean: -0.03
+        log_volatility: 0.30
+      description: Two-sided extreme event sensitivity case.
+  heston:
+    initial_variance: 0.1225
+    mean_reversion: 2.0
+    long_run_variance: 0.1225
+    vol_of_variance: 0.45
+    correlation: -0.55
+    calibration_status: illustrative
+  local_volatility_nodes:
+    - {time_years: 0.0, moneyness: 0.70, volatility: 0.43}
+    - {time_years: 0.0, moneyness: 1.00, volatility: 0.35}
+    - {time_years: 0.0, moneyness: 1.30, volatility: 0.39}
+    - {time_years: 0.5, moneyness: 0.70, volatility: 0.41}
+    - {time_years: 0.5, moneyness: 1.00, volatility: 0.34}
+    - {time_years: 0.5, moneyness: 1.30, volatility: 0.38}
+    - {time_years: 1.0, moneyness: 0.70, volatility: 0.39}
+    - {time_years: 1.0, moneyness: 1.00, volatility: 0.33}
+    - {time_years: 1.0, moneyness: 1.30, volatility: 0.37}
+
+covariance_windows: [20, 60, 252]
+covariance_shrinkage: 0.25
+budget_eur: 1000
+maximum_loss_eur: 1000
+maximum_contracts: 4
+maximum_positions: 2
+maximum_concentration: 1.0
+minimum_liquidity_score: 0.05
+maximum_relative_spread: 0.45
+delta_exposure_range: [-1000, 1000]
+gamma_exposure_range: [-1000, 1000]
+vega_exposure_range: [-5000, 5000]
+theta_exposure_range: [-5000, 1000]
+allow_multiple_strategies: true
+candidate_pool_size: 6
+optimizer_profiles:
+  prudent:
+    risk_aversion: 1.20
+    cvar_aversion: 1.00
+    execution_penalty: 0.80
+    model_risk_penalty: 0.80
+    maximum_allocations: 5
+  balanced:
+    risk_aversion: 0.65
+    cvar_aversion: 0.65
+    execution_penalty: 0.45
+    model_risk_penalty: 0.50
+    maximum_allocations: 5
+  aggressive:
+    risk_aversion: 0.25
+    cvar_aversion: 0.30
+    execution_penalty: 0.25
+    model_risk_penalty: 0.25
+    maximum_allocations: 5
+
+exit_policy:
+  profit_target: 1.50
+  partial_profit_target: 0.80
+  operational_stop_loss: 0.70
+  exit_days_before_expiration: 60
+  iv_crush_threshold: 0.35
+  trailing_drawdown: 0.30
+  maximum_theta_loss_per_day_usd: 200
+  minimum_liquidity_score: 0.05
+  maximum_cvar_fraction: 0.80
+  exit_if_expected_value_negative: true
+  exit_if_data_insufficient: true
+  exit_before_catalyst_days: 5
+  exit_after_catalyst_days: 3
+
+required_series:
+  - TTWO.spot
+  - EURUSD
+  - USD.risk_free_rate
+  - TTWO.dividend_yield
+  - US.market_calendar
+
+freshness_hours_by_domain:
+  market: 24
+  options: 24
+  execution: 1
+  attention: 168
+  catalyst: 720
+  fundamental: 2880
+  macro: 336

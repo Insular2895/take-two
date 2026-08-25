@@ -1,0 +1,294 @@
+{
+  "schema_version": "1.0",
+  "report_id": "ttwo-severity-gates-v2",
+  "ticker": "TTWO",
+  "status": "DEVELOPMENT_ANALYSIS_READY",
+  "candidate_id": "engine_candidate",
+  "payoff_severity": {
+    "observations": 10,
+    "mean_return": -0.012664664703304278,
+    "median_return": -0.072012523917203,
+    "worst_return": -0.8467353951890036,
+    "cvar_95_loss": 0.8467353951890036,
+    "probability_profit": 0.2,
+    "severe_loss_ladder": [
+      {
+        "loss_threshold": 0.1,
+        "probability": 0.5,
+        "observations": 10,
+        "wilson_interval_95": [
+          0.236593090512564,
+          0.7634069094874361
+        ],
+        "bootstrap_interval_95": [
+          0.2,
+          0.8
+        ],
+        "bootstrap_samples": 2000
+      },
+      {
+        "loss_threshold": 0.25,
+        "probability": 0.3,
+        "observations": 10,
+        "wilson_interval_95": [
+          0.10779126740630099,
+          0.6032218525388546
+        ],
+        "bootstrap_interval_95": [
+          0.0,
+          0.6
+        ],
+        "bootstrap_samples": 2000
+      },
+      {
+        "loss_threshold": 0.5,
+        "probability": 0.2,
+        "observations": 10,
+        "wilson_interval_95": [
+          0.05668215145437519,
+          0.5098375284633583
+        ],
+        "bootstrap_interval_95": [
+          0.0,
+          0.5
+        ],
+        "bootstrap_samples": 2000
+      },
+      {
+        "loss_threshold": 0.7,
+        "probability": 0.1,
+        "observations": 10,
+        "wilson_interval_95": [
+          0.017876213095072896,
+          0.4041500267952385
+        ],
+        "bootstrap_interval_95": [
+          0.0,
+          0.3
+        ],
+        "bootstrap_samples": 2000
+      },
+      {
+        "loss_threshold": 0.9,
+        "probability": 0.0,
+        "observations": 10,
+        "wilson_interval_95": [
+          0.0,
+          0.2775327998628892
+        ],
+        "bootstrap_interval_95": [
+          0.0,
+          0.0
+        ],
+        "bootstrap_samples": 2000
+      },
+      {
+        "loss_threshold": 0.99,
+        "probability": 0.0,
+        "observations": 10,
+        "wilson_interval_95": [
+          0.0,
+          0.2775327998628892
+        ],
+        "bootstrap_interval_95": [
+          0.0,
+          0.0
+        ],
+        "bootstrap_samples": 2000
+      }
+    ]
+  },
+  "best_blocked_candidate": {
+    "candidate_id": "engine_candidate",
+    "selection_status": "identified",
+    "selection_basis": "Only scored engine candidate; closest candidate blocked by central predefined gate.",
+    "opportunity_score": 37.07072964641373,
+    "failed_gates": [
+      {
+        "name": "opportunity",
+        "actual": 37.07072964641373,
+        "required": 45.0,
+        "direction": "minimum",
+        "distance": 7.9292703535862685,
+        "status": "failed"
+      }
+    ]
+  },
+  "gate_sensitivity": [
+    {
+      "setting": {
+        "setting_id": "permissive-predefined",
+        "minimum_opportunity": 30.0,
+        "maximum_risk": 70.0,
+        "minimum_evidence": 30.0,
+        "minimum_execution_quality": 30.0,
+        "status": "draft_to_validate"
+      },
+      "passing_candidate_ids": [
+        "engine_candidate"
+      ],
+      "best_candidate_id": "engine_candidate",
+      "no_position_recommended": false
+    },
+    {
+      "setting": {
+        "setting_id": "central-predefined",
+        "minimum_opportunity": 45.0,
+        "maximum_risk": 50.0,
+        "minimum_evidence": 40.0,
+        "minimum_execution_quality": 50.0,
+        "status": "draft_to_validate"
+      },
+      "passing_candidate_ids": [],
+      "best_candidate_id": null,
+      "no_position_recommended": true
+    },
+    {
+      "setting": {
+        "setting_id": "strict-predefined",
+        "minimum_opportunity": 60.0,
+        "maximum_risk": 35.0,
+        "minimum_evidence": 60.0,
+        "minimum_execution_quality": 70.0,
+        "status": "draft_to_validate"
+      },
+      "passing_candidate_ids": [],
+      "best_candidate_id": null,
+      "no_position_recommended": true
+    }
+  ],
+  "opportunity_risk_frontier": [
+    {
+      "candidate_id": "cash",
+      "opportunity": 25.0,
+      "risk": 0.0,
+      "evidence": 40.32979003133478,
+      "model_agreement": null,
+      "execution_quality": 100.0,
+      "pareto_efficient": true,
+      "dominated_by": [],
+      "basis": "Comparable OOS expected return, probability profit, CVaR, drawdown, and P(loss>=50%); frontier indices are not the five-score formulas."
+    },
+    {
+      "candidate_id": "no_position",
+      "opportunity": 25.0,
+      "risk": 0.0,
+      "evidence": 40.32979003133478,
+      "model_agreement": null,
+      "execution_quality": 100.0,
+      "pareto_efficient": true,
+      "dominated_by": [],
+      "basis": "Comparable OOS expected return, probability profit, CVaR, drawdown, and P(loss>=50%); frontier indices are not the five-score formulas."
+    },
+    {
+      "candidate_id": "underlying",
+      "opportunity": 57.25510680982356,
+      "risk": 7.884764492060967,
+      "evidence": 40.32979003133478,
+      "model_agreement": null,
+      "execution_quality": 85.0,
+      "pareto_efficient": false,
+      "dominated_by": [
+        "buy_and_hold"
+      ],
+      "basis": "Comparable OOS expected return, probability profit, CVaR, drawdown, and P(loss>=50%); frontier indices are not the five-score formulas."
+    },
+    {
+      "candidate_id": "buy_and_hold",
+      "opportunity": 57.44510680982356,
+      "risk": 7.672581682765703,
+      "evidence": 40.32979003133478,
+      "model_agreement": null,
+      "execution_quality": 85.0,
+      "pareto_efficient": true,
+      "dominated_by": [],
+      "basis": "Comparable OOS expected return, probability profit, CVaR, drawdown, and P(loss>=50%); frontier indices are not the five-score formulas."
+    },
+    {
+      "candidate_id": "atm_long_call",
+      "opportunity": 60.866203165158545,
+      "risk": 65.96190417270415,
+      "evidence": 40.32979003133478,
+      "model_agreement": null,
+      "execution_quality": 50.49182237441286,
+      "pareto_efficient": true,
+      "dominated_by": [],
+      "basis": "Comparable OOS expected return, probability profit, CVaR, drawdown, and P(loss>=50%); frontier indices are not the five-score formulas."
+    },
+    {
+      "candidate_id": "fixed_delta_long_call",
+      "opportunity": 36.52192681638243,
+      "risk": 82.30889131130023,
+      "evidence": 40.32979003133478,
+      "model_agreement": null,
+      "execution_quality": 50.49182237441286,
+      "pareto_efficient": false,
+      "dominated_by": [
+        "underlying",
+        "buy_and_hold",
+        "atm_long_call",
+        "random_admissible"
+      ],
+      "basis": "Comparable OOS expected return, probability profit, CVaR, drawdown, and P(loss>=50%); frontier indices are not the five-score formulas."
+    },
+    {
+      "candidate_id": "standard_bull_call_spread",
+      "opportunity": 32.45867318067058,
+      "risk": 88.0,
+      "evidence": 40.32979003133478,
+      "model_agreement": null,
+      "execution_quality": 50.49182237441286,
+      "pareto_efficient": false,
+      "dominated_by": [
+        "underlying",
+        "buy_and_hold",
+        "atm_long_call",
+        "fixed_delta_long_call",
+        "random_admissible",
+        "engine_candidate"
+      ],
+      "basis": "Comparable OOS expected return, probability profit, CVaR, drawdown, and P(loss>=50%); frontier indices are not the five-score formulas."
+    },
+    {
+      "candidate_id": "random_admissible",
+      "opportunity": 44.736463309973146,
+      "risk": 74.8336764766357,
+      "evidence": 40.32979003133478,
+      "model_agreement": null,
+      "execution_quality": 50.49182237441286,
+      "pareto_efficient": false,
+      "dominated_by": [
+        "underlying",
+        "buy_and_hold",
+        "atm_long_call"
+      ],
+      "basis": "Comparable OOS expected return, probability profit, CVaR, drawdown, and P(loss>=50%); frontier indices are not the five-score formulas."
+    },
+    {
+      "candidate_id": "engine_candidate",
+      "opportunity": 33.73353352966957,
+      "risk": 75.5777859026179,
+      "evidence": 40.32979003133478,
+      "model_agreement": 31.4613888021953,
+      "execution_quality": 50.49182237441286,
+      "pareto_efficient": false,
+      "dominated_by": [
+        "underlying",
+        "buy_and_hold",
+        "atm_long_call",
+        "random_admissible"
+      ],
+      "basis": "Comparable OOS expected return, probability profit, CVaR, drawdown, and P(loss>=50%); frontier indices are not the five-score formulas."
+    }
+  ],
+  "no_position_frequency": 0.6666666666666666,
+  "sensitivity_interpretation": "candidate_pool_evaluated",
+  "blockers": [
+    "Only ten non-overlapping OOS option observations are available.",
+    "Intervals are wide and are development diagnostics, not final probabilities.",
+    "Final holdout remains unopened; historical rights remain to_review.",
+    "Live execution quality remains pending OPRA."
+  ],
+  "holdout_used": false,
+  "order_capability": "forbidden"
+}

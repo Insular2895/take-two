@@ -1,0 +1,1743 @@
+schema_version: "1.0"
+generated_on: "2026-08-08"
+validation_status: draft_to_validate
+policy:
+  pdf_root_requested: "/Users/insular/take two/take-two/BOOK"
+  pdf_root_resolved_candidate: "/Users/insular/Desktop/book 📙"
+  resolved_candidate_requires_confirmation: true
+  pdf_access: read_only
+  summary_is_not_evidence: true
+  unknown_metadata_must_remain_null: true
+  allowed_evidence_states:
+    - proposed
+    - sourced
+    - implemented
+    - tested
+    - numerically_validated
+    - empirically_validated
+    - holdout_validated
+    - production_ready
+  current_maximum_claim: numerically_validated
+
+sources:
+  - source_id: book-bergomi-stochastic-volatility-modeling
+    source_type: local_book_fragments
+    author:
+      - Lorenzo Bergomi
+    title: Stochastic Volatility Modeling
+    edition: null
+    year: null
+    volume: null
+    chapter: "3-12; epilogue/reference fragment"
+    section: "Phase 11: chapter openings and targeted passages across every available fragment"
+    page_start: null
+    page_end: null
+    pdf_file:
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C3.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C4.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C5.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C6.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C7.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C9.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C10.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C11.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C12.pdf
+      - Bergomi_Lorenzo_Stochastic_Volatility_Modeling_C8./Bergomi_Lorenzo_Stochastic_Volatility_Modeling_ref.pdf
+    concept:
+      - stochastic volatility
+      - Heston diagnostics
+      - forward variance
+      - volatility smile dynamics
+      - local-stochastic volatility
+    formula_id: []
+    formula: null
+    assumptions: "To be extracted per chapter before use; chapters 1-2 are absent."
+    measure: "mixed/section-dependent; must be tagged P or Q per extracted formula"
+    units: "not yet extracted"
+    alternatives:
+      - Heston
+      - local volatility
+      - SVI/eSSVI as a surface parameterization rather than a dynamics model
+    limitations:
+      - fragmented and incomplete local copy
+      - edition and year unknown
+      - no formula is accepted from a summary alone
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    notes: "One bibliographic work, never eleven independent books. Phase 11 inspected all available chapter fragments, with emphasis on forward variance, smile dynamics, calibration and practical state dimension."
+
+  - source_id: book-andersen-piterbarg-interest-rate-modeling
+    source_type: local_book_fragments
+    author:
+      - Leif B.G. Andersen
+      - Vladimir V. Piterbarg
+    title: Interest Rate Modeling
+    subtitle: null
+    edition: null
+    year: 2010
+    volume:
+      - "Volume I — Foundations and Vanilla Models"
+      - "Volume II — Term Structure Models"
+    chapter: "1-15"
+    section: "Priority: 1.3, 1.9-1.10, 2.3-2.11, 3.2-3.5, 4.2-4.5, 6.1-6.5, 8-15; Phase-11 OCR samples across chapters 6 and 10-15"
+    page_start: null
+    page_end: null
+    pdf_file:
+      - interest rate/Interest_Rate_Modeling_by_Piterbarg_I-1.pdf
+      - interest rate/Interest_Rate_Modeling_by_Piterbarg_I-2.pdf
+      - interest rate/Interest_Rate_Modeling_by_Piterbarg_II.pdf
+    concept:
+      - martingale measures and P/Q separation
+      - numerical pricing stability
+      - Monte Carlo variance reduction
+      - yield-curve construction and interpolation
+      - short-rate and HJM models
+    formula_id: []
+    formula: null
+    assumptions: "Extract per section; the three local files cover Volume I in two fragments and Volume II, not all three volumes."
+    measure: "mixed/section-dependent; risk-neutral sections must be explicitly tagged Q"
+    units: "rates, discount factors, year fractions and day-counts must be recorded per use"
+    alternatives:
+      - deterministic Treasury curve
+      - FRED/ALFRED point-in-time rates
+      - simple bootstrapped discount curve
+    limitations:
+      - Volume III absent
+      - edition unknown
+      - some files carry structural PDF warnings
+      - a sophisticated rate model is not justified for TTWO without materiality evidence
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    notes: "Title, authors, 2010 date, volume structure and chapter map were extracted from the PDFs. Phase 11 used bounded OCR because the advanced-rate fragments are image-only."
+
+  - source_id: book-gatheral-volatility-surface
+    source_type: required_book_missing
+    author:
+      - Jim Gatheral
+    title: "The Volatility Surface: A Practitioner's Guide"
+    edition: null
+    year: null
+    volume: null
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: null
+    concept:
+      - SVI
+      - static arbitrage
+      - local volatility
+    formula_id:
+      - FORM-SVI-RAW-001
+      - FORM-SVI-ARBITRAGE-001
+    formula: null
+    assumptions: null
+    measure: Q
+    units: total variance and log-forward-moneyness
+    alternatives:
+      - authoritative original SVI papers
+      - eSSVI primary papers
+    limitations:
+      - not present in the resolved local library
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: proposed
+    notes: "Phase 2 is not documentary-ready until a primary SVI source is available and inspected."
+
+  - source_id: book-shreve-stochastic-calculus-finance-ii
+    source_type: required_book_missing
+    author:
+      - Steven E. Shreve
+    title: "Stochastic Calculus for Finance II: Continuous-Time Models"
+    edition: null
+    year: null
+    volume: II
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: null
+    concept:
+      - Ito calculus
+      - change of measure
+      - Black-Scholes
+      - P/Q separation
+    formula_id:
+      - FORM-BS-PRICE-001
+      - FORM-MEASURE-CHANGE-001
+    formula: null
+    assumptions: null
+    measure: P_and_Q
+    units: null
+    alternatives:
+      - book-andersen-piterbarg-interest-rate-modeling
+      - book-bjork-arbitrage-theory
+    limitations:
+      - requested volume absent; only Shreve Volume I is present
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: proposed
+    notes: "Do not silently substitute Volume I for the requested continuous-time source."
+
+  - source_id: book-glasserman-monte-carlo
+    source_type: local_book_probable_duplicates
+    author:
+      - Paul Glasserman
+    title: Monte Carlo Methods in Financial Engineering
+    edition: null
+    year: 2004
+    volume: null
+    chapter: "1, 4 and 8"
+    section: "1.1 Monte Carlo principles; 4.1 Control Variates; 4.2 Antithetic Variates; American option optimal stopping"
+    page_start: 1
+    page_end: 207
+    pdf_file:
+      - Monte Carlo methods in financial engineerin-Paul Glasserman-Springer (2004).pdf
+      - Monte_Carlo_Methods_In_Financial_Enginee.pdf
+    concept:
+      - Monte Carlo convergence
+      - variance reduction
+      - American option simulation
+      - rare-event estimation
+    formula_id:
+      - FORM-MC-SE-001
+      - FORM-MC-CI-001
+      - FORM-CONTROL-VARIATE-001
+      - FORM-ANTITHETIC-001
+    formula: null
+    assumptions: "Replications used for standard errors must be independent; paired antithetic paths count as one replication."
+    measure: P_or_Q_by_application
+    units: null
+    alternatives:
+      - book-andersen-piterbarg-interest-rate-modeling
+    limitations:
+      - two non-identical payloads likely represent the same work
+    implementation_file:
+      - src/take_two_options/simulation/convergence.py
+      - src/take_two_options/simulation/uncertainty.py
+      - src/take_two_options/simulation/exit_state.py
+      - src/take_two_options/intelligence/valuation.py
+    implementation_symbol:
+      - expectation_converged
+      - control_variate_estimate
+      - antithetic_estimate
+      - advance_exit_state
+      - value_candidate
+    test_file:
+      - tests/test_knowledge_optimizer.py
+      - tests/test_simulation_uncertainty.py
+      - tests/test_intelligence_v11.py
+    validation_status: tested
+    notes: "Chapter 1 printed pp. 1-10, chapter 4 printed pp. 186-207 and the chapter 8 optimal-stopping boundary were inspected directly from the local PDF."
+
+  - source_id: paper-kunsch-block-bootstrap
+    source_type: primary_research_article
+    author:
+      - Hans R. Künsch
+    title: The Jackknife and the Bootstrap for General Stationary Observations
+    edition: null
+    year: 1989
+    volume: "17(3)"
+    chapter: null
+    section: null
+    page_start: 1217
+    page_end: 1241
+    pdf_file: null
+    url:
+      - https://doi.org/10.1214/aos/1176347265
+    concept:
+      - block bootstrap
+      - stationary dependent observations
+      - resampling uncertainty
+    formula_id:
+      - FORM-BLOCK-BOOTSTRAP-001
+    formula: null
+    assumptions: "The observed sequence is stationary with dependence compatible with block resampling."
+    measure: P
+    units: statistic_dependent
+    alternatives:
+      - stationary bootstrap
+      - dependent parametric bootstrap
+    limitations:
+      - primary bibliographic metadata and abstract inspected, not full article text
+      - block-length selection remains application-specific
+    implementation_file: src/take_two_options/simulation/uncertainty.py
+    implementation_symbol: circular_block_bootstrap
+    test_file: tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "The implementation uses circular moving blocks; it does not claim automatic block-length optimality."
+
+  - source_id: paper-clement-lamberton-protter-lsm
+    source_type: local_paper_and_primary_repository_metadata
+    author:
+      - Emmanuelle Clément
+      - Damien Lamberton
+      - Philip Protter
+    title: An analysis of the Longstaff-Schwartz algorithm for American option pricing
+    edition: null
+    year: 2001
+    volume: null
+    chapter: "8"
+    section: "8.1-8.3 bootstrap simulation, variance and confidence intervals"
+    page_start: 107
+    page_end: 114
+    pdf_file: an analysis of the longstaff-schwartz algorithm for american option pricing.pdf
+    url:
+      - https://hdl.handle.net/1813/9176
+    concept:
+      - least-squares Monte Carlo
+      - American option optimal stopping
+      - convergence analysis
+    formula_id: []
+    formula: null
+    assumptions: "Regression basis, sample reuse and stopping-time filtration require explicit validation before implementation."
+    measure: Q
+    units: option_price
+    alternatives:
+      - finite-difference American pricing
+    limitations:
+      - local PDF text extraction is corrupted
+      - primary repository metadata inspected, formulas not extracted
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    notes: "LSM is deferred until a material FD/checkpoint gap is demonstrated on an authorized panel."
+
+  - source_id: book-suli-mayers-numerical-analysis
+    source_type: local_book
+    author:
+      - Endre Süli
+      - David Mayers
+    title: An Introduction to Numerical Analysis
+    edition: null
+    year: 2003
+    volume: null
+    chapter: "1-14"
+    section: "1.6-1.7 and 2.7 inspected for Phase 1"
+    page_start: 28
+    page_end: 71
+    pdf_file: Numerical_Analysis.pdf
+    concept:
+      - root finding
+      - conditioning
+      - interpolation
+      - finite differences
+      - convergence
+    formula_id:
+      - FORM-IV-ROOT-001
+      - FORM-FD-CONVERGENCE-001
+    formula: null
+    assumptions: "Bisection requires a valid sign-changing bracket; tolerances remain problem-scale dependent."
+    measure: not_applicable
+    units: numerical_scale_dependent
+    alternatives:
+      - book-nocedal-wright-numerical-optimization
+    limitations:
+      - generic numerical guidance does not by itself validate a financial model
+    implementation_file:
+      - src/take_two_options/american.py
+      - src/take_two_options/quantitative/numerical_validation.py
+    implementation_symbol:
+      - historical_option_analytics
+      - assess_fd_convergence
+    test_file:
+      - tests/test_quantitative_foundations.py
+    validation_status: sourced
+    notes: "Title, authors, publisher, 2003 copyright and ISBNs were verified on the PDF title/copyright pages."
+
+  - source_id: book-nocedal-wright-numerical-optimization
+    source_type: local_book
+    author:
+      - Jorge Nocedal
+      - Stephen J. Wright
+    title: Numerical Optimization
+    edition: null
+    year: null
+    volume: null
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: NocedalJ.pdf
+    concept:
+      - constrained optimization
+      - line search
+      - trust regions
+      - calibration diagnostics
+    formula_id: []
+    formula: null
+    assumptions: "Edition and chapter remain to be verified."
+    measure: not_applicable
+    units: objective_dependent
+    alternatives:
+      - book-boyd-vandenberghe-convex-optimization
+    limitations:
+      - bibliographic edition/year not established
+    implementation_file:
+      - src/take_two_options/intelligence/optimizer.py
+    implementation_symbol:
+      - optimize_allocations
+    test_file:
+      - tests/test_intelligence_v11.py
+    validation_status: proposed
+    notes: "PDF metadata verifies title and both authors."
+
+  - source_id: book-boyd-vandenberghe-convex-optimization
+    source_type: local_book
+    author:
+      - Stephen Boyd
+      - Lieven Vandenberghe
+    title: Convex Optimization
+    edition: "seventh printing with corrections"
+    year: 2009
+    volume: null
+    chapter: "4"
+    section: "4.7 Vector optimization"
+    page_start: 174
+    page_end: 187
+    pdf_file: convex optimization.pdf
+    concept:
+      - constrained optimization
+      - duality and KKT
+      - robust allocation
+      - Pareto frontiers
+    formula_id:
+      - FORM-PARETO-DOMINANCE-001
+      - FORM-ROBUST-ALLOCATION-OBJECTIVE-001
+    formula: null
+    assumptions: "Pareto dominance is evaluated only over the explicitly declared feasible objectives; integer feasibility is handled by exhaustive enumeration, not convex relaxation."
+    measure: not_applicable
+    units: objective_dependent
+    alternatives:
+      - exact integer enumeration for the current bounded TTWO budget
+    limitations:
+      - convex relaxation may not preserve whole-contract feasibility
+    implementation_file:
+      - src/take_two_options/intelligence/optimizer.py
+      - src/take_two_options/optimization/allocation_pareto.py
+      - src/take_two_options/optimization/pareto.py
+    implementation_symbol:
+      - optimize_allocations
+      - optimize_allocations_with_frontier
+      - allocation_pareto_frontier
+      - pareto_rank
+    test_file:
+      - tests/test_intelligence_v11.py
+      - tests/test_allocation_pareto.py
+      - tests/test_knowledge_optimizer.py
+    validation_status: tested
+    notes: "Title/copyright pages and printed section 4.7 pp. 174-187 were inspected; exact enumeration remains canonical for the bounded integer set."
+
+  - source_id: book-tsay-analysis-financial-time-series
+    source_type: local_book
+    author:
+      - Ruey S. Tsay
+    title: Analysis of Financial Time Series
+    edition: Third Edition
+    year: 2010
+    volume: null
+    chapter: "3 and 10"
+    section: "3.1-3.5 inspected for Phase 3"
+    page_start: 110
+    page_end: 139
+    pdf_file: 42-analysis-of-financial-time-series-third-edition-wiley-series-in-probability-and-statistics-(www.tawcer.com).pdf
+    concept:
+      - ARMA
+      - GARCH
+      - conditional volatility
+      - diagnostics
+    formula_id:
+      - FORM-EWMA-001
+      - FORM-GARCH-001
+    formula: null
+    assumptions: "Conditional-variance models require chronological fitting and standardized-residual checks."
+    measure: P
+    units: return_frequency_dependent
+    alternatives:
+      - EWMA
+      - historical volatility baseline
+    limitations:
+      - model usefulness depends on sufficient point-in-time TTWO history and structural-break tests
+    implementation_file: src/take_two_options/quantitative/calibration.py
+    implementation_symbol:
+      - fit_ewma
+      - fit_garch_11
+      - compare_volatility_forecasts
+    test_file: tests/test_quantitative_calibration.py
+    validation_status: sourced
+    notes: "Third edition, Wiley and 2010 copyright verified directly; chapter 3 passages inspected."
+
+  - source_id: book-mcelreath-statistical-rethinking
+    source_type: local_book
+    author:
+      - Richard McElreath
+    title: Statistical Rethinking
+    subtitle: A Bayesian Course with Examples in R and Stan
+    edition: Second Edition
+    year: 2019
+    volume: null
+    chapter: "2, 3, 5, 6 and 7"
+    section: "small/large worlds; prediction; DAGs, confounding and association versus causation"
+    page_start: 19
+    page_end: 239
+    pdf_file: Statistical Rethinking 2nd Edition.pdf
+    url: null
+    concept:
+      - explicit prior and likelihood
+      - posterior predictive distribution
+      - prior predictive checks
+      - predictive scoring
+      - model comparison and overfitting
+      - directed acyclic graph assumptions
+      - confounding and conditional association
+    formula_id:
+      - FORM-PREDICTIVE-MIXTURE-001
+      - FORM-PROBABILITY-CALIBRATION-001
+    formula: null
+    assumptions: "A statistical posterior requires an explicit data-generating likelihood, priors and observed data; configured evidence weights alone are insufficient."
+    measure: P
+    units: model_dependent
+    alternatives:
+      - book-wasserman-all-statistics
+    limitations:
+      - examples are pedagogical and not TTWO validation
+      - predictive performance in the model's small world does not guarantee real-world performance
+    implementation_file:
+      - src/take_two_options/quantitative/model_uncertainty.py
+      - src/take_two_options/quantitative/probability_calibration.py
+      - src/take_two_options/intelligence/bayesian.py
+      - src/take_two_options/intelligence/sequential_decision.py
+    implementation_symbol:
+      - summarize_model_ensemble
+      - evaluate_binary_calibration
+      - update_heuristic_scenario_beliefs
+      - update_sequential_scenario_beliefs
+    test_file:
+      - tests/test_model_uncertainty.py
+      - tests/test_intelligence_v11.py
+      - tests/test_sequential_event_decision.py
+    validation_status: tested
+    notes: "Title page, contents, chapters 2-3, 5-6 and 7 passages were inspected directly from the local PDF."
+
+  - source_id: book-blitzstein-hwang-introduction-probability
+    source_type: local_book
+    author:
+      - Joseph K. Blitzstein
+      - Jessica Hwang
+    title: Introduction to Probability
+    subtitle: null
+    edition: Second Edition
+    year: 2019
+    volume: null
+    chapter: "2"
+    section: "2.1, 2.3-2.6 and 2.9"
+    page_start: 45
+    page_end: 79
+    pdf_file: "[CRC Texts in Statistical Science] Joseph K. Blitzstein, Jessica Hwang - Introduction to Probability, Second Edition (2019, Chapman and Hall_CRC) - libgen.li.pdf"
+    url: null
+    concept:
+      - conditional probability
+      - likelihood ratio
+      - law of total probability
+      - conditional independence
+      - coherent sequential updating
+    formula_id:
+      - FORM-SCENARIO-MIXTURE-001
+      - FORM-BELIEF-SWITCH-001
+    formula: null
+    assumptions: "Sequential and simultaneous updating agree only under the declared joint conditional structure; multiple reports are not automatically conditionally independent."
+    measure: P
+    units: probability
+    alternatives:
+      - book-mcelreath-statistical-rethinking
+    limitations:
+      - textbook examples do not calibrate TTWO event probabilities
+      - conditional independence must be justified outside the probability identities
+    implementation_file:
+      - src/take_two_options/intelligence/sequential_decision.py
+      - src/take_two_options/intelligence/event_scenarios.py
+    implementation_symbol:
+      - update_sequential_scenario_beliefs
+      - evaluate_event_scenarios
+      - scenario_probability_switch_threshold
+    test_file: tests/test_sequential_event_decision.py
+    validation_status: tested
+    notes: "Title metadata and chapter 2 printed pp. 45-79 were inspected; Summarizer text transcription completed but its evidence-packet stage stalled, so direct bounded-page extraction was used."
+
+  - source_id: paper-brier-probability-forecast-verification
+    source_type: primary_research_article
+    author:
+      - Glenn W. Brier
+    title: Verification of Forecasts Expressed in Terms of Probability
+    edition: null
+    year: 1950
+    volume: "78(1)"
+    chapter: null
+    section: null
+    page_start: 1
+    page_end: 3
+    pdf_file: null
+    url:
+      - https://doi.org/10.1175/1520-0493(1950)078%3C0001:VOFEIT%3E2.0.CO;2
+    concept:
+      - probability forecast verification
+      - squared probability score
+    formula_id:
+      - FORM-PROBABILITY-CALIBRATION-001
+    formula: null
+    assumptions: "Binary probability forecasts and subsequently observed outcomes are aligned."
+    measure: P
+    units: squared_probability_error
+    alternatives:
+      - log predictive score
+    limitations:
+      - primary publisher metadata inspected; no TTWO application evidence
+    implementation_file:
+      - src/take_two_options/intelligence/backtesting.py
+      - src/take_two_options/quantitative/probability_calibration.py
+    implementation_symbol:
+      - run_walk_forward
+      - evaluate_binary_calibration
+    test_file:
+      - tests/test_offline_reliability_v11.py
+      - tests/test_model_uncertainty.py
+    validation_status: tested
+    notes: "Primary AMS journal record, publication date, pages and DOI inspected."
+
+  - source_id: paper-wilson-binomial-interval
+    source_type: primary_research_article_metadata
+    author:
+      - Edwin B. Wilson
+    title: Probable Inference, the Law of Succession, and Statistical Inference
+    edition: null
+    year: 1927
+    volume: "22(158)"
+    chapter: null
+    section: null
+    page_start: 209
+    page_end: 212
+    pdf_file: null
+    url:
+      - https://doi.org/10.1080/01621459.1927.10502953
+    concept:
+      - binomial score confidence interval
+      - rare observed counts
+    formula_id:
+      - FORM-WILSON-001
+    formula: null
+    assumptions: "Independent identically distributed Bernoulli trials."
+    measure: not_applicable
+    units: probability
+    alternatives:
+      - exact binomial interval
+      - likelihood interval
+    limitations:
+      - Crossref primary metadata inspected; publisher PDF access returned HTTP 403
+      - not applicable to weighted or dependent paths without a separate method
+    implementation_file:
+      - src/take_two_options/research_statistics.py
+      - src/take_two_options/simulation/uncertainty.py
+    implementation_symbol:
+      - wilson_interval
+      - estimate_probability
+    test_file:
+      - tests/test_research_statistics.py
+      - tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "No full-text claim is made; implementation behavior is covered by deterministic tests."
+
+  - source_id: book-wasserman-all-statistics
+    source_type: local_book
+    author:
+      - Larry Wasserman
+    title: "All of Statistics: A Concise Course in Statistical Inference"
+    edition: null
+    year: 2004
+    volume: null
+    chapter: null
+    section: null
+    page_start: null
+    page_end: null
+    pdf_file: 2004 - wasserman - all of statistics.pdf
+    concept:
+      - confidence intervals
+      - bootstrap
+      - tests
+      - model selection
+    formula_id:
+      - FORM-WILSON-001
+      - FORM-BOOTSTRAP-001
+    formula: null
+    assumptions: "The implemented percentile bootstrap assumes iid resampling; dependent series require the separate block-bootstrap method."
+    measure: not_applicable
+    units: statistic_dependent
+    alternatives:
+      - primary statistical papers for specialized multiple-testing procedures
+    limitations:
+      - PDF has recoverable structural warnings
+    implementation_file:
+      - src/take_two_options/research_statistics.py
+      - src/take_two_options/simulation/uncertainty.py
+    implementation_symbol:
+      - wilson_interval
+      - bootstrap_interval
+      - circular_block_bootstrap
+      - deflated_sharpe_probability
+    test_file:
+      - tests/test_research_statistics.py
+    validation_status: tested
+    notes: "Chapter 8 printed pp. 107-114 inspected directly. The text warns that bootstrap intervals are approximate and very small samples may be unreliable; the iid bootstrap remains separate from Phase 5 block resampling."
+
+  - source_id: book-bjork-arbitrage-theory
+    source_type: local_book
+    author:
+      - Tomas Björk
+    title: Arbitrage Theory in Continuous Time
+    edition: null
+    year: 2009
+    volume: null
+    chapter: "10 and 12"
+    section: "10.2 and 12.2 inspected for Phase 1"
+    page_start: 141
+    page_end: 176
+    pdf_file: Tomas Bjork Arbitrage Theory in Continuous Time (Oxford Finance)  2009.pdf
+    concept:
+      - absence of arbitrage
+      - equivalent measures
+      - numeraires
+      - incomplete markets
+    formula_id:
+      - FORM-MEASURE-CHANGE-001
+    formula: null
+    assumptions: "Risk-neutral valuation applies inside the stated no-arbitrage model assumptions."
+    measure: P_and_Q
+    units: null
+    alternatives:
+      - book-andersen-piterbarg-interest-rate-modeling
+      - book-shreve-stochastic-calculus-finance-ii
+    limitations:
+      - local filename year is not a substitute for edition verification
+    implementation_file:
+      - src/take_two_options/quantitative/contracts.py
+      - src/take_two_options/simulation/legacy_models.py
+      - src/take_two_options/intelligence/stochastic.py
+    implementation_symbol:
+      - Measure
+      - MeasureTransition
+      - StochasticPathSet
+      - SimulationPaths
+    test_file:
+      - tests/test_quantitative_foundations.py
+    validation_status: sourced
+    notes: "Equivalent martingale-measure definition and Black-Scholes risk-neutral pricing passage inspected directly."
+
+  - source_id: paper-gatheral-jacquier-svi
+    source_type: external_primary_paper
+    author:
+      - Jim Gatheral
+      - Antoine Jacquier
+    title: Arbitrage-free SVI volatility surfaces
+    edition: arXiv:1204.0646v4
+    year: 2013
+    volume: null
+    chapter: "2-5"
+    section: "2.1, 2.2 and 3.1 inspected"
+    page_start: 3
+    page_end: 5
+    pdf_file: null
+    url: https://arxiv.org/abs/1204.0646
+    concept:
+      - raw SVI total variance
+      - butterfly arbitrage
+      - calendar-spread arbitrage
+    formula_id:
+      - FORM-SVI-RAW-001
+      - FORM-SVI-ARBITRAGE-001
+    formula: "Raw SVI equation 3.1; density condition equation 2.1; calendar monotonicity Lemma 2.1."
+    assumptions: "The finite-grid implementation records but cannot prove the paper's full asymptotic condition."
+    measure: Q
+    units: total_variance_and_log_forward_moneyness
+    alternatives:
+      - SSVI
+      - eSSVI behind data gate
+    limitations:
+      - article illustrates SPX rather than TTWO
+      - raw SVI parameters alone do not guarantee absence of arbitrage
+    implementation_file: src/take_two_options/quantitative/svi.py
+    implementation_symbol:
+      - raw_svi_total_variance
+      - svi_arbitrage_report
+      - calendar_arbitrage_report
+    test_file: tests/test_implied_volatility_svi.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "arXiv abstract and v4 PDF inspected directly."
+
+  - source_id: paper-cohort-corbetta-martini-laachir-ssvi
+    source_type: external_primary_paper
+    author:
+      - Pierre Cohort
+      - Jacopo Corbetta
+      - Claude Martini
+      - Ismail Laachir
+    title: Robust calibration and arbitrage-free interpolation of SSVI slices
+    edition: arXiv:1804.04924v2
+    year: 2019
+    volume: null
+    chapter: null
+    section: "abstract inspected"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://arxiv.org/abs/1804.04924
+    concept: [SSVI calibration, butterfly arbitrage, calendar-spread arbitrage]
+    formula_id: []
+    formula: null
+    assumptions: "SSVI needs consistent parameters across expirations."
+    measure: Q
+    units: total_variance_and_log_forward_moneyness
+    alternatives: [raw SVI per slice]
+    limitations: [not implemented in this phase]
+    implementation_file: src/take_two_options/quantitative/svi.py
+    implementation_symbol: evaluate_essvi_gate
+    test_file: tests/test_implied_volatility_svi.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Used to define a conservative cross-expiry gate, not an implementation claim."
+
+  - source_id: paper-mingone-essvi
+    source_type: external_primary_paper
+    author:
+      - Arianna Mingone
+    title: No arbitrage global parametrization for the eSSVI volatility surface
+    edition: arXiv:2204.00312v1
+    year: 2022
+    volume: null
+    chapter: null
+    section: "abstract inspected"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://arxiv.org/abs/2204.00312
+    concept: [eSSVI, global calibration, static arbitrage]
+    formula_id: []
+    formula: null
+    assumptions: "Global eSSVI is evaluated only after point-in-time SVI slice diagnostics."
+    measure: Q
+    units: total_variance_and_log_forward_moneyness
+    alternatives: [SSVI, raw SVI]
+    limitations: [not implemented in this phase, no TTWO materiality evidence]
+    implementation_file: src/take_two_options/quantitative/svi.py
+    implementation_symbol: evaluate_essvi_gate
+    test_file: tests/test_implied_volatility_svi.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Used only to justify treating eSSVI as a separate gated calibration problem."
+
+  - source_id: paper-bailey-borwein-lopez-zhu-pbo
+    source_type: external_primary_paper
+    author:
+      - David H. Bailey
+      - Jonathan Borwein
+      - Marcos López de Prado
+      - Qiji Jim Zhu
+    title: The Probability of Backtest Overfitting
+    edition: SSRN 2326253
+    year: 2015
+    volume: null
+    chapter: null
+    section: "bibliographic record and abstract inspected"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://papers.ssrn.com/sol3/Papers.cfm?abstract_id=2326253
+    concept: [CSCV, probability of backtest overfitting, selection bias]
+    formula_id: [FORM-PBO-001]
+    formula: null
+    assumptions: "All tried configurations and comparable fold outcomes must be retained."
+    measure: not_applicable
+    units: probability
+    alternatives: [locked holdout, nested purged walk-forward]
+    limitations:
+      - automated full-text access returned HTTP 403 during Phase 4
+      - tie policy is an explicit implementation choice and is tested for order invariance
+    implementation_file: src/take_two_options/validation/pbo.py
+    implementation_symbol: probability_of_backtest_overfitting
+    test_file: tests/test_validation_protocol_v10.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "No page-specific claim is made without full-text inspection."
+
+  - source_id: paper-bailey-lopez-deflated-sharpe
+    source_type: external_primary_paper
+    author:
+      - David H. Bailey
+      - Marcos López de Prado
+    title: "The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting and Non-Normality"
+    edition: SSRN 2460551
+    year: 2014
+    volume: "Journal of Portfolio Management 40(5)"
+    chapter: null
+    section: "bibliographic record and publisher metadata inspected"
+    page_start: 94
+    page_end: 107
+    pdf_file: null
+    url:
+      - https://papers.ssrn.com/sol3/Papers.cfm?abstract_id=2460551
+      - https://doi.org/10.3905/jpm.2014.40.5.094
+    concept: [deflated Sharpe ratio, selection bias, non-normal returns]
+    formula_id: [FORM-DSR-001]
+    formula: null
+    assumptions: "The implementation is labeled approximate and requires the complete trial count."
+    measure: P
+    units: probability
+    alternatives: [PBO, locked holdout]
+    limitations: [diagnostic does not replace point-in-time validation]
+    implementation_file: src/take_two_options/research_statistics.py
+    implementation_symbol: deflated_sharpe_probability
+    test_file: tests/test_research_statistics.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: null
+
+  - source_id: repo-readme-v11-1
+    source_type: repository_documentation
+    author:
+      - take-two maintainers
+    title: TTWO Options Research Engine README
+    edition: "repository HEAD 178cfe8"
+    year: 2026
+    volume: null
+    chapter: null
+    section: "Formulas, V10/V11 architecture, safety contract"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    concept:
+      - implemented formulas
+      - report semantics
+      - read-only safety
+    formula_id: []
+    formula: "Multiple formulas documented without a formal formula registry."
+    assumptions: "Repository documentation can describe implementation but is not an independent theoretical source."
+    measure: mixed
+    units: mixed
+    alternatives: []
+    limitations:
+      - no formula-to-source-to-code-to-test identifiers
+    implementation_file: README.md
+    implementation_symbol: null
+    test_file: null
+    validation_status: implemented
+    notes: null
+
+  - source_id: official-quantlib-1-43
+    source_type: official_software_documentation
+    author:
+      - QuantLib project
+    title: QuantLib 1.43 release and official documentation
+    edition: "1.43"
+    year: 2026
+    volume: null
+    chapter: null
+    section: "Release notes and reference manual"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url:
+      - https://www.quantlib.org/docs.shtml
+      - https://github.com/lballabio/QuantLib/releases/tag/v1.43
+    concept:
+      - American finite-difference pricing dependency
+      - API compatibility
+    formula_id: []
+    formula: null
+    assumptions: "Official software documentation validates API/version facts, not TTWO numerical correctness."
+    measure: Q_for_pricing_use
+    units: caller_defined
+    alternatives: []
+    limitations:
+      - independent benchmark tests remain required
+    implementation_file: src/take_two_options/american.py
+    implementation_symbol: null
+    test_file: tests/test_american.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Repository pin and installed distribution are both 1.43, the current official release observed during Phase 0."
+
+  - source_id: official-alpaca-historical-options-2026
+    source_type: official_api_documentation
+    author:
+      - Alpaca
+    title: Historical Option Data
+    edition: current_web
+    year: 2026
+    volume: null
+    chapter: null
+    section: "Availability and data sources"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://docs.alpaca.markets/us/docs/historical-option-data
+    concept:
+      - historical option data availability
+      - OPRA versus indicative feed
+    formula_id: []
+    formula: null
+    assumptions: "Entitlement and feed label must be persisted per observation."
+    measure: observed_market_data
+    units: provider_schema
+    alternatives:
+      - MarketData.app historical EOD chains
+      - IBKR subscribed market data
+    limitations:
+      - official page states history begins in February 2024
+      - indicative quotes are not actual OPRA quotes
+    implementation_file: src/take_two_options/alpaca_data.py
+    implementation_symbol: null
+    test_file: tests/test_alpaca_data.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: null
+
+  - source_id: official-marketdata-option-chain-2026
+    source_type: official_api_documentation
+    author:
+      - Market Data
+    title: Option Chain API
+    edition: current_web
+    year: 2026
+    volume: null
+    chapter: null
+    section: "Current and historical end-of-day chains"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://www.marketdata.app/docs/api/options/chain/
+    concept:
+      - option-chain ingestion
+      - point-in-time EOD history
+    formula_id: []
+    formula: null
+    assumptions: "Access level, timestamp and entitlement must be captured."
+    measure: observed_market_data
+    units: provider_schema
+    alternatives:
+      - Alpaca OPRA
+      - IBKR API
+    limitations:
+      - official product page says intraday options history is not offered
+    implementation_file: src/take_two_options/marketdata_data.py
+    implementation_symbol: null
+    test_file: tests/test_marketdata_data.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: null
+
+  - source_id: official-ibkr-market-data-2026
+    source_type: official_api_documentation
+    author:
+      - Interactive Brokers
+    title: Market Data Subscriptions
+    edition: current_web
+    year: 2026
+    volume: null
+    chapter: null
+    section: Introduction
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://www.interactivebrokers.com/docs/general/market-data-subscriptions/introduction
+    concept:
+      - API market-data entitlements
+      - read-only broker facts
+    formula_id: []
+    formula: null
+    assumptions: "Most securities require Level 1 subscription for API data."
+    measure: observed_market_data
+    units: provider_schema
+    alternatives:
+      - Alpaca
+      - MarketData.app
+    limitations:
+      - live entitlement was not exercised in Phase 0
+    implementation_file: src/take_two_options/reporting/ibkr_ticket.py
+    implementation_symbol: null
+    test_file:
+      - tests/test_intelligence_v11.py
+      - tests/test_thesis_scanner.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "This source does not authorize order capability; TTWO remains transmit=false and what_if=true."
+
+  - source_id: official-occ-odd-2024-current-page-2026
+    source_type: official_market_documentation
+    author:
+      - The Options Clearing Corporation
+    title: Characteristics and Risks of Standardized Options
+    edition: June 2024 ODD
+    year: 2024
+    volume: null
+    chapter: "II and X"
+    section: "Options nomenclature; principal risks of options positions"
+    page_start: 5
+    page_end: 90
+    pdf_file: null
+    url: https://www.theocc.com/company-information/documents-and-archives/options-disclosure-document
+    concept:
+      - contract multiplier
+      - adjusted deliverables
+      - exercise and assignment risk
+      - holder and writer risks
+      - liquidity and market disruption risks
+    formula_id: []
+    formula: null
+    assumptions: "Contract-specific OCC memos remain necessary for adjusted TTWO series."
+    measure: contract_terms
+    units: contract_specific
+    alternatives: []
+    limitations:
+      - generic ODD cannot identify a specific adjusted deliverable
+    implementation_file:
+      - src/take_two_options/intelligence/data_hub.py
+      - src/take_two_options/intelligence/execution.py
+      - src/take_two_options/reporting/evidence_grade.py
+    implementation_symbol:
+      - FinalDecisionEvidenceReport
+      - final_decision_markdown
+      - final_decision_html
+    test_file:
+      - tests/test_intelligence_v11.py
+      - tests/test_evidence_grade_reporting.py
+    validation_status: tested
+    verified_on: "2026-08-08"
+    notes: "The official OCC page and June 2024 PDF chapters II/X were inspected online; the page still presented this ODD as the distribution version observed on the verification date."
+
+  - source_id: official-fred-alfred-realtime-periods-2026
+    source_type: official_api_documentation
+    author:
+      - Federal Reserve Bank of St. Louis
+    title: FRED API Real-Time Periods
+    edition: current_web
+    year: 2026
+    volume: null
+    chapter: null
+    section: Introduction
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: https://fred.stlouisfed.org/docs/api/fred/realtime_period.html
+    concept:
+      - vintage-aware macro and rate observations
+      - prevention of revised-data leakage
+    formula_id: []
+    formula: null
+    assumptions: "Backtests must request the real-time period known at the decision date."
+    measure: point_in_time_observation
+    units: series_specific
+    alternatives:
+      - Treasury daily XML feed for direct Treasury rates
+    limitations:
+      - default API behavior represents what is known today unless vintage parameters are supplied
+    implementation_file: src/take_two_options/intelligence/data_hub.py
+    implementation_symbol: null
+    test_file: tests/test_intelligence_v11.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: null
+
+  - source_id: official-us-treasury-daily-rates-2026
+    source_type: official_government_data_documentation
+    author:
+      - U.S. Department of the Treasury
+    title: Daily Treasury Rates and XML Feed
+    edition: current_web
+    year: 2026
+    volume: null
+    chapter: null
+    section: "Par yield curve methodology and feed structure"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url:
+      - https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_
+      - https://home.treasury.gov/treasury-daily-interest-rate-xml-feed
+    concept:
+      - Treasury term structure
+      - rate provenance
+      - interpolation regime break
+    formula_id:
+      - FORM-DISCOUNT-FACTOR-001
+    formula: null
+    assumptions: "Par yields are not directly discount factors; curve construction must be explicit."
+    measure: observed_rate_curve
+    units: annual_rate_by_maturity
+    alternatives:
+      - FRED/ALFRED vintage series
+      - licensed zero curve
+    limitations:
+      - official methodology changed to monotone convex spline on 2021-12-06
+      - source curve and derived discount curve must not be conflated
+    implementation_file: src/take_two_options/intelligence/data_hub.py
+    implementation_symbol: null
+    test_file: tests/test_intelligence_v11.py
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: null
+
+  - source_id: internal-phase10-validation-evidence
+    source_type: repository_validation_evidence
+    author:
+      - Take Two quantitative validation project
+    title: Phase 10 integral validation and release evidence review
+    edition: "1.0"
+    year: 2026
+    volume: null
+    chapter: null
+    section: "full gate, claim audit, replay inventory, release blockers"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: null
+    concept:
+      - deterministic release audit
+      - claim promotion cap
+      - experiment manifest inventory
+      - research-only release decision
+    formula_id: []
+    formula: null
+    assumptions: "Repository tests establish software behavior only; no predictive-accuracy claim is inferred."
+    measure: not_applicable
+    units: not_applicable
+    alternatives:
+      - external independent model validation after real data exists
+    limitations:
+      - local timing comparison is a single-run smoke check
+      - no active real-data experiment manifest exists to replay
+    implementation_file:
+      - src/take_two_options/validation/release_audit.py
+      - scripts/phase10_release_audit.py
+    implementation_symbol:
+      - build_release_evidence_review
+    test_file: tests/test_phase10_release_audit.py
+    validation_status: tested
+    notes: "Internal evidence artifact; not an external methodological authority."
+
+  - source_id: book-sarkka-svensson-bayesian-filtering-smoothing
+    source_type: local_book
+    author:
+      - Simo Särkkä
+      - Lennart Svensson
+    title: Bayesian Filtering and Smoothing
+    edition: "Second Edition"
+    year: 2023
+    volume: null
+    chapter: "1, 5-8, 11, 16"
+    section: "state-space models, filters and parameter estimation"
+    page_start: 1
+    page_end: 348
+    pdf_file: bayesian filtering and smooting second edition.pdf
+    url: null
+    concept:
+      - state transition and measurement models
+      - nonlinear Gaussian filtering
+      - particle filtering
+      - state-space parameter estimation
+    formula_id: []
+    formula: null
+    assumptions: "A filter requires an explicit transition model, measurement likelihood and sequential observations."
+    measure: P
+    units: model_dependent
+    alternatives:
+      - transparent configured regime rules
+      - non-state-space probability calibration
+    limitations:
+      - general filtering reference, not a TTWO empirical study
+      - no TTWO state-space likelihood has been identified
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Contents, chapters 1 and 16, and state/measurement model prerequisites inspected read-only."
+
+  - source_id: paper-gatheral-jaisson-rosenbaum-volatility-rough
+    source_type: primary_paper
+    author:
+      - Jim Gatheral
+      - Thibault Jaisson
+      - Mathieu Rosenbaum
+    title: Volatility is rough
+    edition: arXiv_1410.3394
+    year: 2014
+    volume: null
+    chapter: null
+    section: "abstract and primary metadata"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url:
+      - https://arxiv.org/abs/1410.3394
+    concept:
+      - rough log-volatility
+      - high-frequency volatility estimation
+      - Hurst exponent below one half
+    formula_id: []
+    formula: null
+    assumptions: "The published evidence is market/time-series specific and must be re-estimated for TTWO."
+    measure: P
+    units: log_volatility_and_time_scale
+    alternatives:
+      - GARCH
+      - Markovian stochastic volatility
+    limitations:
+      - does not demonstrate incremental TTWO option-decision value
+      - high-frequency TTWO inputs are absent
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Primary arXiv abstract and metadata inspected; no formula was imported."
+
+  - source_id: paper-bayer-friz-gatheral-pricing-rough-volatility
+    source_type: primary_paper
+    author:
+      - Christian Bayer
+      - Peter Friz
+      - Jim Gatheral
+    title: Pricing under rough volatility
+    edition: Quantitative_Finance_16_6
+    year: 2016
+    volume: "16(6)"
+    chapter: null
+    section: "abstract and primary preprint metadata"
+    page_start: 887
+    page_end: 904
+    pdf_file: null
+    url:
+      - https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2554754
+      - https://doi.org/10.1080/14697688.2015.1099717
+    concept:
+      - rough Bergomi pricing
+      - forward variance curve
+      - integrated volatility claims
+    formula_id: []
+    formula: null
+    assumptions: "SPX fit evidence cannot be transferred to a single equity without an OOS comparison."
+    measure: Q
+    units: variance_curve_and_option_prices
+    alternatives:
+      - Heston
+      - finite-factor Bergomi
+    limitations:
+      - SPX and variance-swap application differs from TTWO
+      - non-Markovian simulation and calibration cost remains unbenchmarked here
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Primary SSRN preprint metadata and publisher DOI inspected; no model integrated."
+
+  - source_id: paper-livieri-mouti-pallavicini-rosenbaum-option-roughness
+    source_type: primary_paper
+    author:
+      - Giulia Livieri
+      - Saad Mouti
+      - Andrea Pallavicini
+      - Mathieu Rosenbaum
+    title: "Rough volatility: evidence from option prices"
+    edition: arXiv_1702.02777
+    year: 2017
+    volume: null
+    chapter: null
+    section: "abstract and primary metadata"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url:
+      - https://arxiv.org/abs/1702.02777
+    concept:
+      - option-implied roughness
+      - short-maturity at-the-money options
+      - maturity smoothing of Hurst estimates
+    formula_id: []
+    formula: null
+    assumptions: "Short-maturity SPX evidence requires an independent TTWO replication."
+    measure: Q
+    units: implied_volatility_and_maturity
+    alternatives:
+      - historical high-frequency roughness estimate
+      - Markovian volatility models
+    limitations:
+      - evidence uses SPX rather than TTWO
+      - available TTWO surfaces are not dense enough for replication
+    implementation_file: null
+    implementation_symbol: null
+    test_file: null
+    validation_status: sourced
+    verified_on: "2026-08-08"
+    notes: "Primary arXiv abstract and metadata inspected; no formula was imported."
+
+  - source_id: internal-phase11-extension-evaluation
+    source_type: repository_validation_evidence
+    author:
+      - Take Two quantitative validation project
+    title: Phase 11 advanced extension evidence gate
+    edition: "1.0"
+    year: 2026
+    volume: null
+    chapter: null
+    section: "data, identifiability, OOS materiality, ranking and cost gates"
+    page_start: null
+    page_end: null
+    pdf_file: null
+    url: null
+    concept:
+      - documentary extension classification
+      - material-gain gate
+      - no advanced model integration
+    formula_id: []
+    formula: null
+    assumptions: "Documentary relevance never substitutes for a measured TTWO OOS gain."
+    measure: mixed_P_Q_by_extension
+    units: not_applicable
+    alternatives:
+      - retain validated simpler baseline
+    limitations:
+      - all current evidence gates are false due to missing authorized data
+      - reject statuses apply only to the current repository scope
+    implementation_file:
+      - src/take_two_options/validation/extension_evaluation.py
+      - scripts/phase11_extension_gate.py
+    implementation_symbol:
+      - classify_extension
+      - build_phase11_extension_review
+    test_file: tests/test_phase11_extension_evaluation.py
+    validation_status: tested
+    verified_on: "2026-08-08"
+    notes: "Internal decision gate; not an external proof of model value."
+
+formula_links:
+  - formula_id: FORM-MEASURE-CHANGE-001
+    name: Explicit P/Q measure boundary
+    source_id:
+      - book-bjork-arbitrage-theory
+      - book-andersen-piterbarg-interest-rate-modeling
+    source_location_status: inspected_bjork_10_2_12_2_and_andersen_piterbarg_1_3_4_2_1
+    implementation_file:
+      - src/take_two_options/quantitative/contracts.py
+      - src/take_two_options/intelligence/stochastic.py
+    implementation_symbol:
+      - Measure
+      - MeasureTransition
+      - StochasticPathSet
+    test_file: tests/test_quantitative_foundations.py
+    validation_status: tested
+    notes: "Measure tags prevent implicit P/Q conversion; they do not estimate a change of measure."
+
+  - formula_id: FORM-DISCOUNT-FACTOR-001
+    name: Continuous discount factor
+    source_id:
+      - book-bjork-arbitrage-theory
+      - book-andersen-piterbarg-interest-rate-modeling
+    source_location_status: inspected_bjork_12_2_and_andersen_piterbarg_4_2_1_5_A
+    implementation_file: src/take_two_options/quantitative/contracts.py
+    implementation_symbol: discount_factor
+    test_file: tests/test_quantitative_foundations.py
+    validation_status: tested
+    notes: "Flat continuously compounded rate and Actual/365 Fixed are explicit product conventions."
+
+  - formula_id: FORM-BS-PRICE-001
+    name: Black-Scholes European option value
+    source_id:
+      - book-bjork-arbitrage-theory
+    source_location_status: inspected_chapter_12_2_pages_175_176
+    implementation_file: src/take_two_options/pricing.py
+    implementation_symbol: black_scholes_price_greeks
+    test_file: tests/test_quantitative_foundations.py
+    validation_status: numerically_validated
+    notes: "Put-call parity and Hypothesis cross-pricer cases compare the analytic result with QuantLib European finite differences."
+
+  - formula_id: FORM-IV-ROOT-001
+    name: Implied-volatility root solve
+    source_id:
+      - book-suli-mayers-numerical-analysis
+    source_location_status: inspected_section_1_6_pages_28_29
+    implementation_file: src/take_two_options/quantitative/implied_volatility.py
+    implementation_symbol: solve_implied_volatility
+    test_file: tests/test_implied_volatility_svi.py
+    validation_status: numerically_validated
+    notes: "Structured status, bracket, residual, iterations and two tolerances are retained."
+
+  - formula_id: FORM-SVI-RAW-001
+    name: Raw SVI total implied variance
+    source_id:
+      - paper-gatheral-jacquier-svi
+    source_location_status: inspected_equation_3_1_page_5
+    implementation_file: src/take_two_options/quantitative/svi.py
+    implementation_symbol: raw_svi_total_variance
+    test_file: tests/test_implied_volatility_svi.py
+    validation_status: tested
+    notes: "Synthetic known-parameter reconstruction only; no TTWO empirical promotion."
+
+  - formula_id: FORM-SVI-ARBITRAGE-001
+    name: Butterfly-density and calendar-spread checks
+    source_id:
+      - paper-gatheral-jacquier-svi
+    source_location_status: inspected_equation_2_1_and_lemmas_2_1_2_2_pages_3_4
+    implementation_file: src/take_two_options/quantitative/svi.py
+    implementation_symbol:
+      - svi_arbitrage_report
+      - calendar_arbitrage_report
+    test_file: tests/test_implied_volatility_svi.py
+    validation_status: tested
+    notes: "Finite-grid diagnostic; continuous asymptotic proof is not claimed."
+
+  - formula_id: FORM-FD-CONVERGENCE-001
+    name: Finite-difference grid-refinement diagnostic
+    source_id:
+      - book-suli-mayers-numerical-analysis
+      - book-andersen-piterbarg-interest-rate-modeling
+    source_location_status: inspected_suli_mayers_1_6_1_7_2_7_and_andersen_piterbarg_2_3_3_2_2
+    implementation_file: src/take_two_options/quantitative/numerical_validation.py
+    implementation_symbol: assess_fd_convergence
+    test_file: tests/test_quantitative_foundations.py
+    validation_status: tested
+    notes: "Successive-grid agreement is a numerical diagnostic, not a proof of model correctness."
+
+  - formula_id: FORM-EWMA-001
+    name: Exponentially weighted conditional variance
+    source_id:
+      - book-tsay-analysis-financial-time-series
+    source_location_status: inspected_chapter_3_and_section_10_1
+    implementation_file: src/take_two_options/quantitative/calibration.py
+    implementation_symbol:
+      - ewma_variances
+      - fit_ewma
+    test_file: tests/test_quantitative_calibration.py
+    validation_status: tested
+    notes: "Chronological one-step recursion; no TTWO predictive claim."
+
+  - formula_id: FORM-GARCH-001
+    name: Stationary Gaussian GARCH(1,1)
+    source_id:
+      - book-tsay-analysis-financial-time-series
+    source_location_status: inspected_section_3_5_pages_131_139
+    implementation_file: src/take_two_options/quantitative/calibration.py
+    implementation_symbol: fit_garch_11
+    test_file: tests/test_quantitative_calibration.py
+    validation_status: tested
+    notes: "Synthetic recovery and OOS harness only; real TTWO validation remains absent."
+
+  - formula_id: FORM-WILSON-001
+    name: Wilson binomial confidence interval
+    source_id:
+      - paper-wilson-binomial-interval
+    source_location_status: primary_metadata_inspected_publisher_pdf_http_403
+    implementation_file:
+      - src/take_two_options/research_statistics.py
+      - src/take_two_options/simulation/uncertainty.py
+    implementation_symbol:
+      - wilson_interval
+      - estimate_probability
+      - estimate_path_probabilities
+    test_file:
+      - tests/test_research_statistics.py
+      - tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "Canonical path probabilities now receive sidecars; weighted paths explicitly receive no binomial interval."
+
+  - formula_id: FORM-MC-SE-001
+    name: Monte Carlo standard error
+    source_id:
+      - book-glasserman-monte-carlo
+    source_location_status: inspected_chapter_1_printed_pages_1_10
+    implementation_file:
+      - src/take_two_options/intelligence/valuation.py
+      - src/take_two_options/simulation/uncertainty.py
+    implementation_symbol:
+      - _empirical_metrics
+      - control_variate_estimate
+      - antithetic_estimate
+    test_file:
+      - tests/test_intelligence_v11.py
+      - tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "Only independent replications, or independent antithetic pair means, count in the denominator."
+
+  - formula_id: FORM-MC-CI-001
+    name: Asymptotic Monte Carlo interval
+    source_id:
+      - book-glasserman-monte-carlo
+    source_location_status: inspected_chapter_1_printed_pages_5_10
+    implementation_file: src/take_two_options/intelligence/valuation.py
+    implementation_symbol: _empirical_metrics
+    test_file: tests/test_intelligence_v11.py
+    validation_status: tested
+    notes: "This interval covers simulation error only, not model or parameter uncertainty."
+
+  - formula_id: FORM-BOOTSTRAP-001
+    name: IID percentile bootstrap interval
+    source_id:
+      - book-wasserman-all-statistics
+    source_location_status: inspected_chapter_8_printed_pages_107_114
+    implementation_file: src/take_two_options/research_statistics.py
+    implementation_symbol: bootstrap_interval
+    test_file: tests/test_research_statistics.py
+    validation_status: tested
+    notes: "Approximate iid percentile interval; dependent series use a separate block bootstrap."
+
+  - formula_id: FORM-CONTROL-VARIATE-001
+    name: Linear control-variate estimator
+    source_id:
+      - book-glasserman-monte-carlo
+    source_location_status: inspected_section_4_1_printed_pages_186_201
+    implementation_file: src/take_two_options/simulation/uncertainty.py
+    implementation_symbol: control_variate_estimate
+    test_file: tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "Reports the estimated coefficient and variance before/after; same-sample coefficient inference is asymptotic."
+
+  - formula_id: FORM-ANTITHETIC-001
+    name: Antithetic paired estimator
+    source_id:
+      - book-glasserman-monte-carlo
+    source_location_status: inspected_section_4_2_printed_pages_205_207
+    implementation_file: src/take_two_options/simulation/uncertainty.py
+    implementation_symbol: antithetic_estimate
+    test_file: tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "Pair means, not individual paths, are counted as independent replications."
+
+  - formula_id: FORM-BLOCK-BOOTSTRAP-001
+    name: Circular moving-block bootstrap interval
+    source_id:
+      - paper-kunsch-block-bootstrap
+    source_location_status: primary_metadata_and_abstract_inspected
+    implementation_file: src/take_two_options/simulation/uncertainty.py
+    implementation_symbol: circular_block_bootstrap
+    test_file: tests/test_simulation_uncertainty.py
+    validation_status: tested
+    notes: "Seed and block size are explicit; coverage and block-length optimality are not claimed."
+
+  - formula_id: FORM-PREDICTIVE-MIXTURE-001
+    name: Model and parameter predictive mixture decomposition
+    source_id:
+      - book-mcelreath-statistical-rethinking
+    source_location_status: inspected_chapters_3_and_7
+    implementation_file:
+      - src/take_two_options/quantitative/model_uncertainty.py
+      - src/take_two_options/intelligence/valuation.py
+    implementation_symbol:
+      - summarize_model_ensemble
+      - summarize_valuation_ensemble
+    test_file:
+      - tests/test_model_uncertainty.py
+      - tests/test_intelligence_v11.py
+    validation_status: tested
+    notes: "Equal/user weights remain diagnostic; declared OOS evidence is recorded but does not certify validation."
+
+  - formula_id: FORM-PROBABILITY-CALIBRATION-001
+    name: Binary probability calibration diagnostics
+    source_id:
+      - paper-brier-probability-forecast-verification
+      - book-mcelreath-statistical-rethinking
+    source_location_status: primary_brier_metadata_and_mcelreath_chapter_7_inspected
+    implementation_file: src/take_two_options/quantitative/probability_calibration.py
+    implementation_symbol: evaluate_binary_calibration
+    test_file: tests/test_model_uncertainty.py
+    validation_status: tested
+    notes: "Synthetic directional scoring only; no TTWO calibration or holdout claim."
+
+  - formula_id: FORM-SCENARIO-MIXTURE-001
+    name: Conditional event-scenario mixture
+    source_id:
+      - book-blitzstein-hwang-introduction-probability
+    source_location_status: inspected_chapter_2_printed_pages_45_79
+    implementation_file: src/take_two_options/intelligence/event_scenarios.py
+    implementation_symbol: evaluate_event_scenarios
+    test_file: tests/test_sequential_event_decision.py
+    validation_status: tested
+    notes: "Probability boxes are propagated as bounded sensitivity sets, not statistical confidence regions."
+
+  - formula_id: FORM-BELIEF-SWITCH-001
+    name: One-scenario belief switch threshold
+    source_id:
+      - book-blitzstein-hwang-introduction-probability
+    source_location_status: inspected_lotp_and_conditional_probability_chapter_2
+    implementation_file: src/take_two_options/intelligence/event_scenarios.py
+    implementation_symbol: scenario_probability_switch_threshold
+    test_file: tests/test_sequential_event_decision.py
+    validation_status: tested
+    notes: "Derived linear indifference root with fixed conditional PnLs and proportional residual beliefs."
+
+  - formula_id: FORM-PARETO-DOMINANCE-001
+    name: Allocation Pareto dominance
+    source_id:
+      - book-boyd-vandenberghe-convex-optimization
+    source_location_status: inspected_section_4_7_3_to_4_7_5_pages_177_184
+    implementation_file: src/take_two_options/optimization/allocation_pareto.py
+    implementation_symbol:
+      - dominates_allocation
+      - allocation_pareto_frontier
+    test_file: tests/test_allocation_pareto.py
+    validation_status: tested
+    notes: "Direct dominance is evaluated on every exhaustively enumerated feasible integer point."
+
+  - formula_id: FORM-ROBUST-ALLOCATION-OBJECTIVE-001
+    name: Versioned scalar allocation objective
+    source_id:
+      - book-boyd-vandenberghe-convex-optimization
+    source_location_status: inspected_scalarization_sections_4_7_4_4_7_5
+    implementation_file:
+      - src/take_two_options/optimization/allocation_pareto.py
+      - src/take_two_options/intelligence/optimizer.py
+    implementation_symbol:
+      - evaluate_scalar_objective
+      - optimize_allocations_with_frontier
+    test_file: tests/test_allocation_pareto.py
+    validation_status: tested
+    notes: "Scalar ranking never replaces the separately returned Pareto frontier."
+
+  - formula_id: FORM-PBO-001
+    name: Probability of backtest overfitting diagnostic
+    source_id:
+      - paper-bailey-borwein-lopez-zhu-pbo
+    source_location_status: primary_metadata_inspected_full_text_access_blocked
+    implementation_file: src/take_two_options/validation/pbo.py
+    implementation_symbol: probability_of_backtest_overfitting
+    test_file: tests/test_knowledge_optimizer.py
+    validation_status: tested
+    notes: "Tie handling now uses midranks and tied-winner averaging; full-text conformance remains to_review."
+
+  - formula_id: FORM-PLACEBO-001
+    name: Strategy placebo diagnostic
+    source_id:
+      - book-wasserman-all-statistics
+    source_location_status: general_permutation_basis_page_to_research
+    implementation_file: src/take_two_options/validation/placebo.py
+    implementation_symbol: placebo_diagnostics
+    test_file: tests/test_knowledge_optimizer.py
+    validation_status: tested
+    notes: "Corrected to permute signals relative to returns, compute a p-value, and test delayed signals."
+
+  - formula_id: FORM-DSR-001
+    name: Approximate deflated Sharpe probability
+    source_id:
+      - paper-bailey-lopez-deflated-sharpe
+    source_location_status: primary_metadata_and_publisher_pages_inspected
+    implementation_file: src/take_two_options/research_statistics.py
+    implementation_symbol: deflated_sharpe_probability
+    test_file: tests/test_research_statistics.py
+    validation_status: tested
+    notes: "Approximate implementation; complete trial count is mandatory."

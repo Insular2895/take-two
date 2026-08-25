@@ -1,0 +1,265 @@
+{
+  "schema_version": "1.0",
+  "report_id": "ttwo-event-regime-v1",
+  "ticker": "TTWO",
+  "dataset_hash": "b60d7de2e0d91420d2015a829b32d8524a9ea97d73bd42dbe378402fa7612833",
+  "status": "DEVELOPMENT_DATASET_READY",
+  "accepted_events": [
+    {
+      "event_id": "sec-000162828025038919",
+      "external_id": "sec-0001628280-25-038919",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "earnings",
+      "event_time": "2025-08-07T20:24:58Z",
+      "publication_time": "2025-08-07T20:24:58Z",
+      "available_at": "2025-08-07T20:24:58Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://www.sec.gov/Archives/edgar/data/946581/000162828025038919/ttwo-20250807.htm",
+      "source_hash": "957e3e79abbba82ee19059d1b4a7f6f27c252a7eac287cda3064613a19ceace7",
+      "summary": "Official SEC 8-K filing; items 2.02,9.01."
+    },
+    {
+      "event_id": "ir-mafia-release-2025-08-08",
+      "external_id": "ir-mafia-release-2025-08-08",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "product_release",
+      "event_time": "2025-08-09T00:00:00Z",
+      "publication_time": "2025-08-09T00:00:00Z",
+      "available_at": "2025-08-09T00:00:00Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://www.take2games.com/ir/news/mafia-old-country-now-available-worldwide",
+      "source_hash": "8c026c341ec189bb32a1529baa923caeca5340c0f0b1766af9c39c1761241337",
+      "summary": "Mafia: The Old Country became available worldwide."
+    },
+    {
+      "event_id": "sec-000119312525197270",
+      "external_id": "sec-0001193125-25-197270",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "regulatory",
+      "event_time": "2025-09-05T20:35:26Z",
+      "publication_time": "2025-09-05T20:35:26Z",
+      "available_at": "2025-09-05T20:35:26Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://www.sec.gov/Archives/edgar/data/946581/000119312525197270/d64275d8k.htm",
+      "source_hash": "c73a88587c468317aef4736df73260a4583467f8cb25a1c953b58258f74d0e2c",
+      "summary": "Official SEC 8-K filing; items 5.02,9.01."
+    },
+    {
+      "event_id": "ir-nba2k26-release-2025-09-05",
+      "external_id": "ir-nba2k26-release-2025-09-05",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "product_release",
+      "event_time": "2025-09-06T00:00:00Z",
+      "publication_time": "2025-09-06T00:00:00Z",
+      "available_at": "2025-09-06T00:00:00Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://www.take2games.com/ir/news/ball-over-everything-nbar-2k26-superstar-and-leave-no-doubt",
+      "source_hash": "054ff59e3f8a7babc3b25b346bcbff2e5db3d7f993339048f4ebc64c211729f9",
+      "summary": "NBA 2K26 Superstar and Leave No Doubt editions became available."
+    },
+    {
+      "event_id": "sec-000119312525200136",
+      "external_id": "sec-0001193125-25-200136",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "regulatory",
+      "event_time": "2025-09-10T20:36:48Z",
+      "publication_time": "2025-09-10T20:36:48Z",
+      "available_at": "2025-09-10T20:36:48Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://www.sec.gov/Archives/edgar/data/946581/000119312525200136/d924232d8k.htm",
+      "source_hash": "1936de2a71018a1f47a7e52b54256bdb248bd232639ac46cd770450330b6743a",
+      "summary": "Official SEC 8-K filing; items 8.01,9.01."
+    },
+    {
+      "event_id": "ir-borderlands4-release-2025-09-12",
+      "external_id": "ir-borderlands4-release-2025-09-12",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "product_release",
+      "event_time": "2025-09-13T00:00:00Z",
+      "publication_time": "2025-09-13T00:00:00Z",
+      "available_at": "2025-09-13T00:00:00Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://www.take2games.com/ir/news/break-free-borderlandsr4-now-available-worldwide",
+      "source_hash": "a63482a88eed4640926fee933bea6bb65ec3c347b69032529aa65d6e1b36b530",
+      "summary": "Borderlands 4 became available worldwide."
+    },
+    {
+      "event_id": "sec-000162828025042186",
+      "external_id": "sec-0001628280-25-042186",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "regulatory",
+      "event_time": "2025-09-19T20:30:18Z",
+      "publication_time": "2025-09-19T20:30:18Z",
+      "available_at": "2025-09-19T20:30:18Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://www.sec.gov/Archives/edgar/data/946581/000162828025042186/ttwo-20250918.htm",
+      "source_hash": "73e0d8cdac1fb322738a4d42673344dd373ab24faa4aff0f2c7e0eb774253bf5",
+      "summary": "Official SEC 8-K filing; items 5.02,5.07,9.01."
+    },
+    {
+      "event_id": "sec-000162828025050182",
+      "external_id": "sec-0001628280-25-050182",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "earnings",
+      "event_time": "2025-11-06T21:13:47Z",
+      "publication_time": "2025-11-06T21:13:47Z",
+      "available_at": "2025-11-06T21:13:47Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://www.sec.gov/Archives/edgar/data/946581/000162828025050182/ttwo-20251106.htm",
+      "source_hash": "3143d0dd0bec144479f103fd9c648ee2453728abf8864f66279b0e94d1925d0b",
+      "summary": "Official SEC 8-K filing; items 2.02,9.01."
+    },
+    {
+      "event_id": "ir-31946",
+      "external_id": "ir-31946",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "product_release",
+      "event_time": "2026-01-30T18:34:00Z",
+      "publication_time": "2026-01-30T18:34:00Z",
+      "available_at": "2026-01-30T18:34:00Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://ir.take2games.com/news-releases/news-release-details/best-world-cm-punk-graces-wwer-2k26-cover-four-new-match-types",
+      "source_hash": "d9f395da8f241f44bc9f90064e2f07125e6835435182b7590a027adef1c6aa96",
+      "summary": "“The Best in the World” CM Punk Graces WWE® 2K26 Cover as Four New Match Types, Upgrades to All Game Modes, and Unprecedented Roster Ensure The Show Never Stops"
+    },
+    {
+      "event_id": "sec-000162828026005010",
+      "external_id": "sec-0001628280-26-005010",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "earnings",
+      "event_time": "2026-02-03T21:14:25Z",
+      "publication_time": "2026-02-03T21:14:25Z",
+      "available_at": "2026-02-03T21:14:25Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://www.sec.gov/Archives/edgar/data/946581/000162828026005010/ttwo-20260203.htm",
+      "source_hash": "e2940e584ad98bc20aa743f2f530ee4d941b8fc336ec0db6c7ae23c289daea48",
+      "summary": "Official SEC 8-K filing; items 2.02,9.01."
+    },
+    {
+      "event_id": "ir-32051",
+      "external_id": "ir-32051",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "product_release",
+      "event_time": "2026-03-06T13:00:00Z",
+      "publication_time": "2026-03-06T13:00:00Z",
+      "available_at": "2026-03-06T13:00:00Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://ir.take2games.com/news-releases/news-release-details/show-never-stops-wwer-2k26-king-kings-edition-attitude-era",
+      "source_hash": "b2de97f5be417e4a93c4c76cb32dc29f98d9cc72bf136c25debd0d6e210493b2",
+      "summary": "The Show Never Stops in WWE® 2K26 King of Kings Edition, Attitude Era Edition, and Monday Night War Edition Available Now Worldwide"
+    },
+    {
+      "event_id": "sec-000162828026037260",
+      "external_id": "sec-0001628280-26-037260",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "earnings",
+      "event_time": "2026-05-21T20:08:54Z",
+      "publication_time": "2026-05-21T20:08:54Z",
+      "available_at": "2026-05-21T20:08:54Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://www.sec.gov/Archives/edgar/data/946581/000162828026037260/ttwo-20260521.htm",
+      "source_hash": "af4a8f4f70109bcfb23d0204c59982d2ee212e18cf7f0671bcc0f85b8d820973",
+      "summary": "Official SEC 8-K filing; items 2.02,9.01."
+    },
+    {
+      "event_id": "ir-32311",
+      "external_id": "ir-32311",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "product_release",
+      "event_time": "2026-06-24T10:15:00Z",
+      "publication_time": "2026-06-24T10:15:00Z",
+      "available_at": "2026-06-24T10:15:00Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://ir.take2games.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi",
+      "source_hash": "32059cda4f80845182213064ae2323e1abc7ecf0c611b61f67668b32b2430268",
+      "summary": "Rockstar Games Announces Pre-Orders for Grand Theft Auto VI"
+    },
+    {
+      "event_id": "sec-000162828026054580",
+      "external_id": "sec-0001628280-26-054580",
+      "entity": "Take-Two Interactive Software, Inc.",
+      "kind": "earnings",
+      "event_time": "2026-08-07T11:37:31Z",
+      "publication_time": "2026-08-07T11:37:31Z",
+      "available_at": "2026-08-07T11:37:31Z",
+      "decision_cutoff": "2026-08-08T20:00:00Z",
+      "source_id": "https://www.sec.gov/Archives/edgar/data/946581/000162828026054580/ttwo-20260807.htm",
+      "source_hash": "b165ea82846aa46c9ba0e254bce3ecc835c1ea68df09aad38c840c2cefd7bf34",
+      "summary": "Official SEC 8-K filing; items 2.02,9.01."
+    }
+  ],
+  "excluded_post_cutoff_ids": [],
+  "conflicts": [],
+  "regimes": [],
+  "event_study": [
+    {
+      "kind": "earnings",
+      "horizon_sessions": 1,
+      "observations": 4,
+      "mean_return": -0.054359770604413965,
+      "probability_positive": 0.0
+    },
+    {
+      "kind": "earnings",
+      "horizon_sessions": 5,
+      "observations": 4,
+      "mean_return": -0.023648840927119885,
+      "probability_positive": 0.25
+    },
+    {
+      "kind": "earnings",
+      "horizon_sessions": 20,
+      "observations": 4,
+      "mean_return": 0.01595481433154447,
+      "probability_positive": 0.75
+    },
+    {
+      "kind": "product_release",
+      "horizon_sessions": 1,
+      "observations": 6,
+      "mean_return": -0.0022797033263067443,
+      "probability_positive": 0.6666666666666666
+    },
+    {
+      "kind": "product_release",
+      "horizon_sessions": 5,
+      "observations": 6,
+      "mean_return": -0.009148747384463992,
+      "probability_positive": 0.6666666666666666
+    },
+    {
+      "kind": "product_release",
+      "horizon_sessions": 20,
+      "observations": 6,
+      "mean_return": 0.001902547662322951,
+      "probability_positive": 0.5
+    },
+    {
+      "kind": "regulatory",
+      "horizon_sessions": 1,
+      "observations": 3,
+      "mean_return": 0.017732895699362244,
+      "probability_positive": 1.0
+    },
+    {
+      "kind": "regulatory",
+      "horizon_sessions": 5,
+      "observations": 3,
+      "mean_return": 0.0251296706267851,
+      "probability_positive": 1.0
+    },
+    {
+      "kind": "regulatory",
+      "horizon_sessions": 20,
+      "observations": 3,
+      "mean_return": 0.05861521517497289,
+      "probability_positive": 1.0
+    }
+  ],
+  "trend_threshold": 0.05,
+  "high_volatility_threshold": 0.4,
+  "threshold_status": "draft_to_validate",
+  "blockers": [],
+  "holdout_used": false,
+  "order_capability": "forbidden"
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "take-two-control",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-23",
+  "workers_dev": true,
+  "preview_urls": false,
+  "access": {
+    "dev": {
+      "aud": "local-take-two-control",
+      "identity": {
+        "email": "local-admin@take-two.invalid"
+      }
+    }
+  },
+  "vars": {
+    "FREE_TIER_MODE": "true",
+    "MARKET_INTERVAL_SECONDS": "30",
+    "OFF_HOURS_INTERVAL_SECONDS": "300",
+    "SNAPSHOT_INTERVAL_SECONDS": "60",
+    "GITHUB_REPOSITORY": "Insular2895/take-two",
+    "GITHUB_WORKFLOW": "phase-m-research-analysis.yml",
+    "GITHUB_GOVERNED_REF": "main"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "take-two-control",
+      "database_id": "0a887220-0109-4623-bcfc-e04586bc7951",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "MONITOR",
+        "class_name": "TTWOPositionMonitor"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["TTWOPositionMonitor"]
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1
+  }
+}

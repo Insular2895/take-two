@@ -1,0 +1,1214 @@
+{
+  "$defs": {
+    "CloudCloseAction": {
+      "enum": [
+        "SELL_TO_CLOSE",
+        "BUY_TO_CLOSE"
+      ],
+      "title": "CloudCloseAction",
+      "type": "string"
+    },
+    "CloudExitPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "exit_days_before_expiration": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exit Days Before Expiration"
+        },
+        "human_review_required": {
+          "const": true,
+          "default": true,
+          "title": "Human Review Required",
+          "type": "boolean"
+        },
+        "iv_crush_threshold": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Iv Crush Threshold"
+        },
+        "operational_stop_loss": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operational Stop Loss"
+        },
+        "partial_profit_target": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Partial Profit Target"
+        },
+        "profit_target": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profit Target"
+        },
+        "rules": {
+          "items": {
+            "$ref": "#/$defs/CloudExitRule"
+          },
+          "title": "Rules",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "CONFIGURED",
+            "NOT_CONFIGURED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "trailing_drawdown": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trailing Drawdown"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "CloudExitPlan",
+      "type": "object"
+    },
+    "CloudExitRule": {
+      "additionalProperties": false,
+      "properties": {
+        "rule_id": {
+          "minLength": 1,
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "suggested_action": {
+          "enum": [
+            "HOLD",
+            "WATCH",
+            "REDUCE",
+            "EXIT_REVIEW",
+            "THESIS_INVALIDATED",
+            "DATA_STALE",
+            "BLOCKED_INSUFFICIENT_DATA"
+          ],
+          "title": "Suggested Action",
+          "type": "string"
+        },
+        "threshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            }
+          ],
+          "title": "Threshold"
+        }
+      },
+      "required": [
+        "rule_id",
+        "threshold",
+        "suggested_action"
+      ],
+      "title": "CloudExitRule",
+      "type": "object"
+    },
+    "CloudFXContext": {
+      "additionalProperties": false,
+      "properties": {
+        "rate_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rate Source"
+        },
+        "rate_timestamp": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rate Timestamp"
+        },
+        "rate_to_policy_currency": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rate To Policy Currency"
+        },
+        "transaction_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transaction Cost"
+        },
+        "transaction_cost_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transaction Cost Source"
+        },
+        "transaction_cost_status": {
+          "$ref": "#/$defs/CloudFXCostStatus"
+        }
+      },
+      "required": [
+        "transaction_cost_status"
+      ],
+      "title": "CloudFXContext",
+      "type": "object"
+    },
+    "CloudFXCostStatus": {
+      "enum": [
+        "NOT_APPLICABLE",
+        "KNOWN",
+        "ESTIMATED",
+        "UNKNOWN"
+      ],
+      "title": "CloudFXCostStatus",
+      "type": "string"
+    },
+    "CloudFiveScoreSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "$ref": "#/$defs/CloudScoreValue"
+        },
+        "execution_quality": {
+          "$ref": "#/$defs/CloudScoreValue"
+        },
+        "model_agreement": {
+          "$ref": "#/$defs/CloudScoreValue"
+        },
+        "opportunity": {
+          "$ref": "#/$defs/CloudScoreValue"
+        },
+        "risk": {
+          "$ref": "#/$defs/CloudScoreValue"
+        },
+        "scope": {
+          "minLength": 1,
+          "title": "Scope",
+          "type": "string"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "opportunity",
+        "risk",
+        "evidence",
+        "model_agreement",
+        "execution_quality",
+        "source",
+        "scope",
+        "timestamp"
+      ],
+      "title": "CloudFiveScoreSnapshot",
+      "type": "object"
+    },
+    "CloudFlatSpotDiagnostics": {
+      "additionalProperties": false,
+      "properties": {
+        "flat_spot_30d": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Flat Spot 30D"
+        },
+        "flat_spot_60d": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Flat Spot 60D"
+        },
+        "flat_spot_7d": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Flat Spot 7D"
+        },
+        "flat_spot_90d": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Flat Spot 90D"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "timestamp",
+        "source"
+      ],
+      "title": "CloudFlatSpotDiagnostics",
+      "type": "object"
+    },
+    "CloudImportedMonitoringSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "current_greeks": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Current Greeks",
+          "type": "object"
+        },
+        "current_iv": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Current Iv"
+        },
+        "data_sufficient": {
+          "default": true,
+          "title": "Data Sufficient",
+          "type": "boolean"
+        },
+        "estimated_exit_commission": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated Exit Commission"
+        },
+        "estimated_exit_fx": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated Exit Fx"
+        },
+        "estimated_exit_fx_status": {
+          "$ref": "#/$defs/CloudFXCostStatus",
+          "default": "UNKNOWN"
+        },
+        "estimated_exit_slippage": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated Exit Slippage"
+        },
+        "fx_rate_to_policy_currency": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Rate To Policy Currency"
+        },
+        "fx_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Source"
+        },
+        "fx_timestamp": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fx Timestamp"
+        },
+        "option_quotes": {
+          "items": {
+            "$ref": "#/$defs/CloudQuote"
+          },
+          "minItems": 1,
+          "title": "Option Quotes",
+          "type": "array"
+        },
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "quality": {
+          "minLength": 1,
+          "title": "Quality",
+          "type": "string"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "spot": {
+          "exclusiveMinimum": 0,
+          "title": "Spot",
+          "type": "number"
+        },
+        "synthetic": {
+          "default": false,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "thesis_invalidated": {
+          "default": false,
+          "title": "Thesis Invalidated",
+          "type": "boolean"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "underlying_timestamp": {
+          "format": "date-time",
+          "title": "Underlying Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "timestamp",
+        "underlying_timestamp",
+        "provider",
+        "source",
+        "quality",
+        "spot",
+        "option_quotes"
+      ],
+      "title": "CloudImportedMonitoringSnapshot",
+      "type": "object"
+    },
+    "CloudLegSide": {
+      "enum": [
+        "LONG",
+        "SHORT"
+      ],
+      "title": "CloudLegSide",
+      "type": "string"
+    },
+    "CloudModelSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "cvar_95": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cvar 95"
+        },
+        "expected_remaining_pnl": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Remaining Pnl"
+        },
+        "loss_probabilities": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Loss Probabilities",
+          "type": "object"
+        },
+        "probability_profit": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Profit"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "status": {
+          "minLength": 1,
+          "title": "Status",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "var_95": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Var 95"
+        }
+      },
+      "required": [
+        "timestamp",
+        "source",
+        "status"
+      ],
+      "title": "CloudModelSnapshot",
+      "type": "object"
+    },
+    "CloudPositionLeg": {
+      "additionalProperties": false,
+      "properties": {
+        "close_action": {
+          "$ref": "#/$defs/CloudCloseAction"
+        },
+        "con_id": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Con Id"
+        },
+        "contract_identity": {
+          "minLength": 1,
+          "title": "Contract Identity",
+          "type": "string"
+        },
+        "entry_ask": {
+          "minimum": 0,
+          "title": "Entry Ask",
+          "type": "number"
+        },
+        "entry_bid": {
+          "minimum": 0,
+          "title": "Entry Bid",
+          "type": "number"
+        },
+        "entry_executable_price": {
+          "minimum": 0,
+          "title": "Entry Executable Price",
+          "type": "number"
+        },
+        "entry_mid": {
+          "minimum": 0,
+          "title": "Entry Mid",
+          "type": "number"
+        },
+        "expiration": {
+          "format": "date-time",
+          "title": "Expiration",
+          "type": "string"
+        },
+        "instrument_type": {
+          "const": "option",
+          "default": "option",
+          "title": "Instrument Type",
+          "type": "string"
+        },
+        "leg_id": {
+          "minLength": 1,
+          "title": "Leg Id",
+          "type": "string"
+        },
+        "local_symbol": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Local Symbol"
+        },
+        "multiplier": {
+          "exclusiveMinimum": 0,
+          "title": "Multiplier",
+          "type": "number"
+        },
+        "option_right": {
+          "enum": [
+            "CALL",
+            "PUT"
+          ],
+          "title": "Option Right",
+          "type": "string"
+        },
+        "quantity": {
+          "exclusiveMinimum": 0,
+          "title": "Quantity",
+          "type": "integer"
+        },
+        "ratio": {
+          "exclusiveMinimum": 0,
+          "title": "Ratio",
+          "type": "integer"
+        },
+        "side": {
+          "$ref": "#/$defs/CloudLegSide"
+        },
+        "strike": {
+          "exclusiveMinimum": 0,
+          "title": "Strike",
+          "type": "number"
+        },
+        "underlying": {
+          "minLength": 1,
+          "title": "Underlying",
+          "type": "string"
+        }
+      },
+      "required": [
+        "leg_id",
+        "contract_identity",
+        "underlying",
+        "side",
+        "close_action",
+        "ratio",
+        "quantity",
+        "multiplier",
+        "option_right",
+        "strike",
+        "expiration",
+        "entry_bid",
+        "entry_ask",
+        "entry_mid",
+        "entry_executable_price"
+      ],
+      "title": "CloudPositionLeg",
+      "type": "object"
+    },
+    "CloudPositionState": {
+      "enum": [
+        "PLANNED",
+        "PAPER_OPEN",
+        "LIVE_ASSISTED_OPEN"
+      ],
+      "title": "CloudPositionState",
+      "type": "string"
+    },
+    "CloudQuote": {
+      "additionalProperties": false,
+      "properties": {
+        "ask": {
+          "minimum": 0,
+          "title": "Ask",
+          "type": "number"
+        },
+        "bid": {
+          "minimum": 0,
+          "title": "Bid",
+          "type": "number"
+        },
+        "contract_identity": {
+          "minLength": 1,
+          "title": "Contract Identity",
+          "type": "string"
+        },
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "quality": {
+          "minLength": 1,
+          "title": "Quality",
+          "type": "string"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "contract_identity",
+        "bid",
+        "ask",
+        "timestamp",
+        "provider",
+        "source",
+        "quality"
+      ],
+      "title": "CloudQuote",
+      "type": "object"
+    },
+    "CloudScoreValue": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "minLength": 1,
+          "title": "Confidence",
+          "type": "string"
+        },
+        "coverage": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage",
+          "type": "number"
+        },
+        "formula_version": {
+          "minLength": 1,
+          "title": "Formula Version",
+          "type": "string"
+        },
+        "score_value": {
+          "title": "Score Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "score_value",
+        "coverage",
+        "confidence",
+        "formula_version"
+      ],
+      "title": "CloudScoreValue",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/cloud_position_dossier.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actual_entry_commissions": {
+      "minimum": 0,
+      "title": "Actual Entry Commissions",
+      "type": "number"
+    },
+    "actual_entry_fx": {
+      "$ref": "#/$defs/CloudFXContext"
+    },
+    "actual_entry_slippage": {
+      "minimum": 0,
+      "title": "Actual Entry Slippage",
+      "type": "number"
+    },
+    "budget_diagnostics": {
+      "additionalProperties": true,
+      "title": "Budget Diagnostics",
+      "type": "object"
+    },
+    "capital_required_policy": {
+      "description": "Governed non-negative capital requirement in policy currency; never a PnL basis.",
+      "minimum": 0,
+      "title": "Capital Required Policy",
+      "type": "number"
+    },
+    "config_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Config Hash",
+      "type": "string"
+    },
+    "config_hash_source": {
+      "minLength": 1,
+      "title": "Config Hash Source",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "dossier_id": {
+      "minLength": 1,
+      "title": "Dossier Id",
+      "type": "string"
+    },
+    "entry_cash_flow_policy": {
+      "description": "Signed opening account cash flow in policy currency: positive cash received, negative cash paid; all known entry costs are included exactly once.",
+      "title": "Entry Cash Flow Policy",
+      "type": "number"
+    },
+    "entry_native_currency": {
+      "maxLength": 3,
+      "minLength": 3,
+      "title": "Entry Native Currency",
+      "type": "string"
+    },
+    "exit_plan": {
+      "$ref": "#/$defs/CloudExitPlan"
+    },
+    "expirations": {
+      "items": {
+        "format": "date-time",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Expirations",
+      "type": "array"
+    },
+    "five_scores": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CloudFiveScoreSnapshot"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "fixture_status": {
+      "default": "CANONICAL_EXPORT",
+      "enum": [
+        "CANONICAL_EXPORT",
+        "SYNTHETIC_DEMO"
+      ],
+      "title": "Fixture Status",
+      "type": "string"
+    },
+    "flat_spot_diagnostics": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CloudFlatSpotDiagnostics"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "git_commit": {
+      "pattern": "^[a-f0-9]{7,40}$",
+      "title": "Git Commit",
+      "type": "string"
+    },
+    "human_confirmation_required": {
+      "const": true,
+      "default": true,
+      "title": "Human Confirmation Required",
+      "type": "boolean"
+    },
+    "initial_greeks": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "minProperties": 1,
+      "title": "Initial Greeks",
+      "type": "object"
+    },
+    "initial_iv": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "minProperties": 1,
+      "title": "Initial Iv",
+      "type": "object"
+    },
+    "initial_position_state": {
+      "$ref": "#/$defs/CloudPositionState"
+    },
+    "initial_scenario_probabilities": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Initial Scenario Probabilities"
+    },
+    "initial_spot": {
+      "exclusiveMinimum": 0,
+      "title": "Initial Spot",
+      "type": "number"
+    },
+    "last_imported_snapshot": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CloudImportedMonitoringSnapshot"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "latest_promoted_model_snapshot": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CloudModelSnapshot"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "legs": {
+      "items": {
+        "$ref": "#/$defs/CloudPositionLeg"
+      },
+      "minItems": 1,
+      "title": "Legs",
+      "type": "array"
+    },
+    "managed_exit_deadline": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Managed Exit Deadline"
+    },
+    "market_snapshot_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Market Snapshot Hash",
+      "type": "string"
+    },
+    "market_snapshot_hash_source": {
+      "minLength": 1,
+      "title": "Market Snapshot Hash Source",
+      "type": "string"
+    },
+    "multiplier": {
+      "exclusiveMinimum": 0,
+      "title": "Multiplier",
+      "type": "number"
+    },
+    "opened_at": {
+      "format": "date-time",
+      "title": "Opened At",
+      "type": "string"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "phase_m_context_hash": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Phase M Context Hash"
+    },
+    "phase_m_context_id": {
+      "anyOf": [
+        {
+          "pattern": "^phase-m-context-[a-f0-9]{16}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Phase M Context Id"
+    },
+    "policy_currency": {
+      "maxLength": 3,
+      "minLength": 3,
+      "title": "Policy Currency",
+      "type": "string"
+    },
+    "position_id": {
+      "minLength": 1,
+      "title": "Position Id",
+      "type": "string"
+    },
+    "quantity": {
+      "exclusiveMinimum": 0,
+      "title": "Quantity",
+      "type": "integer"
+    },
+    "read_only": {
+      "const": true,
+      "default": true,
+      "title": "Read Only",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.1",
+      "default": "1.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "structure_name": {
+      "minLength": 1,
+      "title": "Structure Name",
+      "type": "string"
+    },
+    "structure_type": {
+      "minLength": 1,
+      "title": "Structure Type",
+      "type": "string"
+    },
+    "ticker": {
+      "minLength": 1,
+      "title": "Ticker",
+      "type": "string"
+    },
+    "trade_economics_schema_version": {
+      "minLength": 1,
+      "title": "Trade Economics Schema Version",
+      "type": "string"
+    },
+    "trade_economics_ticket_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Trade Economics Ticket Hash",
+      "type": "string"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    },
+    "what_if": {
+      "const": true,
+      "default": true,
+      "title": "What If",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "dossier_id",
+    "position_id",
+    "created_at",
+    "opened_at",
+    "initial_position_state",
+    "ticker",
+    "structure_name",
+    "structure_type",
+    "legs",
+    "quantity",
+    "multiplier",
+    "entry_native_currency",
+    "policy_currency",
+    "entry_cash_flow_policy",
+    "capital_required_policy",
+    "actual_entry_fx",
+    "actual_entry_commissions",
+    "actual_entry_slippage",
+    "initial_spot",
+    "initial_iv",
+    "initial_greeks",
+    "expirations",
+    "budget_diagnostics",
+    "exit_plan",
+    "trade_economics_ticket_hash",
+    "trade_economics_schema_version",
+    "git_commit",
+    "config_hash",
+    "config_hash_source",
+    "market_snapshot_hash",
+    "market_snapshot_hash_source"
+  ],
+  "title": "CloudPositionDossier",
+  "type": "object"
+}

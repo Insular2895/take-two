@@ -1,0 +1,523 @@
+{
+  "$defs": {
+    "BrokerCapitalContext": {
+      "additionalProperties": false,
+      "properties": {
+        "buying_power_requirement": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Buying Power Requirement"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "maxLength": 3,
+              "minLength": 3,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "timestamp": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestamp"
+        },
+        "validated": {
+          "default": false,
+          "title": "Validated",
+          "type": "boolean"
+        }
+      },
+      "title": "BrokerCapitalContext",
+      "type": "object"
+    },
+    "CapitalCap": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "$ref": "#/$defs/CapitalCapMode",
+          "default": "AUTO"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "title": "CapitalCap",
+      "type": "object"
+    },
+    "CapitalCapMode": {
+      "enum": [
+        "AUTO",
+        "EXPLICIT"
+      ],
+      "title": "CapitalCapMode",
+      "type": "string"
+    },
+    "FXAccountMode": {
+      "enum": [
+        "CONVERT_AT_ENTRY_AND_EXIT",
+        "MAINTAIN_UNDERLYING_CURRENCY_CASH",
+        "ACCOUNT_BASE_TRANSLATION_ONLY",
+        "UNKNOWN"
+      ],
+      "title": "FXAccountMode",
+      "type": "string"
+    },
+    "FXExecutionCost": {
+      "additionalProperties": false,
+      "description": "Entry FX transaction cost, distinct from the economic conversion rate.",
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "cost_amount": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Amount"
+        },
+        "cost_basis_points": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Basis Points"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "maxLength": 3,
+              "minLength": 3,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "mode": {
+          "$ref": "#/$defs/FXAccountMode"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "status": {
+          "$ref": "#/$defs/FXExecutionCostStatus"
+        },
+        "timestamp": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestamp"
+        },
+        "validated_underlying_currency_cash": {
+          "default": false,
+          "title": "Validated Underlying Currency Cash",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "mode",
+        "status"
+      ],
+      "title": "FXExecutionCost",
+      "type": "object"
+    },
+    "FXExecutionCostStatus": {
+      "enum": [
+        "NOT_APPLICABLE",
+        "KNOWN",
+        "ESTIMATED",
+        "UNKNOWN"
+      ],
+      "title": "FXExecutionCostStatus",
+      "type": "string"
+    },
+    "FXRate": {
+      "additionalProperties": false,
+      "description": "Point-in-time conversion expressed as policy currency per source unit.",
+      "properties": {
+        "policy_currency": {
+          "maxLength": 3,
+          "minLength": 3,
+          "title": "Policy Currency",
+          "type": "string"
+        },
+        "rate_to_policy_currency": {
+          "exclusiveMinimum": 0,
+          "title": "Rate To Policy Currency",
+          "type": "number"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "source_currency": {
+          "maxLength": 3,
+          "minLength": 3,
+          "title": "Source Currency",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_currency",
+        "policy_currency",
+        "rate_to_policy_currency",
+        "timestamp",
+        "source"
+      ],
+      "title": "FXRate",
+      "type": "object"
+    },
+    "FlexibleBudgetPolicyV2": {
+      "additionalProperties": false,
+      "description": "Explicit target budget with asymmetric lower and upper tolerances.",
+      "properties": {
+        "account_available_capital": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Account Available Capital"
+        },
+        "account_liquidity_reserve": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Account Liquidity Reserve",
+          "type": "number"
+        },
+        "buying_power_cap": {
+          "$ref": "#/$defs/CapitalCap"
+        },
+        "currency": {
+          "maxLength": 3,
+          "minLength": 3,
+          "title": "Currency",
+          "type": "string"
+        },
+        "max_overspend": {
+          "minimum": 0,
+          "title": "Max Overspend",
+          "type": "number"
+        },
+        "maximum_contracts": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Contracts",
+          "type": "integer"
+        },
+        "maximum_loss_cap": {
+          "$ref": "#/$defs/CapitalCap"
+        },
+        "minimum_spend_policy": {
+          "$ref": "#/$defs/MinimumSpendPolicy",
+          "default": "SOFT"
+        },
+        "target_budget": {
+          "exclusiveMinimum": 0,
+          "title": "Target Budget",
+          "type": "number"
+        },
+        "under_target_tolerance": {
+          "minimum": 0,
+          "title": "Under Target Tolerance",
+          "type": "number"
+        },
+        "version": {
+          "const": "2.0",
+          "default": "2.0",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "currency",
+        "target_budget",
+        "under_target_tolerance",
+        "max_overspend",
+        "maximum_contracts"
+      ],
+      "title": "FlexibleBudgetPolicyV2",
+      "type": "object"
+    },
+    "MinimumSpendPolicy": {
+      "enum": [
+        "SOFT",
+        "HARD",
+        "OFF"
+      ],
+      "title": "MinimumSpendPolicy",
+      "type": "string"
+    },
+    "MixedExpiryLifecycleConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "close_buffer_calendar_days": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Close Buffer Calendar Days",
+          "type": "integer"
+        },
+        "policy": {
+          "const": "CLOSE_BEFORE_FIRST_EXPIRY",
+          "default": "CLOSE_BEFORE_FIRST_EXPIRY",
+          "title": "Policy",
+          "type": "string"
+        },
+        "source": {
+          "default": "trade_economics_configuration",
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "version": {
+          "default": "1.1",
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "title": "MixedExpiryLifecycleConfiguration",
+      "type": "object"
+    },
+    "ProspectiveBudgetConfig": {
+      "additionalProperties": false,
+      "description": "Phase M input prepared by M0.2 without starting OPRA or paper activity.",
+      "properties": {
+        "budget_policy": {
+          "$ref": "#/$defs/FlexibleBudgetPolicyV2"
+        },
+        "holdout_status": {
+          "const": "UNOPENED",
+          "default": "UNOPENED",
+          "title": "Holdout Status",
+          "type": "string"
+        },
+        "mixed_expiry_lifecycle": {
+          "$ref": "#/$defs/MixedExpiryLifecycleConfiguration"
+        },
+        "opra_status": {
+          "const": "NOT_STARTED",
+          "default": "NOT_STARTED",
+          "title": "Opra Status",
+          "type": "string"
+        },
+        "order_capability": {
+          "const": "forbidden",
+          "default": "forbidden",
+          "title": "Order Capability",
+          "type": "string"
+        },
+        "phase": {
+          "const": "M_PROSPECTIVE_NOT_STARTED",
+          "default": "M_PROSPECTIVE_NOT_STARTED",
+          "title": "Phase",
+          "type": "string"
+        },
+        "read_only": {
+          "const": true,
+          "default": true,
+          "title": "Read Only",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "2.0",
+          "default": "2.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "transmit": {
+          "const": false,
+          "default": false,
+          "title": "Transmit",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "budget_policy",
+        "mixed_expiry_lifecycle"
+      ],
+      "title": "ProspectiveBudgetConfig",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/phase_m_decision_context.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Immutable identity around static policy and point-in-time runtime evidence.",
+  "properties": {
+    "broker_capital_context": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BrokerCapitalContext"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "context_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Context Hash",
+      "type": "string"
+    },
+    "context_id": {
+      "pattern": "^phase-m-context-[a-f0-9]{16}$",
+      "title": "Context Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "fx_execution_cost": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FXExecutionCost"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "fx_rate": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FXRate"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "prospective_config": {
+      "$ref": "#/$defs/ProspectiveBudgetConfig"
+    },
+    "prospective_config_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Prospective Config Hash",
+      "type": "string"
+    },
+    "prospective_config_source": {
+      "minLength": 1,
+      "title": "Prospective Config Source",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Source Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "prospective_config",
+    "prospective_config_source",
+    "prospective_config_hash",
+    "created_at",
+    "context_id",
+    "context_hash"
+  ],
+  "title": "PhaseMDecisionContext",
+  "type": "object"
+}

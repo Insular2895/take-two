@@ -1,5 +1,49 @@
 # Changelog documentaire
 
+## 2026-07-28 - V11 Probabilistic Strategy Intelligence
+
+Statut : `implemented_research_only_calibration_required`
+
+Ajouts :
+
+- couche modulaire au-dessus du rapport V10.1, sans remplacement du moteur de
+  construction ni du contrôle américain QuantLib ;
+- hub de données unifié avec provenance, déduplication et ports read-only SEC
+  EDGAR, FRED, Take-Two RSS, Google Trends alpha, calendrier de marché et
+  IBKR/OPRA ;
+- mises à jour bayésiennes auditées avec faits canoniques, contradictions et
+  plafonds par famille de sources ;
+- 4 régimes croisés avec GBM, volatilité locale Dupire, Heston et
+  Heston-plus-sauts, sorties path-dependent et métriques de queue ;
+- covariance dynamique 20/60/252 jours, fenêtres événement/régime, shrinkage
+  et correction PSD, sans invention des facteurs manquants ;
+- optimisation exacte en contrats entiers sous budget, perte maximale,
+  liquidité et cap de contrats, avec réserve cash et `NO_TRADE` explicites ;
+- stress coûts/adverse/rupture/CVaR, maintien du statut contaminé V7–V9 et
+  interdiction de promotion sans holdout neuf ni paper trading ;
+- dossiers de position et avis explicables `conserver`, `surveiller`,
+  `réduire`, `sortir` ou `thèse invalidée` ;
+- previews IBKR verrouillées `transmit=false`, `what_if=true`,
+  `order_capability=forbidden` et rejet des adaptateurs capables d’ordonner.
+- 119 tests, Ruff, mypy strict, `pip check`, build wheel et contrôles des
+  artefacts JSON/HTML passent.
+- README transformé en spécification mathématique et décisionnelle complète :
+  payoff, coûts, Black-Scholes/QuantLib, Greeks, scénarios, classements, Bayes,
+  Dupire, covariance, SDE/Itô, Monte-Carlo, robustesse, optimisation,
+  stress/promotion, monitoring, paramètres, limites et frontières réellement
+  connectées.
+
+Reste à valider :
+
+- priors, likelihoods, régimes, Heston, sauts et surface locale sur données
+  point-in-time source-backed ;
+- campagne IBKR/OPRA réelle avec droits, fraîcheur, `conId`, livrables, quotes
+  combo, commissions, marge et support what-if ;
+- facteurs de covariance alignés, walk-forward imbriqué, holdout intact et
+  paper trading ;
+- toute évolution éventuelle de la frontière d’exécution, qui reste hors
+  périmètre et soumise à validation explicite.
+
 ## 2026-07-19 - Budget EUR et horizons V9
 
 Statut : `source_backed_budget_screen_no_trade`

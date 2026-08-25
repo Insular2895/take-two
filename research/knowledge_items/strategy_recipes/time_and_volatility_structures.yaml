@@ -1,0 +1,116 @@
+book_source: &book_source
+  source_id: natenberg-options-volatility-2015
+  author: Sheldon Natenberg
+  title: Option Volatility and Pricing
+  edition_or_date: Second edition, 2015
+  chapter: Strategy chapters
+  page: null
+  accessed_at: 2026-07-25
+  source_type: book
+  uri: null
+  confidence: medium
+  excerpt_hash: null
+
+base: &base
+  object_type: strategy_recipe
+  lifecycle: COMPILABLE
+  market_validity: THEORETICALLY_VALID
+  empirical_status: NOT_TESTED
+  execution_status: RESEARCH_ONLY
+  sources: [*book_source]
+  assumptions: [Experimental grids require calibration; they are not profitable book rules.]
+  variables: [strike, expiration, bid, ask, quantity, exit_policy]
+  units: {strike: USD_per_share, expiration: date, quantity: whole_contracts}
+  conditions: [Every leg is listed and maximum loss is explicitly bounded.]
+  action: enumerate all listed combinations inside the declared search ranges
+  exceptions: []
+  risks: [Term-structure changes, early assignment, and non-simultaneous combo fills.]
+  contradictions: []
+  parameters_provided: []
+  parameters_missing: [profitable exit thresholds]
+  parameters_to_calibrate: [profit target, stop, holding period, width, slippage]
+  validation_history:
+    - checked_at: 2026-07-25
+      status: passed
+      method: structural payoff and modern-contract validation
+      source_ids: [natenberg-options-volatility-2015]
+      notes: Structural validity only; empirical edge remains NOT_TESTED.
+  dte: {minimum: 30, maximum: 730, values: [], unit: calendar_days, origin: sourced, source_id: natenberg-options-volatility-2015}
+  front_dte: {minimum: 67, maximum: 360, values: [], unit: calendar_days, origin: calibration_required, source_id: null}
+  moneyness: {minimum: 0.75, maximum: 1.25, values: [], unit: strike_over_spot, origin: experimental, source_id: null}
+  spread_width: {minimum: null, maximum: null, values: [5, 10, 20, 30], unit: USD, origin: calibration_required, source_id: null}
+  profit_targets: {minimum: null, maximum: null, values: [0.50, 0.80, 1.00], unit: return_on_maximum_loss, origin: calibration_required, source_id: null}
+  stops: {minimum: null, maximum: null, values: [0.40, 0.55, 0.70], unit: loss_on_maximum_loss, origin: calibration_required, source_id: null}
+  holding_days: {minimum: null, maximum: null, values: [60, 120, 180], unit: calendar_days, origin: calibration_required, source_id: null}
+  rolling_rules: [none, review_at_30_dte]
+  capital_recovery_rules: [none, close_whole_contracts_only]
+  bounded_risk_required: true
+
+objects:
+  - <<: *base
+    recipe_id: call-calendar-v1
+    architecture: call_calendar
+    name: Long call calendar
+    allowed_theses: [neutral, bullish]
+    legs:
+      - {leg_id: long_back_call, option_type: call, side: long, quantity_ratio: 1, expiration_role: back, strike_role: any}
+      - {leg_id: short_front_call, option_type: call, side: short, quantity_ratio: 1, expiration_role: front, strike_role: any}
+
+  - <<: *base
+    recipe_id: put-calendar-v1
+    architecture: put_calendar
+    name: Long put calendar
+    allowed_theses: [neutral, bearish]
+    legs:
+      - {leg_id: long_back_put, option_type: put, side: long, quantity_ratio: 1, expiration_role: back, strike_role: any}
+      - {leg_id: short_front_put, option_type: put, side: short, quantity_ratio: 1, expiration_role: front, strike_role: any}
+
+  - <<: *base
+    recipe_id: call-diagonal-v1
+    architecture: call_diagonal
+    name: Bounded-risk call diagonal
+    allowed_theses: [bullish]
+    legs:
+      - {leg_id: long_back_call, option_type: call, side: long, quantity_ratio: 1, expiration_role: back, strike_role: lower}
+      - {leg_id: short_front_call, option_type: call, side: short, quantity_ratio: 1, expiration_role: front, strike_role: upper}
+
+  - <<: *base
+    recipe_id: put-diagonal-v1
+    architecture: put_diagonal
+    name: Bounded-risk put diagonal
+    allowed_theses: [bearish]
+    legs:
+      - {leg_id: long_back_put, option_type: put, side: long, quantity_ratio: 1, expiration_role: back, strike_role: upper}
+      - {leg_id: short_front_put, option_type: put, side: short, quantity_ratio: 1, expiration_role: front, strike_role: lower}
+
+  - <<: *base
+    recipe_id: long-straddle-v1
+    architecture: long_straddle
+    name: Long straddle
+    allowed_theses: [volatile]
+    front_dte: null
+    legs:
+      - {leg_id: long_call, option_type: call, side: long, quantity_ratio: 1, expiration_role: same, strike_role: atm}
+      - {leg_id: long_put, option_type: put, side: long, quantity_ratio: 1, expiration_role: same, strike_role: atm}
+
+  - <<: *base
+    recipe_id: long-strangle-v1
+    architecture: long_strangle
+    name: Long strangle
+    allowed_theses: [volatile]
+    front_dte: null
+    legs:
+      - {leg_id: long_otm_call, option_type: call, side: long, quantity_ratio: 1, expiration_role: same, strike_role: otm}
+      - {leg_id: long_otm_put, option_type: put, side: long, quantity_ratio: 1, expiration_role: same, strike_role: otm}
+
+  - <<: *base
+    recipe_id: iron-condor-v1
+    architecture: iron_condor
+    name: Defined-risk iron condor
+    allowed_theses: [neutral]
+    front_dte: null
+    legs:
+      - {leg_id: long_lower_put, option_type: put, side: long, quantity_ratio: 1, expiration_role: same, strike_role: lower}
+      - {leg_id: short_upper_put, option_type: put, side: short, quantity_ratio: 1, expiration_role: same, strike_role: center}
+      - {leg_id: short_lower_call, option_type: call, side: short, quantity_ratio: 1, expiration_role: same, strike_role: center}
+      - {leg_id: long_upper_call, option_type: call, side: long, quantity_ratio: 1, expiration_role: same, strike_role: upper}

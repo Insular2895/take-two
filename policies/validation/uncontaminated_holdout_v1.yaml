@@ -1,0 +1,8 @@
+policy_id: uncontaminated-holdout-required-v1
+status: pre_registered
+minimum_train_observations: 20
+minimum_validation_observations: 8
+minimum_test_observations: 8
+minimum_holdout_observations: 4
+contaminated: [v7, v8, v9]
+provenance: Declared before the knowledge-driven run; sensitivity still required.

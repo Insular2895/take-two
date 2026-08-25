@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.1",
+  "status": "CONFIGURED_NOT_ENTITLED",
+  "provider": "ibkr_tws",
+  "authentication_mode": "tws_session",
+  "provider_protocol": "LiveOptionMarketDataProvider",
+  "paper_decision_contract": "PaperDecisionRecord",
+  "paper_realization_contract": "PaperRealizationRecord",
+  "required_variables": [
+    "OPRA_PROVIDER",
+    "IBKR_HOST",
+    "IBKR_PORT",
+    "IBKR_CLIENT_ID",
+    "IBKR_SESSION_MODE",
+    "IBKR_MARKET_DATA_TYPE",
+    "OPRA_ENTITLEMENT_CONFIRMED",
+    "OPRA_LICENSE_REVIEWED"
+  ],
+  "missing_variables": [],
+  "configuration_errors": [],
+  "credentials_required": false,
+  "credentials_present": false,
+  "entitlement_confirmed": false,
+  "license_reviewed": false,
+  "notes": [
+    "IBKR TWS/IB Gateway uses a locally authenticated socket session; no OPRA_API_KEY or OPRA_API_SECRET is expected.",
+    "Keep the TWS Read-Only API setting enabled for this research-only port."
+  ],
+  "exact_command": "ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml",
+  "connection_attempted": false,
+  "phase_m_started": false,
+  "read_only": true,
+  "transmit": false,
+  "what_if": true,
+  "order_capability": "forbidden"
+}

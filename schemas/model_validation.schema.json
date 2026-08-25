@@ -1,0 +1,78 @@
+{
+  "$id": "https://schemas.take-two-options.invalid/v11.1/model_validation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "candidate_id": {
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "holdout_status": {
+      "enum": [
+        "passed",
+        "failed",
+        "insufficient_data",
+        "contaminated"
+      ],
+      "title": "Holdout Status",
+      "type": "string"
+    },
+    "paper_status": {
+      "enum": [
+        "passed",
+        "failed",
+        "not_run"
+      ],
+      "title": "Paper Status",
+      "type": "string"
+    },
+    "promotion_eligible": {
+      "const": false,
+      "default": false,
+      "title": "Promotion Eligible",
+      "type": "boolean"
+    },
+    "reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasons",
+      "type": "array"
+    },
+    "stress_results": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Stress Results",
+      "type": "object"
+    },
+    "stress_status": {
+      "enum": [
+        "passed",
+        "failed"
+      ],
+      "title": "Stress Status",
+      "type": "string"
+    },
+    "walk_forward_status": {
+      "enum": [
+        "passed",
+        "failed",
+        "insufficient_data",
+        "contaminated"
+      ],
+      "title": "Walk Forward Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "candidate_id",
+    "walk_forward_status",
+    "holdout_status",
+    "stress_status",
+    "stress_results",
+    "paper_status"
+  ],
+  "title": "CandidateValidationSummary",
+  "type": "object"
+}

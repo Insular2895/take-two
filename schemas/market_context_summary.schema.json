@@ -1,0 +1,154 @@
+{
+  "$id": "https://schemas.take-two-options.invalid/v11.1/market_context_summary.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "cash_dividend_yield": {
+      "minimum": 0,
+      "title": "Cash Dividend Yield",
+      "type": "number"
+    },
+    "corporate_action_count": {
+      "minimum": 0,
+      "title": "Corporate Action Count",
+      "type": "integer"
+    },
+    "dataset_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Dataset Hash",
+      "type": "string"
+    },
+    "dataset_id": {
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "dividend_policy_status": {
+      "title": "Dividend Policy Status",
+      "type": "string"
+    },
+    "fx_end": {
+      "format": "date",
+      "title": "Fx End",
+      "type": "string"
+    },
+    "fx_rate_count": {
+      "minimum": 0,
+      "title": "Fx Rate Count",
+      "type": "integer"
+    },
+    "fx_start": {
+      "format": "date",
+      "title": "Fx Start",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "point_in_time_status": {
+      "const": "VERIFIED_WITH_CONSERVATIVE_LAGS",
+      "title": "Point In Time Status",
+      "type": "string"
+    },
+    "rate_curve_count": {
+      "minimum": 0,
+      "title": "Rate Curve Count",
+      "type": "integer"
+    },
+    "rate_end": {
+      "format": "date",
+      "title": "Rate End",
+      "type": "string"
+    },
+    "rate_start": {
+      "format": "date",
+      "title": "Rate Start",
+      "type": "string"
+    },
+    "raw_data_committed": {
+      "const": false,
+      "default": false,
+      "title": "Raw Data Committed",
+      "type": "boolean"
+    },
+    "raw_location": {
+      "const": "local_private",
+      "default": "local_private",
+      "title": "Raw Location",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_hashes": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Source Hashes",
+      "type": "object"
+    },
+    "underlying_bar_count": {
+      "minimum": 0,
+      "title": "Underlying Bar Count",
+      "type": "integer"
+    },
+    "underlying_end": {
+      "format": "date",
+      "title": "Underlying End",
+      "type": "string"
+    },
+    "underlying_fields": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Underlying Fields",
+      "type": "array"
+    },
+    "underlying_start": {
+      "format": "date",
+      "title": "Underlying Start",
+      "type": "string"
+    }
+  },
+  "required": [
+    "dataset_id",
+    "generated_at",
+    "dataset_hash",
+    "underlying_bar_count",
+    "underlying_start",
+    "underlying_end",
+    "underlying_fields",
+    "rate_curve_count",
+    "rate_start",
+    "rate_end",
+    "fx_rate_count",
+    "fx_start",
+    "fx_end",
+    "corporate_action_count",
+    "cash_dividend_yield",
+    "dividend_policy_status",
+    "source_hashes",
+    "point_in_time_status",
+    "limitations"
+  ],
+  "title": "MarketContextSummary",
+  "type": "object"
+}

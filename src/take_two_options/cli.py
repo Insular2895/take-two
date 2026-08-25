@@ -1,592 +1,827 @@
-"""Command-line interface for offline read-only analysis."""
+"""Read-only CLI for knowledge validation and generic option-trade analysis."""
 
 from __future__ import annotations
 
 import json
-from datetime import date, datetime
+import os
+import subprocess
+import sys
+from datetime import date
 from pathlib import Path
-from typing import Annotated, Literal, NoReturn, cast
+from typing import Annotated
 
 import typer
-from alpaca.common.exceptions import APIError, RetryException
 
-from take_two_options.accuracy import (
-    AccuracyGeneratorSpec,
-    MarketDataAccuracyReport,
-    MarketDataAccuracySuiteSpec,
-    generate_accuracy_suite_spec,
-    load_current_expirations,
-    load_market_closes,
-    load_market_sessions,
-    render_accuracy_markdown,
-    run_accuracy_suite,
+from take_two_options.budget import (
+    CapitalCap,
+    CapitalCapMode,
+    FlexibleBudgetPolicyV2,
+    MinimumSpendPolicy,
 )
-from take_two_options.accuracy_dashboard import build_accuracy_dashboard_artifact
-from take_two_options.alpaca_data import (
-    AlpacaDataError,
-    AlpacaOptionBacktestSpec,
-    AlpacaReadOnlyMarketData,
+from take_two_options.decision.pipeline import analyze_trade
+from take_two_options.intelligence.backtesting import (
+    load_walk_forward_dataset,
+    run_walk_forward,
 )
-from take_two_options.backtesting import (
-    BacktestDataset,
-    render_backtest_markdown,
-    run_backtest,
+from take_two_options.intelligence.calibration import (
+    build_dataset_splits,
+    fit_offline_models,
+    validate_historical_dataset,
 )
-from take_two_options.calibration import (
-    CalibrationDataset,
-    calibrate_dataset,
-    render_calibration_markdown,
+from take_two_options.intelligence.monitoring import (
+    monitor_position as assess_position,
 )
-from take_two_options.data import FixtureDataProvider
-from take_two_options.domain import DecisionReport
-from take_two_options.engine import analyze_bundle
-from take_two_options.marketdata_data import (
-    MarketDataError,
-    MarketDataOptionBacktestSpec,
-    MarketDataReadOnlyClient,
+from take_two_options.intelligence.monitoring import (
+    replay_position_trajectory,
 )
-from take_two_options.marketdata_panel import (
-    MarketDataPanelSpec,
-    render_marketdata_panel_markdown,
-    run_marketdata_panel,
+from take_two_options.intelligence.pipeline import run_intelligence
+from take_two_options.intelligence.schemas import (
+    PositionDossier,
+    PositionMonitorInput,
+    PositionTrajectoryFixture,
 )
-from take_two_options.reporting import render_decision_journal, render_json, render_markdown
-from take_two_options.treasury_data import (
-    TreasuryDataError,
-    TreasuryYieldCurve,
-    fetch_treasury_year,
+from take_two_options.knowledge.compiler import compile_knowledge
+from take_two_options.knowledge.loader import KnowledgeLoadError, load_knowledge
+from take_two_options.knowledge.schemas import DecisionReport
+from take_two_options.knowledge.validator import validate_knowledge
+from take_two_options.legacy_cli import app as legacy_app
+from take_two_options.market_snapshot import (
+    MarketSnapshotError,
+    refresh_market_snapshot,
+    snapshot_manifest,
 )
+from take_two_options.opra.contracts import assess_provider_readiness
+from take_two_options.phase_m_context import load_phase_m_decision_context
+from take_two_options.reporting.ibkr_ticket import (
+    TicketBlockedError,
+    write_ibkr_preview,
+)
+from take_two_options.thesis_scanner.engine import run_thesis_scan
+from take_two_options.thesis_scanner.schemas import ThesisScanRequest
 
 app = typer.Typer(
     no_args_is_help=True,
-    help="Read-only TTWO options research. No command can submit or modify an order.",
+    help="Read-only option research. This program has no live-order capability.",
 )
+knowledge_app = typer.Typer(no_args_is_help=True)
+data_app = typer.Typer(no_args_is_help=True)
+trade_app = typer.Typer(no_args_is_help=True)
+position_app = typer.Typer(no_args_is_help=True)
+calibration_app = typer.Typer(
+    no_args_is_help=True,
+    help="Offline historical calibration and walk-forward validation; never uses live fallback.",
+)
+app.add_typer(knowledge_app, name="knowledge")
+app.add_typer(data_app, name="data")
+app.add_typer(trade_app, name="trade")
+app.add_typer(position_app, name="position")
+app.add_typer(calibration_app, name="calibration")
+app.add_typer(legacy_app, name="legacy", hidden=True)
 
 
-def _write(path: Path | None, content: str) -> None:
-    if path is None:
-        return
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
-
-
-def _stock_feed(value: str) -> Literal["iex", "sip"]:
-    normalized = value.lower()
-    if normalized not in {"iex", "sip"}:
-        raise typer.BadParameter("stock feed must be iex or sip")
-    return cast(Literal["iex", "sip"], normalized)
-
-
-def _option_feed(value: str) -> Literal["indicative", "opra"]:
-    normalized = value.lower()
-    if normalized not in {"indicative", "opra"}:
-        raise typer.BadParameter("option feed must be indicative or opra")
-    return cast(Literal["indicative", "opra"], normalized)
-
-
-def _optional_date(value: str | None) -> date | None:
-    if value is None:
-        return None
-    try:
-        return date.fromisoformat(value)
-    except ValueError as error:
-        raise typer.BadParameter("dates must use YYYY-MM-DD") from error
-
-
-def _iso_datetime(value: str) -> datetime:
-    try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError as error:
-        raise typer.BadParameter("timestamps must use ISO-8601") from error
-
-
-def _iso_date(value: str) -> date:
-    try:
-        return date.fromisoformat(value)
-    except ValueError as error:
-        raise typer.BadParameter("dates must use YYYY-MM-DD") from error
-
-
-def _marketdata_expiration(value: str | None) -> date | Literal["all"] | None:
-    if value is None:
-        return None
-    if value.lower() == "all":
-        return "all"
-    return _iso_date(value)
-
-
-def _strike_values(value: str | None) -> list[float] | None:
-    if value is None:
-        return None
-    try:
-        strikes = [float(item.strip()) for item in value.split(",") if item.strip()]
-    except ValueError as error:
-        raise typer.BadParameter("strikes must be comma-separated numbers") from error
-    if not strikes or any(strike <= 0 for strike in strikes):
-        raise typer.BadParameter("strikes must contain positive numbers")
-    return strikes
-
-
-def _alpaca_failure(error: Exception) -> NoReturn:
-    typer.echo(f"Alpaca read-only data error: {error}", err=True)
-    raise typer.Exit(code=1)
-
-
-def _marketdata_failure(error: Exception) -> NoReturn:
-    typer.echo(f"MarketData.app read-only data error: {error}", err=True)
-    raise typer.Exit(code=1)
-
-
-@app.command()
-def analyze(
-    fixture: Annotated[
-        Path,
-        typer.Option("--fixture", exists=True, readable=True, dir_okay=False, resolve_path=True),
-    ],
-    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
-    markdown_out: Annotated[Path | None, typer.Option("--markdown-out")] = None,
-    journal_out: Annotated[Path | None, typer.Option("--journal-out")] = None,
-    print_json: Annotated[bool, typer.Option("--print-json")] = False,
-) -> None:
-    """Analyze one explicit fixture and emit auditable research artifacts."""
-    report = analyze_bundle(FixtureDataProvider(fixture).load_bundle())
-    json_text = render_json(report)
-    _write(json_out, json_text)
-    _write(markdown_out, render_markdown(report))
-    _write(journal_out, render_decision_journal(report))
-    if print_json:
-        typer.echo(json_text)
-    else:
-        typer.echo(
-            f"{report.report_id}: {len(report.candidates)} candidates, "
-            f"{len(report.ranked_candidate_ids)} scored, order capability forbidden"
-        )
-
-
-@app.command()
-def calibrate(
-    fixture: Annotated[
-        Path,
-        typer.Option("--fixture", exists=True, readable=True, dir_okay=False, resolve_path=True),
-    ],
-    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
-    markdown_out: Annotated[Path | None, typer.Option("--markdown-out")] = None,
-    print_json: Annotated[bool, typer.Option("--print-json")] = False,
-) -> None:
-    """Calibrate only parameters supported by timestamped training data."""
-    dataset = CalibrationDataset.model_validate_json(fixture.read_text(encoding="utf-8"))
-    report = calibrate_dataset(dataset)
-    json_text = report.model_dump_json(indent=2)
-    _write(json_out, json_text)
-    _write(markdown_out, render_calibration_markdown(report))
-    if print_json:
-        typer.echo(json_text)
-    else:
-        typer.echo(
-            f"{report.ticker}: {len(report.results)} calibration results, "
-            f"readiness {report.model_readiness.value}"
-        )
-
-
-@app.command()
-def backtest(
-    fixture: Annotated[
-        Path,
-        typer.Option("--fixture", exists=True, readable=True, dir_okay=False, resolve_path=True),
-    ],
-    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
-    markdown_out: Annotated[Path | None, typer.Option("--markdown-out")] = None,
-    print_json: Annotated[bool, typer.Option("--print-json")] = False,
-) -> None:
-    """Run a train/test options backtest with look-ahead controls."""
-    dataset = BacktestDataset.model_validate_json(fixture.read_text(encoding="utf-8"))
-    report = run_backtest(dataset)
-    json_text = report.model_dump_json(indent=2)
-    _write(json_out, json_text)
-    _write(markdown_out, render_backtest_markdown(report))
-    if print_json:
-        typer.echo(json_text)
-    else:
-        typer.echo(
-            f"{report.ticker}: train n={report.train_metrics.observations}, "
-            f"test n={report.test_metrics.observations}, order capability forbidden"
-        )
-
-
-@app.command("alpaca-check")
-def alpaca_check(
-    ticker: Annotated[str, typer.Option("--ticker")] = "TTWO",
-    stock_feed: Annotated[str, typer.Option("--stock-feed")] = "iex",
-    print_json: Annotated[bool, typer.Option("--print-json")] = False,
-) -> None:
-    """Verify read-only Alpaca stock-data access without touching trading APIs."""
-    try:
-        report = AlpacaReadOnlyMarketData.from_env().check_connection(
-            ticker=ticker.upper(), feed=_stock_feed(stock_feed)
-        )
-    except (AlpacaDataError, APIError, RetryException) as error:
-        _alpaca_failure(error)
-    if print_json:
-        typer.echo(report.model_dump_json(indent=2))
-    else:
-        typer.echo(
-            f"Alpaca read-only connected: {report.ticker}, feed={report.stock_feed}, "
-            f"bars={report.bars_received}, order capability forbidden"
-        )
-
-
-@app.command("alpaca-chain")
-def alpaca_chain(
-    ticker: Annotated[str, typer.Option("--ticker")] = "TTWO",
-    feed: Annotated[str, typer.Option("--feed")] = "indicative",
-    expiration_from: Annotated[str | None, typer.Option("--expiration-from")] = None,
-    expiration_to: Annotated[str | None, typer.Option("--expiration-to")] = None,
-    strike_min: Annotated[float | None, typer.Option("--strike-min")] = None,
-    strike_max: Annotated[float | None, typer.Option("--strike-max")] = None,
-    option_type: Annotated[str | None, typer.Option("--option-type")] = None,
-    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
-    print_json: Annotated[bool, typer.Option("--print-json")] = False,
-) -> None:
-    """Export a current Alpaca option chain with quote, IV, and Greek provenance."""
-    normalized_type = option_type.lower() if option_type else None
-    if normalized_type not in {None, "call", "put"}:
-        raise typer.BadParameter("option type must be call or put")
-    try:
-        export = AlpacaReadOnlyMarketData.from_env().option_chain(
-            ticker=ticker.upper(),
-            feed=_option_feed(feed),
-            expiration_date_gte=_optional_date(expiration_from),
-            expiration_date_lte=_optional_date(expiration_to),
-            strike_price_gte=strike_min,
-            strike_price_lte=strike_max,
-            option_type=cast(Literal["call", "put"] | None, normalized_type),
-        )
-    except (AlpacaDataError, APIError, RetryException) as error:
-        _alpaca_failure(error)
-    json_text = export.model_dump_json(indent=2)
-    _write(json_out, json_text)
-    if print_json:
-        typer.echo(json_text)
-    else:
-        typer.echo(
-            f"Alpaca {export.feed} chain: {export.ticker}, "
-            f"contracts={len(export.contracts)}, order capability forbidden"
-        )
-
-
-@app.command("alpaca-calibrate")
-def alpaca_calibrate(
-    start: Annotated[str, typer.Option("--start")],
-    end: Annotated[str, typer.Option("--end")],
-    training_cutoff: Annotated[str, typer.Option("--training-cutoff")],
-    ticker: Annotated[str, typer.Option("--ticker")] = "TTWO",
-    stock_feed: Annotated[str, typer.Option("--stock-feed")] = "iex",
-    jump_threshold_sigma: Annotated[float, typer.Option("--jump-threshold-sigma")] = 2.5,
-    dataset_out: Annotated[Path | None, typer.Option("--dataset-out")] = None,
-    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
-    markdown_out: Annotated[Path | None, typer.Option("--markdown-out")] = None,
-) -> None:
-    """Fetch real Alpaca equity bars, persist the dataset, and calibrate supported models."""
-    try:
-        dataset = AlpacaReadOnlyMarketData.from_env().calibration_dataset(
-            ticker=ticker.upper(),
-            start=_iso_datetime(start),
-            end=_iso_datetime(end),
-            training_cutoff=_iso_datetime(training_cutoff),
-            feed=_stock_feed(stock_feed),
-            jump_threshold_sigma=jump_threshold_sigma,
-        )
-        report = calibrate_dataset(dataset)
-    except (AlpacaDataError, APIError, RetryException) as error:
-        _alpaca_failure(error)
-    _write(dataset_out, dataset.model_dump_json(indent=2))
-    _write(json_out, report.model_dump_json(indent=2))
-    _write(markdown_out, render_calibration_markdown(report))
-    typer.echo(
-        f"Alpaca calibration: {report.ticker}, observations={report.results[0].observations}, "
-        f"readiness={report.model_readiness.value}, order capability forbidden"
-    )
-
-
-@app.command("alpaca-backtest")
-def alpaca_backtest(
-    spec: Annotated[
-        Path,
-        typer.Option("--spec", exists=True, readable=True, dir_okay=False, resolve_path=True),
-    ],
-    dataset_out: Annotated[Path | None, typer.Option("--dataset-out")] = None,
-    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
-    markdown_out: Annotated[Path | None, typer.Option("--markdown-out")] = None,
-) -> None:
-    """Build and run a real-bar option backtest with explicit execution-proxy labeling."""
-    specification = AlpacaOptionBacktestSpec.model_validate_json(spec.read_text(encoding="utf-8"))
-    try:
-        dataset = AlpacaReadOnlyMarketData.from_env().option_backtest_dataset(specification)
-        report = run_backtest(dataset)
-    except (AlpacaDataError, APIError, RetryException) as error:
-        _alpaca_failure(error)
-    _write(dataset_out, dataset.model_dump_json(indent=2))
-    _write(json_out, report.model_dump_json(indent=2))
-    _write(markdown_out, render_backtest_markdown(report))
-    typer.echo(
-        f"Alpaca option backtest: train={report.train_metrics.observations}, "
-        f"test={report.test_metrics.observations}, prices={report.execution_price_quality}, "
-        "order capability forbidden"
-    )
-
-
-@app.command("marketdata-chain")
-def marketdata_chain(
-    quote_date: Annotated[str, typer.Option("--date")],
-    ticker: Annotated[str, typer.Option("--ticker")] = "TTWO",
-    expiration: Annotated[str | None, typer.Option("--expiration")] = None,
-    side: Annotated[str | None, typer.Option("--side")] = None,
-    strikes: Annotated[str | None, typer.Option("--strikes")] = None,
-    strike_limit: Annotated[int | None, typer.Option("--strike-limit")] = 10,
-    min_open_interest: Annotated[int | None, typer.Option("--min-open-interest")] = None,
-    min_volume: Annotated[int | None, typer.Option("--min-volume")] = None,
-    risk_free_rate: Annotated[float | None, typer.Option("--risk-free-rate")] = None,
-    dividend_yield: Annotated[float, typer.Option("--dividend-yield")] = 0.0,
-    cache_dir: Annotated[Path, typer.Option("--cache-dir")] = Path("data/marketdata/cache"),
-    force_refresh: Annotated[bool, typer.Option("--force-refresh")] = False,
-    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
-    print_json: Annotated[bool, typer.Option("--print-json")] = False,
-) -> None:
-    """Fetch a filtered historical EOD option chain; no account or order API is used."""
-    normalized_side = side.lower() if side else None
-    if normalized_side not in {None, "call", "put"}:
-        raise typer.BadParameter("side must be call or put")
-    try:
-        export = MarketDataReadOnlyClient.from_env(cache_dir=cache_dir).historical_chain(
-            ticker=ticker.upper(),
-            quote_date=_iso_date(quote_date),
-            expiration=_marketdata_expiration(expiration),
-            side=cast(Literal["call", "put"] | None, normalized_side),
-            strikes=_strike_values(strikes),
-            strike_limit=strike_limit,
-            min_open_interest=min_open_interest,
-            min_volume=min_volume,
-            risk_free_rate=risk_free_rate,
-            continuous_dividend_yield=dividend_yield,
-            force_refresh=force_refresh,
-        )
-    except MarketDataError as error:
-        _marketdata_failure(error)
-    json_text = export.model_dump_json(indent=2)
-    _write(json_out, json_text)
-    if print_json:
-        typer.echo(json_text)
-    else:
-        analytics_count = sum(
-            contract.computed_analytics is not None for contract in export.contracts
-        )
-        typer.echo(
-            f"MarketData.app EOD chain: {export.ticker} {export.requested_date}, "
-            f"contracts={len(export.contracts)}, local_analytics={analytics_count}, "
-            f"cache_hit={export.cache_hit}, credits_remaining={export.usage.remaining}, "
-            "order capability forbidden"
-        )
-
-
-@app.command("marketdata-backtest")
-def marketdata_backtest(
-    spec: Annotated[
-        Path,
-        typer.Option("--spec", exists=True, readable=True, dir_okay=False, resolve_path=True),
-    ],
-    cache_dir: Annotated[Path, typer.Option("--cache-dir")] = Path("data/marketdata/cache"),
-    force_refresh: Annotated[bool, typer.Option("--force-refresh")] = False,
-    dataset_out: Annotated[Path | None, typer.Option("--dataset-out")] = None,
-    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
-    markdown_out: Annotated[Path | None, typer.Option("--markdown-out")] = None,
-) -> None:
-    """Build and run a source-backed EOD bid/ask option backtest."""
-    specification = MarketDataOptionBacktestSpec.model_validate_json(
-        spec.read_text(encoding="utf-8")
-    )
-    try:
-        dataset = MarketDataReadOnlyClient.from_env(cache_dir=cache_dir).option_backtest_dataset(
-            specification, force_refresh=force_refresh
-        )
-        report = run_backtest(dataset)
-    except MarketDataError as error:
-        _marketdata_failure(error)
-    _write(dataset_out, dataset.model_dump_json(indent=2))
-    _write(json_out, report.model_dump_json(indent=2))
-    _write(markdown_out, render_backtest_markdown(report))
-    typer.echo(
-        f"MarketData.app EOD backtest: train={report.train_metrics.observations}, "
-        f"test={report.test_metrics.observations}, prices={report.execution_price_quality}, "
-        "order capability forbidden"
-    )
-
-
-@app.command("marketdata-panel")
-def marketdata_panel(
-    spec: Annotated[
-        Path,
-        typer.Option("--spec", exists=True, readable=True, dir_okay=False, resolve_path=True),
-    ],
-    cache_dir: Annotated[Path, typer.Option("--cache-dir")] = Path("data/marketdata/cache"),
-    force_refresh: Annotated[bool, typer.Option("--force-refresh")] = False,
-    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
-    markdown_out: Annotated[Path | None, typer.Option("--markdown-out")] = None,
-) -> None:
-    """Run a prior-signal, later-entry EOD bid/ask strategy panel."""
-    specification = MarketDataPanelSpec.model_validate_json(spec.read_text(encoding="utf-8"))
-    try:
-        report = run_marketdata_panel(
-            MarketDataReadOnlyClient.from_env(cache_dir=cache_dir),
-            specification,
-            force_refresh=force_refresh,
-        )
-    except MarketDataError as error:
-        _marketdata_failure(error)
-    _write(json_out, report.model_dump_json(indent=2))
-    _write(markdown_out, render_marketdata_panel_markdown(report))
-    ranking = ", ".join(strategy.value for strategy in report.ranked_strategy_ids) or "none"
-    typer.echo(
-        f"MarketData.app panel: requests={report.provider_requests}, "
-        f"cache_hits={report.cache_hits}, ranking={ranking}, order capability forbidden"
-    )
-
-
-@app.command("accuracy-spec")
-def accuracy_spec(
+@app.command("pre-opra-finalize")
+def pre_opra_finalize(
     config: Annotated[
         Path,
-        typer.Option("--config", exists=True, readable=True, dir_okay=False, resolve_path=True),
-    ],
-    calibration_dataset: Annotated[
+        typer.Option("--config", exists=True, dir_okay=False, readable=True),
+    ] = Path("configs/pre_opra/v1/ttwo_research.yaml"),
+) -> None:
+    """Rebuild final aggregate evidence and inspect OPRA config without connecting."""
+
+    repository = Path(__file__).resolve().parents[2]
+    readiness = assess_provider_readiness(os.environ)
+    try:
+        subprocess.run(
+            [
+                sys.executable,
+                str(repository / "scripts" / "build_opra_readiness.py"),
+                "--output",
+                str(repository / "reports/pre_opra/opra_interface_readiness_2026-08-08.json"),
+            ],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        subprocess.run(
+            [
+                sys.executable,
+                str(repository / "scripts" / "build_pre_opra_final_report.py"),
+                "--config",
+                str(config.resolve()),
+            ],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as error:
+        typer.echo("Pre-OPRA finalization failed without attempting a market connection.", err=True)
+        if error.stderr:
+            typer.echo(error.stderr.strip(), err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(
+        "PRE_OPRA_RESEARCH_COMPLETE: "
+        "report=reports/pre_opra/final_pre_opra_report_2026-08-08.html; "
+        f"opra={readiness.status}; connection_attempted=false; phase_m_started=false; "
+        "transmit=false; what_if=true; order capability forbidden"
+    )
+
+
+def _csv_floats(value: str, *, option_name: str) -> list[float]:
+    try:
+        values = [float(item.strip()) for item in value.split(",") if item.strip()]
+    except ValueError as error:
+        raise typer.BadParameter(f"{option_name} must be a comma-separated numeric list") from error
+    if not values:
+        raise typer.BadParameter(f"{option_name} cannot be empty")
+    return values
+
+
+def _write_model_json(path: Path, payload: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(payload, encoding="utf-8")
+
+
+@trade_app.command("phase-m-context")
+def trade_phase_m_context(
+    config: Annotated[
         Path,
-        typer.Option(
-            "--calibration-dataset",
-            exists=True,
-            readable=True,
-            dir_okay=False,
-            resolve_path=True,
+        typer.Option("--config", exists=True, dir_okay=False, readable=True),
+    ] = Path("configs/phase_m/v2/ttwo_prospective_budget.yaml"),
+    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
+) -> None:
+    """Validate and serialize governed Phase M policy without contacting any provider."""
+
+    try:
+        context = load_phase_m_decision_context(config)
+    except ValueError as error:
+        typer.echo(f"Phase M context validation failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    if json_out is not None:
+        _write_model_json(json_out, context.model_dump_json(indent=2))
+    rows = (
+        ("Budget policy", "READY"),
+        ("Mixed-expiry lifecycle", "READY"),
+        ("FX rate", "NOT PROVIDED"),
+        ("FX execution cost", "NOT PROVIDED"),
+        ("Broker buying power", "NOT PROVIDED"),
+        ("Holdout", context.prospective_config.holdout_status),
+        ("OPRA", context.prospective_config.opra_status),
+        ("Order capability", context.prospective_config.order_capability.upper()),
+    )
+    for label, status in rows:
+        typer.echo(f"{label:<30} {status}")
+    typer.echo(f"Context ID                    {context.context_id}")
+    typer.echo(f"Context hash                  {context.context_hash}")
+    typer.echo("connection_attempted=false; paper_started=false; transmit=false")
+
+
+def _capital_cap_option(value: str, *, option_name: str) -> CapitalCap:
+    if value.strip().lower() == "auto":
+        return CapitalCap()
+    try:
+        amount = float(value)
+    except ValueError as error:
+        raise typer.BadParameter(f"{option_name} must be auto or a positive amount") from error
+    if amount <= 0:
+        raise typer.BadParameter(f"{option_name} must be auto or a positive amount")
+    return CapitalCap(mode=CapitalCapMode.EXPLICIT, value=amount)
+
+
+def _budget_policy_from_cli(
+    *,
+    budget: float,
+    budget_currency: str,
+    allow_under: float,
+    allow_over: float,
+    minimum_spend_policy: str,
+    max_loss: str,
+    buying_power_cap: str,
+    maximum_contracts: int,
+    account_capital: float | None,
+    liquidity_reserve: float,
+) -> FlexibleBudgetPolicyV2:
+    return FlexibleBudgetPolicyV2(
+        currency=budget_currency,
+        target_budget=budget,
+        under_target_tolerance=allow_under,
+        max_overspend=allow_over,
+        minimum_spend_policy=MinimumSpendPolicy(minimum_spend_policy.upper()),
+        maximum_loss_cap=_capital_cap_option(max_loss, option_name="--max-loss"),
+        buying_power_cap=_capital_cap_option(
+            buying_power_cap,
+            option_name="--buying-power-cap",
         ),
-    ],
+        maximum_contracts=maximum_contracts,
+        account_available_capital=account_capital,
+        account_liquidity_reserve=liquidity_reserve,
+    )
+
+
+@trade_app.command("budget")
+def trade_budget(
+    budget: Annotated[float, typer.Option("--budget", min=0.01)] = 1_000,
+    budget_currency: Annotated[str, typer.Option("--budget-currency")] = "EUR",
+    allow_under: Annotated[float, typer.Option("--allow-under", min=0)] = 200,
+    allow_over: Annotated[float, typer.Option("--allow-over", min=0)] = 500,
+    minimum_spend_policy: Annotated[
+        str,
+        typer.Option("--minimum-spend-policy"),
+    ] = "soft",
+    max_loss: Annotated[str, typer.Option("--max-loss")] = "auto",
+    buying_power_cap: Annotated[
+        str,
+        typer.Option("--buying-power-cap"),
+    ] = "auto",
+    maximum_contracts: Annotated[
+        int,
+        typer.Option("--maximum-contracts", min=1),
+    ] = 4,
+    account_capital: Annotated[
+        float | None,
+        typer.Option("--account-capital", min=0),
+    ] = None,
+    liquidity_reserve: Annotated[
+        float,
+        typer.Option("--liquidity-reserve", min=0),
+    ] = 0,
+    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
+) -> None:
+    """Build and display a prospective V2 budget policy; no market connection."""
+    try:
+        policy = _budget_policy_from_cli(
+            budget=budget,
+            budget_currency=budget_currency,
+            allow_under=allow_under,
+            allow_over=allow_over,
+            minimum_spend_policy=minimum_spend_policy,
+            max_loss=max_loss,
+            buying_power_cap=buying_power_cap,
+            maximum_contracts=maximum_contracts,
+            account_capital=account_capital,
+            liquidity_reserve=liquidity_reserve,
+        )
+    except ValueError as error:
+        raise typer.BadParameter(str(error)) from error
+    payload = policy.model_dump_json(indent=2)
+    if json_out is not None:
+        _write_model_json(json_out, payload)
+    typer.echo(payload)
+    typer.echo("read_only=true; transmit=false; order_capability=forbidden")
+
+
+@app.command("thesis-scan")
+def thesis_scan(
+    ticker: Annotated[str, typer.Option("--ticker")] = "TTWO",
+    direction: Annotated[str, typer.Option("--direction")] = "bullish",
+    budget_eur: Annotated[float, typer.Option("--budget-eur", min=0.01)] = 1_000,
+    catalyst_date: Annotated[
+        str,
+        typer.Option("--catalyst-date"),
+    ] = ...,  # type: ignore[assignment]
+    expiration_buffer_days: Annotated[
+        int,
+        typer.Option("--expiration-buffer-days", min=0),
+    ] = 45,
+    target_prices: Annotated[
+        str,
+        typer.Option("--target-prices"),
+    ] = ...,  # type: ignore[assignment]
+    scenario_probabilities: Annotated[
+        str | None,
+        typer.Option("--scenario-probabilities"),
+    ] = None,
+    max_loss_eur: Annotated[float, typer.Option("--max-loss-eur", min=0.01)] = 1_000,
+    top: Annotated[int, typer.Option("--top", min=1, max=20)] = 3,
     current_chain: Annotated[
-        Path | None,
+        Path,
         typer.Option(
             "--current-chain",
             exists=True,
-            readable=True,
             dir_okay=False,
-            resolve_path=True,
+            readable=True,
         ),
-    ] = None,
-    treasury_cache_dir: Annotated[Path, typer.Option("--treasury-cache-dir")] = Path(
-        "data/treasury"
+    ] = ...,  # type: ignore[assignment]
+    spot: Annotated[float | None, typer.Option("--spot", min=0.01)] = None,
+    json_out: Annotated[Path, typer.Option("--json-out")] = Path("reports/thesis_scan/latest.json"),
+    markdown_out: Annotated[Path, typer.Option("--markdown-out")] = Path(
+        "reports/thesis_scan/latest.md"
     ),
-    force_refresh_rates: Annotated[bool, typer.Option("--force-refresh-rates")] = False,
-    json_out: Annotated[Path, typer.Option("--json-out")] = Path(
-        "data/marketdata/ttwo_v9_budget_spec.json"
-    ),
+    html_out: Annotated[Path, typer.Option("--html-out")] = Path("reports/thesis_scan/latest.html"),
+    policy: Annotated[Path, typer.Option("--policy")] = Path("configs/thesis_scanner/default.yaml"),
 ) -> None:
-    """Generate rolling, purged opportunity specs from Alpaca sessions and Treasury rates."""
-    generator = AccuracyGeneratorSpec.model_validate_json(config.read_text(encoding="utf-8"))
+    """Enumerate and rank bounded bullish option theses; never transmit an order."""
+    if direction != "bullish":
+        raise typer.BadParameter("V10 thesis-scan currently supports --direction bullish only")
     try:
-        rate_paths = [
-            fetch_treasury_year(
-                year,
-                cache_dir=treasury_cache_dir,
-                force_refresh=force_refresh_rates,
-            )
-            for year in range(generator.start_date.year, generator.end_date.year + 1)
-        ]
-        curve = TreasuryYieldCurve.from_files(rate_paths)
-    except TreasuryDataError as error:
-        typer.echo(f"Treasury read-only data error: {error}", err=True)
+        parsed_catalyst_date = date.fromisoformat(catalyst_date)
+    except ValueError as error:
+        raise typer.BadParameter("--catalyst-date must use YYYY-MM-DD") from error
+    try:
+        request = ThesisScanRequest(
+            ticker=ticker.upper(),
+            direction="bullish",
+            budget_eur=budget_eur,
+            max_loss_eur=max_loss_eur,
+            catalyst_date=parsed_catalyst_date,
+            expiration_buffer_days=expiration_buffer_days,
+            target_prices=_csv_floats(
+                target_prices,
+                option_name="--target-prices",
+            ),
+            scenario_probabilities=(
+                _csv_floats(
+                    scenario_probabilities,
+                    option_name="--scenario-probabilities",
+                )
+                if scenario_probabilities is not None
+                else None
+            ),
+            top=top,
+            current_chain=str(current_chain),
+            spot_override=spot,
+        )
+    except ValueError as error:
+        raise typer.BadParameter(str(error)) from error
+    try:
+        report = run_thesis_scan(
+            request=request,
+            json_out=json_out,
+            markdown_out=markdown_out,
+            html_out=html_out,
+            policy_path=policy,
+        )
+    except (OSError, RuntimeError, ValueError) as error:
+        typer.echo(f"Thesis scan failed: {error}", err=True)
         raise typer.Exit(code=1) from error
-    suite = generate_accuracy_suite_spec(
-        generator,
-        load_market_sessions(calibration_dataset),
-        curve,
-        current_expirations=(
-            load_current_expirations(current_chain, generator.current_quote_date)
-            if current_chain is not None
-            else None
-        ),
-        market_closes=load_market_closes(calibration_dataset),
-    )
-    _write(json_out, suite.model_dump_json(indent=2))
     typer.echo(
-        f"{suite.research_version} opportunity spec: panels={len(suite.panels)}, "
-        f"observations={sum(len(panel.observations) for panel in suite.panels)}, "
-        "order capability forbidden"
+        f"{report.overall_status.value}: candidates="
+        f"{report.technically_admissible_candidates} "
+        f"json={json_out} markdown={markdown_out} dashboard={html_out}; "
+        "transmit=false"
     )
 
 
-@app.command("marketdata-accuracy")
-def marketdata_accuracy(
-    spec: Annotated[
+@app.command("intelligence-run")
+def intelligence_run(
+    base_report: Annotated[
         Path,
-        typer.Option("--spec", exists=True, readable=True, dir_okay=False, resolve_path=True),
-    ],
-    cache_dir: Annotated[Path, typer.Option("--cache-dir")] = Path("data/marketdata/cache"),
-    force_refresh: Annotated[bool, typer.Option("--force-refresh")] = False,
+        typer.Option(
+            "--base-report",
+            exists=True,
+            dir_okay=False,
+            readable=True,
+        ),
+    ] = Path("reports/examples/v10_thesis_scan.json"),
+    policy: Annotated[
+        Path,
+        typer.Option("--policy", exists=True, dir_okay=False, readable=True),
+    ] = Path("configs/intelligence/v11.yaml"),
+    events: Annotated[
+        Path | None,
+        typer.Option("--events", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    factor_history: Annotated[
+        Path | None,
+        typer.Option("--factor-history", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    calibration_data: Annotated[
+        Path | None,
+        typer.Option("--calibration-data", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    walk_forward: Annotated[
+        Path | None,
+        typer.Option("--walk-forward", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    profile: Annotated[
+        str,
+        typer.Option("--profile"),
+    ] = "fast_fixture",
     json_out: Annotated[Path, typer.Option("--json-out")] = Path(
-        "reports/ttwo_v9_budget_report.json"
+        "reports/v11/latest.json"
     ),
     markdown_out: Annotated[Path, typer.Option("--markdown-out")] = Path(
-        "reports/ttwo_v9_budget_report.md"
+        "reports/v11/latest.md"
     ),
-    artifact_out: Annotated[Path, typer.Option("--artifact-out")] = Path(
-        "reports/ttwo_v9_budget_dashboard.artifact.json"
+    html_out: Annotated[Path, typer.Option("--html-out")] = Path(
+        "reports/v11/latest.html"
     ),
 ) -> None:
-    """Run source-backed panels, holdout governance, current scan, and dashboard extract."""
-    specification = MarketDataAccuracySuiteSpec.model_validate_json(
-        spec.read_text(encoding="utf-8")
-    )
+    """Run V11 probabilistic intelligence over a stable V10.1 structure report."""
     try:
-        report = run_accuracy_suite(
-            MarketDataReadOnlyClient.from_env(cache_dir=cache_dir),
-            specification,
-            force_refresh=force_refresh,
+        if profile not in {"fast_fixture", "research", "validation", "exhaustive"}:
+            raise ValueError(
+                "--profile must be fast_fixture, research, validation, or exhaustive"
+            )
+        report = run_intelligence(
+            base_report_path=base_report,
+            policy_path=policy,
+            events_path=events,
+            factor_history_path=factor_history,
+            calibration_data_path=calibration_data,
+            walk_forward_path=walk_forward,
+            runtime_profile=profile,  # type: ignore[arg-type]
+            json_out=json_out,
+            markdown_out=markdown_out,
+            html_out=html_out,
         )
-    except MarketDataError as error:
-        _marketdata_failure(error)
-    _write(json_out, report.model_dump_json(indent=2))
-    _write(markdown_out, render_accuracy_markdown(report))
-    artifact = build_accuracy_dashboard_artifact(
-        report,
-        report_path=str(json_out),
-    )
-    _write(artifact_out, json.dumps(artifact, indent=2, ensure_ascii=True))
+    except (OSError, RuntimeError, ValueError) as error:
+        typer.echo(f"V11 intelligence failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
     typer.echo(
-        f"{report.research_version} opportunity report: panels={len(report.panels)}, "
-        f"variants={len(report.variants)}, "
-        f"ranking={','.join(report.ranked_variant_ids)}, order capability forbidden"
+        f"{report.posture.value}: readiness={report.machine_summary.result_status.value} "
+        f"calibration={report.machine_summary.calibration_status} "
+        f"backtest={report.machine_summary.backtest_status} "
+        f"models={len(report.model_metrics)} "
+        f"allocations={len(report.allocations)} report={json_out}; "
+        "transmit=false; order capability forbidden"
     )
 
 
-@app.command("accuracy-dashboard")
-def accuracy_dashboard(
-    report_path: Annotated[
-        Path,
-        typer.Option("--report", exists=True, readable=True, dir_okay=False, resolve_path=True),
-    ],
-    artifact_out: Annotated[Path, typer.Option("--artifact-out")] = Path(
-        "reports/ttwo_v9_budget_dashboard.artifact.json"
+@calibration_app.command("validate-dataset")
+def calibration_validate_dataset(
+    dataset: Annotated[
+        Path | None,
+        typer.Option("--dataset", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/calibration/dataset_quality.json"
     ),
 ) -> None:
-    """Rebuild the canonical dashboard artifact from an existing opportunity report."""
-    report = MarketDataAccuracyReport.model_validate_json(report_path.read_text(encoding="utf-8"))
-    artifact = build_accuracy_dashboard_artifact(
-        report,
-        report_path=str(report_path),
+    """Validate lineage, timezone, units, duplicates, and point-in-time availability."""
+    _loaded, report = validate_historical_dataset(dataset)
+    _write_model_json(output, report.model_dump_json(indent=2))
+    typer.echo(f"{report.status}: report={output}; order capability forbidden")
+
+
+@calibration_app.command("build-splits")
+def calibration_build_splits(
+    dataset: Annotated[
+        Path | None,
+        typer.Option("--dataset", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    method: Annotated[str, typer.Option("--method")] = "expanding",
+    embargo_days: Annotated[int, typer.Option("--embargo-days", min=0)] = 5,
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/calibration/splits.json"
+    ),
+) -> None:
+    """Build a rolling or expanding split with embargo and a locked final holdout."""
+    if method not in {"rolling", "expanding"}:
+        raise typer.BadParameter("--method must be rolling or expanding")
+    loaded, quality = validate_historical_dataset(dataset)
+    report = build_dataset_splits(
+        loaded,
+        quality,
+        method=method,  # type: ignore[arg-type]
+        embargo_days=embargo_days,
     )
-    _write(artifact_out, json.dumps(artifact, indent=2, ensure_ascii=True))
-    typer.echo(f"{report.research_version} dashboard artifact: {artifact_out}")
+    _write_model_json(output, report.model_dump_json(indent=2))
+    typer.echo(f"{report.status}: splits={len(report.splits)} report={output}")
 
 
-@app.command("schema")
-def print_schema() -> None:
-    """Print the canonical DecisionReport JSON Schema."""
-    typer.echo(json.dumps(DecisionReport.model_json_schema(), indent=2))
+@calibration_app.command("fit")
+def calibration_fit(
+    dataset: Annotated[
+        Path | None,
+        typer.Option("--dataset", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/calibration/fit.json"
+    ),
+) -> None:
+    """Fit only identifiable offline parameters; refuse fake Heston calibration."""
+    loaded, quality = validate_historical_dataset(dataset)
+    report = fit_offline_models(loaded, quality)
+    _write_model_json(output, report.model_dump_json(indent=2))
+    typer.echo(f"{report.status}: report={output}; no fixture substitution")
+
+
+@calibration_app.command("evaluate")
+def calibration_evaluate(
+    walk_forward: Annotated[
+        Path | None,
+        typer.Option("--walk-forward", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/calibration/walk_forward.json"
+    ),
+) -> None:
+    """Evaluate a point-in-time walk-forward dataset with explicit baselines."""
+    report = run_walk_forward(
+        load_walk_forward_dataset(walk_forward)
+        if walk_forward is not None
+        else None
+    )
+    _write_model_json(output, report.model_dump_json(indent=2))
+    typer.echo(f"{report.status}: report={output}; holdout tuning=false")
+
+
+@calibration_app.command("report")
+def calibration_report(
+    dataset: Annotated[
+        Path | None,
+        typer.Option("--dataset", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    walk_forward: Annotated[
+        Path | None,
+        typer.Option("--walk-forward", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/calibration/offline_validation.json"
+    ),
+) -> None:
+    """Write one machine-readable offline validation summary."""
+    loaded, quality = validate_historical_dataset(dataset)
+    split_plan = build_dataset_splits(loaded, quality)
+    calibration = fit_offline_models(loaded, quality)
+    backtest = run_walk_forward(
+        load_walk_forward_dataset(walk_forward)
+        if walk_forward is not None
+        else None
+    )
+    payload = {
+        "schema_version": "11.1",
+        "dataset_quality": quality.model_dump(mode="json"),
+        "split_plan": split_plan.model_dump(mode="json"),
+        "calibration": calibration.model_dump(mode="json"),
+        "walk_forward": backtest.model_dump(mode="json"),
+        "promotion_eligible": False,
+        "order_capability": "forbidden",
+    }
+    _write_model_json(output, json.dumps(payload, indent=2))
+    typer.echo(
+        f"calibration={calibration.status}; backtest={backtest.status}; "
+        f"report={output}; promotion=false"
+    )
+
+
+@knowledge_app.command("validate")
+def knowledge_validate(
+    knowledge_dir: Annotated[
+        Path,
+        typer.Option("--knowledge-dir", exists=True, file_okay=False, readable=True),
+    ] = Path("research/knowledge_items"),
+) -> None:
+    """Validate strict knowledge, recipe, provenance, and modern-validation objects."""
+    try:
+        result = validate_knowledge(load_knowledge(knowledge_dir))
+    except KnowledgeLoadError as error:
+        typer.echo(f"Knowledge validation failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(result.model_dump_json(indent=2))
+    if not result.valid:
+        raise typer.Exit(code=1)
+
+
+@knowledge_app.command("compile")
+def knowledge_compile(
+    knowledge_dir: Annotated[
+        Path,
+        typer.Option("--knowledge-dir", exists=True, file_okay=False, readable=True),
+    ] = Path("research/knowledge_items"),
+    catalog_out: Annotated[Path, typer.Option("--catalog-out")] = Path(
+        "research/strategy_catalog/catalog.json"
+    ),
+) -> None:
+    """Compile validated rules and recipes into a deterministic catalog."""
+    try:
+        catalog = compile_knowledge(load_knowledge(knowledge_dir))
+    except (KnowledgeLoadError, ValueError) as error:
+        typer.echo(f"Knowledge compilation failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    catalog_out.parent.mkdir(parents=True, exist_ok=True)
+    catalog_out.write_text(catalog.model_dump_json(indent=2), encoding="utf-8")
+    typer.echo(
+        f"catalog={catalog_out} recipes={len(catalog.recipes)} "
+        f"rules={len(catalog.rules)} blocked={len(catalog.blocked_items)}"
+    )
+
+
+@data_app.command("refresh")
+def data_refresh(
+    ticker: Annotated[str, typer.Option("--ticker")] = "TTWO",
+    as_of: Annotated[str | None, typer.Option("--as-of")] = None,
+    strike_limit: Annotated[int, typer.Option("--strike-limit", min=1, max=100)] = 40,
+    print_json: Annotated[bool, typer.Option("--print-json")] = False,
+) -> None:
+    """Refresh one read-only MarketData.app EOD chain and persist a normalized cache."""
+    selected_date = date.fromisoformat(as_of) if as_of else date.today()
+    try:
+        snapshot = refresh_market_snapshot(
+            ticker=ticker.upper(),
+            as_of=selected_date,
+            strike_limit=strike_limit,
+        )
+    except MarketSnapshotError as error:
+        typer.echo(f"Data refresh failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    if print_json:
+        typer.echo(snapshot.model_dump_json(indent=2))
+    else:
+        typer.echo(snapshot_manifest(snapshot))
+
+
+@trade_app.command("analyze")
+def trade_analyze(
+    request: Annotated[
+        Path,
+        typer.Option("--request", exists=True, dir_okay=False, readable=True),
+    ],
+    refresh_data: Annotated[bool, typer.Option("--refresh-data")] = False,
+    report_dir: Annotated[Path, typer.Option("--report-dir")] = Path("reports/latest"),
+    knowledge_dir: Annotated[Path, typer.Option("--knowledge-dir")] = Path(
+        "research/knowledge_items"
+    ),
+    research_config: Annotated[Path, typer.Option("--research-config")] = Path(
+        "configs/research/default.yaml"
+    ),
+    budget: Annotated[float | None, typer.Option("--budget", min=0.01)] = None,
+    budget_currency: Annotated[str, typer.Option("--budget-currency")] = "EUR",
+    allow_under: Annotated[float, typer.Option("--allow-under", min=0)] = 200,
+    allow_over: Annotated[float, typer.Option("--allow-over", min=0)] = 500,
+    minimum_spend_policy: Annotated[
+        str,
+        typer.Option("--minimum-spend-policy"),
+    ] = "soft",
+    max_loss: Annotated[str, typer.Option("--max-loss")] = "auto",
+    buying_power_cap: Annotated[
+        str,
+        typer.Option("--buying-power-cap"),
+    ] = "auto",
+    maximum_contracts: Annotated[
+        int,
+        typer.Option("--maximum-contracts", min=1),
+    ] = 4,
+    account_capital: Annotated[
+        float | None,
+        typer.Option("--account-capital", min=0),
+    ] = None,
+    liquidity_reserve: Annotated[
+        float,
+        typer.Option("--liquidity-reserve", min=0),
+    ] = 0,
+) -> None:
+    """Run the complete read-only decision pipeline."""
+    budget_policy = None
+    if budget is not None:
+        try:
+            budget_policy = _budget_policy_from_cli(
+                budget=budget,
+                budget_currency=budget_currency,
+                allow_under=allow_under,
+                allow_over=allow_over,
+                minimum_spend_policy=minimum_spend_policy,
+                max_loss=max_loss,
+                buying_power_cap=buying_power_cap,
+                maximum_contracts=maximum_contracts,
+                account_capital=account_capital,
+                liquidity_reserve=liquidity_reserve,
+            )
+        except ValueError as error:
+            raise typer.BadParameter(str(error)) from error
+    report = analyze_trade(
+        request_path=request,
+        report_dir=report_dir,
+        knowledge_dir=knowledge_dir,
+        research_config_path=research_config,
+        refresh_data=refresh_data,
+        budget_policy=budget_policy,
+    )
+    typer.echo(
+        f"{report.verdict.value}: candidates={len(report.candidates)} "
+        f"trials={report.analysis.total_trials} report={report_dir / 'decision_report.json'}"
+    )
+
+
+@trade_app.command("compare")
+def trade_compare(
+    report: Annotated[
+        Path,
+        typer.Option("--report", exists=True, dir_okay=False, readable=True),
+    ],
+) -> None:
+    """Print a compact comparison of report candidates."""
+    decision = DecisionReport.model_validate_json(report.read_text(encoding="utf-8"))
+    typer.echo("candidate\tarchitecture\tmax_loss\texpected\tpareto\tstatus")
+    for candidate in decision.candidates:
+        typer.echo(
+            f"{candidate.candidate_id}\t{candidate.architecture.value}\t"
+            f"{candidate.risk.maximum_loss:.2f}\t"
+            f"{candidate.evaluation.conservative_expected_pnl}\t"
+            f"{candidate.pareto_rank}\t{candidate.status}"
+        )
+
+
+@trade_app.command("ibkr-ticket")
+def trade_ibkr_ticket(
+    report: Annotated[
+        Path,
+        typer.Option("--report", exists=True, dir_okay=False, readable=True),
+    ],
+    candidate_id: Annotated[str, typer.Option("--candidate-id")],
+    mode: Annotated[str, typer.Option("--mode")] = "preview",
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/latest/ibkr_ticket_preview.json"
+    ),
+) -> None:
+    """Create a non-transmitting IBKR preview for an admissible candidate only."""
+    if mode != "preview":
+        raise typer.BadParameter("only preview mode is supported")
+    decision = DecisionReport.model_validate_json(report.read_text(encoding="utf-8"))
+    try:
+        write_ibkr_preview(decision, candidate_id, output)
+    except TicketBlockedError as error:
+        typer.echo(f"Ticket blocked: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(f"IBKR preview={output}; transmit=false; order capability forbidden")
+
+
+@position_app.command("monitor")
+def position_monitor(
+    position: Annotated[
+        Path,
+        typer.Option("--position", exists=True, dir_okay=False, readable=True),
+    ],
+    refresh_data: Annotated[bool, typer.Option("--refresh-data")] = False,
+    report_dir: Annotated[Path, typer.Option("--report-dir")] = Path(
+        "reports/latest/position"
+    ),
+) -> None:
+    """Record a read-only position snapshot; position mutation is unsupported."""
+    payload = json.loads(position.read_text(encoding="utf-8"))
+    report_dir.mkdir(parents=True, exist_ok=True)
+    output = {
+        "status": "MONITORING_REQUIRES_FRESH_QUOTES"
+        if refresh_data
+        else "CACHED_POSITION_REVIEW",
+        "position": payload,
+        "actions_allowed": ["review", "preview"],
+        "actions_forbidden": ["submit", "modify", "cancel", "exercise"],
+        "order_capability": "forbidden",
+    }
+    output_path = report_dir / "position_monitor.json"
+    output_path.write_text(json.dumps(output, indent=2), encoding="utf-8")
+    typer.echo(f"position monitor={output_path}; order capability forbidden")
+
+
+@position_app.command("assess")
+def position_assess(
+    dossier: Annotated[
+        Path,
+        typer.Option("--dossier", exists=True, dir_okay=False, readable=True),
+    ],
+    current: Annotated[
+        Path,
+        typer.Option("--current", exists=True, dir_okay=False, readable=True),
+    ],
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/position_monitor.json"
+    ),
+) -> None:
+    """Evaluate an open-position dossier and emit an explainable advisory action."""
+    try:
+        stored = PositionDossier.model_validate_json(dossier.read_text(encoding="utf-8"))
+        snapshot = PositionMonitorInput.model_validate_json(
+            current.read_text(encoding="utf-8")
+        )
+        report = assess_position(stored, snapshot)
+    except (OSError, ValueError) as error:
+        typer.echo(f"Position assessment failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(report.model_dump_json(indent=2), encoding="utf-8")
+    typer.echo(
+        f"position action={report.action.value} report={output}; "
+        "human confirmation required; order capability forbidden"
+    )
+
+
+@position_app.command("replay")
+def position_replay(
+    trajectory: Annotated[
+        Path,
+        typer.Option("--trajectory", exists=True, dir_okay=False, readable=True),
+    ],
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/v11/position_trajectory.json"
+    ),
+) -> None:
+    """Replay a synthetic multi-date trajectory through advisory exit rules."""
+    try:
+        fixture = PositionTrajectoryFixture.model_validate_json(
+            trajectory.read_text(encoding="utf-8")
+        )
+        report = replay_position_trajectory(fixture)
+    except (OSError, ValueError) as error:
+        typer.echo(f"Position trajectory replay failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    _write_model_json(output, report.model_dump_json(indent=2))
+    typer.echo(
+        f"{report.status}: snapshots={len(report.reports)} report={output}; "
+        "human confirmation required; order capability forbidden"
+    )
 
 
 if __name__ == "__main__":

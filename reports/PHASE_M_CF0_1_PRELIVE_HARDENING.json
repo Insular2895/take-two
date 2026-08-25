@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-24",
+  "phase": "M-CF0.1",
+  "files_changed": {
+    "python": [
+      "src/take_two_options/cloud/contracts.py",
+      "src/take_two_options/cloud/export_position.py",
+      "tests/test_cloud_position_export.py"
+    ],
+    "cloudflare": [
+      "cloudflare/src/types.ts",
+      "cloudflare/src/domain.ts",
+      "cloudflare/src/provider.ts",
+      "cloudflare/src/monitor.ts",
+      "cloudflare/src/db.ts",
+      "cloudflare/src/index.ts",
+      "cloudflare/src/demo.ts",
+      "cloudflare/public/app.txt",
+      "cloudflare/public/dashboard.txt",
+      "cloudflare/test/domain.test.ts",
+      "cloudflare/test/integration.test.ts"
+    ],
+    "migrations": [
+      "cloudflare/migrations/0003_prelive_freshness_signed_cash.sql",
+      "cloudflare/migrations/0004_close_preview_signed_economics_immutable.sql"
+    ],
+    "contracts_and_reports": [
+      "schemas/cloud_position_dossier.schema.json",
+      "docs/specs/CLOUD_REQUIRED_DATA_FRESHNESS.md",
+      "docs/specs/CLOUD_SIGNED_CASH_FLOW_ACCOUNTING.md",
+      "docs/audits/PHASE_M_CF0_1_PRELIVE_HARDENING.md",
+      "reports/PHASE_M_CF0_1_PRELIVE_HARDENING.md",
+      "reports/PHASE_M_CF0_1_PRELIVE_HARDENING.json"
+    ]
+  },
+  "initial_audit": {
+    "freshness_issue": "CONFIRMED_UNDERLYING_TIMESTAMP_ONLY",
+    "cash_flow_issue": "CONFIRMED_POSITIVE_ENTRY_CASH_CONFLATION",
+    "combo_close_issue": "CONFIRMED_IMPLICIT_CASH_RECEIPT",
+    "manual_fill_issue": "CONFIRMED_IMPLICIT_PROCEEDS"
+  },
+  "freshness": {
+    "stale_seconds": 120,
+    "future_tolerance_seconds": 5,
+    "required_inputs": [
+      "underlying_timestamp",
+      "every_used_option_timestamp",
+      "fx_timestamp_when_conversion_required",
+      "combo_timestamp_when_combo_quote_used"
+    ],
+    "effective_timestamp": "OLDEST_REQUIRED_INPUT",
+    "statuses": ["FRESH", "STALE", "INVALID", "INSUFFICIENT_DATA"],
+    "missing_timestamp_substitution": false,
+    "data_stale_precedes_economic_rules": true
+  },
+  "signed_cash_flow": {
+    "schema_version": "1.1",
+    "positive": "CASH_RECEIVED_BY_ACCOUNT",
+    "negative": "CASH_PAID_BY_ACCOUNT",
+    "entry_field": "entry_cash_flow_policy",
+    "capital_field": "capital_required_policy",
+    "capital_source": "BudgetDiagnostics.effective_capital_requirement",
+    "capital_used_as_pnl_basis": false,
+    "close_field": "estimated_close_cash_flow_policy",
+    "manual_close_type_required": true,
+    "partial_close_allocation": "quantity_closed_over_original_quantity"
+  },
+  "acceptance_cases": {
+    "debit": {
+      "entry_cash_flow": -1023,
+      "capital_required": 1023,
+      "market_value": 1487,
+      "mtm_pnl": 464,
+      "estimated_close_cash_flow": 1455,
+      "liquidation_pnl": 432
+    },
+    "credit": {
+      "entry_cash_flow": 300,
+      "capital_required": 700,
+      "market_value": -120,
+      "mtm_pnl": 180,
+      "estimated_close_cash_flow": -105,
+      "liquidation_pnl": 195
+    },
+    "losing_credit_realized_pnl": -360,
+    "manual_credit_reconciliation_realized_pnl": 198,
+    "partial_credit_realized_pnl": 185
+  },
+  "d1": {
+    "migrations": [
+      "0003_prelive_freshness_signed_cash.sql",
+      "0004_close_preview_signed_economics_immutable.sql"
+    ],
+    "non_destructive": true,
+    "safe_legacy_backfill": "SYNTHETIC_DEMO_PROVEN_DEBIT_ONLY",
+    "unknown_legacy_state": "RECONCILIATION_REQUIRED"
+  },
+  "validation": {
+    "python_tests": {"status": "PASS", "count": 360, "warnings": 1},
+    "ruff": "PASS",
+    "mypy": {"status": "PASS", "source_files": 191},
+    "schemas": {"status": "PASS", "count": 30},
+    "offline_artifacts": "PASS",
+    "research_registry": "PASS",
+    "phase10_release_audit": "PASS",
+    "cloudflare_tests": {"status": "PASS", "count": 43},
+    "typescript": "PASS",
+    "cloudflare_safety_scan": "PASS",
+    "d1_local_migrations": "PASS",
+    "wrangler_dry_run": "PASS",
+    "security_gate": {
+      "status": "PASS",
+      "python_files_scanned": 170,
+      "forbidden_order_imports": 0,
+      "transmit_true_literals": 0
+    }
+  },
+  "historical_hashes": {
+    "M0_GREEKS_CARRY_HARDENING_REPORT.json": "0fd557ff68c78c12f3a44645a26f48448e43134bc539d26bb2e1305a837080de",
+    "M0_1_FINAL_PRE_OPRA_CORRECTION_REPORT.json": "5dfcbddaa840fae19a97986190f6284caeb90a00146bdae27363f38164456430",
+    "M0_2_FLEXIBLE_BUDGET_REPORT.json": "04fdce78ccc07717632c2d7d192ece4a69783f9626ac7bd50db94c8be16be977",
+    "M0_2_1_FINAL_BUDGET_SEMANTICS_REPORT.json": "1bc33afc897a3c4bb5e87f7dcb886598416204bd7262e3fb4e992c302f0571d3",
+    "m0_trade_economics_ticket.json": "ddc05fa0422de62599260c09273b45aa36034ea4583ed2c815dc7efb89cd0430",
+    "status": "UNCHANGED"
+  },
+  "safety": {
+    "cloudflare_access": "UNCHANGED",
+    "csrf": true,
+    "action_password": true,
+    "read_only": true,
+    "transmit": false,
+    "what_if": true,
+    "order_capability": "forbidden",
+    "whole_combo_only": true,
+    "leg_by_leg_fallback": false,
+    "phase_m_context_propagation": "COMPLETE",
+    "holdout": "UNOPENED"
+  },
+  "remaining_live_dependencies": [
+    "live_read_only_market_data_provider",
+    "OPRA_entitlement_and_data_usage_rights",
+    "verified_option_fx_combo_timestamp_semantics",
+    "broker_read_only_sync",
+    "observed_fill_evidence",
+    "shadow_validation",
+    "separately_authorized_paper_validation"
+  ],
+  "final_status": {
+    "CF0_REQUIRED_DATA_FRESHNESS": "HARDENED",
+    "CF0_SIGNED_CASH_FLOW_ACCOUNTING": "HARDENED",
+    "DEBIT_STRUCTURES": "SUPPORTED",
+    "CREDIT_STRUCTURES": "SUPPORTED",
+    "PARTIAL_CLOSE_ACCOUNTING": "SUPPORTED",
+    "PHASE_M_CONTEXT_PROPAGATION": "COMPLETE",
+    "CF0_CONTROL_PLANE": "READY_FOR_LIVE_READ_ONLY_INTEGRATION",
+    "CLOUDFLARE_ACCESS": "UNCHANGED",
+    "ORDER_TRANSMISSION": "FORBIDDEN",
+    "HOLDOUT": "UNOPENED",
+    "NEXT": "PHASE_M_LIVE_READ_ONLY_MARKET_DATA_INTEGRATION"
+  }
+}

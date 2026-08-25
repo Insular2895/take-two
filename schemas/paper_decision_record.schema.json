@@ -1,0 +1,257 @@
+{
+  "$defs": {
+    "PaperPrediction": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence_interval": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence Interval"
+        },
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "model_id",
+        "metric",
+        "value",
+        "unit"
+      ],
+      "title": "PaperPrediction",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/paper_decision_record.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "best_baseline": {
+      "title": "Best Baseline",
+      "type": "string"
+    },
+    "candidate_set": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Candidate Set",
+      "type": "array"
+    },
+    "classification": {
+      "title": "Classification",
+      "type": "string"
+    },
+    "code_commit": {
+      "maxLength": 40,
+      "minLength": 7,
+      "title": "Code Commit",
+      "type": "string"
+    },
+    "config_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Config Hash",
+      "type": "string"
+    },
+    "decided_at": {
+      "format": "date-time",
+      "title": "Decided At",
+      "type": "string"
+    },
+    "decision_confidence_intervals": {
+      "additionalProperties": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "number"
+          }
+        ],
+        "type": "array"
+      },
+      "title": "Decision Confidence Intervals",
+      "type": "object"
+    },
+    "decision_id": {
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "five_scores": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Five Scores",
+      "type": "object"
+    },
+    "holdout_used": {
+      "const": false,
+      "default": false,
+      "title": "Holdout Used",
+      "type": "boolean"
+    },
+    "no_position_alternative": {
+      "const": "no_position",
+      "default": "no_position",
+      "title": "No Position Alternative",
+      "type": "string"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "predictions": {
+      "items": {
+        "$ref": "#/$defs/PaperPrediction"
+      },
+      "title": "Predictions",
+      "type": "array"
+    },
+    "previous_hash": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previous Hash"
+    },
+    "raw_metrics": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "title": "Raw Metrics",
+      "type": "object"
+    },
+    "record_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Record Hash",
+      "type": "string"
+    },
+    "record_kind": {
+      "const": "paper_decision",
+      "default": "paper_decision",
+      "title": "Record Kind",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "score_coverages": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Score Coverages",
+      "type": "object"
+    },
+    "selected_candidate": {
+      "title": "Selected Candidate",
+      "type": "string"
+    },
+    "sequence": {
+      "exclusiveMinimum": 0,
+      "title": "Sequence",
+      "type": "integer"
+    },
+    "snapshot_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Snapshot Hash",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    },
+    "what_if": {
+      "const": true,
+      "default": true,
+      "title": "What If",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "decision_id",
+    "decided_at",
+    "snapshot_id",
+    "snapshot_hash",
+    "candidate_set",
+    "five_scores",
+    "score_coverages",
+    "raw_metrics",
+    "classification",
+    "selected_candidate",
+    "best_baseline",
+    "predictions",
+    "decision_confidence_intervals",
+    "config_hash",
+    "code_commit",
+    "sequence",
+    "record_hash"
+  ],
+  "title": "PaperDecisionRecord",
+  "type": "object"
+}

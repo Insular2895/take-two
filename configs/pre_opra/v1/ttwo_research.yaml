@@ -1,0 +1,533 @@
+schema_version: "1.0"
+
+research_request:
+  request_id: ttwo-pre-opra-2026-08-08
+  ticker: TTWO
+  as_of: 2026-08-08
+  directional_thesis: bullish
+  thesis_summary: >-
+    Research the bounded-risk TTWO option opportunity without presuming that a
+    catalyst implies a positive stock or option return.
+  invalidation_conditions:
+    - No listed bounded-risk candidate passes the evidence and data gates.
+    - The relevant catalyst moves outside the configured horizon.
+  source_ids: []
+
+market_context:
+  decision_cutoff: 2026-08-08T20:00:00Z
+  base_currency: EUR
+  historical_dataset_id: null
+  data_providers: [marketdata_cache]
+  maximum_data_age_days:
+    value: 7
+    origin: user_assumption
+    status: draft_to_validate
+    source_ids: []
+    rationale: Research freshness limit; not a validated trading threshold.
+  allow_cache_fallback: true
+  sources: []
+
+capital_constraints:
+  amount: 1000
+  currency: EUR
+  maximum_loss: 1000
+  maximum_contracts: 4
+  safety_reserve_fraction:
+    value: 0.05
+    origin: user_assumption
+    status: draft_to_validate
+    source_ids: []
+    rationale: Research scenario only; not a recommendation.
+  fx_rate_to_usd: null
+  fx_rate_as_of: null
+
+risk_profile:
+  bounded_risk_only: true
+  loss_ladder_thresholds: [0.10, 0.25, 0.50, 0.70, 0.90, 0.99]
+  large_loss_threshold:
+    value: 0.70
+    origin: user_assumption
+    status: draft_to_validate
+    source_ids: []
+    rationale: Requested diagnostic threshold; it is not calibrated.
+  target_return:
+    value: 0.90
+    origin: user_assumption
+    status: draft_to_validate
+    source_ids: []
+    rationale: Requested research target; it is not a promised return.
+  maximum_relative_spread:
+    value: 0.30
+    origin: estimate
+    status: calibration_required
+    source_ids: []
+    rationale: Legacy screen threshold awaiting historical execution validation.
+  minimum_open_interest:
+    value: 20
+    origin: estimate
+    status: calibration_required
+    source_ids: []
+    rationale: Legacy screen threshold awaiting validation.
+  minimum_volume:
+    value: 0
+    origin: estimate
+    status: calibration_required
+    source_ids: []
+    rationale: Missing historical volume is permitted only as an explicit limitation.
+  allow_missing_volume: true
+
+strategy_universe:
+  allowed_structures:
+    - long_call
+    - long_put
+    - bull_call_spread
+    - bear_put_spread
+    - call_butterfly
+    - put_butterfly
+    - call_broken_wing_butterfly
+    - put_broken_wing_butterfly
+    - call_calendar
+    - put_calendar
+    - call_diagonal
+    - put_diagonal
+    - long_straddle
+    - long_strangle
+    - iron_condor
+  forbidden_structures: [uncovered_short_option, unbounded_ratio_spread]
+  horizon_min_days: 365
+  horizon_max_days: 548
+  strike_source: listed_chain
+  expiration_source: listed_chain
+  recipe_catalog_path: research/knowledge_items/strategy_recipes
+
+model_universe:
+  models:
+    - model_id: empirical-bootstrap
+      family: empirical
+      status: calibration_required
+      parameters: {}
+    - model_id: garch-family
+      family: conditional_volatility
+      status: calibration_required
+      parameters: {}
+    - model_id: svi-surface
+      family: implied_volatility_surface
+      status: calibration_required
+      parameters: {}
+    - model_id: heston
+      family: stochastic_volatility
+      status: blocked
+      parameters: {}
+  selection_policy: walk_forward_only
+  model_addition_policy: deficiency_and_validation_required
+
+scenario_set:
+  scenario_set_id: ttwo-pre-opra-unweighted-v1
+  probability_measure: none
+  scenarios:
+    - scenario_id: adverse
+      label: Adverse catalyst and liquidity outcome
+      probability: null
+      inputs: {}
+    - scenario_id: base
+      label: Base research scenario
+      probability: null
+      inputs: {}
+    - scenario_id: favorable
+      label: Favorable catalyst outcome
+      probability: null
+      inputs: {}
+
+execution_assumptions:
+  scenario: conservative
+  long_entry_side: ask
+  short_entry_side: bid
+  long_exit_side: bid
+  short_exit_side: ask
+  commission_per_contract_side:
+    value: 0.65
+    origin: estimate
+    status: draft_to_validate
+    source_ids: []
+    rationale: Account-specific commission must be confirmed before paper validation.
+  slippage_per_contract_side:
+    value: 0.05
+    origin: estimate
+    status: calibration_required
+    source_ids: []
+    rationale: Placeholder until historical combo-fill evidence is available.
+  quote_quality_required: eod_bid_ask
+  preview_only: true
+  order_capability: forbidden
+
+validation_policy:
+  require_oos: true
+  walk_forward_method: expanding
+  minimum_train_observations: 20
+  minimum_validation_observations: 8
+  minimum_test_observations: 8
+  minimum_holdout_observations: 4
+  purge_days: 0
+  embargo_days: 5
+  final_holdout_id: null
+  holdout_must_be_unopened: true
+  multiple_testing_method: holm
+  significance_level:
+    value: 0.05
+    origin: user_assumption
+    status: draft_to_validate
+    source_ids: []
+    rationale: Pre-registered research convention; subject to sensitivity analysis.
+  minimum_economic_materiality:
+    value: 0.02
+    origin: user_assumption
+    status: draft_to_validate
+    source_ids: []
+    rationale: Candidate threshold for sensitivity reporting, not a validated cutoff.
+
+optimization_objective:
+  objective_type: pareto_multi_objective
+  primary_metrics:
+    - expected_return
+    - probability_profit
+    - cvar_95
+    - maximum_loss
+    - execution_cost
+  secondary_ranking_weights: {}
+  no_single_magic_score: true
+
+report_policy:
+  formats: [json, markdown, html]
+  display_raw_metrics: true
+  display_score_components: true
+  maximum_candidates: 5
+  language: fr
+  score_versions:
+    opportunity: pre-opra-v2
+    risk: pre-opra-v2
+    evidence: pre-opra-v2
+    model_agreement: pre-opra-v2
+    execution_quality: pre-opra-v2
+
+trade_economics:
+  schema_version: "1.1"
+  analysis_mode: deep_analysis
+  deep_analysis_candidate_limit: 3
+  time_decay_horizons_days: [1, 7, 30, 60, 90]
+  scenario_horizons_days: [7, 30, 60, 90]
+  spot_grid:
+    mode: spot_multipliers
+    values: [0.70, 0.85, 1.00, 1.15, 1.30]
+  target_spots: []
+  volatility_scenarios:
+    - name: base_constant_leg_iv
+      scenario_type: CONSTANT_LEG_IV
+      unit: none
+      parameters: {}
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Each leg retains its observed implied volatility.]
+    - name: parallel_iv_crush
+      scenario_type: PARALLEL_ABSOLUTE_VOL_SHIFT
+      unit: vol_points
+      parameters: {parallel_shift_vol_points: -10.0}
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Configured sensitivity stress; not a forecast.]
+    - name: parallel_iv_expansion
+      scenario_type: PARALLEL_ABSOLUTE_VOL_SHIFT
+      unit: vol_points
+      parameters: {parallel_shift_vol_points: 10.0}
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Configured sensitivity stress; not a forecast.]
+    - name: skew_steepening
+      scenario_type: SKEW_STEEPENING
+      unit: vol_points
+      parameters: {skew_slope_vol_points: 5.0}
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Log-moneyness stress is diagnostic and uncalibrated.]
+    - name: short_end_crush
+      scenario_type: SHORT_END_CRUSH
+      unit: vol_points
+      parameters:
+        short_end_max_days: 90
+        front_expiry_shift_vol_points: -15.0
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Only maturities at or below the configured boundary are shocked.]
+    - name: event_iv_crush
+      scenario_type: EVENT_IV_CRUSH
+      unit: vol_points
+      parameters:
+        short_end_max_days: 90
+        long_end_min_days: 365
+        front_expiry_shift_vol_points: -20.0
+        mid_expiry_shift_vol_points: -10.0
+        back_expiry_shift_vol_points: 0.0
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Term-structure crush is a stress, not a calibrated event forecast.]
+    - name: spot_up_iv_down
+      scenario_type: SPOT_UP_IV_DOWN
+      unit: mixed
+      parameters:
+        spot_multiplier: 1.15
+        parallel_shift_vol_points: -8.0
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Spot/vol correlation stress is diagnostic.]
+    - name: spot_down_iv_up
+      scenario_type: SPOT_DOWN_IV_UP
+      unit: mixed
+      parameters:
+        spot_multiplier: 0.85
+        parallel_shift_vol_points: 12.0
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Spot/vol correlation stress is diagnostic.]
+  greek_bumps:
+    spot_relative_bumps: [0.0025, 0.005, 0.01]
+    minimum_spot_bump: 0.01
+    volatility_bumps_vol_points: [0.5, 1.0, 2.0]
+    rate_bumps_basis_points: [10.0, 25.0]
+    time_bump_calendar_days: 1
+    grid_levels: [100, 200]
+  numerical_tolerances:
+    greek_high_relative_dispersion: 0.01
+    greek_medium_relative_dispersion: 0.05
+    greek_low_relative_dispersion: 0.20
+    greek_absolute_scale_floor: 1.0e-8
+    price_grid_tolerance: 0.02
+    reconciliation_tolerance: 1.0e-5
+  rate_stresses:
+    - name: base_curve
+      scenario_type: BASE_CURVE
+      short_end_shift_basis_points: 0.0
+      long_end_shift_basis_points: 0.0
+      short_end_max_days: 90
+      long_end_min_days: 730
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Use the declared input curve without an added shock.]
+    - name: parallel_up
+      scenario_type: PARALLEL_UP
+      short_end_shift_basis_points: 100.0
+      long_end_shift_basis_points: 100.0
+      short_end_max_days: 90
+      long_end_min_days: 730
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Configured +100 bp sensitivity stress; not a forecast.]
+    - name: parallel_down
+      scenario_type: PARALLEL_DOWN
+      short_end_shift_basis_points: -100.0
+      long_end_shift_basis_points: -100.0
+      short_end_max_days: 90
+      long_end_min_days: 730
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Configured -100 bp sensitivity stress; not a forecast.]
+    - name: steepening
+      scenario_type: STEEPENING
+      short_end_shift_basis_points: -50.0
+      long_end_shift_basis_points: 50.0
+      short_end_max_days: 90
+      long_end_min_days: 730
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Configured maturity-dependent curve stress.]
+    - name: flattening
+      scenario_type: FLATTENING
+      short_end_shift_basis_points: 50.0
+      long_end_shift_basis_points: -50.0
+      short_end_max_days: 90
+      long_end_min_days: 730
+      source: configured_m0_policy_v1
+      status: CONFIGURED_STRESS
+      assumptions: [Configured maturity-dependent curve stress.]
+  fx_mode: UNKNOWN
+  entry_fx_rate_usd_per_base: null
+  scenario_fx_rate_usd_per_base: null
+  exit_cost_model:
+    spread_cost_multiplier: 1.0
+    slippage_cost_multiplier: 1.0
+    closing_commission_multiplier: 1.0
+    fx_exit_cost_bps: null
+    assignment_or_exercise_cost: null
+    exercise_cost: null
+    assignment_cost: null
+    settlement_cost: null
+    status: ESTIMATED_CONFIGURED_EXECUTION_MODEL
+  mixed_expiry_lifecycle_policy: CLOSE_BEFORE_FIRST_EXPIRY
+  mixed_expiry_close_buffer_calendar_days: 1
+  breakeven_solver:
+    minimum_spot_multiplier: 0.0
+    maximum_spot_multiplier: 3.0
+    grid_points: 401
+    root_tolerance: 1.0e-5
+    pnl_tolerance: 1.0e-4
+    maximum_iterations: 100
+  touch_targets: []
+  near_expiry_threshold_hours: 48.0
+  display_policy:
+    show_raw_greeks: true
+    show_numerical_confidence: true
+    show_scenario_assumptions: true
+  advanced_greeks:
+    enabled: true
+    display_speed: true
+    display_color: true
+  leverage_denominator_floor: 1.0
+  intensity_thresholds:
+    high_effective_leverage: 5.0
+    extreme_effective_leverage: 10.0
+    high_flat_spot_30d_loss_fraction: 0.20
+    extreme_flat_spot_30d_loss_fraction: 0.40
+    high_round_trip_cost_fraction: 0.08
+    extreme_round_trip_cost_fraction: 0.15
+
+extensions:
+  option_normalization:
+    cache_dir: data/marketdata/cache
+    private_output: data/pre_opra/normalized_options.jsonl
+    aggregate_summary: reports/pre_opra/option_normalization_2026-08-08.json
+    availability_delay_hours: 24
+  market_context:
+    start: 2024-02-01T00:00:00+00:00
+    stock_feed: iex
+    treasury_files:
+      - data/treasury/daily_treasury_yield_curve_2025.csv
+      - data/treasury/daily_treasury_yield_curve_2026.csv
+    private_output: data/pre_opra/market_context.json
+    aggregate_summary: reports/pre_opra/market_context_2026-08-08.json
+  event_history:
+    start: 2025-07-01
+    private_output: data/pre_opra/event_regime_dataset.json
+    aggregate_output: reports/pre_opra/event_regime_dataset_2026-08-08.json
+    trend_threshold: 0.05
+    high_volatility_threshold: 0.40
+    manual_events:
+      - event_id: ir-mafia-release-2025-08-08
+        kind: product_release
+        available_at: 2025-08-09T00:00:00+00:00
+        source_url: https://www.take2games.com/ir/news/mafia-old-country-now-available-worldwide
+        summary: "Mafia: The Old Country became available worldwide."
+      - event_id: ir-nba2k26-release-2025-09-05
+        kind: product_release
+        available_at: 2025-09-06T00:00:00+00:00
+        source_url: https://www.take2games.com/ir/news/ball-over-everything-nbar-2k26-superstar-and-leave-no-doubt
+        summary: NBA 2K26 Superstar and Leave No Doubt editions became available.
+      - event_id: ir-borderlands4-release-2025-09-12
+        kind: product_release
+        available_at: 2025-09-13T00:00:00+00:00
+        source_url: https://www.take2games.com/ir/news/break-free-borderlandsr4-now-available-worldwide
+        summary: Borderlands 4 became available worldwide.
+  baseline_panel:
+    full_chain_min_quotes: 100
+    target_dte: 21
+    fixed_delta_target: 0.35
+    bull_spread_width_pct: 0.10
+    maximum_relative_spread: 0.30
+    minimum_open_interest: 20
+    capital_eur: 1000
+    maximum_contracts: 4
+    commission_per_contract_side: 0.65
+    slippage_per_contract_side: 0.05
+    share_round_trip_cost_fraction: 0.002
+    random_draws: 25
+    seed: 20260808
+    v10_momentum_gate: -0.05
+    v10_high_momentum: 0.05
+    v10_high_volatility: 0.40
+    bootstrap_samples: 2000
+    permutation_samples: 4000
+    private_output: data/pre_opra/comparable_panel.json
+    aggregate_report: reports/pre_opra/baseline_comparison_2026-08-08.json
+  historical_surfaces:
+    option_input: data/pre_opra/normalized_options.jsonl
+    market_context_input: data/pre_opra/market_context.json
+    aggregate_report: reports/pre_opra/historical_surfaces_2026-08-08.json
+    option_side: call
+    minimum_distinct_strikes: 5
+    minimum_open_interest: 20
+    maximum_relative_spread: 0.30
+    maturity_days: [7, 365]
+    strike_moneyness: [0.50, 1.50]
+    vendor_iv_policy: never_impute_missing
+    heston_policy: gate_before_calibration
+  empirical_calibration:
+    market_context_input: data/pre_opra/market_context.json
+    surface_diagnostics_input: reports/pre_opra/historical_surfaces_2026-08-08.json
+    aggregate_report: reports/pre_opra/empirical_calibration_2026-08-08.json
+    bootstrap_draws: 2000
+    bootstrap_block_size: 5
+    seed: 20260808
+    chronological_train_fraction: 0.6666666667
+    historical_volatility_window: 40
+    final_holdout_used: false
+  strategy_walk_forward:
+    panel_input: data/pre_opra/comparable_panel.json
+    aggregate_report: reports/pre_opra/walk_forward_protocol_2026-08-08.json
+    development_train_observations: 12
+    development_validation_observations: 1
+    development_test_observations: 1
+    development_purge_observations: 1
+    development_embargo_observations: 1
+    step_observations: 1
+    formal_policy: {train: 20, validation: 8, embargo: 5, test: 8}
+    multiple_testing: holm
+    final_holdout_used: false
+  five_scores:
+    aggregate_report: reports/pre_opra/five_scores_2026-08-08.json
+    partial_score_policy: preserve_original_weights_without_renormalization
+    classification_rule_version: pre-opra-v2
+  severity_gates:
+    aggregate_report: reports/pre_opra/severity_and_gate_sensitivity_2026-08-08.json
+    loss_thresholds: [0.10, 0.25, 0.50, 0.70, 0.90, 0.99]
+    interval_methods: [wilson_95, bootstrap_percentile_95]
+    bootstrap_samples: 2000
+    seed: 20260808
+    gate_settings: [permissive-predefined, central-predefined, strict-predefined]
+  engine_verdict:
+    aggregate_report: reports/pre_opra/engine_verdict_2026-08-08.json
+    rule_version: pre-opra-engine-value-v1
+    allowed_verdicts:
+      - ENGINE_ADDS_VALUE
+      - ENGINE_NOT_PROVEN_SUPERIOR
+      - PROMISING_BUT_NOT_PROVEN
+      - BLOCKED_BY_DATA
+      - VALIDATION_FAILED
+  opra_interface:
+    provider_protocol: LiveOptionMarketDataProvider
+    provider_profiles:
+      ibkr_tws:
+        authentication_mode: tws_session
+        required_environment_variables:
+          - OPRA_PROVIDER
+          - IBKR_HOST
+          - IBKR_PORT
+          - IBKR_CLIENT_ID
+          - IBKR_SESSION_MODE
+          - IBKR_MARKET_DATA_TYPE
+          - OPRA_ENTITLEMENT_CONFIRMED
+          - OPRA_LICENSE_REVIEWED
+        api_key_required: false
+      token_api:
+        authentication_mode: api_credentials
+        required_environment_variables:
+          - OPRA_PROVIDER
+          - OPRA_API_KEY
+          - OPRA_API_SECRET
+          - OPRA_ACCOUNT_OR_SESSION
+          - OPRA_ENTITLEMENT_CONFIRMED
+          - OPRA_LICENSE_REVIEWED
+    readiness_report: reports/pre_opra/opra_interface_readiness_2026-08-08.json
+    paper_decision_ledger: data/opra/paper_decisions.jsonl
+    paper_realization_ledger: data/opra/paper_realizations.jsonl
+    connection_enabled: false
+    phase_m_started: false
+    transmit: false
+    what_if: true
+    order_capability: forbidden

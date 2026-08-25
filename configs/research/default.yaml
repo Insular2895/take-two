@@ -1,0 +1,21 @@
+seed: 20260725
+coarse_paths: 256
+fine_paths: 512
+final_paths_initial: 1000
+final_paths_maximum: 8000
+coarse_maximum_per_architecture: 2
+fine_maximum_base_candidates: 8
+local_stability_strike_radius: 10
+local_stability_holding_radius_days: 30
+ranking_policy:
+  policy_id: transparent-secondary-ranking-v1
+  status: experimental
+  weights:
+    conservative_expected_pnl: 0.25
+    probability_profit: 0.20
+    cvar: 0.20
+    maximum_loss: 0.10
+    liquidity: 0.10
+    local_stability: 0.10
+    complexity: 0.05
+  note: Secondary display ranking only; hard vetoes and Pareto always run first.

@@ -1,0 +1,614 @@
+{
+  "$defs": {
+    "BaselineMetricRow": {
+      "additionalProperties": false,
+      "properties": {
+        "cvar_95": {
+          "minimum": 0,
+          "title": "Cvar 95",
+          "type": "number"
+        },
+        "evidence": {
+          "minLength": 1,
+          "title": "Evidence",
+          "type": "string"
+        },
+        "expected_return": {
+          "title": "Expected Return",
+          "type": "number"
+        },
+        "maximum_drawdown": {
+          "minimum": 0,
+          "title": "Maximum Drawdown",
+          "type": "number"
+        },
+        "median_return": {
+          "title": "Median Return",
+          "type": "number"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "probability_large_loss": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Large Loss",
+          "type": "number"
+        },
+        "probability_loss_50": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Loss 50",
+          "type": "number"
+        },
+        "probability_loss_70": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Loss 70",
+          "type": "number"
+        },
+        "probability_loss_90": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Loss 90",
+          "type": "number"
+        },
+        "probability_profit": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Profit",
+          "type": "number"
+        },
+        "probability_target": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability Target",
+          "type": "number"
+        },
+        "role": {
+          "enum": [
+            "baseline",
+            "candidate"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "sharpe": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sharpe"
+        },
+        "sortino": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sortino"
+        },
+        "status": {
+          "enum": [
+            "baseline",
+            "candidate"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "strategy": {
+          "$ref": "#/$defs/ComparableStrategy"
+        },
+        "total_return": {
+          "title": "Total Return",
+          "type": "number"
+        },
+        "transaction_costs": {
+          "minimum": 0,
+          "title": "Transaction Costs",
+          "type": "number"
+        }
+      },
+      "required": [
+        "strategy",
+        "role",
+        "observations",
+        "total_return",
+        "expected_return",
+        "median_return",
+        "cvar_95",
+        "maximum_drawdown",
+        "probability_profit",
+        "probability_target",
+        "probability_large_loss",
+        "probability_loss_50",
+        "probability_loss_70",
+        "probability_loss_90",
+        "sharpe",
+        "sortino",
+        "transaction_costs",
+        "evidence",
+        "status"
+      ],
+      "title": "BaselineMetricRow",
+      "type": "object"
+    },
+    "ComparableStrategy": {
+      "enum": [
+        "cash",
+        "no_position",
+        "underlying",
+        "buy_and_hold",
+        "atm_long_call",
+        "fixed_delta_long_call",
+        "standard_bull_call_spread",
+        "random_admissible",
+        "engine_candidate"
+      ],
+      "title": "ComparableStrategy",
+      "type": "string"
+    },
+    "ComparisonConventions": {
+      "additionalProperties": false,
+      "properties": {
+        "capital": {
+          "exclusiveMinimum": 0,
+          "title": "Capital",
+          "type": "number"
+        },
+        "currency": {
+          "maxLength": 3,
+          "minLength": 3,
+          "title": "Currency",
+          "type": "string"
+        },
+        "entry_convention": {
+          "title": "Entry Convention",
+          "type": "string"
+        },
+        "exit_convention": {
+          "title": "Exit Convention",
+          "type": "string"
+        },
+        "fees": {
+          "title": "Fees",
+          "type": "string"
+        },
+        "fx_policy": {
+          "title": "Fx Policy",
+          "type": "string"
+        },
+        "horizon": {
+          "title": "Horizon",
+          "type": "string"
+        },
+        "large_loss_threshold": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Large Loss Threshold",
+          "type": "number"
+        },
+        "spread_assumption": {
+          "title": "Spread Assumption",
+          "type": "string"
+        },
+        "target_return": {
+          "title": "Target Return",
+          "type": "number"
+        }
+      },
+      "required": [
+        "horizon",
+        "capital",
+        "currency",
+        "fees",
+        "spread_assumption",
+        "fx_policy",
+        "entry_convention",
+        "exit_convention",
+        "target_return",
+        "large_loss_threshold"
+      ],
+      "title": "ComparisonConventions",
+      "type": "object"
+    },
+    "EffectiveSearchSpace": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_trials": {
+          "exclusiveMinimum": 0,
+          "title": "Actual Trials",
+          "type": "integer"
+        },
+        "cartesian_upper_bound": {
+          "exclusiveMinimum": 0,
+          "title": "Cartesian Upper Bound",
+          "type": "integer"
+        },
+        "contracts_considered": {
+          "exclusiveMinimum": 0,
+          "title": "Contracts Considered",
+          "type": "integer"
+        },
+        "exit_rules_considered": {
+          "exclusiveMinimum": 0,
+          "title": "Exit Rules Considered",
+          "type": "integer"
+        },
+        "expirations_considered": {
+          "exclusiveMinimum": 0,
+          "title": "Expirations Considered",
+          "type": "integer"
+        },
+        "model_sets_considered": {
+          "exclusiveMinimum": 0,
+          "title": "Model Sets Considered",
+          "type": "integer"
+        },
+        "parameter_sets_considered": {
+          "exclusiveMinimum": 0,
+          "title": "Parameter Sets Considered",
+          "type": "integer"
+        },
+        "strategies_considered": {
+          "exclusiveMinimum": 0,
+          "title": "Strategies Considered",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "strategies_considered",
+        "contracts_considered",
+        "expirations_considered",
+        "parameter_sets_considered",
+        "model_sets_considered",
+        "exit_rules_considered",
+        "actual_trials",
+        "cartesian_upper_bound"
+      ],
+      "title": "EffectiveSearchSpace",
+      "type": "object"
+    },
+    "MultipleTestingDiagnostics": {
+      "additionalProperties": false,
+      "properties": {
+        "alpha": {
+          "exclusiveMaximum": 1,
+          "exclusiveMinimum": 0,
+          "title": "Alpha",
+          "type": "number"
+        },
+        "bootstrap_samples": {
+          "exclusiveMinimum": 0,
+          "title": "Bootstrap Samples",
+          "type": "integer"
+        },
+        "correction": {
+          "const": "holm",
+          "title": "Correction",
+          "type": "string"
+        },
+        "deflated_sharpe_probability": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deflated Sharpe Probability"
+        },
+        "effective_search_space": {
+          "$ref": "#/$defs/EffectiveSearchSpace"
+        },
+        "paired_permutation_samples": {
+          "exclusiveMinimum": 0,
+          "title": "Paired Permutation Samples",
+          "type": "integer"
+        },
+        "probability_backtest_overfitting": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Backtest Overfitting"
+        },
+        "seed": {
+          "title": "Seed",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "correction",
+        "alpha",
+        "effective_search_space",
+        "paired_permutation_samples",
+        "bootstrap_samples",
+        "seed"
+      ],
+      "title": "MultipleTestingDiagnostics",
+      "type": "object"
+    },
+    "PairedDelta": {
+      "additionalProperties": false,
+      "properties": {
+        "adjusted_p_value": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Adjusted P Value",
+          "type": "number"
+        },
+        "baseline": {
+          "$ref": "#/$defs/ComparableStrategy"
+        },
+        "candidate": {
+          "const": "engine_candidate",
+          "title": "Candidate",
+          "type": "string"
+        },
+        "classification": {
+          "enum": [
+            "statistically_and_economically_material",
+            "statistically_distinguishable_not_material",
+            "economically_material_not_statistically_distinguishable",
+            "inconclusive",
+            "worse_than_baseline"
+          ],
+          "title": "Classification",
+          "type": "string"
+        },
+        "cvar_improvement": {
+          "title": "Cvar Improvement",
+          "type": "number"
+        },
+        "drawdown_improvement": {
+          "title": "Drawdown Improvement",
+          "type": "number"
+        },
+        "economically_material": {
+          "title": "Economically Material",
+          "type": "boolean"
+        },
+        "expected_return_uplift": {
+          "title": "Expected Return Uplift",
+          "type": "number"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "paired_mean_uplift_interval": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Paired Mean Uplift Interval",
+          "type": "array"
+        },
+        "probability_large_loss_improvement": {
+          "title": "Probability Large Loss Improvement",
+          "type": "number"
+        },
+        "probability_profit_uplift": {
+          "title": "Probability Profit Uplift",
+          "type": "number"
+        },
+        "probability_target_uplift": {
+          "title": "Probability Target Uplift",
+          "type": "number"
+        },
+        "raw_p_value": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Raw P Value",
+          "type": "number"
+        },
+        "return_uplift": {
+          "title": "Return Uplift",
+          "type": "number"
+        },
+        "sharpe_uplift": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sharpe Uplift"
+        },
+        "sortino_uplift": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sortino Uplift"
+        },
+        "statistically_distinguishable": {
+          "title": "Statistically Distinguishable",
+          "type": "boolean"
+        },
+        "transaction_cost_difference": {
+          "title": "Transaction Cost Difference",
+          "type": "number"
+        }
+      },
+      "required": [
+        "baseline",
+        "candidate",
+        "observations",
+        "return_uplift",
+        "expected_return_uplift",
+        "cvar_improvement",
+        "drawdown_improvement",
+        "probability_profit_uplift",
+        "probability_target_uplift",
+        "probability_large_loss_improvement",
+        "sharpe_uplift",
+        "sortino_uplift",
+        "transaction_cost_difference",
+        "paired_mean_uplift_interval",
+        "raw_p_value",
+        "adjusted_p_value",
+        "statistically_distinguishable",
+        "economically_material",
+        "classification"
+      ],
+      "title": "PairedDelta",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/baseline_comparison.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "conventions": {
+      "$ref": "#/$defs/ComparisonConventions"
+    },
+    "dataset_hash": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dataset Hash"
+    },
+    "deltas": {
+      "items": {
+        "$ref": "#/$defs/PairedDelta"
+      },
+      "title": "Deltas",
+      "type": "array"
+    },
+    "holdout_used": {
+      "const": false,
+      "title": "Holdout Used",
+      "type": "boolean"
+    },
+    "missing_strategies": {
+      "items": {
+        "$ref": "#/$defs/ComparableStrategy"
+      },
+      "title": "Missing Strategies",
+      "type": "array"
+    },
+    "multiple_testing": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MultipleTestingDiagnostics"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "regret_vs_best_simple_baseline": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Regret Vs Best Simple Baseline"
+    },
+    "report_id": {
+      "title": "Report Id",
+      "type": "string"
+    },
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/BaselineMetricRow"
+      },
+      "title": "Rows",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "EVALUATED",
+        "FIXTURE_ONLY_NOT_VALIDATED",
+        "DIAGNOSTIC_ONLY_LICENSE_REVIEW",
+        "BLOCKED_INCOMPARABLE_DATA"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "ticker": {
+      "title": "Ticker",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "report_id",
+    "ticker",
+    "status",
+    "conventions",
+    "rows",
+    "deltas",
+    "missing_strategies",
+    "regret_vs_best_simple_baseline",
+    "multiple_testing",
+    "blockers",
+    "holdout_used"
+  ],
+  "title": "BaselineComparisonReport",
+  "type": "object"
+}

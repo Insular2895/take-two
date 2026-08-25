@@ -1,0 +1,6 @@
+policy_id: bounded-budget-v1
+status: product_constraint
+allowed_risk: bounded_only
+whole_contracts_only: true
+safety_reserve_fraction: 0.05
+provenance: User product constraint; reserve is experimental and visible.

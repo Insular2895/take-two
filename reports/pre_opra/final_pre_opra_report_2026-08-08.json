@@ -1,0 +1,604 @@
+{
+  "baseline_table": [
+    {
+      "cvar_95": 0.0,
+      "evidence": "aligned_panel_input",
+      "expected_return": 0.0,
+      "maximum_drawdown": 0.0,
+      "median_return": 0.0,
+      "observations": 10,
+      "probability_loss_50": 0.0,
+      "probability_loss_70": 0.0,
+      "probability_loss_90": 0.0,
+      "probability_profit": 0.0,
+      "probability_target": 0.0,
+      "sharpe": null,
+      "sortino": null,
+      "strategy": "cash",
+      "total_return": 0.0,
+      "transaction_costs_eur": 0.0
+    },
+    {
+      "cvar_95": 0.0,
+      "evidence": "aligned_panel_input",
+      "expected_return": 0.0,
+      "maximum_drawdown": 0.0,
+      "median_return": 0.0,
+      "observations": 10,
+      "probability_loss_50": 0.0,
+      "probability_loss_70": 0.0,
+      "probability_loss_90": 0.0,
+      "probability_profit": 0.0,
+      "probability_target": 0.0,
+      "sharpe": null,
+      "sortino": null,
+      "strategy": "no_position",
+      "total_return": 0.0,
+      "transaction_costs_eur": 0.0
+    },
+    {
+      "cvar_95": 0.08081911251146667,
+      "evidence": "aligned_panel_input",
+      "expected_return": 0.022551068098235604,
+      "maximum_drawdown": 0.12812696221625441,
+      "median_return": 0.029965198746630728,
+      "observations": 10,
+      "probability_loss_50": 0.0,
+      "probability_loss_70": 0.0,
+      "probability_loss_90": 0.0,
+      "probability_profit": 0.6,
+      "probability_target": 0.0,
+      "sharpe": 0.35364862238416417,
+      "sortino": 0.7321126985504098,
+      "strategy": "underlying",
+      "total_return": 0.2280819841795816,
+      "transaction_costs_eur": 20.0
+    },
+    {
+      "cvar_95": 0.07881911251146667,
+      "evidence": "aligned_panel_input",
+      "expected_return": 0.024451068098235607,
+      "maximum_drawdown": 0.12438753523974566,
+      "median_return": 0.03196519874663073,
+      "observations": 10,
+      "probability_loss_50": 0.0,
+      "probability_loss_70": 0.0,
+      "probability_loss_90": 0.0,
+      "probability_profit": 0.6,
+      "probability_target": 0.0,
+      "sharpe": 0.3840480323258037,
+      "sortino": 0.8206093975438661,
+      "strategy": "buy_and_hold",
+      "total_return": 0.2512435006292011,
+      "transaction_costs_eur": 1.0
+    },
+    {
+      "cvar_95": 0.6473871131405378,
+      "evidence": "aligned_panel_input",
+      "expected_return": 0.10866203165158546,
+      "maximum_drawdown": 0.9197516171892423,
+      "median_return": -0.013103481708255066,
+      "observations": 10,
+      "probability_loss_50": 0.3,
+      "probability_loss_70": 0.0,
+      "probability_loss_90": 0.0,
+      "probability_profit": 0.5,
+      "probability_target": 0.1,
+      "sharpe": 0.15150137936854163,
+      "sortino": 0.3017724083367115,
+      "strategy": "atm_long_call",
+      "total_return": -0.6549393805531625,
+      "transaction_costs_eur": 1786.7679091115551
+    },
+    {
+      "cvar_95": 0.8467353951890036,
+      "evidence": "aligned_panel_input",
+      "expected_return": -0.03478073183617572,
+      "maximum_drawdown": 0.9990707183950014,
+      "median_return": -0.36730467526292615,
+      "observations": 10,
+      "probability_loss_50": 0.5,
+      "probability_loss_70": 0.4,
+      "probability_loss_90": 0.0,
+      "probability_profit": 0.3,
+      "probability_target": 0.1,
+      "sharpe": -0.03276963632090303,
+      "sortino": -0.06436854925302499,
+      "strategy": "fixed_delta_long_call",
+      "total_return": -0.9956493456978286,
+      "transaction_costs_eur": 3474.1155088374567
+    },
+    {
+      "cvar_95": 1.0,
+      "evidence": "aligned_panel_input",
+      "expected_return": -0.17541326819329423,
+      "maximum_drawdown": 1.0,
+      "median_return": -0.08166488311445394,
+      "observations": 10,
+      "probability_loss_50": 0.4,
+      "probability_loss_70": 0.4,
+      "probability_loss_90": 0.4,
+      "probability_profit": 0.5,
+      "probability_target": 0.1,
+      "sharpe": -0.23727736288666196,
+      "sortino": -0.2857802357489483,
+      "strategy": "standard_bull_call_spread",
+      "total_return": -1.0,
+      "transaction_costs_eur": 4413.881770483628
+    },
+    {
+      "cvar_95": 0.7464243647989232,
+      "evidence": "aligned_panel_input",
+      "expected_return": -0.002635366900268496,
+      "maximum_drawdown": 0.9837486078896513,
+      "median_return": -0.03313490034522168,
+      "observations": 10,
+      "probability_loss_50": 0.4,
+      "probability_loss_70": 0.2,
+      "probability_loss_90": 0.0,
+      "probability_profit": 0.4,
+      "probability_target": 0.1,
+      "sharpe": -0.0035601050145367802,
+      "sortino": -0.006119130132777439,
+      "strategy": "random_admissible",
+      "total_return": -0.937242517223274,
+      "transaction_costs_eur": 3077.5303190394757
+    },
+    {
+      "cvar_95": 0.8467353951890036,
+      "evidence": "aligned_panel_input",
+      "expected_return": -0.012664664703304278,
+      "maximum_drawdown": 0.9747005381055908,
+      "median_return": -0.072012523917203,
+      "observations": 10,
+      "probability_loss_50": 0.2,
+      "probability_loss_70": 0.1,
+      "probability_loss_90": 0.0,
+      "probability_profit": 0.2,
+      "probability_target": 0.1,
+      "sharpe": -0.019338611318175478,
+      "sortino": -0.035062795290173907,
+      "strategy": "engine_candidate",
+      "total_return": -0.9041231874818685,
+      "transaction_costs_eur": 1682.5706646102901
+    }
+  ],
+  "best_blocked_candidate": {
+    "candidate_id": "engine_candidate",
+    "failed_gates": [
+      {
+        "actual": 37.07072964641373,
+        "direction": "minimum",
+        "distance": 7.9292703535862685,
+        "name": "opportunity",
+        "required": 45.0,
+        "status": "failed"
+      }
+    ],
+    "opportunity_score": 37.07072964641373,
+    "selection_basis": "Only scored engine candidate; closest candidate blocked by central predefined gate.",
+    "selection_status": "identified"
+  },
+  "calibration_status": {
+    "annualized_realized_volatility": 0.2985990319828694,
+    "excess_kurtosis": 6.6982802469232485,
+    "fitted_surface_dates": 130,
+    "heston_status": "BLOCKED_INSUFFICIENT_CALIBRATION_DATA",
+    "iv_inversions_succeeded": 6946,
+    "return_observations": 630,
+    "surface_slices": 535
+  },
+  "data_coverage": {
+    "fx_rates": 283,
+    "governed_events": 14,
+    "option_dates": 250,
+    "raw_option_envelopes": 1998,
+    "raw_option_rows": 46413,
+    "rights_status": "HUMAN_REVIEW_RECOMMENDED",
+    "risk_free_curves": 385,
+    "underlying_bars": 631,
+    "unique_option_observations": 20884
+  },
+  "decision": "NO_POSITION_RECOMMENDED",
+  "decision_scope": "research_only_not_investment_advice",
+  "engine_verdict": "ENGINE_NOT_PROVEN_SUPERIOR",
+  "evidence_grade": "development_oos_limited",
+  "exact_command_after_opra": "ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml",
+  "exact_opra_variables": [
+    "OPRA_PROVIDER",
+    "IBKR_HOST",
+    "IBKR_PORT",
+    "IBKR_CLIENT_ID",
+    "IBKR_SESSION_MODE",
+    "IBKR_MARKET_DATA_TYPE",
+    "OPRA_ENTITLEMENT_CONFIRMED",
+    "OPRA_LICENSE_REVIEWED"
+  ],
+  "external_source_ids": [
+    "https://www.marketdata.app/terms/",
+    "https://files.alpaca.markets/disclosures/library/AcctAppMarginAndCustAgmt.pdf",
+    "https://home.treasury.gov/policy-issues/financing-the-government/interest-rate-statistics/interest-rate-xml-files",
+    "https://www.ecb.europa.eu/services/using-our-site/disclaimer/html/index.en.html",
+    "https://www.sec.gov/Archives/edgar/data/946581/000162828026037434/ttwo-20260331.htm",
+    "https://ibkrcampus.com/campus/ibkr-api-page/twsapi-doc/",
+    "https://ibkrcampus.com/docs/general/market-data-subscriptions/introduction",
+    "https://cdn.opraplan.com/documents/OPRA_Fee_Schedule.pdf",
+    "https://cdn.opraplan.com/documents/OPRA_Exhibit_A.pdf"
+  ],
+  "five_scores": [
+    {
+      "confidence": "LOW",
+      "formula_version": "pre-opra-v2",
+      "kind": "opportunity",
+      "missing_components": [],
+      "score_coverage": 1.0,
+      "score_value": 37.07072964641373
+    },
+    {
+      "confidence": "LOW",
+      "formula_version": "pre-opra-v2",
+      "kind": "risk",
+      "missing_components": [],
+      "score_coverage": 1.0,
+      "score_value": 49.46668008285406
+    },
+    {
+      "confidence": "LOW",
+      "formula_version": "pre-opra-v2",
+      "kind": "evidence",
+      "missing_components": [
+        "holdout_validation",
+        "rights_confirmation"
+      ],
+      "score_coverage": 0.8,
+      "score_value": 40.32979003133478
+    },
+    {
+      "confidence": "VERY_LOW",
+      "formula_version": "pre-opra-v2",
+      "kind": "model_agreement",
+      "missing_components": [
+        "option_expected_return_agreement",
+        "candidate_ranking_agreement"
+      ],
+      "score_coverage": 0.5,
+      "score_value": 31.4613888021953
+    },
+    {
+      "confidence": "LOW",
+      "formula_version": "pre-opra-v2",
+      "kind": "execution_quality",
+      "missing_components": [
+        "live_execution_component"
+      ],
+      "score_coverage": 0.75,
+      "score_value": 50.49182237441286
+    }
+  ],
+  "gate_sensitivity": [
+    {
+      "best_candidate_id": "engine_candidate",
+      "maximum_risk": 70.0,
+      "minimum_evidence": 30.0,
+      "minimum_execution_quality": 30.0,
+      "minimum_opportunity": 30.0,
+      "passed": true,
+      "setting_id": "permissive-predefined"
+    },
+    {
+      "best_candidate_id": null,
+      "maximum_risk": 50.0,
+      "minimum_evidence": 40.0,
+      "minimum_execution_quality": 50.0,
+      "minimum_opportunity": 45.0,
+      "passed": false,
+      "setting_id": "central-predefined"
+    },
+    {
+      "best_candidate_id": null,
+      "maximum_risk": 35.0,
+      "minimum_evidence": 60.0,
+      "minimum_execution_quality": 70.0,
+      "minimum_opportunity": 60.0,
+      "passed": false,
+      "setting_id": "strict-predefined"
+    }
+  ],
+  "generated_at": "2026-08-18T23:15:00+02:00",
+  "holdout_state": "UNOPENED",
+  "holdout_used": false,
+  "opra_readiness": [
+    "Contrat de provider live read-only impl\u00e9ment\u00e9 ; aucune m\u00e9thode d'ordre autoris\u00e9e.",
+    "Cha\u00eenes, bid/ask, timestamps, fra\u00eecheur et spreads devront \u00eatre journalis\u00e9s.",
+    "D\u00e9cisions paper immuables et hash-cha\u00een\u00e9es ; r\u00e9alisations stock\u00e9es s\u00e9par\u00e9ment.",
+    "La Phase M comparera V10 aux m\u00eames baselines avec co\u00fbts et slippage observ\u00e9s."
+  ],
+  "order_capability": "forbidden",
+  "overall_status": "PRE_OPRA_RESEARCH_COMPLETE",
+  "phase_m_started": false,
+  "raw_metrics": {
+    "best_simple_oos_total_return": 0.2512435006292011,
+    "classification": "AVOID",
+    "holm_superiority_rejections": 0,
+    "payoff_severity_classification": "AGGRESSIVE",
+    "payoff_severity_rule": "CVaR95 >= 50% or P(loss>50%) >= 20%",
+    "v10_full_total_return": -0.9905068072897727,
+    "v10_oos_cvar_95": 0.8467353951890036,
+    "v10_oos_expected_return": -0.012664664703304278,
+    "v10_oos_total_return": -0.9041231874818685
+  },
+  "remaining_blockers": [
+    "Confirmation humaine du type d'abonnement et des droits de recherche/stockage des fournisseurs historiques.",
+    "\u00c9chantillon options formel et holdout r\u00e9ellement futur : 25 observations disponibles contre 41 requises ; il ne peut pas \u00eatre fabriqu\u00e9 sans fuite.",
+    "Entitlement et identifiants OPRA live requis pour la future Phase M prospective read-only/paper."
+  ],
+  "report_id": "ttwo-final-pre-opra-v2",
+  "run_manifest": {
+    "artifact_hashes": {
+      "baseline_comparison_2026-08-08.json": "d1079f0c5829a40afec467b7f4ca5982f300254d0001b7d68871b5412c1305eb",
+      "data_usage_rights_2026-08-08.json": "64c1a728696908308567ddce9ee34a8aa710e86ae325e74a817ba070af5f4d40",
+      "empirical_calibration_2026-08-08.json": "7dce4111af642b4417d4e897c400484a3d3075bce3a41f832545bcb14c52be8f",
+      "engine_verdict_2026-08-08.json": "7caeda5a16eec98ebd40fe451cb193842684c4bad8adf1fc1d6e8fe0fce4f7ea",
+      "event_regime_dataset_2026-08-08.json": "75eaafe30fdc3291153abcca61c5fccfd6d56b3cf529afce1d3d064446045789",
+      "five_scores_2026-08-08.json": "a09cbb759c4b9a05961fbb75966e074a54aa01f7556eb153918d5b40d068a5f4",
+      "historical_surfaces_2026-08-08.json": "72362db6ffb1cce23dd0f03673395a954ad6d3593a2b33dfd0a33c27a975469e",
+      "market_context_2026-08-08.json": "2ea4a59df535ac2bfce368eda5799c95dcf506d15062efdccf46b47e45629a8e",
+      "opra_interface_readiness_2026-08-08.json": "51bf03c31247203bb0ff5697384d61e092bee44ac1d072896753710ff8f945b8",
+      "option_normalization_2026-08-08.json": "adbd0df20a04fc5a2b9804d58658f00ddca3dd1626dc0a8139ef58b4cc2d0f72",
+      "severity_and_gate_sensitivity_2026-08-08.json": "268b0c665d75de66f5135fbff585fb4236f0de72063dc60321074737c0ab2104",
+      "walk_forward_protocol_2026-08-08.json": "a4652afde0ef94e5ac2a86b1dd581ea96d6a8329f3f837007afee09892168534"
+    },
+    "code_commit": "1fac9b2b84a398a27ba318cf5e3db03f70ece5b4",
+    "command": "ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml",
+    "configuration_hash": "6311544557a89b9845993dcacac70c0b9e48a7007bf29176a48826188e4461cb",
+    "dataset_hash": "9f9e7d57f34b9c75402e843e4acc01a44ad1b434d324d884fda2e237404250c2",
+    "dependencies": {
+      "PyYAML": "6.0.3",
+      "QuantLib": "1.43",
+      "numpy": "2.5.1",
+      "pydantic": "2.13.4"
+    },
+    "generated_at": "2026-08-18T23:15:00+02:00",
+    "holdout_used": false,
+    "order_capability": "forbidden",
+    "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+    "python_version": "3.14.4",
+    "schema_version": "2.0",
+    "schema_versions": {
+      "baseline_comparison": "1.0",
+      "empirical_calibration": "1.0",
+      "engine_verdict": "1.0",
+      "final_pre_opra_report": "2.0",
+      "five_scores": "1.0",
+      "historical_surfaces": "1.0",
+      "severity_gates": "1.0",
+      "walk_forward": "1.0"
+    },
+    "score_versions": {
+      "evidence": "pre-opra-v2",
+      "execution_quality": "pre-opra-v2",
+      "model_agreement": "pre-opra-v2",
+      "opportunity": "pre-opra-v2",
+      "risk": "pre-opra-v2"
+    },
+    "seed": 20260808
+  },
+  "schema_version": "2.0",
+  "sections": [
+    {
+      "artifact": "option_normalization_2026-08-08.json",
+      "section_id": "A",
+      "status": "LOCAL_PRIVATE_DATA_USED",
+      "summary": "20 884 observations options uniques, 631 barres spot, taux, FX et 14 \u00e9v\u00e9nements.",
+      "title": "DATA COVERAGE"
+    },
+    {
+      "artifact": "empirical_calibration_2026-08-08.json",
+      "section_id": "B",
+      "status": "DEVELOPMENT_CALIBRATED_HESTON_BLOCKED",
+      "summary": "Empirique, EWMA, GARCH/GJR et 535 tranches SVI ; Heston reste non identifiable.",
+      "title": "CALIBRATION"
+    },
+    {
+      "artifact": "walk_forward_protocol_2026-08-08.json",
+      "section_id": "C",
+      "status": "REAL_DEVELOPMENT_OOS_LIMITED",
+      "summary": "10 tests futurs non chevauchants ; DSR 5,7 %, PBO 77,8 %.",
+      "title": "WALK-FORWARD"
+    },
+    {
+      "artifact": "../../validation/final_holdout_ledger.jsonl",
+      "section_id": "D",
+      "status": "UNOPENED",
+      "summary": "Ledger intact ; aucun holdout artificiel n'a \u00e9t\u00e9 cr\u00e9\u00e9 ou consult\u00e9.",
+      "title": "HOLDOUT"
+    },
+    {
+      "artifact": "baseline_comparison_2026-08-08.json",
+      "section_id": "E",
+      "status": "NINE_REAL_ALIGNED_STRATEGIES",
+      "summary": "M\u00eame capital EUR, m\u00eames dates, m\u00eames co\u00fbts prudents et m\u00eame politique FX.",
+      "title": "BASELINES"
+    },
+    {
+      "artifact": "severity_and_gate_sensitivity_2026-08-08.json",
+      "section_id": "F",
+      "status": "EXPOSED_WITH_NO_POSITION",
+      "summary": "Le no-position ne masque ni l'upside mesur\u00e9 ni le meilleur candidat bloqu\u00e9.",
+      "title": "TOP CANDIDATES"
+    },
+    {
+      "artifact": "five_scores_2026-08-08.json",
+      "section_id": "G",
+      "status": "CALCULATED_PARTIAL_AWARE",
+      "summary": "Cinq dimensions calcul\u00e9es sans redistribuer les poids manquants.",
+      "title": "FIVE SCORES"
+    },
+    {
+      "artifact": "engine_verdict_2026-08-08.json",
+      "section_id": "H",
+      "status": "DISPLAYED",
+      "summary": "Rendements, co\u00fbts, CVaR, drawdown, DSR, PBO et diagnostics sont conserv\u00e9s.",
+      "title": "RAW METRICS"
+    },
+    {
+      "artifact": "severity_and_gate_sensitivity_2026-08-08.json",
+      "section_id": "I",
+      "status": "CALCULATED_WITH_INTERVALS",
+      "summary": "Six seuils avec intervalles Wilson et bootstrap ; dix observations seulement.",
+      "title": "SEVERE-LOSS LADDER"
+    },
+    {
+      "artifact": "severity_and_gate_sensitivity_2026-08-08.json",
+      "section_id": "J",
+      "status": "GATE_INSTABILITY",
+      "summary": "Le candidat passe le r\u00e9glage permissif mais \u00e9choue central et strict.",
+      "title": "GATE SENSITIVITY"
+    },
+    {
+      "artifact": "engine_verdict_2026-08-08.json",
+      "section_id": "K",
+      "status": "V10_UNDERPERFORMS",
+      "summary": "V10 perd sur le panel complet et OOS ; aucune sup\u00e9riorit\u00e9 ajust\u00e9e Holm.",
+      "title": "V10 VS BASELINES"
+    },
+    {
+      "artifact": "engine_verdict_2026-08-08.json",
+      "section_id": "L",
+      "status": "ENGINE_NOT_PROVEN_SUPERIOR",
+      "summary": "Verdict m\u00e9canique ; aucun retuning apr\u00e8s observation du r\u00e9sultat.",
+      "title": "ENGINE VERDICT"
+    },
+    {
+      "artifact": "../../docs/LIMITATIONS.md",
+      "section_id": "M",
+      "status": "THREE_EXTERNAL_OR_FUTURE_DEPENDENCIES",
+      "summary": "Droits humains, nouvel \u00e9chantillon/holdout et OPRA restent irr\u00e9ductibles localement.",
+      "title": "REMAINING BLOCKERS"
+    },
+    {
+      "artifact": "../../docs/validation/OPRA_FINAL_VALIDATION_PLAN.md",
+      "section_id": "N",
+      "status": "ADAPTER_READY_NOT_CONNECTED",
+      "summary": "Interface read-only et registres paper pr\u00eats ; Phase M non d\u00e9marr\u00e9e.",
+      "title": "OPRA READINESS"
+    }
+  ],
+  "severe_loss_ladder": [
+    {
+      "bootstrap_interval_95": [
+        0.2,
+        0.8
+      ],
+      "probability": 0.5,
+      "threshold": 0.1,
+      "wilson_interval_95": [
+        0.236593090512564,
+        0.7634069094874361
+      ]
+    },
+    {
+      "bootstrap_interval_95": [
+        0.0,
+        0.6
+      ],
+      "probability": 0.3,
+      "threshold": 0.25,
+      "wilson_interval_95": [
+        0.10779126740630099,
+        0.6032218525388546
+      ]
+    },
+    {
+      "bootstrap_interval_95": [
+        0.0,
+        0.5
+      ],
+      "probability": 0.2,
+      "threshold": 0.5,
+      "wilson_interval_95": [
+        0.05668215145437519,
+        0.5098375284633583
+      ]
+    },
+    {
+      "bootstrap_interval_95": [
+        0.0,
+        0.3
+      ],
+      "probability": 0.1,
+      "threshold": 0.7,
+      "wilson_interval_95": [
+        0.017876213095072896,
+        0.4041500267952385
+      ]
+    },
+    {
+      "bootstrap_interval_95": [
+        0.0,
+        0.0
+      ],
+      "probability": 0.0,
+      "threshold": 0.9,
+      "wilson_interval_95": [
+        0.0,
+        0.2775327998628892
+      ]
+    },
+    {
+      "bootstrap_interval_95": [
+        0.0,
+        0.0
+      ],
+      "probability": 0.0,
+      "threshold": 0.99,
+      "wilson_interval_95": [
+        0.0,
+        0.2775327998628892
+      ]
+    }
+  ],
+  "ticker": "TTWO",
+  "top_candidates": [
+    {
+      "candidate_id": "buy_and_hold",
+      "classification": "DEVELOPMENT_LEADER",
+      "label": "BEST_RISK_ADJUSTED",
+      "rationale": "Meilleur compromis OOS observ\u00e9 : +25,1% compos\u00e9, CVaR 7,9%."
+    },
+    {
+      "candidate_id": "atm_long_call",
+      "classification": "HIGH_RISK",
+      "label": "HIGHEST_UPSIDE",
+      "rationale": "E[R] OOS la plus haute, mais -65,5% compos\u00e9 et CVaR 64,7%."
+    },
+    {
+      "candidate_id": "no_position",
+      "classification": "LOWEST_RISK",
+      "label": "LOWEST_RISK",
+      "rationale": "Rendement et perte nuls dans le panel ; aucune exposition optionnelle."
+    },
+    {
+      "candidate_id": "engine_candidate",
+      "classification": "AVOID",
+      "label": "BEST_BLOCKED_CANDIDATE",
+      "rationale": "Meilleur candidat moteur visible ; \u00e9choue le gate central d'opportunit\u00e9."
+    },
+    {
+      "candidate_id": "buy_and_hold",
+      "classification": "BASELINE",
+      "label": "BEST_SIMPLE_BASELINE",
+      "rationale": "Baseline simple sup\u00e9rieure \u00e0 V10 sur d\u00e9veloppement complet et OOS."
+    }
+  ],
+  "transmit": false,
+  "walk_forward_status": {
+    "available_panel_observations": 25,
+    "deflated_sharpe_probability": 0.05728179858800706,
+    "formal_policy_satisfied": false,
+    "holdout_touched": false,
+    "oos_test_observations": 10,
+    "probability_backtest_overfitting": 0.7777777777777778
+  },
+  "what_if": true
+}

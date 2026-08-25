@@ -1,0 +1,232 @@
+{
+  "fixture_id": "ttwo-v11-synthetic-position-trajectory",
+  "status": "FIXTURE_ONLY_REPLAY",
+  "reports": [
+    {
+      "dossier_id": "dossier-fixture-1",
+      "as_of": "2026-01-09T15:00:00Z",
+      "action": "HOLD",
+      "unrealized_pnl_usd": 60.0,
+      "prudent_liquidation_pnl_usd": 45.0,
+      "total_pnl_usd": 60.0,
+      "expected_remaining_pnl_usd": 80.0,
+      "remaining_cvar_95_usd": 280.0,
+      "current_greeks": {
+        "delta": 32.0,
+        "gamma": 1.1,
+        "vega": 14.0,
+        "theta": -1.7
+      },
+      "liquidity_status": "acceptable",
+      "thesis_change": "unchanged",
+      "probability_changes": {
+        "adverse": -0.03,
+        "central": 0.0,
+        "upside": 0.030000000000000027
+      },
+      "greek_attribution": {
+        "delta": 90.0,
+        "gamma": 5.3999999999999995,
+        "theta": -10.5,
+        "vega": 15.000000000000014,
+        "rho": 0.0
+      },
+      "iv_change": 0.010000000000000009,
+      "execution_impact_usd": 3.0,
+      "regime_change": "neutral->neutral",
+      "thesis_market_divergence": "aligned_or_inconclusive",
+      "triggered_rules": [],
+      "rule_triggers": [],
+      "explanation": [
+        "No configured profit, loss, time, IV, or thesis trigger fired."
+      ],
+      "human_confirmation_required": true,
+      "order_capability": "forbidden"
+    },
+    {
+      "dossier_id": "dossier-fixture-1",
+      "as_of": "2026-03-02T15:00:00Z",
+      "action": "WATCH",
+      "unrealized_pnl_usd": -90.0,
+      "prudent_liquidation_pnl_usd": -120.0,
+      "total_pnl_usd": -90.0,
+      "expected_remaining_pnl_usd": 20.0,
+      "remaining_cvar_95_usd": 360.0,
+      "current_greeks": {
+        "delta": 24.0,
+        "gamma": 1.0,
+        "vega": 11.0,
+        "theta": -2.1
+      },
+      "liquidity_status": "degraded",
+      "thesis_change": "weakened",
+      "probability_changes": {
+        "adverse": 0.22999999999999998,
+        "central": -0.08000000000000002,
+        "upside": -0.15
+      },
+      "greek_attribution": {
+        "delta": -150.0,
+        "gamma": 15.0,
+        "theta": -88.5,
+        "vega": -74.99999999999997,
+        "rho": 0.1999999999999988
+      },
+      "iv_change": -0.04999999999999999,
+      "execution_impact_usd": 8.0,
+      "regime_change": "neutral->adverse",
+      "thesis_market_divergence": "aligned_or_inconclusive",
+      "triggered_rules": [
+        "liquidity_deterioration"
+      ],
+      "rule_triggers": [
+        {
+          "rule_id": "liquidity_deterioration",
+          "observed_value": 0.48,
+          "threshold": 0.5,
+          "triggered_at": "2026-03-02T15:00:00Z",
+          "severity": "warning",
+          "suggested_action": "WATCH",
+          "required_data": [
+            "liquidity_score"
+          ],
+          "confidence": 1.0
+        }
+      ],
+      "explanation": [
+        "liquidity_deterioration: observed=0.48; threshold=0.5; suggested=WATCH."
+      ],
+      "human_confirmation_required": true,
+      "order_capability": "forbidden"
+    },
+    {
+      "dossier_id": "dossier-fixture-1",
+      "as_of": "2026-05-28T15:00:00Z",
+      "action": "THESIS_INVALIDATED",
+      "unrealized_pnl_usd": -310.0,
+      "prudent_liquidation_pnl_usd": -350.0,
+      "total_pnl_usd": -310.0,
+      "expected_remaining_pnl_usd": -80.0,
+      "remaining_cvar_95_usd": 460.0,
+      "current_greeks": {
+        "delta": 12.0,
+        "gamma": 0.6,
+        "vega": 5.0,
+        "theta": -2.8
+      },
+      "liquidity_status": "degraded",
+      "thesis_change": "invalidated",
+      "probability_changes": {
+        "adverse": 0.44999999999999996,
+        "central": -0.25,
+        "upside": -0.2
+      },
+      "greek_attribution": {
+        "delta": -390.0,
+        "gamma": 101.39999999999999,
+        "theta": -219.0,
+        "vega": -194.99999999999997,
+        "rho": 0.1999999999999988
+      },
+      "iv_change": -0.12999999999999998,
+      "execution_impact_usd": 20.0,
+      "regime_change": "neutral->rupture",
+      "thesis_market_divergence": "aligned_or_inconclusive",
+      "triggered_rules": [
+        "fundamental_invalidation",
+        "operational_stop_loss",
+        "iv_crush",
+        "liquidity_deterioration",
+        "expected_value_negative",
+        "cvar_limit"
+      ],
+      "rule_triggers": [
+        {
+          "rule_id": "fundamental_invalidation",
+          "observed_value": true,
+          "threshold": true,
+          "triggered_at": "2026-05-28T15:00:00Z",
+          "severity": "critical",
+          "suggested_action": "THESIS_INVALIDATED",
+          "required_data": [
+            "thesis_review"
+          ],
+          "confidence": 1.0
+        },
+        {
+          "rule_id": "operational_stop_loss",
+          "observed_value": -0.7,
+          "threshold": -0.5,
+          "triggered_at": "2026-05-28T15:00:00Z",
+          "severity": "critical",
+          "suggested_action": "EXIT_REVIEW",
+          "required_data": [
+            "prudent_liquidation_value"
+          ],
+          "confidence": 1.0
+        },
+        {
+          "rule_id": "iv_crush",
+          "observed_value": 0.37142857142857133,
+          "threshold": 0.3,
+          "triggered_at": "2026-05-28T15:00:00Z",
+          "severity": "warning",
+          "suggested_action": "WATCH",
+          "required_data": [
+            "current_iv"
+          ],
+          "confidence": 1.0
+        },
+        {
+          "rule_id": "liquidity_deterioration",
+          "observed_value": 0.25,
+          "threshold": 0.5,
+          "triggered_at": "2026-05-28T15:00:00Z",
+          "severity": "warning",
+          "suggested_action": "WATCH",
+          "required_data": [
+            "liquidity_score"
+          ],
+          "confidence": 1.0
+        },
+        {
+          "rule_id": "expected_value_negative",
+          "observed_value": -80.0,
+          "threshold": 0.0,
+          "triggered_at": "2026-05-28T15:00:00Z",
+          "severity": "warning",
+          "suggested_action": "EXIT_REVIEW",
+          "required_data": [
+            "expected_remaining_pnl_usd"
+          ],
+          "confidence": 1.0
+        },
+        {
+          "rule_id": "cvar_limit",
+          "observed_value": 460.0,
+          "threshold": 0.8,
+          "triggered_at": "2026-05-28T15:00:00Z",
+          "severity": "critical",
+          "suggested_action": "EXIT_REVIEW",
+          "required_data": [
+            "remaining_cvar_95_usd"
+          ],
+          "confidence": 1.0
+        }
+      ],
+      "explanation": [
+        "fundamental_invalidation: observed=True; threshold=True; suggested=THESIS_INVALIDATED.",
+        "operational_stop_loss: observed=-0.7; threshold=-0.5; suggested=EXIT_REVIEW.",
+        "iv_crush: observed=0.37142857142857133; threshold=0.3; suggested=WATCH.",
+        "liquidity_deterioration: observed=0.25; threshold=0.5; suggested=WATCH.",
+        "expected_value_negative: observed=-80.0; threshold=0.0; suggested=EXIT_REVIEW.",
+        "cvar_limit: observed=460.0; threshold=0.8; suggested=EXIT_REVIEW."
+      ],
+      "human_confirmation_required": true,
+      "order_capability": "forbidden"
+    }
+  ],
+  "deterministic": true,
+  "human_confirmation_required": true,
+  "order_capability": "forbidden"
+}

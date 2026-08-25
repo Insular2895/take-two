@@ -1,0 +1,50 @@
+{
+  "artifact_hashes": {
+    "baseline_comparison_2026-08-08.json": "d1079f0c5829a40afec467b7f4ca5982f300254d0001b7d68871b5412c1305eb",
+    "data_usage_rights_2026-08-08.json": "64c1a728696908308567ddce9ee34a8aa710e86ae325e74a817ba070af5f4d40",
+    "empirical_calibration_2026-08-08.json": "7dce4111af642b4417d4e897c400484a3d3075bce3a41f832545bcb14c52be8f",
+    "engine_verdict_2026-08-08.json": "7caeda5a16eec98ebd40fe451cb193842684c4bad8adf1fc1d6e8fe0fce4f7ea",
+    "event_regime_dataset_2026-08-08.json": "75eaafe30fdc3291153abcca61c5fccfd6d56b3cf529afce1d3d064446045789",
+    "five_scores_2026-08-08.json": "a09cbb759c4b9a05961fbb75966e074a54aa01f7556eb153918d5b40d068a5f4",
+    "historical_surfaces_2026-08-08.json": "72362db6ffb1cce23dd0f03673395a954ad6d3593a2b33dfd0a33c27a975469e",
+    "market_context_2026-08-08.json": "2ea4a59df535ac2bfce368eda5799c95dcf506d15062efdccf46b47e45629a8e",
+    "opra_interface_readiness_2026-08-08.json": "51bf03c31247203bb0ff5697384d61e092bee44ac1d072896753710ff8f945b8",
+    "option_normalization_2026-08-08.json": "adbd0df20a04fc5a2b9804d58658f00ddca3dd1626dc0a8139ef58b4cc2d0f72",
+    "severity_and_gate_sensitivity_2026-08-08.json": "268b0c665d75de66f5135fbff585fb4236f0de72063dc60321074737c0ab2104",
+    "walk_forward_protocol_2026-08-08.json": "a4652afde0ef94e5ac2a86b1dd581ea96d6a8329f3f837007afee09892168534"
+  },
+  "code_commit": "1fac9b2b84a398a27ba318cf5e3db03f70ece5b4",
+  "command": "ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml",
+  "configuration_hash": "6311544557a89b9845993dcacac70c0b9e48a7007bf29176a48826188e4461cb",
+  "dataset_hash": "9f9e7d57f34b9c75402e843e4acc01a44ad1b434d324d884fda2e237404250c2",
+  "dependencies": {
+    "PyYAML": "6.0.3",
+    "QuantLib": "1.43",
+    "numpy": "2.5.1",
+    "pydantic": "2.13.4"
+  },
+  "generated_at": "2026-08-18T23:15:00+02:00",
+  "holdout_used": false,
+  "order_capability": "forbidden",
+  "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+  "python_version": "3.14.4",
+  "schema_version": "2.0",
+  "schema_versions": {
+    "baseline_comparison": "1.0",
+    "empirical_calibration": "1.0",
+    "engine_verdict": "1.0",
+    "final_pre_opra_report": "2.0",
+    "five_scores": "1.0",
+    "historical_surfaces": "1.0",
+    "severity_gates": "1.0",
+    "walk_forward": "1.0"
+  },
+  "score_versions": {
+    "evidence": "pre-opra-v2",
+    "execution_quality": "pre-opra-v2",
+    "model_agreement": "pre-opra-v2",
+    "opportunity": "pre-opra-v2",
+    "risk": "pre-opra-v2"
+  },
+  "seed": 20260808
+}

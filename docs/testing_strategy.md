@@ -1,57 +1,26 @@
-# Strategie de tests V9
+# Current testing strategy
 
-La suite est offline, déterministe et sans broker :
+The repository uses a fail-closed evidence ladder. A passing unit test proves only the tested
+contract; it does not imply numerical, empirical, holdout, paper, or production validity.
 
-```bash
-.venv/bin/python -m pytest -q
-.venv/bin/python -m ruff check src tests
-.venv/bin/python -m mypy src
-```
+## Test layers
 
-Les tests couvrent :
+1. Unit and schema tests: validation bounds, provenance, `NO_TRADE`, deterministic helpers.
+2. Property tests: payoff identities, put-call parity, cross-pricer cases, chronological and
+   measure invariants.
+3. Numerical tests: absolute plus relative tolerances, synthetic recovery, grid refinement,
+   multiple seeds/starts where relevant.
+4. Integration and golden tests: fixture-only pipelines and backward-compatible reports.
+5. Offline artifact checks: schema exports and self-contained report validation.
+6. Safety checks: forbidden broker imports/order symbols, `transmit=True`, unsafe writes, and
+   read-only connector behaviour.
+7. Empirical gates: point-in-time split, purge/embargo, baselines, placebo, multiple-testing,
+   and a separately sealed holdout. These remain blocked without authorized real data.
 
-- payoff call/put/vertical, max gain/perte, break-even et débit exécutable ;
-- bid/ask, commissions, slippage et multiplicateur non standard ;
-- monotonie call/put et bornes des verticals sur une grille de spots ;
-- agrégation des Greeks ;
-- dominance numerique americain/europeen, dividendes discrets, assignment et pin risk ;
-- interpolation/extrapolation de surface IV et veto de fraicheur ;
-- reproductibilite GBM/Merton/Heston, variance non negative et comportement de queue ;
-- scénarios gap, IV crush/expansion, délai, ex-dividende et liquidité ;
-- reconciliation de l'attribution par repricing jusqu'au P&L ;
-- calibration RV/jumps, refus Heston sur preuve insuffisante et exclusion temporelle ;
-- backtest bid/ask, frais, train/test, drawdown et rejet du look-ahead ;
-- credentials Alpaca absents/redactes, normalisation de bars, provenance source-backed ;
-- conversion bars actions vers calibration et bars options vers proxy explicite ;
-- normalisation de chaine Alpaca avec quote, IV et Greeks ;
-- credentials MarketData.app absents/redactes et token limite au header Authorization ;
-- normalisation des chaines EOD, verification de session, symbole OCC et tableaux alignes ;
-- cache MarketData.app SHA-256, cache hit et blocage sur corruption ;
-- recalcul IV/Greeks americains QuantLib depuis un midpoint EOD ;
-- conversion EOD bid/ask vers backtest, open interest conserve et readiness `screen_grade` ;
-- panel MarketData.app a signal anterieur, selection delta/liquidite, spreads bornes, veto de risque
-  et reference `no_trade` ;
-- contrainte de risque EUR appliquee au scan actuel et aux cas historiques avant calcul des KPI ;
-- generation de sessions non chevauchantes avec splits train/test/holdout, embargo, expiration
-  cotee proche du DTE cible et taux Treasury interpole sans look-ahead ;
-- intervalles Wilson et bootstrap deterministes, volatilite/downside, profit factor, VaR/CVaR et
-  approximation Deflated Sharpe ;
-- P&L par jambe aux cotes executables, couts, stress spread/slippage et KPI par trade ;
-- orchestration multi-horizon/multi-DTE, cache memoire, scan de chaine actuelle et maintien de
-  `no_trade` lorsque les gates test/holdout echouent ;
-- generation de l'artefact canonique du dashboard et libelles compacts auditables ;
-- registre d'architectures avec separation `backtested`, `catalog_only` et `risk_disabled` ;
-- jambes multi-quantites, butterflies 1/-2/1, iron condor et term spreads multi-echeances ;
-- selection moneyness `spot +/-10 %`, capital a risque des credits et rejet du risque non borne ;
-- premiere sortie EOD franchissant TP/SL, motif de sortie et date effective auditables ;
-- regime momentum/volatilite sans look-ahead, ratio IV/RV et verrou `reused_exploratory` ;
-- datasets dedies aux opportunites actuelles, gagnants historiques et bibliotheque d'architectures ;
-- veto fraîcheur, quote, contrat ajusté, marge, événement, catalyseur, evidence et risque non borné ;
-- sérialisation JSON/Markdown/journal et absence de statut d'exécution ;
-- submit/modify/cancel bloqués par `ForbiddenOperation`.
+## Mandatory phase gate
 
-Les tests ne valident pas un prix de marché, une volatilité future ou une stratégie d'investissement.
-Ils valident la mécanique et les garde-fous du logiciel.
+Before each phase commit run its targeted tests, then the full suite, Ruff, mypy, dependency
+check, offline schema/artifact checks, and security gate. Stop before the next phase on any
+failure. Record synthetic evidence as synthetic and never promote a result past its evidence.
 
-Etat verifie le 2026-07-19 : 68 tests, Ruff, mypy strict et `pip check` passent localement. Le SDK
-Alpaca emet un warning de deprecation interne `websockets.legacy` sous Python 3.14.
+Canonical commands are listed in the Phase 0–11 implementation plan under Phase 10.
