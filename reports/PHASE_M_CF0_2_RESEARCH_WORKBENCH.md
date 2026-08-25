@@ -2,7 +2,7 @@
 
 Date: 2026-08-25
 Base commit audited: `3942b2e31bad33dd32ed19aa514ae51acbe7cc24`
-Implementation commit: not created or pushed by this task.
+Implementation payload commit: `8158e2ebab9f1ae439a6292f397b2823a3c55f8e`.
 
 ## Result
 
@@ -143,7 +143,7 @@ repeated large snapshots must be measured. GitHub Actions is free for public rep
 private repositories consume plan-specific included minutes and can incur charges. Zero cost is
 therefore conditional, not guaranteed.
 
-Remaining operational work: merge/push workflow to the default branch, set Worker and GitHub
+Remaining operational work: merge the workflow to the default branch, set Worker and GitHub
 secrets, add the Access Service Auth policy, apply remote D1 migrations, deploy, and perform the
 real authenticated end-to-end GitHub callback run. Live OPRA/provider rights, shadow validation,
 IBKR execution review, paper execution, prospective validation, and holdout remain future phases.

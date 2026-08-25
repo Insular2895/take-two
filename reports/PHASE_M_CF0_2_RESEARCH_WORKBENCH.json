@@ -3,7 +3,7 @@
   "generated_at": "2026-08-25",
   "phase": "M-CF0.2",
   "base_commit": "3942b2e31bad33dd32ed19aa514ae51acbe7cc24",
-  "implementation_commit": null,
+  "implementation_commit": "8158e2ebab9f1ae439a6292f397b2823a3c55f8e",
   "initial_audit": {
     "local_research_dependency": "CONFIRMED",
     "cloud_analysis_lifecycle": "MISSING_BEFORE_PATCH",
@@ -139,7 +139,7 @@
     "holdout": "UNOPENED"
   },
   "remaining_dependencies": [
-    "push_or_merge_workflow_to_default_branch",
+    "merge_workflow_to_default_branch",
     "worker_and_github_secrets",
     "cloudflare_access_service_auth_policy",
     "remote_d1_migrations",
