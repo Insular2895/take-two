@@ -161,11 +161,14 @@ Replace every placeholder in `/etc/take-two/ibkr-telemetry.env` through a privat
 validate and start:
 
 ```bash
-sudo systemd-analyze verify /etc/systemd/system/take-two-ibkr-telemetry.service
-sudo systemctl enable --now take-two-ibkr-telemetry.service
+sudo /home/ubuntu/apps/take-two/services/ibkr-paper-bridge/deploy/systemd/configure-telemetry-access.sh
 sudo systemctl status --no-pager take-two-ibkr-telemetry.service
 sudo journalctl -u take-two-ibkr-telemetry.service -n 30 --no-pager
 ```
+
+The helper prompts for the dedicated Access Client ID and Secret, never echoes the secret, rewrites
+the existing root-owned environment atomically, rejects remaining placeholders and starts the
+daemon only after validation. `systemd-analyze verify` is part of the installation checkpoint.
 
 The log intentionally contains only a success position count or an exception class. It must never
 contain an account identifier, payload, request header, URL, or secret. Once enabled, no Mac

@@ -51,7 +51,10 @@ The production telemetry daemon uses
 [`deploy/systemd/take-two-ibkr-telemetry.service`](deploy/systemd/take-two-ibkr-telemetry.service)
 and a root-owned `0600` environment file at `/etc/take-two/ibkr-telemetry.env`. Keep the telemetry
 HMAC distinct from `BROKER_BRIDGE_SHARED_SECRET`: the Worker rejects either credential at the
-other route.
+other route. The root-only
+[`configure-telemetry-access.sh`](deploy/systemd/configure-telemetry-access.sh) helper accepts the
+dedicated Access ID/secret without echoing the secret, replaces only those two placeholders, and
+starts the daemon after validation.
 
 See [`../../docs/specs/M_IBKR_PAPER_CONTROL_PLANE.md`](../../docs/specs/M_IBKR_PAPER_CONTROL_PLANE.md)
 and [`../../docs/deployment/ORACLE_A1_IBKR_PAPER_BRIDGE.md`](../../docs/deployment/ORACLE_A1_IBKR_PAPER_BRIDGE.md).
