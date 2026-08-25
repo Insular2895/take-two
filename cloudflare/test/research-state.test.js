@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   filterCandidateUniverse,
+  maximumGainState,
   paginateCandidates,
   percentileHeatmap,
   sortCandidates,
@@ -41,5 +42,20 @@ describe("research candidate browser state", () => {
     expect(filterCandidateUniverse(candidates, { view: "paper" })).toHaveLength(2);
     expect(filterCandidateUniverse(candidates, { view: "research" }).map((item) => item.candidate_id)).toEqual(["b"]);
     expect(filterCandidateUniverse(candidates, { view: "architecture" })).toHaveLength(2);
+  });
+
+  it("distinguishes unbounded upside from an unavailable maximum gain", () => {
+    expect(maximumGainState({ architecture: "long_call", maximum_gain: null })).toEqual({
+      status: "UNBOUNDED",
+      value: null,
+    });
+    expect(maximumGainState({ architecture: "bull_call_spread", maximum_gain: 450 })).toEqual({
+      status: "BOUNDED",
+      value: 450,
+    });
+    expect(maximumGainState({ architecture: "bull_call_spread", maximum_gain: null })).toEqual({
+      status: "UNAVAILABLE",
+      value: null,
+    });
   });
 });

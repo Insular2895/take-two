@@ -128,6 +128,20 @@ def test_missing_metrics_are_null_not_invented_zero(result) -> None:  # type: ig
     assert all(item.score_probability is None for item in result.summaries)
 
 
+def test_bounded_maximum_gain_is_converted_to_policy_currency(result) -> None:  # type: ignore[no-untyped-def]
+    summary = next(item for item in result.summaries if item.maximum_gain is not None)
+    detail = next(item for item in result.details if item.candidate_id == summary.candidate_id)
+    native_gain = detail.trade_economics_ticket["economics"]["maximum_gain_native"]
+    fx_rate = detail.budget_diagnostics["fx_rate_to_policy_currency"]
+    assert summary.maximum_gain == pytest.approx(native_gain * fx_rate, abs=0.0001)
+    assert detail.economics["maximum_gain"] == summary.maximum_gain
+
+
+def test_unbounded_maximum_gain_remains_null(result) -> None:  # type: ignore[no-untyped-def]
+    long_call = next(item for item in result.summaries if item.architecture == "long_call")
+    assert long_call.maximum_gain is None
+
+
 def test_no_trade_is_a_first_class_terminal_result() -> None:
     result = run_research_analysis(
         analysis_request_id="analysis-bbbbbbbbbbbbbbbbbbbbbbbb",

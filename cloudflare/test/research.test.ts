@@ -2,7 +2,7 @@ import { env } from "cloudflare:test";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { handleRequest } from "../src/index";
-import { parseAnalysisBudgetRequest } from "../src/research-domain";
+import { parseAnalysisBudgetRequest, policyCurrencyMaximumGain } from "../src/research-domain";
 import { hmacHex, sha256Hex } from "../src/research-security";
 
 const CALLBACK_SECRET = "test-analysis-callback-secret-at-least-32-bytes";
@@ -63,6 +63,13 @@ async function insertAnalysis(analysisId: string): Promise<void> {
 }
 
 describe("Phase M research request boundary", () => {
+  it("normalizes only the legacy native-currency maximum gain", () => {
+    expect(policyCurrencyMaximumGain(2013, 1 / 1.1435)).toBeCloseTo(1760.3848, 4);
+    expect(policyCurrencyMaximumGain(1760.3848, null)).toBe(1760.3848);
+    expect(policyCurrencyMaximumGain(null, 1 / 1.1435)).toBeNull();
+    expect(() => policyCurrencyMaximumGain(2013, 0)).toThrow("INVALID_LEGACY_GAIN_FX_RATE");
+  });
+
   it("rejects unknown fields, non-finite values, and invalid budget order", () => {
     expect(() => parseAnalysisBudgetRequest({
       preferred_budget: 800,
