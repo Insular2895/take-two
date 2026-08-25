@@ -37,8 +37,26 @@ export const METRIC_METADATA = Object.freeze({
   score_execution_quality: { label: "Execution Quality", direction: "HIGHER" },
 });
 
+const UNBOUNDED_GAIN_ARCHITECTURES = new Set([
+  "long_call",
+  "call_calendar",
+  "call_diagonal",
+  "long_straddle",
+  "long_strangle",
+]);
+
 function numeric(value) {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+export function maximumGainState(candidate) {
+  if (numeric(candidate.maximum_gain)) {
+    return { status: "BOUNDED", value: candidate.maximum_gain };
+  }
+  if (UNBOUNDED_GAIN_ARCHITECTURES.has(String(candidate.architecture))) {
+    return { status: "UNBOUNDED", value: null };
+  }
+  return { status: "UNAVAILABLE", value: null };
 }
 
 export function filterCandidateUniverse(candidates, filters = {}) {

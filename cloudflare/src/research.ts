@@ -17,6 +17,7 @@ const HASH = /^[a-f0-9]{64}$/;
 const GIT_COMMIT = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/;
 const ACTIVE_STATUSES = new Set(["CREATED", "QUEUED", "RUNNING"]);
 const COMPLETE_STATUSES = new Set(["COMPLETE", "NO_TRADE"]);
+const LEGACY_NATIVE_MAXIMUM_GAIN_COMMIT = "509dfeb2b4da60016805e8f6a421885620aa0793";
 const LAUNCH_COOLDOWN_MS = 30_000;
 
 function randomAnalysisId(): string {
@@ -177,8 +178,15 @@ async function analysisDetail(env: Env, analysisId: string): Promise<Response> {
 
 async function candidateList(env: Env, analysisId: string): Promise<Response> {
   const result = await env.DB.prepare(
-    "SELECT * FROM analysis_candidate_summaries WHERE analysis_request_id=? ORDER BY engine_rank ASC",
-  ).bind(analysisId).all<Record<string, unknown>>();
+    `SELECT s.*,
+      CASE WHEN a.git_commit=? THEN
+        json_extract(d.detail_json, '$.budget_diagnostics.fx_rate_to_policy_currency')
+      ELSE NULL END AS legacy_maximum_gain_fx_rate
+     FROM analysis_candidate_summaries s
+     JOIN analysis_requests a USING(analysis_request_id)
+     JOIN analysis_candidate_details d USING(analysis_request_id,candidate_id)
+     WHERE s.analysis_request_id=? ORDER BY s.engine_rank ASC`,
+  ).bind(LEGACY_NATIVE_MAXIMUM_GAIN_COMMIT, analysisId).all<Record<string, unknown>>();
   return Response.json({
     analysis_request_id: analysisId,
     candidates: result.results.map(candidateFromRow),
@@ -189,10 +197,15 @@ async function candidateList(env: Env, analysisId: string): Promise<Response> {
 
 async function candidateDetail(env: Env, analysisId: string, candidateId: string): Promise<Response> {
   const row = await env.DB.prepare(
-    `SELECT s.*,d.detail_json FROM analysis_candidate_summaries s
+    `SELECT s.*,d.detail_json,
+      CASE WHEN a.git_commit=? THEN
+        json_extract(d.detail_json, '$.budget_diagnostics.fx_rate_to_policy_currency')
+      ELSE NULL END AS legacy_maximum_gain_fx_rate
+     FROM analysis_candidate_summaries s
+     JOIN analysis_requests a USING(analysis_request_id)
      JOIN analysis_candidate_details d USING(analysis_request_id,candidate_id)
      WHERE s.analysis_request_id=? AND s.candidate_id=?`,
-  ).bind(analysisId, candidateId).first<Record<string, unknown>>();
+  ).bind(LEGACY_NATIVE_MAXIMUM_GAIN_COMMIT, analysisId, candidateId).first<Record<string, unknown>>();
   if (!row) return Response.json({ error: "CANDIDATE_NOT_FOUND" }, { status: 404 });
   return Response.json({
     summary: candidateFromRow(row),

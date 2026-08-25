@@ -196,6 +196,13 @@ def _summary(
     signed_entry = -candidate.risk.total_cost
     if diagnostics is not None and diagnostics.fx_rate_to_policy_currency is not None:
         signed_entry *= diagnostics.fx_rate_to_policy_currency
+    maximum_gain = candidate.risk.maximum_gain
+    if (
+        maximum_gain is not None
+        and diagnostics is not None
+        and diagnostics.fx_rate_to_policy_currency is not None
+    ):
+        maximum_gain *= diagnostics.fx_rate_to_policy_currency
     ticket = _ticket(candidate, snapshot)
     return CandidateSummary(
         candidate_id=candidate.candidate_id,
@@ -220,7 +227,7 @@ def _summary(
         ),
         capital_required=(diagnostics.effective_capital_requirement if diagnostics else None),
         maximum_loss=(diagnostics.maximum_loss if diagnostics else candidate.risk.maximum_loss),
-        maximum_gain=candidate.risk.maximum_gain,
+        maximum_gain=(round(maximum_gain, 4) if maximum_gain is not None else None),
         break_even_points=candidate.risk.break_even_points,
         net_delta=round(sum(deltas), 6) if deltas else None,
         net_theta=None,

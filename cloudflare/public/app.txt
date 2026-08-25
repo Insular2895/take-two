@@ -2,6 +2,7 @@ import { selectTrackedClosePreview } from "/preview-state.js";
 import {
   METRIC_METADATA,
   filterCandidateUniverse,
+  maximumGainState,
   paginateCandidates,
   percentileHeatmap,
   sortCandidates,
@@ -319,7 +320,83 @@ function candidateFilters() {
 }
 
 function candidateMetric(value, format = (item) => String(item)) {
-  return value === null || value === undefined ? "N/A" : format(value);
+  return value === null || value === undefined ? "NON CALCULÉ" : format(value);
+}
+
+function maximumGainLabel(candidate) {
+  const gain = maximumGainState(candidate);
+  if (gain.status === "BOUNDED") return money(gain.value);
+  if (gain.status === "UNBOUNDED") return "NON BORNÉ";
+  return "NON CALCULÉ";
+}
+
+function displayBudgetStatus(value) {
+  return String(value || "NON CALCULÉ").replaceAll("_", " ");
+}
+
+function compareMetric(value, format, unavailableReason) {
+  if (value === null || value === undefined) {
+    return { value: "Non calculé", note: unavailableReason, tone: "unavailable" };
+  }
+  return { value: format(value), note: "", tone: "" };
+}
+
+function compareMaximumGain(candidate) {
+  const gain = maximumGainState(candidate);
+  if (gain.status === "UNBOUNDED") {
+    return {
+      value: "Non borné",
+      note: "Plafond théorique absent — ce n’est pas une prévision de gain.",
+      tone: "unbounded",
+    };
+  }
+  if (gain.status === "UNAVAILABLE") {
+    return {
+      value: "Non calculé",
+      note: "Le payoff disponible ne permet pas une borne fiable.",
+      tone: "unavailable",
+    };
+  }
+  return { value: money(gain.value), note: "Borne du payoff à l’échéance.", tone: "" };
+}
+
+function compareCell(metric) {
+  return `<div class="compare-value ${h(metric.tone || "")}"><strong>${h(metric.value)}</strong>${metric.note ? `<small>${h(metric.note)}</small>` : ""}</div>`;
+}
+
+function compareRow(label, explanation, metrics) {
+  return `<tr><th scope="row"><strong>${h(label)}</strong>${explanation ? `<small>${h(explanation)}</small>` : ""}</th>${metrics.map((metric) => `<td>${compareCell(metric)}</td>`).join("")}</tr>`;
+}
+
+function entryCashMetric(candidate) {
+  const note = candidate.entry_cash_flow_type === "DEBIT"
+    ? "Débit : cash payé pour ouvrir."
+    : candidate.entry_cash_flow_type === "CREDIT"
+      ? "Crédit : cash reçu à l’ouverture."
+      : "Aucun flux net à l’ouverture.";
+  return { value: money(candidate.signed_entry_cash_flow), note, tone: String(candidate.entry_cash_flow_type || "flat").toLowerCase() };
+}
+
+function scoreMetric(candidate) {
+  const scores = [
+    ["Opp.", candidate.score_opportunity],
+    ["Risque", candidate.score_risk],
+    ["Preuve", candidate.score_evidence],
+    ["Accord", candidate.score_model_agreement],
+    ["Exéc.", candidate.score_execution_quality],
+  ];
+  if (scores.every(([, value]) => value === null || value === undefined)) {
+    return {
+      value: "Non calculés",
+      note: "Les formules historiques des five scores n’ont pas été exécutées.",
+      tone: "unavailable",
+    };
+  }
+  return {
+    value: scores.map(([label, value]) => `${label} ${value ?? "—"}`).join(" · "),
+    note: "Échelle 0–100.",
+    tone: "",
+  };
 }
 
 function heatClass(heat, metric) {
@@ -355,20 +432,20 @@ function renderCandidates() {
       <p class="candidate-id">${h(candidate.candidate_id)} · ${h(candidate.quantity)} structure(s) · ${h(candidate.expiration)} · DTE ${h(candidate.dte)}</p>
       <p class="candidate-legs">${h(candidate.leg_summary)}</p>
       <div class="candidate-metrics">
-        <div class="metric-cell heat-neutral"><span>${h(candidate.entry_cash_flow_type)} ENTRY</span><strong>${h(candidateMetric(candidate.signed_entry_cash_flow, money))}</strong></div>
+        <div class="metric-cell heat-neutral"><span>FLUX D’ENTRÉE · ${h(candidate.entry_cash_flow_type)}</span><strong>${h(candidateMetric(candidate.signed_entry_cash_flow, money))}</strong></div>
         <div class="metric-cell heat-neutral"><span>CAPITAL</span><strong>${h(candidateMetric(candidate.capital_required, money))}</strong></div>
         <div class="metric-cell heat-neutral"><span>MAX LOSS</span><strong>${h(candidateMetric(candidate.maximum_loss, money))}</strong></div>
-        <div class="metric-cell heat-neutral"><span>MAX GAIN</span><strong>${h(candidateMetric(candidate.maximum_gain, money))}</strong></div>
+        <div class="metric-cell heat-neutral"><span>MAX GAIN</span><strong>${h(maximumGainLabel(candidate))}</strong></div>
         <div class="${heatClass(heat, metric)}"><span>${h(METRIC_METADATA[metric]?.label || metric)} · ${h(direction)}</span><strong>${h(candidateMetric(candidate[metric], (value) => Number(value).toFixed(3)))}</strong></div>
-        <div class="metric-cell heat-neutral"><span>BREAKEVEN</span><strong>${h(candidate.break_even_points.length ? candidate.break_even_points.join(" · ") : "N/A")}</strong></div>
+        <div class="metric-cell heat-neutral"><span>BREAKEVEN</span><strong>${h(candidate.break_even_points.length ? candidate.break_even_points.join(" · ") : "NON CALCULÉ")}</strong></div>
       </div>
       <div class="candidate-flags"><span class="pill">${h(candidate.budget_status)}</span><span>${candidate.paper_eligible ? "PAPER ELIGIBLE" : candidate.research_eligible ? "RESEARCH ONLY" : "BLOCKED"}</span><span>${h(candidate.data_freshness)}</span></div>
       <p class="note">${h(candidate.reason_codes.length ? candidate.reason_codes.join(" · ") : "Aucun hard veto")}</p>
       <details><summary>Metrics avancées et five scores</summary><dl>${dlRows([
-        ["Expected PnL", money(candidate.expected_pnl)], ["Probability profit", percent(candidate.probability_profit)],
-        ["CVaR 95", money(candidate.cvar_95)], ["Net delta", candidateMetric(candidate.net_delta)],
-        ["Net theta", candidateMetric(candidate.net_theta)], ["Average IV", percent(candidate.average_implied_volatility)],
-        ["Relative spread", percent(candidate.maximum_relative_spread)], ["Open interest min", candidateMetric(candidate.minimum_open_interest)],
+        ["Expected PnL", candidateMetric(candidate.expected_pnl, money)], ["Probability profit", candidateMetric(candidate.probability_profit, percent)],
+        ["CVaR 95", candidateMetric(candidate.cvar_95, money)], ["Net delta", candidateMetric(candidate.net_delta)],
+        ["Net theta", candidateMetric(candidate.net_theta)], ["Average IV", candidateMetric(candidate.average_implied_volatility, percent)],
+        ["Relative spread", candidateMetric(candidate.maximum_relative_spread, percent)], ["Open interest min", candidateMetric(candidate.minimum_open_interest)],
         ["Score Opportunity", candidateMetric(candidate.score_opportunity)], ["Score Risk", candidateMetric(candidate.score_risk)],
         ["Score Evidence", candidateMetric(candidate.score_evidence)], ["Score Model Agreement", candidateMetric(candidate.score_model_agreement)],
         ["Score Execution Quality", candidateMetric(candidate.score_execution_quality)],
@@ -445,7 +522,7 @@ async function openCandidateDetail(candidateId) {
     const payload = await api(`/api/research/analyses/${encodeURIComponent(analysisId)}/candidates/${encodeURIComponent(candidateId)}`);
     const { summary, detail } = payload;
     $("#candidate-detail-content").innerHTML = `<h2>${h(summary.architecture)} · ENGINE #${h(summary.engine_rank)}</h2>
-      <div class="modal-economics"><div><span>ENTRY CASH FLOW</span><strong>${h(money(summary.signed_entry_cash_flow))}</strong></div><div><span>CAPITAL REQUIRED</span><strong>${h(money(summary.capital_required))}</strong></div><div><span>MAX LOSS</span><strong>${h(money(summary.maximum_loss))}</strong></div><div><span>MAX GAIN</span><strong>${h(money(summary.maximum_gain))}</strong></div></div>
+      <div class="modal-economics"><div><span>ENTRY CASH FLOW</span><strong>${h(money(summary.signed_entry_cash_flow))}</strong></div><div><span>CAPITAL REQUIRED</span><strong>${h(money(summary.capital_required))}</strong></div><div><span>MAX LOSS</span><strong>${h(money(summary.maximum_loss))}</strong></div><div><span>MAX GAIN</span><strong>${h(maximumGainLabel(summary))}</strong></div></div>
       <h2>LEGS</h2><div class="preview-legs">${detail.legs.map((leg) => `<div class="preview-leg"><strong>${h(leg.side)}</strong><span>${h(leg.quantity)} × ${h(leg.option_type)} ${h(leg.strike)} · ${h(leg.expiration)}<br><small>${h(leg.symbol)} · bid ${h(leg.bid)} / ask ${h(leg.ask)}</small></span></div>`).join("")}</div>
       <h2>PAYOFF / EXPLICATION / LIMITES</h2><p>Break-evens: ${h(detail.payoff.break_even_points.join(" · ") || "N/A")} · Flat spots: ${h(detail.payoff.flat_spots)}</p><p>${h(detail.explanation.join(" "))}</p><ul>${detail.limitations.map((item) => `<li>${h(item)}</li>`).join("")}</ul>
       <p class="note">Ticket hash: ${h(summary.trade_economics_ticket_hash)}<br>Context: ${h(detail.phase_m_context_id)} · ${h(detail.phase_m_context_hash)}</p>`;
@@ -466,13 +543,28 @@ async function selectResearchCandidate(candidateId) {
 
 function openCompare() {
   const candidates = state.research.candidates.filter((candidate) => state.research.compare.has(candidate.candidate_id));
-  $("#candidate-compare-content").innerHTML = candidates.map((candidate) => `<article><h2>${h(candidate.architecture)}</h2><p>Engine #${h(candidate.engine_rank)}</p><dl>${dlRows([
-    ["Capital", money(candidate.capital_required)], ["Max loss", money(candidate.maximum_loss)],
-    ["Max gain", money(candidate.maximum_gain)], ["Expected PnL", money(candidate.expected_pnl)],
-    ["Probability profit", percent(candidate.probability_profit)], ["CVaR 95", money(candidate.cvar_95)],
-    ["Budget", candidate.budget_status], ["Five scores", candidate.score_probability === null ? "N/A" : candidate.score_probability],
-  ])}</dl></article>`).join("");
-  $("#candidate-compare-dialog").showModal();
+  const probabilityReason = "Aucun modèle probabiliste valide n’a été exécuté pour ce run exhaustif.";
+  const headers = candidates.map((candidate) => `<th scope="col"><div class="compare-candidate-head"><span class="eyebrow">ENGINE #${h(candidate.engine_rank)}</span><h3>${h(candidate.architecture)} · ${h(candidate.strategy_name)}</h3><p>${h(candidate.leg_summary)}</p><small>${h(candidate.expiration)} · DTE ${h(candidate.dte)}</small></div></th>`).join("");
+  const rows = [
+    compareRow("Flux d’entrée", "Signe du point de vue du compte.", candidates.map(entryCashMetric)),
+    compareRow("Capital requis", "Maximum des contraintes connues : cash, perte, buying power et cycle de vie.", candidates.map((candidate) => compareMetric(candidate.capital_required, money, "Contrainte de capital non prouvée."))),
+    compareRow("Perte maximale", "Borne du payoff, distincte du capital même si les valeurs peuvent coïncider.", candidates.map((candidate) => compareMetric(candidate.maximum_loss, money, "Borne de perte non prouvée."))),
+    compareRow("Gain maximal", "Borne théorique du payoff, pas une estimation de rendement.", candidates.map(compareMaximumGain)),
+    compareRow("Break-even", "Cours du sous-jacent à l’échéance pour un P&L nul.", candidates.map((candidate) => ({ value: candidate.break_even_points.length ? candidate.break_even_points.join(" · ") : "Non calculé", note: "", tone: candidate.break_even_points.length ? "" : "unavailable" }))),
+    compareRow("Budget", "Position de la contrainte de capital dans la plage configurée.", candidates.map((candidate) => ({ value: displayBudgetStatus(candidate.budget_status), note: candidate.paper_eligible ? "Paper eligible" : candidate.research_eligible ? "Recherche uniquement" : "Bloqué", tone: candidate.paper_eligible ? "eligible" : "" }))),
+    compareRow("P&L espéré", "Sortie d’un modèle probabiliste, jamais remplacée par zéro.", candidates.map((candidate) => compareMetric(candidate.expected_pnl, money, probabilityReason))),
+    compareRow("Probabilité de profit", "Probabilité issue d’un modèle validé.", candidates.map((candidate) => compareMetric(candidate.probability_profit, percent, probabilityReason))),
+    compareRow("CVaR 95", "Perte moyenne dans les 5 % de scénarios les plus défavorables.", candidates.map((candidate) => compareMetric(candidate.cvar_95, money, probabilityReason))),
+    compareRow("Five scores", "Opportunity, risque, preuve, accord modèle et exécution.", candidates.map(scoreMetric)),
+    compareRow("Fraîcheur", "Qualité temporelle des entrées de ce run.", candidates.map((candidate) => ({ value: candidate.data_freshness, note: "", tone: candidate.data_freshness === "FRESH" ? "eligible" : "" }))),
+  ].join("");
+  $("#candidate-compare-title").textContent = `COMPARER ${candidates.length} STRUCTURES`;
+  $("#candidate-compare-content").innerHTML = `<table class="compare-table"><thead><tr><th scope="col" class="compare-axis">MESURE</th>${headers}</tr></thead><tbody>${rows}</tbody></table>`;
+  const dialog = $("#candidate-compare-dialog");
+  dialog.style.setProperty("--compare-count", String(candidates.length));
+  dialog.style.setProperty("--compare-min-width", `${190 + candidates.length * 250}px`);
+  dialog.showModal();
+  dialog.querySelector(".dialog-x").focus();
 }
 
 $("#nav-research").addEventListener("click", () => switchWorkspace("research"));

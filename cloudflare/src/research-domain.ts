@@ -67,9 +67,26 @@ export function canonicalBudgetJson(value: AnalysisBudgetRequest): string {
   });
 }
 
+export function policyCurrencyMaximumGain(
+  maximumGain: unknown,
+  legacyFxRate: unknown,
+): number | null {
+  if (maximumGain === null || maximumGain === undefined) return null;
+  const value = Number(maximumGain);
+  if (!Number.isFinite(value)) throw new Error("INVALID_CANDIDATE_NUMBER");
+  if (legacyFxRate === null || legacyFxRate === undefined) return value;
+  const rate = Number(legacyFxRate);
+  if (!Number.isFinite(rate) || rate <= 0) throw new Error("INVALID_LEGACY_GAIN_FX_RATE");
+  return Math.round(value * rate * 10_000) / 10_000;
+}
+
 export function candidateFromRow(row: Record<string, unknown>): CandidateSummaryRecord {
+  const publicRow = { ...row };
+  delete publicRow.break_even_points_json;
+  delete publicRow.reason_codes_json;
+  delete publicRow.legacy_maximum_gain_fx_rate;
   return {
-    ...row,
+    ...publicRow,
     break_even_points: JSON.parse(String(row.break_even_points_json)) as number[],
     reason_codes: JSON.parse(String(row.reason_codes_json)) as string[],
     eligible: Boolean(row.eligible),
@@ -80,7 +97,10 @@ export function candidateFromRow(row: Record<string, unknown>): CandidateSummary
     pareto_rank: row.pareto_rank === null ? null : Number(row.pareto_rank),
     capital_required: row.capital_required === null ? null : Number(row.capital_required),
     maximum_loss: row.maximum_loss === null ? null : Number(row.maximum_loss),
-    maximum_gain: row.maximum_gain === null ? null : Number(row.maximum_gain),
+    maximum_gain: policyCurrencyMaximumGain(
+      row.maximum_gain,
+      row.legacy_maximum_gain_fx_rate,
+    ),
     net_delta: row.net_delta === null ? null : Number(row.net_delta),
     net_theta: row.net_theta === null ? null : Number(row.net_theta),
     average_implied_volatility: row.average_implied_volatility === null

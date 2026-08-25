@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.12.7 — 2026-08-25
+
+### Cloud comparison clarity and maximum-gain currency correction
+
+- Replaced the cramped two-column comparison cards with a wide, aligned comparison table for two
+  to four candidates, including structure, legs, expiry, risk, budget, model availability and
+  five-score availability.
+- Enlarged the close target, strengthened its focus/contrast, retained native dialog/Escape
+  behavior, and added responsive horizontal comparison with a sticky metric column.
+- Replaced ambiguous research `N/A` labels with `NON CALCULÉ` plus explicit reasons, while showing
+  `NON BORNÉ` for architectures whose theoretical upside has no finite cap.
+- Clarified signed entry cash flow and the distinction between entry debit, maximum loss, and the
+  effective capital requirement.
+- Corrected bounded maximum gain from native USD into policy EUR, with a read-only compatibility
+  conversion for summaries produced by the original deployed CF0.2 revision.
+- Preserved synthetic-only data, null model outputs, immutable native economics tickets,
+  `transmit=false`, and `order_capability=forbidden`.
+
 ## 0.12.6 — 2026-08-24
 
 ### Phase M governed context propagation
