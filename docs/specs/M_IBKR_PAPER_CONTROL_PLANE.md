@@ -1,6 +1,6 @@
 # Phase M — isolated IBKR paper control plane
 
-Status: **read-only IBKR adapter implemented locally; execution adapter disabled**
+Status: **signed read-only telemetry implemented; execution adapter disabled**
 Decision owner: project owner
 Decision date: 2026-08-25
 
@@ -59,7 +59,14 @@ The Worker implements:
 - automatic floor evaluation by the Durable Object monitor;
 - signed internal heartbeat, claim, and event routes with a 60-second clock window and nonce
   replay defense;
-- SAFE MODE engaging the broker kill switch and blocking every unclaimed ready intent.
+- SAFE MODE engaging the broker kill switch and blocking every unclaimed ready intent;
+- a separate `POST /internal/broker/telemetry` machine route with its own identity, HMAC secret,
+  60-second timestamp window, nonce replay defense, strict exact-key schema and derived-total
+  verification;
+- an authenticated `GET /api/broker/telemetry` route and an always-visible read-only dashboard
+  card whose state is `FRESH`, `STALE`, `OFFLINE`, or `NOT_CONFIGURED`;
+- a latest-only D1 telemetry projection containing no broker account identifier and always reporting
+  `execution_enabled=false`.
 
 The isolated service under `services/ibkr-paper-bridge` implements:
 
@@ -70,7 +77,8 @@ The isolated service under `services/ibkr-paper-bridge` implements:
 - a separate official-API telemetry adapter restricted to loopback, paper port `4002`, one `DU`
   account and symbol `TTWO`; it returns redacted positions, per-contract quotes and broker-reported
   P&L while preserving missing values as missing;
-- a deliberately disabled gateway adapter.
+- a deliberately disabled gateway adapter;
+- a separate persistent telemetry runtime and hardened systemd unit that can only publish snapshots.
 
 The telemetry adapter is not imported by the bridge runtime and exposes no place, modify, cancel,
 exercise, or global-cancel operation. Its live P&L payload is explicitly marked as not yet
@@ -84,17 +92,17 @@ The snapshot proved the handshake, server time, single-paper-account guard, TTWO
 and redaction boundary. The account had zero open TTWO positions, so per-leg quotes and position P&L
 remain unvalidated against a real paper position.
 
-The following remain blocked:
+Signed read-only publication is implemented and tested. Production activation still requires a
+dedicated Cloudflare Access service token entered privately on the VM. The following remain blocked:
 
-1. publish the adapter's redacted telemetry through a signed, schema-validated Cloudflare route;
-2. group IBKR option legs into the governed Take Two position without guessing from symbols alone;
-3. combo quote refresh and tick-size validation immediately before dispatch;
-4. bounded BAG limit construction and paper submission;
-5. `openOrder`, `orderStatus`, `execDetails`, error, and commission callback normalization;
-6. recovery using `orderRef`, `permId`, `execId`, open orders, and recent executions;
-7. actual-fill/commission reconciliation into the user-visible net P&L;
-8. broker-native protective-order creation after a verified paper entry;
-9. fault-injection, disconnect, partial-fill, and weekly reauthentication tests.
+1. group IBKR option legs into the governed Take Two position without guessing from symbols alone;
+2. combo quote refresh and tick-size validation immediately before dispatch;
+3. bounded BAG limit construction and paper submission;
+4. `openOrder`, `orderStatus`, `execDetails`, error, and commission callback normalization;
+5. recovery using `orderRef`, `permId`, `execId`, open orders, and recent executions;
+6. actual-fill/commission reconciliation into the user-visible net P&L;
+7. broker-native protective-order creation after a verified paper entry;
+8. fault-injection, disconnect, partial-fill, and weekly reauthentication tests.
 
 Until those items pass paper tests, `DisabledGateway` reports unhealthy, the Worker kill switch
 stays engaged, and no bridge command can be claimed.

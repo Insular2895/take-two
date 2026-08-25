@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.12.8 — 2026-08-25
+
+### Persistent IBKR Paper read-only telemetry
+
+- Added a dedicated signed machine route and strict schema for redacted TTWO-only IBKR Paper
+  snapshots, with separate HMAC identity, timestamp/body verification and nonce replay defense.
+- Added a latest-only D1 projection plus authenticated freshness API and responsive Position
+  workspace card for gateway state, collection age, positions, quotes, market value and
+  broker-reported P&L.
+- Added an outbound-only Python telemetry daemon and hardened systemd unit for the Oracle A1 VM;
+  it has no claim, event, order, cancel, modify, exercise, or execution capability.
+- Preserved unknown values as null, exposed quote/data completeness, and labelled broker P&L as
+  not yet reconciled with final commissions and fees.
+- Kept broker execution disabled, the kill switch engaged, and the telemetry credential unusable
+  on every broker-control route.
+
 ## 0.12.7 — 2026-08-25
 
 ### Cloud comparison clarity and maximum-gain currency correction

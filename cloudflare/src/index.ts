@@ -6,6 +6,7 @@ import {
   requireCsrf,
 } from "./auth";
 import { queueAcknowledgedPaperClose, routeBrokerAuthenticated, routeBrokerInternal } from "./broker-control";
+import { routeTelemetryAuthenticated, routeTelemetryInternal } from "./broker-telemetry";
 import { activePosition, audit, importDossier, incrementUsage, latestProjection, persistProjection } from "./db";
 import { syntheticDemoDossier } from "./demo";
 import { calculateProjection, estimateDailyUsage, inverseStructureLegs, randomId, validateDossier } from "./domain";
@@ -43,17 +44,25 @@ function apiError(error: unknown): Response {
     message.startsWith("INVALID_CALLBACK") || message === "CALLBACK_BODY_HASH_MISMATCH" ||
     message === "CALLBACK_TIMESTAMP_OUTSIDE_WINDOW" ||
     message.startsWith("INVALID_BROKER_BRIDGE") ||
-    message === "BROKER_BRIDGE_TIMESTAMP_OUTSIDE_WINDOW"
+    message === "BROKER_BRIDGE_TIMESTAMP_OUTSIDE_WINDOW" ||
+    [
+      "INVALID_BROKER_TELEMETRY_ID",
+      "INVALID_BROKER_TELEMETRY_NONCE",
+      "INVALID_BROKER_TELEMETRY_SIGNATURE",
+      "BROKER_TELEMETRY_TIMESTAMP_OUTSIDE_WINDOW",
+    ].includes(message)
   ) status = 403;
   else if (message === "ACTION_PASSWORD_RATE_LIMITED") status = 429;
   else if (message === "CALLBACK_BODY_TOO_LARGE") status = 413;
-  else if (message === "CALLBACK_REPLAY_DETECTED" || message === "BROKER_BRIDGE_REPLAY_DETECTED") status = 409;
-  else if (message === "BROKER_BRIDGE_BODY_TOO_LARGE") status = 413;
+  else if (message === "CALLBACK_REPLAY_DETECTED" || message === "BROKER_BRIDGE_REPLAY_DETECTED" ||
+      message === "BROKER_TELEMETRY_REPLAY_DETECTED") status = 409;
+  else if (message === "BROKER_BRIDGE_BODY_TOO_LARGE" || message === "BROKER_TELEMETRY_BODY_TOO_LARGE") status = 413;
   else if (
     message === "ACTION_PASSWORD_NOT_CONFIGURED" ||
     message === "ANALYSIS_CALLBACK_SECRET_NOT_CONFIGURED" ||
     message === "GITHUB_ACTIONS_TOKEN_NOT_CONFIGURED" ||
-    message === "BROKER_BRIDGE_SECRET_NOT_CONFIGURED"
+    message === "BROKER_BRIDGE_SECRET_NOT_CONFIGURED" ||
+    message === "BROKER_TELEMETRY_SECRET_NOT_CONFIGURED"
   ) status = 503;
   else if (message.startsWith("GITHUB_WORKFLOW_DISPATCH_FAILED_")) status = 502;
   else if (
@@ -375,6 +384,7 @@ async function exportData(env: Env, auth: AuthContext): Promise<Response> {
     "analysis_runs", "analysis_candidate_summaries", "analysis_candidate_details",
     "candidate_selections", "planned_positions", "position_exit_policies",
     "broker_execution_intents", "broker_execution_events", "broker_bridge_heartbeats",
+    "broker_telemetry_latest",
   ] as const;
   const results = await env.DB.batch(tables.map((table) => env.DB.prepare(`SELECT * FROM ${table}`)));
   const payload = Object.fromEntries(tables.map((table, index) => [table, results[index]?.results ?? []]));
@@ -386,6 +396,8 @@ async function exportData(env: Env, auth: AuthContext): Promise<Response> {
 
 async function routeAuthenticated(request: Request, env: Env, auth: AuthContext, path: string): Promise<Response> {
   await incrementUsage(env.DB, "worker_api_requests");
+  const telemetry = await routeTelemetryAuthenticated(request, env, path);
+  if (telemetry) return telemetry;
   const broker = await routeBrokerAuthenticated(
     request,
     env,
@@ -428,6 +440,8 @@ export async function handleRequest(
 ): Promise<Response> {
   try {
     const path = new URL(request.url).pathname;
+    const internalTelemetry = await routeTelemetryInternal(request, env, path);
+    if (internalTelemetry) return withSecurity(internalTelemetry);
     const internalBroker = await routeBrokerInternal(request, env, path);
     if (internalBroker) return withSecurity(internalBroker);
     const internalResearch = await routeInternalResearch(request, env, path);

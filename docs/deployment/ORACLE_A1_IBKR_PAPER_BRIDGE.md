@@ -1,6 +1,6 @@
 # Oracle A1 + IB Gateway paper bridge runbook
 
-Status: **VM/API read-only path validated; do not enable dispatch yet**
+Status: **VM/API read-only path validated; signed telemetry implemented; dispatch remains disabled**
 
 ## Provisioning checkpoint — 2026-08-25
 
@@ -67,8 +67,9 @@ API environment at `~/.venvs/ibkr-api`. The project CLI completed a redacted `PA
 snapshot against loopback port `4002`: server time was present, the account identifier remained
 absent, and the symbol scope remained `TTWO`. The paper account contained zero open TTWO positions,
 so this checkpoint does not yet validate per-leg quotes, position P&L, fee reconciliation, or combo
-grouping. The snapshot is not posted to Cloudflare and no persistent project service or executable
-combo adapter has been enabled.
+grouping. The first snapshot was not posted to Cloudflare. The repository now includes a persistent,
+read-only systemd publisher and a dedicated schema-validated Cloudflare route. No executable combo
+adapter has been enabled.
 
 ## What the user will provide later
 
@@ -109,9 +110,23 @@ or assume 4 OCPUs/24 GB are free.
 | VM `.env` only | `CF_ACCESS_CLIENT_SECRET` | Access service-token secret |
 | VM `.env` only | `TTWO_CONTROL_URL` | protected Worker URL |
 
-The Access policy must keep the existing human account-member rule and add the dedicated GitHub/VM
-service-token rule only to machine routes. Rotate either service-token or HMAC secret independently
-after an incident.
+Read-only telemetry uses a separate credential boundary:
+
+| Location | Name | Purpose |
+|---|---|---|
+| Cloudflare Worker secret | `BROKER_TELEMETRY_SHARED_SECRET` | verifies telemetry-only HMAC |
+| Cloudflare Worker variable | `BROKER_TELEMETRY_ID` | pins the telemetry publisher identity |
+| VM root-owned env | `TTWO_TELEMETRY_SHARED_SECRET` | same telemetry-only HMAC value |
+| VM root-owned env | `CF_ACCESS_CLIENT_ID` | dedicated VM Access service-token ID |
+| VM root-owned env | `CF_ACCESS_CLIENT_SECRET` | dedicated VM Access service-token secret |
+| VM root-owned env | `TTWO_CONTROL_URL` | protected Worker base URL |
+
+The Access policy must keep the existing human account-member rule and add a dedicated VM Service
+Auth policy selecting only the VM service token. Do not reuse the GitHub Actions token. Rotate the
+service token and telemetry HMAC independently after an incident.
+
+Cloudflare shows the service-token secret only once. Enter it directly in the protected VM setup
+session; never paste it into chat. The daemon sends both Access headers and the telemetry HMAC.
 
 ## Current safe verification
 
@@ -120,8 +135,42 @@ The bridge image can be built now, but it intentionally uses `DisabledGateway`. 
 read-only VM probe proves local IBKR connectivity and the `DU` guard. The new project reader remains
 outside that runtime and grants no broker authority to the project bridge.
 
-Do not apply migration `0007`, configure secrets, or deploy this branch to the live Worker until the
-owner explicitly approves a paper-control deployment. Local tests are the current authorized scope.
+Migrations `0007` and `0008` are additive and fail closed: broker mode defaults to `DISABLED`, the
+kill switch defaults engaged, and telemetry has no order capability. Back up remote D1 before
+applying them. A deployment of these migrations does not authorize paper dispatch.
+
+## Persistent telemetry service
+
+After the branch is installed on the VM and the dedicated Access service token exists:
+
+```bash
+cd ~/apps/take-two
+git pull --ff-only
+~/.venvs/ibkr-api/bin/python -m pip install --no-deps -e services/ibkr-paper-bridge
+sudo install -d -m 0700 /etc/take-two
+sudo install -m 0600 \
+  services/ibkr-paper-bridge/deploy/systemd/ibkr-telemetry.env.example \
+  /etc/take-two/ibkr-telemetry.env
+sudo install -m 0644 \
+  services/ibkr-paper-bridge/deploy/systemd/take-two-ibkr-telemetry.service \
+  /etc/systemd/system/take-two-ibkr-telemetry.service
+sudo systemctl daemon-reload
+```
+
+Replace every placeholder in `/etc/take-two/ibkr-telemetry.env` through a private SSH session, then
+validate and start:
+
+```bash
+sudo systemd-analyze verify /etc/systemd/system/take-two-ibkr-telemetry.service
+sudo systemctl enable --now take-two-ibkr-telemetry.service
+sudo systemctl status --no-pager take-two-ibkr-telemetry.service
+sudo journalctl -u take-two-ibkr-telemetry.service -n 30 --no-pager
+```
+
+The log intentionally contains only a success position count or an exception class. It must never
+contain an account identifier, payload, request header, URL, or secret. Once enabled, no Mac
+terminal, VNC tunnel, or VS Code window is required for telemetry. IB Gateway itself must remain
+logged in on the VM and may still require periodic IBKR reauthentication.
 
 ## Later activation order
 

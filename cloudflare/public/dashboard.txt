@@ -28,6 +28,25 @@
         </div>
       </section>
 
+      <section class="card broker-live-card">
+        <div class="section-title">
+          <div><p class="eyebrow">IBKR PAPER — LIVE READ-ONLY</p><h2>POSITION ET P&amp;L BROKER</h2></div>
+          <span id="telemetry-status" class="pill broker-pill">NOT CONFIGURED</span>
+        </div>
+        <div class="broker-live-grid">
+          <div><span>GATEWAY</span><strong id="telemetry-gateway">—</strong></div>
+          <div><span>DERNIÈRE COLLECTE</span><strong id="telemetry-collected">—</strong></div>
+          <div><span>POSITIONS TTWO</span><strong id="telemetry-position-count">—</strong></div>
+          <div><span>VALEUR DE MARCHÉ</span><strong id="telemetry-market-value">—</strong></div>
+          <div><span>P&amp;L JOURNALIER</span><strong id="telemetry-daily-pnl">—</strong></div>
+          <div><span>P&amp;L NON RÉALISÉ</span><strong id="telemetry-unrealized-pnl">—</strong></div>
+          <div><span>P&amp;L RÉALISÉ</span><strong id="telemetry-realized-pnl">—</strong></div>
+          <div><span>QUALITÉ</span><strong id="telemetry-quality">—</strong></div>
+        </div>
+        <div id="telemetry-positions" class="telemetry-positions"></div>
+        <p id="telemetry-explanation" class="note">Aucune donnée broker reçue. Cette zone ne dispose d’aucune capacité d’ordre.</p>
+      </section>
+
       <section id="empty-state" class="card empty-state hidden">
         <h2>Aucune position</h2>
         <p>Importez le <code>cloud_position.json</code> produit par le moteur Python. SAFE MODE bloque les nouveaux imports.</p>

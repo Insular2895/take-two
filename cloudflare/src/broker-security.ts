@@ -7,6 +7,13 @@ export interface VerifiedBridgeRequest {
   receivedAt: string;
 }
 
+export interface VerifiedTelemetryRequest {
+  telemetryId: string;
+  bodyText: string;
+  receivedAt: string;
+  payloadSha256: string;
+}
+
 function bytesToHex(bytes: Uint8Array): string {
   return Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
 }
@@ -20,7 +27,7 @@ function hexToBytes(value: string): Uint8Array | null {
   return result;
 }
 
-async function sha256Hex(value: string): Promise<string> {
+export async function sha256Hex(value: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return bytesToHex(new Uint8Array(digest));
 }
@@ -43,34 +50,49 @@ async function verifyHmac(secret: string, canonical: string, signatureHex: strin
   );
 }
 
-export async function verifyBridgeRequest(request: Request, env: Env): Promise<VerifiedBridgeRequest> {
-  const secret = env.BROKER_BRIDGE_SHARED_SECRET?.trim();
-  if (!secret || secret.length < 32) throw new Error("BROKER_BRIDGE_SECRET_NOT_CONFIGURED");
+interface MachineSignatureConfig {
+  secret: string | undefined;
+  configuredId: string | undefined;
+  idHeader: string;
+  timestampHeader: string;
+  nonceHeader: string;
+  signatureHeader: string;
+  errorPrefix: "BROKER_BRIDGE" | "BROKER_TELEMETRY";
+}
 
-  const bridgeId = request.headers.get("X-TTWO-Bridge-Id") ?? "";
-  const timestampText = request.headers.get("X-TTWO-Bridge-Timestamp") ?? "";
-  const nonce = request.headers.get("X-TTWO-Bridge-Nonce") ?? "";
-  const suppliedSignature = request.headers.get("X-TTWO-Bridge-Signature") ?? "";
-  if (!/^[a-zA-Z0-9._-]{3,80}$/.test(bridgeId)) throw new Error("INVALID_BROKER_BRIDGE_ID");
-  if (env.BROKER_BRIDGE_ID?.trim() && bridgeId !== env.BROKER_BRIDGE_ID.trim()) {
-    throw new Error("INVALID_BROKER_BRIDGE_ID");
+async function verifyMachineRequest(
+  request: Request,
+  env: Env,
+  config: MachineSignatureConfig,
+): Promise<{ machineId: string; bodyText: string; receivedAt: string; payloadSha256: string }> {
+  const secret = config.secret?.trim();
+  if (!secret || secret.length < 32) throw new Error(`${config.errorPrefix}_SECRET_NOT_CONFIGURED`);
+
+  const machineId = request.headers.get(config.idHeader) ?? "";
+  const timestampText = request.headers.get(config.timestampHeader) ?? "";
+  const nonce = request.headers.get(config.nonceHeader) ?? "";
+  const suppliedSignature = request.headers.get(config.signatureHeader) ?? "";
+  if (!/^[a-zA-Z0-9._-]{3,80}$/.test(machineId)) throw new Error(`INVALID_${config.errorPrefix}_ID`);
+  if (config.configuredId?.trim() && machineId !== config.configuredId.trim()) {
+    throw new Error(`INVALID_${config.errorPrefix}_ID`);
   }
-  if (!/^[a-zA-Z0-9_-]{16,128}$/.test(nonce)) throw new Error("INVALID_BROKER_BRIDGE_NONCE");
+  if (!/^[a-zA-Z0-9_-]{16,128}$/.test(nonce)) throw new Error(`INVALID_${config.errorPrefix}_NONCE`);
 
   const timestamp = Number(timestampText);
   const nowSeconds = Math.floor(Date.now() / 1000);
   if (!Number.isInteger(timestamp) || Math.abs(nowSeconds - timestamp) > MAX_CLOCK_SKEW_SECONDS) {
-    throw new Error("BROKER_BRIDGE_TIMESTAMP_OUTSIDE_WINDOW");
+    throw new Error(`${config.errorPrefix}_TIMESTAMP_OUTSIDE_WINDOW`);
   }
 
   const bodyText = await request.text();
   if (new TextEncoder().encode(bodyText).byteLength > MAX_BODY_BYTES) {
-    throw new Error("BROKER_BRIDGE_BODY_TOO_LARGE");
+    throw new Error(`${config.errorPrefix}_BODY_TOO_LARGE`);
   }
   const path = new URL(request.url).pathname;
-  const canonical = [timestampText, nonce, request.method.toUpperCase(), path, await sha256Hex(bodyText)].join("\n");
+  const payloadSha256 = await sha256Hex(bodyText);
+  const canonical = [timestampText, nonce, request.method.toUpperCase(), path, payloadSha256].join("\n");
   if (!await verifyHmac(secret, canonical, suppliedSignature)) {
-    throw new Error("INVALID_BROKER_BRIDGE_SIGNATURE");
+    throw new Error(`INVALID_${config.errorPrefix}_SIGNATURE`);
   }
 
   const receivedAt = new Date().toISOString();
@@ -78,7 +100,38 @@ export async function verifyBridgeRequest(request: Request, env: Env): Promise<V
     .bind(new Date(Date.now() - 10 * 60_000).toISOString()).run();
   const inserted = await env.DB.prepare(
     "INSERT OR IGNORE INTO broker_bridge_nonces(nonce,bridge_id,received_at) VALUES(?,?,?)",
-  ).bind(nonce, bridgeId, receivedAt).run();
-  if (!inserted.meta.changes) throw new Error("BROKER_BRIDGE_REPLAY_DETECTED");
-  return { bridgeId, bodyText, receivedAt };
+  ).bind(nonce, machineId, receivedAt).run();
+  if (!inserted.meta.changes) throw new Error(`${config.errorPrefix}_REPLAY_DETECTED`);
+  return { machineId, bodyText, receivedAt, payloadSha256 };
+}
+
+export async function verifyBridgeRequest(request: Request, env: Env): Promise<VerifiedBridgeRequest> {
+  const verified = await verifyMachineRequest(request, env, {
+    secret: env.BROKER_BRIDGE_SHARED_SECRET,
+    configuredId: env.BROKER_BRIDGE_ID,
+    idHeader: "X-TTWO-Bridge-Id",
+    timestampHeader: "X-TTWO-Bridge-Timestamp",
+    nonceHeader: "X-TTWO-Bridge-Nonce",
+    signatureHeader: "X-TTWO-Bridge-Signature",
+    errorPrefix: "BROKER_BRIDGE",
+  });
+  return { bridgeId: verified.machineId, bodyText: verified.bodyText, receivedAt: verified.receivedAt };
+}
+
+export async function verifyTelemetryRequest(request: Request, env: Env): Promise<VerifiedTelemetryRequest> {
+  const verified = await verifyMachineRequest(request, env, {
+    secret: env.BROKER_TELEMETRY_SHARED_SECRET,
+    configuredId: env.BROKER_TELEMETRY_ID,
+    idHeader: "X-TTWO-Telemetry-Id",
+    timestampHeader: "X-TTWO-Telemetry-Timestamp",
+    nonceHeader: "X-TTWO-Telemetry-Nonce",
+    signatureHeader: "X-TTWO-Telemetry-Signature",
+    errorPrefix: "BROKER_TELEMETRY",
+  });
+  return {
+    telemetryId: verified.machineId,
+    bodyText: verified.bodyText,
+    receivedAt: verified.receivedAt,
+    payloadSha256: verified.payloadSha256,
+  };
 }

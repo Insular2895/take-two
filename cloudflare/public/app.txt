@@ -9,8 +9,8 @@ import {
 } from "/research-state.js";
 
 const state = {
-  csrf: "", data: null, broker: null, preview: null, range: "all", actionPrompt: null,
-  workspace: "research",
+  csrf: "", data: null, broker: null, telemetry: null, preview: null, range: "all", actionPrompt: null,
+  workspace: window.location.hash === "#position" ? "position" : "research",
   research: {
     analyses: [], analysis: null, candidates: [], selectedAnalysisId: null,
     view: "best", sort: "engine_rank", sortDirection: null,
@@ -99,6 +99,42 @@ function renderChart(history) {
   }).join(" ");
   const zeroY = 195 - (0 - minimum) / span * 165;
   svg.innerHTML = `<line x1="30" y1="${zeroY}" x2="570" y2="${zeroY}" stroke="#293444"/><polyline points="${coordinates("mtm_pnl")}" fill="none" stroke="#71b7ff" stroke-width="3"/><polyline points="${coordinates("liquidation_pnl")}" fill="none" stroke="#41d69a" stroke-width="3"/><text x="35" y="22" fill="#9aa8b7">${h(money(maximum))}</text><text x="35" y="214" fill="#9aa8b7">${h(money(minimum))}</text>`;
+}
+
+function renderTelemetry(result) {
+  state.telemetry = result;
+  const telemetry = result?.telemetry;
+  const status = result?.status || "NOT_CONFIGURED";
+  const fresh = status === "FRESH";
+  $("#telemetry-status").textContent = status.replaceAll("_", " ");
+  $("#telemetry-status").classList.toggle("ready", fresh);
+  $("#telemetry-gateway").textContent = telemetry?.gateway_connected ? "CONNECTED · PAPER" : "NOT CONNECTED";
+  $("#telemetry-collected").textContent = telemetry ? age(telemetry.collected_at) : "N/A";
+  $("#telemetry-position-count").textContent = telemetry ? String(telemetry.positions.length) : "N/A";
+  const currency = telemetry?.positions?.[0]?.currency || "USD";
+  setEconomicValue("#telemetry-market-value", telemetry?.totals?.market_value, (value) => money(value, currency));
+  setEconomicValue("#telemetry-daily-pnl", telemetry?.totals?.daily_pnl, (value) => money(value, currency));
+  setEconomicValue("#telemetry-unrealized-pnl", telemetry?.totals?.unrealized_pnl, (value) => money(value, currency));
+  setEconomicValue("#telemetry-realized-pnl", telemetry?.totals?.realized_pnl, (value) => money(value, currency));
+  $("#telemetry-quality").textContent = telemetry
+    ? `${telemetry.quotes_complete ? "QUOTES COMPLETE" : "QUOTES INCOMPLETE"} · ${telemetry.pnl_complete ? "PNL COMPLETE" : "PNL INCOMPLETE"}`
+    : "N/A";
+  $("#telemetry-positions").innerHTML = telemetry?.positions?.length
+    ? telemetry.positions.map((position) => {
+      const quote = position.quote;
+      return `<article class="telemetry-position">
+        <div><span>${h(position.security_type)} · CONID ${h(position.con_id)}</span><strong>${h(position.local_symbol)}</strong><small>${h(position.quantity)} × ${h(position.multiplier)} · ${h(position.currency)}</small></div>
+        <div><span>BID / ASK</span><strong>${h(quote?.bid ?? "N/A")} / ${h(quote?.ask ?? "N/A")}</strong><small>${h(quote?.market_data_type || "NO QUOTE")} · ${h(quote ? age(quote.observed_at) : "N/A")}</small></div>
+        <div><span>MARKET VALUE</span><strong>${h(money(position.market_value, position.currency))}</strong><small>Mark ${h(quote?.mark ?? quote?.midpoint ?? "N/A")}</small></div>
+        <div><span>UNREALIZED PNL</span><strong class="${Number(position.unrealized_pnl) > 0 ? "positive" : Number(position.unrealized_pnl) < 0 ? "negative" : ""}">${h(money(position.unrealized_pnl, position.currency))}</strong><small>Daily ${h(money(position.daily_pnl, position.currency))}</small></div>
+      </article>`;
+    }).join("")
+    : `<p class="telemetry-empty">${telemetry ? "Aucune position TTWO ouverte dans le compte Paper." : "Le service VM n’a encore publié aucun snapshot."}</p>`;
+  $("#telemetry-explanation").textContent = !telemetry
+    ? "Aucune donnée broker reçue. Cette zone ne dispose d’aucune capacité d’ordre."
+    : status === "FRESH"
+      ? "Données IBKR Paper reçues en lecture seule. Le P&L live n’inclut pas encore une réconciliation finale des commissions et frais de sortie."
+      : "Télémétrie périmée ou hors ligne : ne pas utiliser ces chiffres pour décider d’une fermeture.";
 }
 
 function render(data) {
@@ -219,8 +255,11 @@ function render(data) {
 
 async function refresh() {
   try {
-    const [dashboard, broker] = await Promise.all([api("/api/dashboard"), api("/api/broker/status")]);
+    const [dashboard, broker, telemetry] = await Promise.all([
+      api("/api/dashboard"), api("/api/broker/status"), api("/api/broker/telemetry"),
+    ]);
     state.broker = broker;
+    renderTelemetry(telemetry);
     render(dashboard);
   } catch (error) { console.error(error); }
 }
@@ -682,7 +721,7 @@ $("#execute-planned").addEventListener("click", async () => {
 });
 
 refresh();
-refreshResearch();
+switchWorkspace(state.workspace);
 async function poll() {
   if (document.visibilityState === "visible") await refresh();
   if (document.visibilityState === "visible" && state.workspace === "research") await refreshResearch();
