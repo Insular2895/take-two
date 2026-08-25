@@ -325,7 +325,7 @@ function candidateMetric(value, format = (item) => String(item)) {
 
 function maximumGainLabel(candidate) {
   const gain = maximumGainState(candidate);
-  if (gain.status === "BOUNDED") return money(gain.value);
+  if (gain.status === "BOUNDED") return amount(gain.value);
   if (gain.status === "UNBOUNDED") return "NON BORNÉ";
   return "NON CALCULÉ";
 }
@@ -357,7 +357,7 @@ function compareMaximumGain(candidate) {
       tone: "unavailable",
     };
   }
-  return { value: money(gain.value), note: "Borne du payoff à l’échéance.", tone: "" };
+  return { value: amount(gain.value), note: "Borne du payoff à l’échéance.", tone: "" };
 }
 
 function compareCell(metric) {
@@ -433,9 +433,9 @@ function renderCandidates() {
       <p class="candidate-legs">${h(candidate.leg_summary)}</p>
       <div class="candidate-metrics">
         <div class="metric-cell heat-neutral"><span>FLUX D’ENTRÉE · ${h(candidate.entry_cash_flow_type)}</span><strong>${h(candidateMetric(candidate.signed_entry_cash_flow, money))}</strong></div>
-        <div class="metric-cell heat-neutral"><span>CAPITAL</span><strong>${h(candidateMetric(candidate.capital_required, money))}</strong></div>
-        <div class="metric-cell heat-neutral"><span>MAX LOSS</span><strong>${h(candidateMetric(candidate.maximum_loss, money))}</strong></div>
-        <div class="metric-cell heat-neutral"><span>MAX GAIN</span><strong>${h(maximumGainLabel(candidate))}</strong></div>
+        <div class="metric-cell heat-neutral"><span>CAPITAL REQUIS</span><strong>${h(candidateMetric(candidate.capital_required, amount))}</strong></div>
+        <div class="metric-cell heat-neutral"><span>PERTE MAXIMALE</span><strong>${h(candidateMetric(candidate.maximum_loss, amount))}</strong></div>
+        <div class="metric-cell heat-neutral"><span>GAIN MAXIMAL</span><strong>${h(maximumGainLabel(candidate))}</strong></div>
         <div class="${heatClass(heat, metric)}"><span>${h(METRIC_METADATA[metric]?.label || metric)} · ${h(direction)}</span><strong>${h(candidateMetric(candidate[metric], (value) => Number(value).toFixed(3)))}</strong></div>
         <div class="metric-cell heat-neutral"><span>BREAKEVEN</span><strong>${h(candidate.break_even_points.length ? candidate.break_even_points.join(" · ") : "NON CALCULÉ")}</strong></div>
       </div>
@@ -522,7 +522,7 @@ async function openCandidateDetail(candidateId) {
     const payload = await api(`/api/research/analyses/${encodeURIComponent(analysisId)}/candidates/${encodeURIComponent(candidateId)}`);
     const { summary, detail } = payload;
     $("#candidate-detail-content").innerHTML = `<h2>${h(summary.architecture)} · ENGINE #${h(summary.engine_rank)}</h2>
-      <div class="modal-economics"><div><span>ENTRY CASH FLOW</span><strong>${h(money(summary.signed_entry_cash_flow))}</strong></div><div><span>CAPITAL REQUIRED</span><strong>${h(money(summary.capital_required))}</strong></div><div><span>MAX LOSS</span><strong>${h(money(summary.maximum_loss))}</strong></div><div><span>MAX GAIN</span><strong>${h(maximumGainLabel(summary))}</strong></div></div>
+      <div class="modal-economics"><div><span>FLUX D’ENTRÉE</span><strong>${h(money(summary.signed_entry_cash_flow))}</strong></div><div><span>CAPITAL REQUIS</span><strong>${h(amount(summary.capital_required))}</strong></div><div><span>PERTE MAXIMALE</span><strong>${h(amount(summary.maximum_loss))}</strong></div><div><span>GAIN MAXIMAL</span><strong>${h(maximumGainLabel(summary))}</strong></div></div>
       <h2>LEGS</h2><div class="preview-legs">${detail.legs.map((leg) => `<div class="preview-leg"><strong>${h(leg.side)}</strong><span>${h(leg.quantity)} × ${h(leg.option_type)} ${h(leg.strike)} · ${h(leg.expiration)}<br><small>${h(leg.symbol)} · bid ${h(leg.bid)} / ask ${h(leg.ask)}</small></span></div>`).join("")}</div>
       <h2>PAYOFF / EXPLICATION / LIMITES</h2><p>Break-evens: ${h(detail.payoff.break_even_points.join(" · ") || "N/A")} · Flat spots: ${h(detail.payoff.flat_spots)}</p><p>${h(detail.explanation.join(" "))}</p><ul>${detail.limitations.map((item) => `<li>${h(item)}</li>`).join("")}</ul>
       <p class="note">Ticket hash: ${h(summary.trade_economics_ticket_hash)}<br>Context: ${h(detail.phase_m_context_id)} · ${h(detail.phase_m_context_hash)}</p>`;
@@ -547,8 +547,8 @@ function openCompare() {
   const headers = candidates.map((candidate) => `<th scope="col"><div class="compare-candidate-head"><span class="eyebrow">ENGINE #${h(candidate.engine_rank)}</span><h3>${h(candidate.architecture)} · ${h(candidate.strategy_name)}</h3><p>${h(candidate.leg_summary)}</p><small>${h(candidate.expiration)} · DTE ${h(candidate.dte)}</small></div></th>`).join("");
   const rows = [
     compareRow("Flux d’entrée", "Signe du point de vue du compte.", candidates.map(entryCashMetric)),
-    compareRow("Capital requis", "Maximum des contraintes connues : cash, perte, buying power et cycle de vie.", candidates.map((candidate) => compareMetric(candidate.capital_required, money, "Contrainte de capital non prouvée."))),
-    compareRow("Perte maximale", "Borne du payoff, distincte du capital même si les valeurs peuvent coïncider.", candidates.map((candidate) => compareMetric(candidate.maximum_loss, money, "Borne de perte non prouvée."))),
+    compareRow("Capital requis", "Montant mobilisé par cette position, pas le capital total du compte.", candidates.map((candidate) => compareMetric(candidate.capital_required, amount, "Contrainte de capital non prouvée."))),
+    compareRow("Perte maximale", "Montant de perte possible, distinct du capital même s’ils peuvent coïncider.", candidates.map((candidate) => compareMetric(candidate.maximum_loss, amount, "Borne de perte non prouvée."))),
     compareRow("Gain maximal", "Borne théorique du payoff, pas une estimation de rendement.", candidates.map(compareMaximumGain)),
     compareRow("Break-even", "Cours du sous-jacent à l’échéance pour un P&L nul.", candidates.map((candidate) => ({ value: candidate.break_even_points.length ? candidate.break_even_points.join(" · ") : "Non calculé", note: "", tone: candidate.break_even_points.length ? "" : "unavailable" }))),
     compareRow("Budget", "Position de la contrainte de capital dans la plage configurée.", candidates.map((candidate) => ({ value: displayBudgetStatus(candidate.budget_status), note: candidate.paper_eligible ? "Paper eligible" : candidate.research_eligible ? "Recherche uniquement" : "Bloqué", tone: candidate.paper_eligible ? "eligible" : "" }))),
