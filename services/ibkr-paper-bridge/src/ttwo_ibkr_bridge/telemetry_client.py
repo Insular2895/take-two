@@ -66,7 +66,9 @@ class SignedTelemetryClient:
             self._config.shared_secret.encode(), canonical, hashlib.sha256
         ).hexdigest()
         return {
+            "Accept": "application/json",
             "Content-Type": "application/json",
+            "User-Agent": "Take-Two-IBKR-Telemetry/1.0",
             "CF-Access-Client-Id": self._config.access_client_id,
             "CF-Access-Client-Secret": self._config.access_client_secret,
             "X-TTWO-Telemetry-Id": self._config.telemetry_id,

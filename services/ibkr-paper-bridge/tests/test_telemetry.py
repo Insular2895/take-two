@@ -105,6 +105,8 @@ def test_dedicated_client_signs_only_telemetry_route(monkeypatch: pytest.MonkeyP
         secret.encode(), canonical, hashlib.sha256
     ).hexdigest()
     assert headers["cf-access-client-id"] == "access-id"
+    assert headers["accept"] == "application/json"
+    assert headers["user-agent"] == "Take-Two-IBKR-Telemetry/1.0"
     assert "x-ttwo-bridge-id" not in headers
     assert not hasattr(client, "claim")
     assert not hasattr(client, "post_event")
