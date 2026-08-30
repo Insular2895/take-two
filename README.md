@@ -16,8 +16,8 @@ Phase M-CF0 adds one private Cloudflare Workers application under [`cloudflare/`
 Cloudflare Access authentication, a bundled dashboard and API, D1 persistence, and a SQLite
 Durable Object alarm monitor.
 The Python engine exports the immutable dossier; Cloudflare does not duplicate pricing or model
-training and cannot transmit a broker order. No VPS, production Docker, database server, or
-always-on Mac is required.
+training. The research dashboard alone needs no VPS, production Docker, database server, or
+always-on Mac.
 
 ```bash
 python -m take_two_options.cloud.export_position \
@@ -38,6 +38,19 @@ secret verifier. Wrangler returns the real `take-two-control.<account>.workers.d
 domain is optional later. See the
 [`zero-cost deployment guide`](docs/cloudflare/ZERO_COST_DEPLOYMENT.md) and
 [`CF0 architecture`](docs/cloudflare/ARCHITECTURE.md).
+
+## IBKR paper bridge — disabled foundation
+
+An isolated paper-only control plane is now staged under
+[`services/ibkr-paper-bridge`](services/ibkr-paper-bridge). It targets an Oracle A1 ARM64 VM so the
+personal Mac and VS Code can be off. D1 keeps immutable intents/events; the VM polls outbound,
+journals locally before broker work, and will later connect to IB Gateway paper on localhost port
+`4002`. It does not use an IBKR API key.
+
+The actual IBKR adapter is deliberately disabled, the broker kill switch defaults on, and this
+version has not been deployed. No live-account mode exists. See the
+[`paper control specification`](docs/specs/M_IBKR_PAPER_CONTROL_PLANE.md) and
+[`Oracle A1 runbook`](docs/deployment/ORACLE_A1_IBKR_PAPER_BRIDGE.md).
 
 ## Phase M — Governed prospective context
 

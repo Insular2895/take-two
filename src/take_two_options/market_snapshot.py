@@ -9,13 +9,18 @@ from pathlib import Path
 
 from take_two_options.alpaca_data import AlpacaOptionChainExport
 from take_two_options.knowledge.provenance import stable_hash
-from take_two_options.knowledge.schemas import MarketSnapshot, QuoteSnapshot
+from take_two_options.knowledge.schemas import (
+    DatasetLineage,
+    MarketSnapshot,
+    QuoteSnapshot,
+)
 from take_two_options.marketdata_data import (
     MarketDataChainExport,
     MarketDataError,
     MarketDataReadOnlyClient,
     parse_occ_option_symbol,
 )
+from take_two_options.quantitative.contracts import EvidenceLevel
 
 
 class MarketSnapshotError(RuntimeError):
@@ -62,8 +67,10 @@ def _marketdata_snapshot(export: MarketDataChainExport, cache_path: Path) -> Mar
             expiration=record.expiration.date(),
             option_type=record.option_type,
             strike=record.strike,
-            bid=record.bid or 0.0,
-            ask=record.ask or 0.0,
+            bid=record.bid,
+            ask=record.ask,
+            bid_size=(int(record.bid_size) if record.bid_size is not None else None),
+            ask_size=(int(record.ask_size) if record.ask_size is not None else None),
             volume=int(record.volume) if record.volume is not None else None,
             open_interest=(
                 int(record.open_interest) if record.open_interest is not None else None
@@ -85,7 +92,12 @@ def _marketdata_snapshot(export: MarketDataChainExport, cache_path: Path) -> Mar
                 )
             ),
             quote_timestamp=record.quote_timestamp,
-            multiplier=100,
+            multiplier=None,
+            multiplier_status=EvidenceLevel.UNKNOWN,
+            contract_adjustment_status=EvidenceLevel.UNKNOWN,
+            exchange_timestamp=record.quote_timestamp,
+            provider_timestamp=export.provider_fetched_at,
+            received_at=export.retrieved_at,
             price_quality="eod_bid_ask",
             source_id=export.source.id,
         )
@@ -99,15 +111,33 @@ def _marketdata_snapshot(export: MarketDataChainExport, cache_path: Path) -> Mar
         as_of=as_of,
         spot=spot,
         spot_timestamp=as_of,
+        exchange_timestamp=as_of,
+        provider_timestamp=export.provider_fetched_at,
+        received_at=export.retrieved_at,
+        freshness_age_seconds=max(
+            (export.retrieved_at - as_of).total_seconds(),
+            0.0,
+        ),
+        freshness_status=EvidenceLevel.KNOWN,
         quote_quality="eod_bid_ask",
         source_ids=[export.source.id],
         quotes=quotes,
         available_expirations=sorted({quote.expiration for quote in quotes}),
         data_warnings=[
             "End-of-day bid/ask does not prove an intraday or simultaneous combo fill",
-            "Contract multiplier is normalized to 100 and must be rechecked with the broker",
+            "Contract multiplier, exercise style, and adjustment metadata are unavailable; "
+            "dependent calculations are blocked",
         ],
         cache_path=str(cache_path),
+        lineage=DatasetLineage(
+            dataset_id=f"marketdata-{export.ticker}-{export.requested_date.isoformat()}",
+            source=export.source.id,
+            range_start=as_of,
+            range_end=as_of,
+            ingested_at=export.retrieved_at,
+            schema_version="normalized-market-snapshot-1.1",
+            dataset_hash=stable_hash(export.model_dump(mode="json")),
+        ),
     )
 
 
@@ -123,14 +153,19 @@ def _alpaca_snapshot(export: AlpacaOptionChainExport, cache_path: Path) -> Marke
                 expiration=parsed.expiration,
                 option_type=parsed.option_type,
                 strike=parsed.strike,
-                bid=record.bid or 0.0,
-                ask=record.ask or 0.0,
+                bid=record.bid,
+                ask=record.ask,
                 volume=None,
                 open_interest=None,
                 implied_volatility=record.implied_volatility,
                 delta=record.delta,
                 quote_timestamp=record.quote_timestamp,
-                multiplier=100,
+                multiplier=None,
+                multiplier_status=EvidenceLevel.UNKNOWN,
+                contract_adjustment_status=EvidenceLevel.UNKNOWN,
+                exchange_timestamp=record.quote_timestamp,
+                provider_timestamp=export.retrieved_at,
+                received_at=export.retrieved_at,
                 price_quality="indicative",
                 source_id=export.source.id,
             )
@@ -229,12 +264,36 @@ def snapshot_manifest(snapshot: MarketSnapshot) -> str:
             "as_of": snapshot.as_of.isoformat(),
             "spot": snapshot.spot,
             "spot_timestamp": snapshot.spot_timestamp.isoformat(),
+            "exchange_timestamp": (
+                snapshot.exchange_timestamp.isoformat()
+                if snapshot.exchange_timestamp is not None
+                else None
+            ),
+            "provider_timestamp": (
+                snapshot.provider_timestamp.isoformat()
+                if snapshot.provider_timestamp is not None
+                else None
+            ),
+            "received_at": (
+                snapshot.received_at.isoformat()
+                if snapshot.received_at is not None
+                else None
+            ),
+            "freshness_age_seconds": snapshot.freshness_age_seconds,
+            "freshness_status": snapshot.freshness_status.value,
+            "risk_free_rate_status": snapshot.risk_free_rate_status.value,
+            "dividend_status": snapshot.dividend_status.value,
             "quote_quality": snapshot.quote_quality,
             "source_ids": snapshot.source_ids,
             "contracts": len(snapshot.quotes),
             "expirations": [value.isoformat() for value in snapshot.available_expirations],
             "data_warnings": snapshot.data_warnings,
             "cache_path": snapshot.cache_path,
+            "lineage": (
+                snapshot.lineage.model_dump(mode="json")
+                if snapshot.lineage is not None
+                else None
+            ),
             "generated_at": datetime.now(UTC).isoformat(),
         },
         indent=2,

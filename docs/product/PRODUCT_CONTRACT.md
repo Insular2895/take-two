@@ -60,3 +60,8 @@ V11 preserves and narrows that boundary again:
 Changing this execution boundary is a distinct project decision requiring
 explicit user approval, threat modeling, broker-specific controls, and new
 tests. No probabilistic score or scenario posterior grants execution authority.
+
+On 2026-08-25 the owner approved a distinct, isolated **IBKR paper-only** control-plane project.
+That approval does not alter the research-engine boundary above. The new service starts disabled,
+rejects non-`DU` accounts and live mode, and cannot dispatch until its separate paper activation
+gates pass. See [`../specs/M_IBKR_PAPER_CONTROL_PLANE.md`](../specs/M_IBKR_PAPER_CONTROL_PLANE.md).

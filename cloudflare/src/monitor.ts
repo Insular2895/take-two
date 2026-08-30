@@ -1,4 +1,5 @@
 import { activePosition, audit, incrementUsage, persistProjection } from "./db";
+import { evaluateAutomaticPaperExit } from "./broker-control";
 import { calculateProjection, randomId, validateDossier } from "./domain";
 import { fetchProviderSnapshot, marketDataProvider } from "./provider";
 import type { ProviderSnapshot } from "./types";
@@ -121,6 +122,21 @@ export class TTWOPositionMonitor {
       }
       if (statusChanged && projection.monitor_action === "EXIT_REVIEW") {
         await audit(this.env.DB, "EXIT_REVIEW_TRIGGERED", "monitor", position.id, { reasons: projection.monitor_reasons });
+      }
+      const automaticExit = await evaluateAutomaticPaperExit(this.env, position, projection);
+      if (["WARNING", "QUEUED", "BLOCKED"].includes(automaticExit)) {
+        await monitoringEvent(
+          this.env.DB,
+          position.id,
+          `PAPER_EXIT_${automaticExit}`,
+          automaticExit === "QUEUED" ? "CRITICAL" : "WARNING",
+          {
+            evaluation: automaticExit,
+            net_liquidation_value: projection.estimated_close_cash_flow_policy,
+            required_data_freshness: projection.required_data_freshness,
+          },
+          `paper-exit:${automaticExit}:${position.id}:${projection.timestamp}`,
+        );
       }
       const usage = await this.env.DB.prepare(
         "SELECT worker_api_requests + monitor_alarm_executions AS invocations FROM daily_usage WHERE date=?",

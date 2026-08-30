@@ -27,7 +27,12 @@ from take_two_options.config.loader import load_prospective_budget_config
 from take_two_options.data import FixtureDataProvider
 from take_two_options.decision import pipeline
 from take_two_options.decision.request import load_trade_request
-from take_two_options.domain import MarketDataBundle, OptionType, PositionSide
+from take_two_options.domain import (
+    ExerciseStyle,
+    MarketDataBundle,
+    OptionType,
+    PositionSide,
+)
 from take_two_options.knowledge.compiler import compile_knowledge
 from take_two_options.knowledge.loader import load_knowledge
 from take_two_options.knowledge.schemas import Architecture, MarketSnapshot, QuoteSnapshot
@@ -37,6 +42,7 @@ from take_two_options.phase_m_context import (
     load_phase_m_decision_context,
 )
 from take_two_options.pricing import analyze_risk
+from take_two_options.quantitative.contracts import EvidenceLevel
 from take_two_options.quantitative.trade_economics import build_trade_economics_ticket
 from take_two_options.trade_economics_models import ExitPath
 
@@ -145,6 +151,7 @@ def _quote(
         symbol=symbol,
         expiration=expiration,
         option_type=OptionType.CALL,
+        exercise_style=ExerciseStyle.AMERICAN,
         strike=strike,
         bid=bid,
         ask=ask,
@@ -153,6 +160,9 @@ def _quote(
         implied_volatility=0.30,
         quote_timestamp=EVIDENCE_TIME,
         multiplier=100,
+        multiplier_status=EvidenceLevel.KNOWN,
+        contract_adjustment_status=EvidenceLevel.KNOWN,
+        deliverable_description="standard listed deliverable",
         price_quality="eod_bid_ask",
         source_id="test-chain",
     )

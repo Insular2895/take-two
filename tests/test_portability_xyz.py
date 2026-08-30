@@ -65,7 +65,11 @@ def test_xyz_fixture_exercises_symbol_agnostic_quantitative_core() -> None:
     assert all(leg.quote.symbol.startswith("XYZ") for item in admissible for leg in item.legs)
     assert terminal_payoff(admissible[0].legs, 150.0) > 0
     assert admissible[0].risk.maximum_loss > 0
-    assert pareto_rank(admissible)
+    assert pareto_rank(admissible) == []
+    assert all(
+        candidate.evaluation.decision_status.value == "BLOCKED"
+        for candidate in admissible
+    )
 
     numerical = compare_values(
         reference_name="identity",

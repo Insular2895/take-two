@@ -11,6 +11,11 @@
 - HTML V11 autonome, sans requête réseau ni calcul financier côté client ;
 - fixtures toujours marquées `synthetic` et non promouvables.
 
+Ces invariants continuent de s'appliquer au moteur de recherche. La fondation IBKR paper approuvée
+le 25 août 2026 est isolée sous `services/ibkr-paper-bridge`; elle démarre désactivée, refuse le mode
+live, exige un compte `DU`, n'expose aucun port broker, journalise avant dispatch et transforme un
+timeout ambigu en réconciliation obligatoire plutôt qu'en nouvel envoi.
+
 Le test `assert_all_execution_paths_forbidden()` inspecte tous les fichiers Python du
 package pour les imports/constructeurs d’ordre interdits et `transmit=True`. Le script
 `scripts/security_gate.py` ajoute un scan de secrets à haute confiance et de capacités

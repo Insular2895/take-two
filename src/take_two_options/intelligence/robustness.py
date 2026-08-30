@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from take_two_options.intelligence.schemas import StressTestResult
 from take_two_options.intelligence.valuation import StrategyPathValuation
+from take_two_options.quantitative.pricing import require_contract_economics
 from take_two_options.thesis_scanner.schemas import ThesisCandidate
 
 
@@ -18,10 +19,15 @@ def run_stress_suite(
         if item.metrics.regime.value == "neutral"
     ]
     baseline = min(neutral, default=None)
-    spread_cost = sum(
-        (leg.quote.ask - leg.quote.bid) * leg.quantity * leg.quote.multiplier
-        for leg in candidate.base_candidate.legs
-    )
+    spread_cost = 0.0
+    for leg in candidate.base_candidate.legs:
+        if leg.quote.bid is None or leg.quote.ask is None:
+            raise ValueError("BLOCKED_BID_ASK_UNKNOWN")
+        spread_cost += (
+            (leg.quote.ask - leg.quote.bid)
+            * leg.quantity
+            * require_contract_economics(leg.quote)
+        )
     fees = candidate.base_candidate.risk.fees
     slippage = candidate.base_candidate.risk.slippage
     stable_points = [

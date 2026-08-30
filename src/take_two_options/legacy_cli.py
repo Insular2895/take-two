@@ -37,9 +37,7 @@ from take_two_options.calibration import (
     calibrate_dataset,
     render_calibration_markdown,
 )
-from take_two_options.data import FixtureDataProvider
-from take_two_options.domain import DecisionReport
-from take_two_options.engine import analyze_bundle
+from take_two_options.knowledge.schemas import DecisionReport
 from take_two_options.marketdata_data import (
     MarketDataError,
     MarketDataOptionBacktestSpec,
@@ -50,7 +48,6 @@ from take_two_options.marketdata_panel import (
     render_marketdata_panel_markdown,
     run_marketdata_panel,
 )
-from take_two_options.reporting import render_decision_journal, render_json, render_markdown
 from take_two_options.treasury_data import (
     TreasuryDataError,
     TreasuryYieldCurve,
@@ -135,32 +132,6 @@ def _alpaca_failure(error: Exception) -> NoReturn:
 def _marketdata_failure(error: Exception) -> NoReturn:
     typer.echo(f"MarketData.app read-only data error: {error}", err=True)
     raise typer.Exit(code=1)
-
-
-@app.command()
-def analyze(
-    fixture: Annotated[
-        Path,
-        typer.Option("--fixture", exists=True, readable=True, dir_okay=False, resolve_path=True),
-    ],
-    json_out: Annotated[Path | None, typer.Option("--json-out")] = None,
-    markdown_out: Annotated[Path | None, typer.Option("--markdown-out")] = None,
-    journal_out: Annotated[Path | None, typer.Option("--journal-out")] = None,
-    print_json: Annotated[bool, typer.Option("--print-json")] = False,
-) -> None:
-    """Analyze one explicit fixture and emit auditable research artifacts."""
-    report = analyze_bundle(FixtureDataProvider(fixture).load_bundle())
-    json_text = render_json(report)
-    _write(json_out, json_text)
-    _write(markdown_out, render_markdown(report))
-    _write(journal_out, render_decision_journal(report))
-    if print_json:
-        typer.echo(json_text)
-    else:
-        typer.echo(
-            f"{report.report_id}: {len(report.candidates)} candidates, "
-            f"{len(report.ranked_candidate_ids)} scored, order capability forbidden"
-        )
 
 
 @app.command()

@@ -50,6 +50,14 @@ cloud runtime. Close output is an immutable BAG-shaped preview with `transmit=fa
 human confirmation, and `order_capability=forbidden`. There is no cancel, modify, exercise,
 automatic retry, individual-leg close, or silent legging route.
 
+The IBKR telemetry path is a separate capability boundary. Cloudflare Access first requires a
+dedicated Service Auth token; the Worker then verifies a telemetry-only HMAC identity, timestamp,
+body hash and one-time nonce. Its secret is not accepted by broker claim/event routes, and the
+bridge HMAC is not accepted by the telemetry route. The exact-key payload rejects account IDs,
+unexpected identity fields, non-paper mode, non-TTWO positions, inconsistent quote midpoints,
+mismatched totals, stale collection times and oversized bodies. D1 contains only the latest
+redacted projection and the browser endpoint always returns `execution_enabled=false`.
+
 ## Secrets
 
 Cloudflare Access removes the application login password. `ACTION_PASSWORD_VERIFIER` is a keyed
@@ -63,3 +71,7 @@ identities, and every secret.
 The action password is defense in depth for an unlocked or stolen Access browser session. It does
 not protect against a complete Cloudflare account takeover capable of replacing Worker code or
 secrets. The no-order boundary remains the primary financial blast-radius control.
+
+Machine service tokens and the telemetry HMAC are encrypted operational secrets. They belong only
+in Cloudflare and the root-owned VM environment file, never in `.dev.vars`, screenshots, chat,
+logs, GitHub Actions output, or the repository.

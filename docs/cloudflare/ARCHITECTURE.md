@@ -14,13 +14,13 @@ browser (Mac / iPhone / iPad)
       Cloudflare Access
              |
              v
- Cloudflare Worker + bundled UI
-       |             |
-       v             v
-      D1     TTWOPositionMonitor
-                       |
-                       v
-              HTTPS market-data API
+ Cloudflare Worker + bundled UI <---- signed read-only telemetry ---- Oracle VM
+       |             |                                           |       |
+       v             v                                           |  IB Gateway paper
+      D1     TTWOPositionMonitor                                  |
+                       |                                           |
+                       v                                           |
+              HTTPS market-data API                                |
 ```
 
 There is no VPS, production Docker, PostgreSQL, Redis, reverse proxy, daemon, Queue, KV, R2,
@@ -72,7 +72,9 @@ future provider adapter should expose authoritative session state when one is se
 
 ## Truthful status
 
-The application has no provider configured and no broker synchronization. `SYNTHETIC_DEMO` and
-`LAST_IMPORTED_SNAPSHOT` remain visibly labelled. `read_only=true`, `transmit=false`,
-`what_if=true`, `human_confirmation_required=true`, and `order_capability=forbidden` are both
-contract and runtime boundaries.
+Research monitoring may still have no market-data provider configured. Separately, the Oracle VM
+can publish a redacted, TTWO-only IBKR Paper snapshot to a signed telemetry-only route. D1 stores
+only the latest validated broker snapshot; the authenticated UI labels stale/offline data and
+never receives broker or machine credentials. The publisher has no order route or broker mutation
+method. `read_only=true`, `transmit=false`, `what_if=true`, `human_confirmation_required=true`,
+`execution_enabled=false`, and `order_capability=forbidden` remain contract and runtime boundaries.

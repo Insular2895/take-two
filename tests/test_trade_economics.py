@@ -25,7 +25,6 @@ from take_two_options.domain import (
     MarketDataBundle,
     PositionSide,
 )
-from take_two_options.engine import analyze_bundle
 from take_two_options.pricing import analyze_risk, estimate_execution
 from take_two_options.quantitative.contracts import Measure
 from take_two_options.quantitative.trade_economics import (
@@ -41,7 +40,6 @@ from take_two_options.reporting.trade_economics import (
     render_trade_economics_markdown,
 )
 from take_two_options.trade_economics_models import (
-    AnalysisMode,
     BreakevenSolverConfiguration,
     DistributionAvailabilityStatus,
     DividendTreatmentMode,
@@ -451,20 +449,17 @@ def test_trade_economics_ticket_remains_backward_readable(schema_version: str) -
     assert ticket.budget_diagnostics is None
 
 
-def test_engine_deep_mode_attaches_tickets_only_to_configured_top_candidates() -> None:
+def test_deep_ticket_generation_is_explicit_and_execution_free() -> None:
     bundle = _fast_bundle()
-    bundle.trade_economics.analysis_mode = AnalysisMode.DEEP_ANALYSIS
-    bundle.trade_economics.deep_analysis_candidate_limit = 2
     bundle.trade_economics.time_decay_horizons_days = [1, 7]
     bundle.trade_economics.scenario_horizons_days = [7]
     bundle.trade_economics.spot_grid.values = [0.85, 1.15]
     bundle.trade_economics.breakeven_solver.grid_points = 51
-    report = analyze_bundle(bundle)
-    tickets = [
-        candidate.trade_economics
-        for candidate in report.candidates
-        if candidate.trade_economics is not None
-    ]
+    candidates = [candidate for candidate in generate_candidates(bundle) if candidate.legs][:2]
+    tickets = []
+    for candidate in candidates:
+        analyze_risk(candidate, bundle)
+        tickets.append(build_trade_economics_ticket(candidate, bundle))
     assert len(tickets) == 2
     assert all(ticket.order_capability == "forbidden" for ticket in tickets)
 
@@ -673,45 +668,36 @@ def test_spot_paths_require_an_explicit_future_iv_valuation_rule() -> None:
     assert "MODEL_IMPLIED_UNDER_DECLARED_IV_RULE" in " ".join(available.assumptions)
 
 
-def test_engine_bridges_exact_canonical_candidate_scores_into_ranked_deep_ticket() -> None:
+def test_ticket_preserves_explicit_candidate_five_scores_without_legacy_ranking() -> None:
     bundle = _fast_bundle()
-    screen_bundle = bundle.model_copy(deep=True)
-    screen_bundle.trade_economics.analysis_mode = AnalysisMode.SCREEN
-    canonical_rank = analyze_bundle(screen_bundle).ranked_candidate_ids
-    bundle.trade_economics.analysis_mode = AnalysisMode.DEEP_ANALYSIS
-    bundle.trade_economics.deep_analysis_candidate_limit = 1
+    candidate = next(
+        item for item in generate_candidates(bundle) if item.id == "ttwo-long-call"
+    )
+    analyze_risk(candidate, bundle)
     report = FiveScoreReport.model_validate_json(
         (ROOT / "reports/pre_opra/five_scores_2026-08-08.json").read_text(encoding="utf-8")
     )
-    canonical = {
-        candidate_id: report.model_copy(
-            update={
-                "candidate_id": candidate_id,
-                "report_id": f"synthetic-{candidate_id}",
-            }
-        )
-        for candidate_id in canonical_rank
-    }
-    decision = analyze_bundle(
-        bundle,
-        canonical_five_score_reports=canonical,
-        canonical_ranked_candidate_ids=canonical_rank,
+    source = report.model_copy(
+        update={
+            "candidate_id": candidate.id,
+            "report_id": f"synthetic-{candidate.id}",
+        }
     )
-    assert decision.ranked_candidate_ids == canonical_rank
-    top_id = decision.ranked_candidate_ids[0]
-    top = next(candidate for candidate in decision.candidates if candidate.id == top_id)
-    assert top.trade_economics is not None
-    scores = top.trade_economics.five_scores
+    ticket = build_trade_economics_ticket(
+        candidate,
+        bundle,
+        canonical_five_score_report=source,
+    )
+    scores = ticket.five_scores
     assert scores is not None
     assert scores.scope is FiveScoreScope.CANDIDATE
-    source = canonical[top_id]
     assert scores.opportunity.score_value == source.opportunity.score_value
     assert scores.risk.score_value == source.risk.score_value
     assert scores.evidence.score_value == source.evidence.score_value
     assert scores.model_agreement.score_value == source.model_agreement.score_value
     assert scores.execution_quality.score_value == source.execution_quality.score_value
-    assert top.trade_economics.read_only is True
-    assert top.trade_economics.transmit is False
+    assert ticket.read_only is True
+    assert ticket.transmit is False
 
 
 def _event_scenario(event_date: date) -> VolatilityScenario:
