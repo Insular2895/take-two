@@ -11,7 +11,7 @@ from take_two_options.candidate_generation.enumerator import enumerate_candidate
 from take_two_options.candidate_generation.factory import terminal_payoff
 from take_two_options.candidate_generation.pruning import prune_candidate
 from take_two_options.decision.request import load_trade_request
-from take_two_options.domain import OptionType, PositionSide
+from take_two_options.domain import ExerciseStyle, OptionType, PositionSide
 from take_two_options.forecasting.contracts import HistoricalReturnSeries
 from take_two_options.knowledge.compiler import compile_knowledge
 from take_two_options.knowledge.conflicts import detect_conflicts
@@ -34,6 +34,7 @@ from take_two_options.maintenance.rolling import roll_review_required
 from take_two_options.maintenance.state_machine import PositionState, transition
 from take_two_options.optimization.parameter_stability import local_stability
 from take_two_options.optimization.trial_registry import TrialRegistry
+from take_two_options.quantitative.contracts import EvidenceLevel
 from take_two_options.reporting import ibkr_ticket
 from take_two_options.reporting.decision_report import write_decision_report
 from take_two_options.reporting.ibkr_ticket import (
@@ -82,6 +83,7 @@ def _quote(
         symbol=f"TTWO{expiration:%y%m%d}C{int(strike * 1000):08d}",
         expiration=expiration,
         option_type=OptionType.CALL,
+        exercise_style=ExerciseStyle.AMERICAN,
         strike=strike,
         bid=bid,
         ask=ask,
@@ -90,6 +92,10 @@ def _quote(
         implied_volatility=0.30,
         delta=None,
         quote_timestamp=datetime(2026, 7, 24, 20, tzinfo=UTC),
+        multiplier=100,
+        multiplier_status=EvidenceLevel.KNOWN,
+        contract_adjustment_status=EvidenceLevel.KNOWN,
+        deliverable_description="standard listed deliverable",
         price_quality="eod_bid_ask",
         source_id="test-chain",
     )

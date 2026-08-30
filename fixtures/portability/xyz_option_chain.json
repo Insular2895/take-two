@@ -12,6 +12,7 @@
       "expiration": "2026-12-18",
       "option_type": "call",
       "strike": 90.0,
+      "exercise_style": "american",
       "bid": 14.0,
       "ask": 14.2,
       "volume": 40,
@@ -20,6 +21,9 @@
       "delta": 0.70,
       "quote_timestamp": "2026-01-02T20:00:00Z",
       "multiplier": 100,
+      "multiplier_status": "KNOWN",
+      "contract_adjustment_status": "KNOWN",
+      "deliverable_description": "standard listed deliverable",
       "price_quality": "indicative",
       "source_id": "xyz-synthetic-fixture"
     },
@@ -28,6 +32,7 @@
       "expiration": "2026-12-18",
       "option_type": "call",
       "strike": 100.0,
+      "exercise_style": "american",
       "bid": 8.0,
       "ask": 8.2,
       "volume": 50,
@@ -36,6 +41,9 @@
       "delta": 0.52,
       "quote_timestamp": "2026-01-02T20:00:00Z",
       "multiplier": 100,
+      "multiplier_status": "KNOWN",
+      "contract_adjustment_status": "KNOWN",
+      "deliverable_description": "standard listed deliverable",
       "price_quality": "indicative",
       "source_id": "xyz-synthetic-fixture"
     },
@@ -44,6 +52,7 @@
       "expiration": "2026-12-18",
       "option_type": "call",
       "strike": 110.0,
+      "exercise_style": "american",
       "bid": 4.0,
       "ask": 4.2,
       "volume": 45,
@@ -52,6 +61,9 @@
       "delta": 0.35,
       "quote_timestamp": "2026-01-02T20:00:00Z",
       "multiplier": 100,
+      "multiplier_status": "KNOWN",
+      "contract_adjustment_status": "KNOWN",
+      "deliverable_description": "standard listed deliverable",
       "price_quality": "indicative",
       "source_id": "xyz-synthetic-fixture"
     }

@@ -5,9 +5,9 @@ from __future__ import annotations
 import math
 from collections import Counter
 from dataclasses import dataclass
+from datetime import datetime, time, timedelta
 from statistics import fmean
 
-from take_two_options.domain import OptionType
 from take_two_options.intelligence._numpy import NDArray, np
 from take_two_options.intelligence.schemas import (
     CandidateExitPlan,
@@ -19,12 +19,21 @@ from take_two_options.intelligence.schemas import (
     StrategyModelMetrics,
 )
 from take_two_options.intelligence.stochastic import StochasticPathSet
-from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS
+from take_two_options.quantitative.contracts import (
+    EvidenceLevel,
+    VolatilityPolicy,
+)
 from take_two_options.quantitative.model_uncertainty import (
     EnsembleMemberEstimate,
     EnsembleWeightBasis,
     ModelUncertaintyReport,
     summarize_model_ensemble,
+)
+from take_two_options.quantitative.pricing import (
+    CanonicalMarketState,
+    VolatilityBatchState,
+    price_option_batch,
+    require_contract_economics,
 )
 from take_two_options.thesis_scanner.schemas import ThesisCandidate, ThesisScanReport
 
@@ -37,50 +46,6 @@ class StrategyPathValuation:
     pnl_usd: NDArray
     exit_days: NDArray
     metrics: StrategyModelMetrics
-
-
-def _normal_cdf(values: NDArray) -> NDArray:
-    """Fast vectorized normal CDF approximation with sub-basis-point accuracy."""
-    absolute = np.abs(values)
-    t = 1.0 / (1.0 + 0.2316419 * absolute)
-    density = np.exp(-0.5 * absolute**2) / math.sqrt(2 * math.pi)
-    polynomial = t * (
-        0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429)))
-    )
-    positive = 1.0 - density * polynomial
-    return np.where(values >= 0, positive, 1.0 - positive)
-
-
-def _black_scholes(
-    *,
-    spot: NDArray,
-    strike: float,
-    time_years: float,
-    volatility: NDArray,
-    rate: float,
-    dividend_yield: float,
-    option_type: OptionType,
-) -> NDArray:
-    if time_years <= 0:
-        return (
-            np.maximum(spot - strike, 0.0)
-            if option_type is OptionType.CALL
-            else np.maximum(strike - spot, 0.0)
-        )
-    safe_spot = np.maximum(spot, 1e-12)
-    safe_volatility = np.maximum(volatility, 1e-6)
-    root_time = math.sqrt(time_years)
-    d1 = (
-        np.log(safe_spot / strike) + (rate - dividend_yield + 0.5 * safe_volatility**2) * time_years
-    ) / (safe_volatility * root_time)
-    d2 = d1 - safe_volatility * root_time
-    if option_type is OptionType.CALL:
-        return safe_spot * math.exp(-dividend_yield * time_years) * _normal_cdf(
-            d1
-        ) - strike * math.exp(-rate * time_years) * _normal_cdf(d2)
-    return strike * math.exp(-rate * time_years) * _normal_cdf(-d2) - safe_spot * math.exp(
-        -dividend_yield * time_years
-    ) * _normal_cdf(-d1)
 
 
 def generate_exit_plan(
@@ -278,20 +243,46 @@ def _position_values(
     steps = path_set.spots.shape[1] - 1
     day_grid = np.linspace(0.0, horizon_days, steps + 1)
     values = np.zeros_like(path_set.spots)
+    market_state = CanonicalMarketState(
+        risk_free_rate=rate,
+        risk_free_rate_status=EvidenceLevel.ESTIMATED,
+        continuous_dividend_yield=dividend_yield,
+        dividend_status=EvidenceLevel.ESTIMATED,
+        source_ids=("v11-intelligence-policy",),
+    )
     for step, day in enumerate(day_grid):
-        remaining_days = max(candidate.dte - day, 0.0)
-        volatility = np.sqrt(np.maximum(path_set.variances[:, step], 1e-12))
+        elapsed_days = min(int(round(float(day))), candidate.dte)
+        variances = path_set.variances[:, step]
+        if bool(np.any(variances <= 0)):
+            raise ValueError("BLOCKED_NON_POSITIVE_PATH_VARIANCE")
+        volatilities = np.sqrt(variances)
         for leg in candidate.base_candidate.legs:
-            option_value = _black_scholes(
-                spot=path_set.spots[:, step],
-                strike=leg.quote.strike,
-                time_years=remaining_days / DEFAULT_QUANT_CONVENTIONS.calendar_day_basis,
-                volatility=volatility,
-                rate=rate,
-                dividend_yield=dividend_yield,
-                option_type=leg.quote.option_type,
+            multiplier = require_contract_economics(leg.quote)
+            valuation_date = leg.quote.expiration - timedelta(
+                days=max(candidate.dte - elapsed_days, 0)
             )
-            values[:, step] += leg.side.sign * leg.quantity * leg.quote.multiplier * option_value
+            valuation_time = datetime.combine(valuation_date, time.min)
+            result = price_option_batch(
+                leg.quote,
+                market_state,
+                spots=tuple(float(value) for value in path_set.spots[:, step]),
+                valuation_time=valuation_time,
+                volatility_state=VolatilityBatchState(
+                    annual_volatilities=tuple(float(value) for value in volatilities),
+                    policy=VolatilityPolicy.CONFIGURED_STRESS,
+                    evidence=EvidenceLevel.UNVALIDATED,
+                    source_id=path_set.parameter_set_id,
+                    assumptions=(
+                        "Path variance is an unvalidated V11 scenario input",
+                    ),
+                ),
+            )
+            values[:, step] += (
+                leg.side.sign
+                * leg.quantity
+                * multiplier
+                * np.asarray(result.prices_per_share, dtype=float)
+            )
     return values, day_grid
 
 
@@ -368,7 +359,7 @@ def _empirical_metrics(
     half = max(paths // 2, 1)
     half_mean = float(np.mean(realized[:half]))
     full_mean = float(np.mean(realized))
-    convergence_delta = abs(half_mean - full_mean) / max(cost, 1e-9)
+    convergence_delta = abs(half_mean - full_mean) / cost
     convergence_status = "converged" if convergence_delta <= 0.10 else "unstable"
     horizon = float(day_grid[-1])
     warnings = list(path_set.warnings)
@@ -510,7 +501,9 @@ def summarize_robustness(
     ]
     profitable_fraction = sum(value > 0 for value in expectations) / len(expectations)
     dispersion = max(neutral) - min(neutral) if len(neutral) > 1 else 0.0
-    cost = max(candidate.execution.total_cost_usd, 1e-9)
+    cost = candidate.execution.total_cost_usd
+    if cost <= 0:
+        raise ValueError("BLOCKED_CAPITAL_AT_RISK_UNKNOWN")
     dispersion_penalty = min(dispersion / cost, 1.0)
     adverse_penalty = min(max(adverse_cvars, default=0.0) / cost, 1.0)
     score = 100 * max(

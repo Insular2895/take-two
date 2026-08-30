@@ -20,6 +20,7 @@ from take_two_options.knowledge.schemas import (
     CompiledStrategyCandidate,
     QuoteSnapshot,
 )
+from take_two_options.quantitative.pricing import require_contract_economics
 from take_two_options.thesis_scanner.enumeration import EnumeratedCandidate
 from take_two_options.thesis_scanner.schemas import (
     IVCase,
@@ -42,6 +43,19 @@ from take_two_options.thesis_scanner.schemas import (
 class EvaluationResult:
     candidates: tuple[ThesisCandidate, ...]
     blocked_reasons: dict[str, int]
+
+
+def _quote_economics(quote: QuoteSnapshot) -> tuple[float, float, int]:
+    if quote.bid is None or quote.ask is None:
+        raise ValueError("BLOCKED_BID_ASK_UNKNOWN")
+    return quote.bid, quote.ask, require_contract_economics(quote)
+
+
+def _known_maximum_loss(candidate: CompiledStrategyCandidate) -> float:
+    maximum_loss = candidate.risk.maximum_loss
+    if maximum_loss is None or maximum_loss <= 0:
+        raise ValueError("BLOCKED_CAPITAL_AT_RISK_UNKNOWN")
+    return maximum_loss
 
 
 def terminal_value_thresholds(
@@ -110,7 +124,8 @@ def _base_volatility(
 ) -> tuple[float, str | None]:
     if quote.implied_volatility is not None:
         return quote.implied_volatility, None
-    midpoint = (quote.bid + quote.ask) / 2
+    bid, ask, _ = _quote_economics(quote)
+    midpoint = (bid + ask) / 2
     analytics = historical_option_analytics(
         spot=chain.spot,
         strike=quote.strike,
@@ -170,6 +185,7 @@ def _position_value(
         return terminal_payoff(legs, spot)
     value = 0.0
     for leg in legs:
+        _, _, multiplier = _quote_economics(leg.quote)
         volatility = min(
             max(volatility_by_symbol[leg.quote.symbol] * volatility_multiplier, 0.0001),
             5.0,
@@ -184,7 +200,7 @@ def _position_value(
             rate=policy.risk_free_rate,
             dividend_yield=policy.continuous_dividend_yield,
         )
-        value += leg.side.sign * leg.quantity * leg.quote.multiplier * option_value
+        value += leg.side.sign * leg.quantity * multiplier * option_value
     return value
 
 
@@ -195,10 +211,12 @@ def _execution(
     policy: ThesisScanPolicy,
 ) -> ThesisExecution:
     candidate = item.candidate
-    theoretical_mid = sum(
-        leg.side.sign * leg.quantity * leg.quote.multiplier * ((leg.quote.bid + leg.quote.ask) / 2)
-        for leg in candidate.legs
-    )
+    theoretical_mid = 0.0
+    for leg in candidate.legs:
+        bid, ask, multiplier = _quote_economics(leg.quote)
+        theoretical_mid += (
+            leg.side.sign * leg.quantity * multiplier * ((bid + ask) / 2)
+        )
     strategy_units = min(leg.quantity for leg in candidate.legs if leg.side is PositionSide.LONG)
     return ThesisExecution(
         theoretical_mid_debit_usd=round(theoretical_mid, 4),
@@ -254,6 +272,7 @@ def _net_greeks(
 ) -> NetGreeks:
     totals = {"delta": 0.0, "gamma": 0.0, "theta": 0.0, "vega": 0.0, "rho": 0.0}
     for leg in item.candidate.legs:
+        _, _, multiplier = _quote_economics(leg.quote)
         analytics = american_scenario_analytics(
             contract_symbol=leg.quote.symbol,
             spot=chain.spot,
@@ -265,7 +284,7 @@ def _net_greeks(
             rate=policy.risk_free_rate,
             dividend_yield=policy.continuous_dividend_yield,
         )
-        scale = leg.side.sign * leg.quantity * leg.quote.multiplier
+        scale = leg.side.sign * leg.quantity * multiplier
         for name in totals:
             totals[name] += scale * getattr(analytics, name)
     return NetGreeks(**{name: round(value, 6) for name, value in totals.items()})
@@ -496,20 +515,21 @@ def _decision_metrics(
     leg_execution: list[LegExecutionMetric] = []
     for leg in candidate.legs:
         quote = leg.quote
+        bid, ask, _ = _quote_economics(quote)
         quote_timestamp = _aware(quote.quote_timestamp)
         age_seconds = max(0, int((_aware(scan_time) - quote_timestamp).total_seconds()))
         quote_ages.append(age_seconds)
-        midpoint = (quote.bid + quote.ask) / 2
+        midpoint = (bid + ask) / 2
         leg_execution.append(
             LegExecutionMetric(
                 symbol=quote.symbol,
                 quote_timestamp=quote_timestamp,
                 quote_age_seconds=age_seconds,
-                bid=quote.bid,
-                ask=quote.ask,
+                bid=bid,
+                ask=ask,
                 midpoint=round(midpoint, 6),
                 relative_spread=round(
-                    (quote.ask - quote.bid) / midpoint if midpoint > 0 else 0,
+                    (ask - bid) / midpoint if midpoint > 0 else 0,
                     8,
                 ),
                 open_interest=quote.open_interest,
@@ -528,7 +548,7 @@ def _decision_metrics(
         butterfly_center,
         profit_zone,
     ) = _structure_language(candidate)
-    maximum_loss = candidate.risk.maximum_loss
+    maximum_loss = _known_maximum_loss(candidate)
     maximum_gain = candidate.risk.maximum_gain
     total_cost = execution.total_cost_usd
     strategy_units = min(
@@ -704,7 +724,8 @@ def evaluate_candidates(
                 8,
             )
         dte = (candidate.legs[0].quote.expiration - chain.as_of.date()).days
-        modeled_return = max(targets.values()) / candidate.risk.maximum_loss
+        maximum_loss = _known_maximum_loss(candidate)
+        modeled_return = max(targets.values()) / maximum_loss
         status = ThesisCandidateStatus.WATCHLIST if warnings else ThesisCandidateStatus.ELIGIBLE
         greeks = _net_greeks(
             item,
@@ -742,7 +763,7 @@ def evaluate_candidates(
                 scenario_points=scenarios,
                 target_pnl_stable_at_catalyst_usd=targets,
                 maximum_loss_eur=round(
-                    candidate.risk.maximum_loss / policy.eur_usd_rate,
+                    maximum_loss / policy.eur_usd_rate,
                     4,
                 ),
                 maximum_gain_eur=(

@@ -3,20 +3,29 @@
 from __future__ import annotations
 
 from take_two_options.knowledge.schemas import CompiledStrategyCandidate
+from take_two_options.quantitative.contracts import Measure, ModelEligibility
 
 
 def _objectives(candidate: CompiledStrategyCandidate) -> tuple[float, ...]:
-    metrics = candidate.evaluation.model_metrics
-    probability_profit = min((item.probability_profit for item in metrics), default=0.0)
-    cvar = max((item.cvar_95 for item in metrics), default=float("inf"))
-    mean_exit = max((item.mean_exit_days for item in metrics), default=float("inf"))
-    expectation = candidate.evaluation.conservative_expected_pnl or -float("inf")
-    stability = candidate.evaluation.local_stability or 0.0
+    metrics = [
+        item
+        for item in candidate.evaluation.model_metrics
+        if item.eligibility is ModelEligibility.DECISION_ELIGIBLE
+        and item.measure is Measure.REAL_WORLD
+    ]
+    expectation = candidate.evaluation.conservative_expected_pnl
+    maximum_loss = candidate.risk.maximum_loss
+    stability = candidate.evaluation.local_stability
+    if not metrics or expectation is None or maximum_loss is None or stability is None:
+        raise ValueError("blocked candidates cannot enter Pareto objectives")
+    probability_profit = min(item.probability_profit for item in metrics)
+    cvar = max(item.cvar_95 for item in metrics)
+    mean_exit = max(item.mean_exit_days for item in metrics)
     return (
         expectation,
         probability_profit,
         -cvar,
-        -candidate.risk.maximum_loss,
+        -maximum_loss,
         -max(candidate.risk.total_cost, 0),
         stability,
         -candidate.evaluation.complexity_penalty,
@@ -33,7 +42,14 @@ def dominates(left: CompiledStrategyCandidate, right: CompiledStrategyCandidate)
 
 
 def pareto_rank(candidates: list[CompiledStrategyCandidate]) -> list[list[str]]:
-    remaining = list(candidates)
+    remaining = [
+        candidate
+        for candidate in candidates
+        if candidate.evaluation.decision_status is ModelEligibility.DECISION_ELIGIBLE
+        and candidate.evaluation.conservative_expected_pnl is not None
+        and candidate.risk.maximum_loss is not None
+        and candidate.evaluation.local_stability is not None
+    ]
     fronts: list[list[str]] = []
     rank = 1
     while remaining:

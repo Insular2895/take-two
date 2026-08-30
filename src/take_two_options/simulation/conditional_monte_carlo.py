@@ -14,7 +14,11 @@ from take_two_options.forecasting.regimes import (
     log_returns,
     realized_volatility,
 )
-from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS, Measure
+from take_two_options.quantitative.contracts import (
+    DEFAULT_QUANT_CONVENTIONS,
+    Measure,
+    ModelEligibility,
+)
 
 
 @dataclass(frozen=True)
@@ -25,6 +29,21 @@ class ConditionalPathSet:
     calibration_observations: int
     assumptions: tuple[str, ...]
     measure: Measure = Measure.REAL_WORLD
+    eligibility: ModelEligibility = ModelEligibility.UNVALIDATED
+
+
+def _next_empirical_gbm_spot(
+    current_spot: float,
+    *,
+    mean_log_return: float,
+    daily_log_return_volatility: float,
+    gaussian_draw: float,
+) -> float:
+    """Advance an empirical log-return model without a second variance correction."""
+
+    return current_spot * math.exp(
+        mean_log_return + daily_log_return_volatility * gaussian_draw
+    )
 
 
 def simulate_conditional_paths(
@@ -42,8 +61,10 @@ def simulate_conditional_paths(
     conditioned = conditional_returns(returns, regime)
     volatility = realized_volatility(returns)
     assert volatility is not None
-    daily_volatility = DEFAULT_QUANT_CONVENTIONS.deannualize_volatility(volatility)
-    daily_mean = fmean(returns)
+    daily_log_return_volatility = DEFAULT_QUANT_CONVENTIONS.deannualize_volatility(
+        volatility
+    )
+    mean_log_return = fmean(returns)
 
     gbm_rng = random.Random(seed)
     gbm_paths: list[list[float]] = []
@@ -51,11 +72,11 @@ def simulate_conditional_paths(
         values = [spot]
         for _day in range(horizon_days):
             values.append(
-                values[-1]
-                * math.exp(
-                    daily_mean
-                    - 0.5 * daily_volatility * daily_volatility
-                    + daily_volatility * gbm_rng.gauss(0.0, 1.0)
+                _next_empirical_gbm_spot(
+                    values[-1],
+                    mean_log_return=mean_log_return,
+                    daily_log_return_volatility=daily_log_return_volatility,
+                    gaussian_draw=gbm_rng.gauss(0.0, 1.0),
                 )
             )
         gbm_paths.append(values)
@@ -75,9 +96,11 @@ def simulate_conditional_paths(
             paths=gbm_paths,
             calibration_observations=len(returns),
             assumptions=(
-                "Historical drift and volatility estimated before the run cutoff",
+                "Empirical mean log return and volatility estimated before the run cutoff",
                 "Constant daily volatility within each path",
+                "UNVALIDATED PRE-OPRA forecast model; not decision eligible",
             ),
+            eligibility=ModelEligibility.UNVALIDATED,
         ),
         ConditionalPathSet(
             model_id="conditional_historical_bootstrap",
@@ -86,7 +109,9 @@ def simulate_conditional_paths(
             calibration_observations=len(conditioned),
             assumptions=(
                 f"Returns sampled from the {regime} regime when enough observations exist",
-                "Historical daily-return ordering is not preserved",
+                "IID resampling does not preserve historical temporal dependence",
+                "DIAGNOSTIC_ONLY until real-data validation exists",
             ),
+            eligibility=ModelEligibility.DIAGNOSTIC_ONLY,
         ),
     ]

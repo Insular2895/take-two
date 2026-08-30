@@ -6,7 +6,20 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from take_two_options.knowledge.schemas import CandidateLeg
 from take_two_options.thesis_scanner.schemas import ThesisScanReport
+
+
+def _leg_quote_row(leg: CandidateLeg) -> str:
+    if leg.quote.bid is None or leg.quote.ask is None:
+        raise ValueError("BLOCKED_BID_ASK_UNKNOWN")
+    midpoint = (leg.quote.bid + leg.quote.ask) / 2
+    return (
+        f"| {'ACHETER' if leg.side.value == 'long' else 'VENDRE'} | "
+        f"{leg.quantity} | `{leg.quote.symbol}` | {leg.quote.strike:g} | "
+        f"${leg.quote.bid:,.2f} | ${leg.quote.ask:,.2f} | "
+        f"${midpoint:,.2f} | {leg.quote.multiplier} |"
+    )
 
 
 def markdown_report(report: ThesisScanReport) -> str:
@@ -128,16 +141,7 @@ def markdown_report(report: ThesisScanReport) -> str:
                 "",
                 "| Action | Quantité | OCC | Strike | Bid | Ask | Mid | Multiplicateur |",
                 "|---|---:|---|---:|---:|---:|---:|---:|",
-                *[
-                    (
-                        f"| {'ACHETER' if leg.side.value == 'long' else 'VENDRE'} | "
-                        f"{leg.quantity} | `{leg.quote.symbol}` | {leg.quote.strike:g} | "
-                        f"${leg.quote.bid:,.2f} | ${leg.quote.ask:,.2f} | "
-                        f"${((leg.quote.bid + leg.quote.ask) / 2):,.2f} | "
-                        f"{leg.quote.multiplier} |"
-                    )
-                    for leg in candidate.base_candidate.legs
-                ],
+                *[_leg_quote_row(leg) for leg in candidate.base_candidate.legs],
                 "",
                 "### Seuils de performance à l'échéance",
                 "",
@@ -655,7 +659,8 @@ multiLineChart($("dates"),dateSeries);
 const spots=[...new Set(stable.map(p=>p.spot))];$("heatmap").replaceChildren();$("heatmap").style.gridTemplateColumns=`90px repeat(${{spots.length}},minmax(65px,1fr))`;
 $("heatmap").append(E("div","Date / spot","muted"));spots.forEach(s=>$("heatmap").append(E("div","$"+s,"muted")));
 dates.forEach(d=>{{$("heatmap").append(E("div",d,"muted"));spots.forEach(s=>{{const p=stable.find(x=>x.valuation_date===d&&x.spot===s),
-n=E("div",p?money(p.pnl_usd):"—");if(p){{const strength=Math.min(Math.abs(p.pnl_usd)/Math.max(c.base_candidate.risk.maximum_loss,1),1);
+n=E("div",p?money(p.pnl_usd):"—");if(p){{const capital=c.base_candidate.risk.maximum_loss,
+strength=capital!==null&&capital>0?Math.min(Math.abs(p.pnl_usd)/capital,1):0;
 n.style.background=p.pnl_usd>=0?`rgba(46,230,166,${{.12+.55*strength}})`:`rgba(255,107,122,${{.12+.55*strength}})`}}$("heatmap").append(n)}})}});
 const ivRows=["iv_down","iv_stable","iv_up"].map(k=>{{const p=c.scenario_points.find(x=>x.valuation_date===R.request.catalyst_date&&Math.abs(x.spot-target)<.001&&x.iv_case===k);
 return {{label:k,value:p?p.pnl_usd:0}}}});valueBars($("iv"),ivRows);

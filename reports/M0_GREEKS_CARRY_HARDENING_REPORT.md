@@ -5,6 +5,11 @@ Repository mode: read-only research
 Final holdout dataset: `UNOPENED` and not accessed
 OPRA/provider connection: not attempted
 
+> Historical file note (2026-08-30): the file list below describes M0 as delivered. The former
+> `src/take_two_options/engine.py` was subsequently migrated into the canonical
+> `src/take_two_options/decision/pipeline.py` orchestration and deleted during PRE-OPRA engine
+> consolidation.
+
 ## 1. Initial state
 
 The repository already had a QuantLib finite-difference American pricer, analytic European

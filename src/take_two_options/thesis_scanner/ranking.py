@@ -13,6 +13,13 @@ from take_two_options.thesis_scanner.schemas import (
 )
 
 
+def _known_maximum_loss(candidate: ThesisCandidate) -> float:
+    maximum_loss = candidate.base_candidate.risk.maximum_loss
+    if maximum_loss is None or maximum_loss <= 0:
+        raise ValueError("BLOCKED_CAPITAL_AT_RISK_UNKNOWN")
+    return maximum_loss
+
+
 def _clamp(value: float) -> float:
     return min(max(value, 0.0), 1.0)
 
@@ -31,7 +38,8 @@ def _criteria(
 ) -> dict[str, float]:
     base = candidate.base_candidate
     budget_usd = request.budget_eur * policy.eur_usd_rate
-    loss_ratio = base.risk.maximum_loss / budget_usd
+    maximum_loss = _known_maximum_loss(candidate)
+    loss_ratio = maximum_loss / budget_usd
     reduced_loss = _clamp(1 - loss_ratio)
     break_evens = base.risk.break_even_points
     nearest_break_even = (
@@ -43,6 +51,8 @@ def _criteria(
     spread_scores: list[float] = []
     liquidity_scores: list[float] = []
     for leg in base.legs:
+        if leg.quote.bid is None or leg.quote.ask is None:
+            raise ValueError("BLOCKED_BID_ASK_UNKNOWN")
         midpoint = (leg.quote.bid + leg.quote.ask) / 2
         relative_spread = (
             (leg.quote.ask - leg.quote.bid) / midpoint
@@ -78,12 +88,12 @@ def _criteria(
         Architecture.LONG_CALL: 0.45,
     }[candidate.architecture]
     target_returns = [
-        pnl / max(base.risk.maximum_loss, 1)
+        pnl / maximum_loss
         for pnl in candidate.target_pnl_stable_at_catalyst_usd.values()
     ]
     positive_target_share = sum(value > 0 for value in target_returns) / len(target_returns)
     payoff_ratio = (
-        base.risk.maximum_gain / max(base.risk.maximum_loss, 1)
+        base.risk.maximum_gain / maximum_loss
         if base.risk.maximum_gain is not None
         else max(target_returns)
     )
