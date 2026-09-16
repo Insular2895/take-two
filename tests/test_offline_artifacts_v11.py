@@ -30,6 +30,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
     assert {path.name for path in schema_paths} == {
         "baseline_comparison.schema.json",
         "analysis_budget_request.schema.json",
+        "broker_what_if_evidence.schema.json",
         "comparable_panel_dataset.schema.json",
         "backtest_report.schema.json",
         "calibration_report.schema.json",
@@ -44,6 +45,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
         "historical_dataset_manifest.schema.json",
         "historical_option_dataset_summary.schema.json",
         "historical_surface_report.schema.json",
+        "live_combo_quote.schema.json",
         "live_option_chain_snapshot.schema.json",
         "market_context_summary.schema.json",
         "holdout_ledger_entry.schema.json",

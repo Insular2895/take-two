@@ -31,11 +31,14 @@ pytest -q
 Les fichiers `.env*` sont ignorés par Git, sauf exemple sans secret. Le scanner vérifie
 les fichiers suivis sans afficher le contenu d’un environnement local.
 
-## État de préparation au 18 août 2026
+## État de préparation au 16 septembre 2026
 
 - frontière d'exécution et scan offline : `COMPLETE_SOFTWARE_CONTROLS` ;
-- exemple IBKR : paramètres de socket non secrets uniquement, entitlement et licence à
-  `false`, aucune connexion ;
+- IBKR : handshake paper et compte `DU` observés le 25 août dans le bridge Oracle ; le provider
+  de chaîne ajouté en septembre est testé hors ligne, désarmé sans `--connect-read-only` et bloqué
+  avant I/O tant que l'entitlement et la licence ne sont pas confirmés ;
+- transport de chaîne : loopback, paper et compte `DU` obligatoires ; aucune importation de type
+  d'ordre, aucun submit/modify/cancel/exercise ;
 - audit de frontière :
   [`audits/PRE_ENTITLEMENT_BOUNDARY_2026-08-18.md`](audits/PRE_ENTITLEMENT_BOUNDARY_2026-08-18.md) ;
 - revue indépendante, threat model, SAST/dépendances, pentest et réponse à incident :

@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased — 2026-09-16
+
+### IBKR read-only option-chain adapter and human study dossier
+
+- Added a paper-only, loopback-only IBKR market-data provider using the official TWS API at runtime,
+  with contract qualification, bounded option-chain snapshots, spot, bid/ask, sizes, volume, open
+  interest, model Greeks and explicit timestamp provenance.
+- Added governed entitlement/licence gates before network I/O, TTWO allowlisting, bounded retry,
+  pacing, a short in-memory cache with no stale fallback, strict completeness and deterministic
+  hashes.
+- Added BAG snapshot quotes and comparison with executable per-leg synthetic prices; the signed
+  convention remains unconfirmed until observed in a real session.
+- Added an ingestion-only broker what-if evidence contract without adding order imports or broker
+  order methods.
+- Added the explicitly armed `ttwo-options data ibkr-chain --connect-read-only` command and two
+  generated JSON Schemas; private IBKR capture outputs are excluded from Git.
+- Added a 15-chapter French review dossier under `docs_v2/_review`, aligned stale current-state
+  documentation, and preserved the distinction between coded, offline-tested and live-observed.
+- No IBKR connection was made for this checkpoint. Entitlement, licence, full-chain behavior,
+  what-if and shadow/paper validation remain open; execution remains forbidden.
+
 ## 0.12.8 — 2026-08-25
 
 ### Persistent IBKR Paper read-only telemetry

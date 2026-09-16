@@ -1,0 +1,128 @@
+{
+  "$id": "https://schemas.take-two-options.invalid/v11.1/broker_what_if_evidence.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Strict ingestion contract for separately obtained broker preview evidence.\n\nThis model does not request a preview and grants no order capability.  It lets the\nresearch engine consume a future broker observation without replacing missing values.",
+  "properties": {
+    "account_scope_redacted": {
+      "const": true,
+      "default": true,
+      "title": "Account Scope Redacted",
+      "type": "boolean"
+    },
+    "buying_power_change": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Buying Power Change"
+    },
+    "candidate_id": {
+      "minLength": 1,
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "complete": {
+      "default": false,
+      "title": "Complete",
+      "type": "boolean"
+    },
+    "currency": {
+      "maxLength": 3,
+      "minLength": 3,
+      "title": "Currency",
+      "type": "string"
+    },
+    "estimated_commission": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Estimated Commission"
+    },
+    "initial_margin_change": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Initial Margin Change"
+    },
+    "maintenance_margin_change": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Maintenance Margin Change"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "read_only": {
+      "const": true,
+      "default": true,
+      "title": "Read Only",
+      "type": "boolean"
+    },
+    "source_id": {
+      "minLength": 1,
+      "title": "Source Id",
+      "type": "string"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "what_if": {
+      "const": true,
+      "default": true,
+      "title": "What If",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "candidate_id",
+    "observed_at",
+    "currency",
+    "source_id"
+  ],
+  "title": "BrokerWhatIfEvidence",
+  "type": "object"
+}

@@ -2,6 +2,10 @@
 
 > Lecture française : [`docs/LECTURE_FR.md`](docs/LECTURE_FR.md) regroupe le handoff, les livres,
 > les sources, les formules, la recherche des phases 1 à 11 et le plan complet en français.
+>
+> Dossier d'étude humain : [`docs_v2/_review/00_COMMENCER_ICI.md`](docs_v2/_review/00_COMMENCER_ICI.md)
+> explique l'architecture, chaque décision importante, les invariants de sécurité, IBKR,
+> Cloudflare, les niveaux de preuve et le runbook de reprise.
 
 Read-only, generic, knowledge-driven option research for bounded-risk trade
 requests. The active pipeline loads provenance-aware recipes, enumerates listed
@@ -39,7 +43,7 @@ domain is optional later. See the
 [`zero-cost deployment guide`](docs/cloudflare/ZERO_COST_DEPLOYMENT.md) and
 [`CF0 architecture`](docs/cloudflare/ARCHITECTURE.md).
 
-## IBKR paper bridge — disabled foundation
+## IBKR paper bridge et données de marché — frontières séparées
 
 An isolated paper-only control plane is now staged under
 [`services/ibkr-paper-bridge`](services/ibkr-paper-bridge). It targets an Oracle A1 ARM64 VM so the
@@ -47,10 +51,14 @@ personal Mac and VS Code can be off. D1 keeps immutable intents/events; the VM p
 journals locally before broker work, and will later connect to IB Gateway paper on localhost port
 `4002`. It does not use an IBKR API key.
 
-The actual IBKR adapter is deliberately disabled, the broker kill switch defaults on, and this
-version has not been deployed. No live-account mode exists. See the
+The execution adapter remains deliberately disabled and the broker kill switch defaults on. A
+separate market-data-only adapter can now qualify TTWO options, capture bounded chains and BAG
+quotes, and convert them to the canonical engine snapshot. It is tested offline, refuses live
+accounts and non-loopback hosts, and does not connect unless `--connect-read-only` is supplied.
+The full chain path has not yet been validated against IBKR. No live-account mode exists. See the
 [`paper control specification`](docs/specs/M_IBKR_PAPER_CONTROL_PLANE.md) and
-[`Oracle A1 runbook`](docs/deployment/ORACLE_A1_IBKR_PAPER_BRIDGE.md).
+[`Oracle A1 runbook`](docs/deployment/ORACLE_A1_IBKR_PAPER_BRIDGE.md), plus the
+[`IBKR provider chapter`](docs_v2/_review/07_INTEGRATION_IBKR.md).
 
 ## Phase M — Governed prospective context
 

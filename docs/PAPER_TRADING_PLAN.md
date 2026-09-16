@@ -1,11 +1,12 @@
 # Plan de paper trading
 
-Statut au 18 août 2026 : `blocked_before_start`. Aucune campagne paper n’a été
+Statut au 16 septembre 2026 : `blocked_before_start`. Aucune campagne paper n’a été
 réalisée. Le plan reste `draft_to_validate` jusqu'à validation du responsable risque.
 
-Blocage actuel : session IBKR paper non connectée, abonnement/licence OPRA non
-confirmés, échantillon historique sous le minimum formel et gate walk-forward non
-franchi. La campagne ne doit pas être simulée à partir des mêmes données historiques.
+Blocage actuel : le handshake IBKR paper a été observé le 25 août, mais le nouveau provider de
+chaîne n'a pas encore été validé en session réelle ; abonnement/licence OPRA non confirmés,
+échantillon historique sous le minimum formel et gate walk-forward non franchi. La campagne ne
+doit pas être simulée à partir des mêmes données historiques.
 
 ## Prérequis
 

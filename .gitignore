@@ -14,6 +14,7 @@ data/alpaca/
 reports/alpaca_*
 data/marketdata/
 reports/marketdata_*
+reports/private/
 data/treasury/
 data/pre_opra/
 data/opra/

@@ -1,0 +1,169 @@
+{
+  "$id": "https://schemas.take-two-options.invalid/v11.1/live_combo_quote.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Signed net-debit convention: positive is a debit, negative is a credit.",
+  "properties": {
+    "ask_net_debit": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ask Net Debit"
+    },
+    "bid_net_debit": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Bid Net Debit"
+    },
+    "broker_quote_complete": {
+      "default": false,
+      "title": "Broker Quote Complete",
+      "type": "boolean"
+    },
+    "candidate_id": {
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "comparison_confirmed": {
+      "default": false,
+      "title": "Comparison Confirmed",
+      "type": "boolean"
+    },
+    "market_data_type": {
+      "default": "unknown",
+      "enum": [
+        "live",
+        "frozen",
+        "delayed",
+        "delayed_frozen",
+        "unknown"
+      ],
+      "title": "Market Data Type",
+      "type": "string"
+    },
+    "maximum_absolute_divergence": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Maximum Absolute Divergence"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "price_convention_verified": {
+      "default": false,
+      "title": "Price Convention Verified",
+      "type": "boolean"
+    },
+    "quote_freshness_verified": {
+      "default": false,
+      "title": "Quote Freshness Verified",
+      "type": "boolean"
+    },
+    "quote_timestamp": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Quote Timestamp"
+    },
+    "read_only": {
+      "const": true,
+      "default": true,
+      "title": "Read Only",
+      "type": "boolean"
+    },
+    "received_at": {
+      "format": "date-time",
+      "title": "Received At",
+      "type": "string"
+    },
+    "source_id": {
+      "title": "Source Id",
+      "type": "string"
+    },
+    "synthetic_ask_net_debit": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Synthetic Ask Net Debit"
+    },
+    "synthetic_bid_net_debit": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Synthetic Bid Net Debit"
+    },
+    "synthetic_quote_complete": {
+      "default": false,
+      "title": "Synthetic Quote Complete",
+      "type": "boolean"
+    },
+    "ticker": {
+      "title": "Ticker",
+      "type": "string"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "candidate_id",
+    "ticker",
+    "received_at",
+    "source_id"
+  ],
+  "title": "LiveComboQuote",
+  "type": "object"
+}

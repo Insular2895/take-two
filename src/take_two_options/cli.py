@@ -6,7 +6,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import date
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -47,10 +47,20 @@ from take_two_options.knowledge.validator import validate_knowledge
 from take_two_options.legacy_cli import app as legacy_app
 from take_two_options.market_snapshot import (
     MarketSnapshotError,
+    load_local_environment,
     refresh_market_snapshot,
     snapshot_manifest,
 )
-from take_two_options.opra.contracts import assess_provider_readiness
+from take_two_options.opra.contracts import (
+    LiveChainRequest,
+    OpraConfigurationError,
+    assess_provider_readiness,
+)
+from take_two_options.opra.ibkr_provider import (
+    IbkrProviderError,
+    build_official_ibkr_provider,
+    live_chain_to_market_snapshot,
+)
 from take_two_options.phase_m_context import load_phase_m_decision_context
 from take_two_options.reporting.ibkr_ticket import (
     TicketBlockedError,
@@ -125,6 +135,82 @@ def pre_opra_finalize(
         "report=reports/pre_opra/final_pre_opra_report_2026-08-08.html; "
         f"opra={readiness.status}; connection_attempted=false; phase_m_started=false; "
         "transmit=false; what_if=true; order capability forbidden"
+    )
+
+
+@data_app.command("ibkr-chain")
+def ibkr_chain(
+    expiration_start: Annotated[str, typer.Option("--expiration-start")],
+    expiration_end: Annotated[str, typer.Option("--expiration-end")],
+    json_out: Annotated[Path, typer.Option("--json-out")],
+    connect_read_only: Annotated[
+        bool,
+        typer.Option(
+            "--connect-read-only",
+            help="Explicitly permit this command to open the local IBKR paper socket.",
+        ),
+    ] = False,
+    ticker: Annotated[str, typer.Option("--ticker")] = "TTWO",
+    maximum_quote_age_seconds: Annotated[
+        int,
+        typer.Option("--maximum-quote-age-seconds", min=1),
+    ] = 30,
+    minimum_strike: Annotated[float | None, typer.Option("--minimum-strike", min=0.01)] = None,
+    maximum_strike: Annotated[float | None, typer.Option("--maximum-strike", min=0.01)] = None,
+    maximum_contracts: Annotated[
+        int,
+        typer.Option("--maximum-contracts", min=1, max=10_000),
+    ] = 1_500,
+    maximum_expirations: Annotated[
+        int,
+        typer.Option("--maximum-expirations", min=1, max=60),
+    ] = 24,
+    engine_json_out: Annotated[Path | None, typer.Option("--engine-json-out")] = None,
+) -> None:
+    """Capture one governed IBKR paper chain; never submit or preview an order."""
+
+    if not connect_read_only:
+        typer.echo(
+            "IBKR connection not attempted. Re-run with --connect-read-only only after "
+            "OPRA entitlement and licence review are recorded.",
+            err=True,
+        )
+        raise typer.Exit(code=2)
+    load_local_environment()
+    try:
+        parsed_expiration_start = date.fromisoformat(expiration_start)
+        parsed_expiration_end = date.fromisoformat(expiration_end)
+        provider = build_official_ibkr_provider(os.environ)
+        snapshot = provider.get_option_chain(
+            LiveChainRequest(
+                ticker=ticker,
+                as_of=datetime.now(UTC),
+                expiration_start=parsed_expiration_start,
+                expiration_end=parsed_expiration_end,
+                maximum_quote_age_seconds=maximum_quote_age_seconds,
+                minimum_strike=minimum_strike,
+                maximum_strike=maximum_strike,
+                maximum_contracts=maximum_contracts,
+                maximum_expirations=maximum_expirations,
+            )
+        )
+        json_out.parent.mkdir(parents=True, exist_ok=True)
+        json_out.write_text(snapshot.model_dump_json(indent=2), encoding="utf-8")
+        if engine_json_out is not None:
+            engine_snapshot = live_chain_to_market_snapshot(snapshot)
+            engine_json_out.parent.mkdir(parents=True, exist_ok=True)
+            engine_json_out.write_text(
+                engine_snapshot.model_dump_json(indent=2),
+                encoding="utf-8",
+            )
+    except (IbkrProviderError, OpraConfigurationError, ValueError) as error:
+        typer.echo(f"IBKR read-only capture blocked safely: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(
+        f"IBKR_READ_ONLY_CAPTURED: snapshot={snapshot.snapshot_id}; "
+        f"quotes={len(snapshot.quotes)}; missing={snapshot.missing_quote_count}; "
+        f"promotion_eligible={str(snapshot.promotion_eligible).lower()}; "
+        "transmit=false; order_capability=forbidden"
     )
 
 

@@ -43,7 +43,7 @@ capacité, jamais une promesse de rendement.
 | Robustesse, stress et allocation entière | `experimental_offline` | Les entrées probabilistes restent expérimentales. |
 | Surveillance par snapshots et replay | `experimental_offline` | Aucune campagne paper/live terminée. |
 | Rapports autonomes | `production_ready_offline` | Les résultats héritent du statut de leurs données. |
-| Port IBKR/OPRA read-only | `configured_not_entitled` | Socket TWS paper paramétré sans clé API ; session, entitlement et quotes combo absents. |
+| Provider IBKR/OPRA read-only | `experimental_offline` | Chaîne, normalisation et BAG testés avec transport fake ; entitlement/licence et validation live de la nouvelle implémentation absents. |
 | Exécution | `blocked_for_execution` | `transmit=false`, `what_if=true`, confirmation humaine. |
 
 ## Gates de promotion
@@ -106,3 +106,11 @@ power, marge combo, commissions et exécution restent à observer en Phase M. Le
 `UNOPENED`, OPRA `NOT_STARTED` et aucune capacité d'ordre n'existe.
 
 `NEXT_PHASE = M — OPRA READ-ONLY + SHADOW/PAPER VALIDATION`.
+
+## Checkpoint provider IBKR — 16 septembre 2026
+
+Le provider officiel de marché est présent derrière une commande à consentement explicite. Les
+contrats, gates, normalisation, cache/retry/pacing, conversion moteur et comparaison BAG sont
+`experimental_offline`. Le handshake du 25 août est une preuve séparée et plus étroite ; il ne
+promote pas ce provider. `LIVE_DATA_READ_ONLY`, shadow et paper restent non franchis. L'exécution
+reste `blocked_for_execution`.

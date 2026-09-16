@@ -37,6 +37,8 @@ from take_two_options.intelligence.schemas import (
     UnifiedObservation,
 )
 from take_two_options.opra.contracts import (
+    BrokerWhatIfEvidence,
+    LiveComboQuote,
     LiveOptionChainSnapshot,
     ProviderReadinessReport,
 )
@@ -77,6 +79,8 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "historical_option_dataset_summary.schema.json": HistoricalOptionDatasetSummary,
     "market_context_summary.schema.json": MarketContextSummary,
     "live_option_chain_snapshot.schema.json": LiveOptionChainSnapshot,
+    "live_combo_quote.schema.json": LiveComboQuote,
+    "broker_what_if_evidence.schema.json": BrokerWhatIfEvidence,
     "opra_provider_readiness.schema.json": ProviderReadinessReport,
     "paper_decision_record.schema.json": PaperDecisionRecord,
     "paper_realization_record.schema.json": PaperRealizationRecord,

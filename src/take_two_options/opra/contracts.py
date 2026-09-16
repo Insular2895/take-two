@@ -134,6 +134,10 @@ class LiveChainRequest(StrictModel):
     expiration_end: date
     maximum_quote_age_seconds: int = Field(gt=0)
     include_greeks: bool = True
+    minimum_strike: float | None = Field(default=None, gt=0)
+    maximum_strike: float | None = Field(default=None, gt=0)
+    maximum_contracts: int = Field(default=1_500, gt=0, le=10_000)
+    maximum_expirations: int = Field(default=24, gt=0, le=60)
 
     @field_validator("as_of")
     @classmethod
@@ -146,6 +150,12 @@ class LiveChainRequest(StrictModel):
     def require_expiration_order(self) -> LiveChainRequest:
         if self.expiration_start > self.expiration_end:
             raise ValueError("expiration_start cannot follow expiration_end")
+        if (
+            self.minimum_strike is not None
+            and self.maximum_strike is not None
+            and self.minimum_strike > self.maximum_strike
+        ):
+            raise ValueError("minimum_strike cannot exceed maximum_strike")
         return self
 
 
@@ -181,6 +191,18 @@ class LiveOptionQuote(StrictModel):
     rho: float | None = None
     provider_greek_convention: str | None = None
     provider_stream: str | None = None
+    quote_timestamp_source: Literal[
+        "exchange",
+        "provider",
+        "client_received_at",
+    ] = "provider"
+    market_data_type: Literal[
+        "live",
+        "frozen",
+        "delayed",
+        "delayed_frozen",
+        "unknown",
+    ] = "unknown"
 
     @field_validator("quote_timestamp", "received_at")
     @classmethod
@@ -209,6 +231,28 @@ class LiveOptionChainSnapshot(StrictModel):
     provider_metadata_hash: str = Field(min_length=64, max_length=64)
     raw_snapshot_hash: str = Field(min_length=64, max_length=64)
     source_latency_milliseconds: float = Field(ge=0)
+    underlying_quote_timestamp: datetime | None = None
+    underlying_received_at: datetime | None = None
+    underlying_timestamp_source: Literal[
+        "exchange",
+        "provider",
+        "client_received_at",
+        "unknown",
+    ] = "unknown"
+    underlying_market_data_type: Literal[
+        "live",
+        "frozen",
+        "delayed",
+        "delayed_frozen",
+        "unknown",
+    ] = "unknown"
+    requested_contract_count: int | None = Field(default=None, ge=0)
+    returned_quote_count: int | None = Field(default=None, ge=0)
+    missing_quote_count: int = Field(default=0, ge=0)
+    contract_discovery_complete: bool = False
+    quote_collection_complete: bool = False
+    promotion_eligible: bool = False
+    warnings: list[str] = Field(default_factory=list)
     read_only: Literal[True] = True
     transmit: Literal[False] = False
     what_if: Literal[True] = True
@@ -221,13 +265,140 @@ class LiveOptionChainSnapshot(StrictModel):
             raise ValueError("snapshot timestamps must be timezone-aware")
         return value.astimezone(UTC)
 
+    @field_validator("underlying_quote_timestamp", "underlying_received_at")
+    @classmethod
+    def require_optional_snapshot_timezone(cls, value: datetime | None) -> datetime | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            raise ValueError("underlying timestamps must be timezone-aware")
+        return value.astimezone(UTC)
+
     @model_validator(mode="after")
     def validate_snapshot(self) -> LiveOptionChainSnapshot:
         if self.received_at < self.requested_at:
             raise ValueError("snapshot receipt cannot precede request")
         if any(quote.ticker.upper() != self.ticker.upper() for quote in self.quotes):
             raise ValueError("all live quotes must match the snapshot ticker")
+        if self.returned_quote_count is not None and self.returned_quote_count != len(self.quotes):
+            raise ValueError("returned_quote_count must match serialized quotes")
+        if self.promotion_eligible and (
+            not self.contract_discovery_complete
+            or not self.quote_collection_complete
+            or self.missing_quote_count
+        ):
+            raise ValueError("promotion eligibility requires complete discovery and quotes")
         return self
+
+
+class LiveComboLeg(StrictModel):
+    """One qualified, read-only BAG market-data leg."""
+
+    con_id: int = Field(gt=0)
+    ratio: int = Field(default=1, gt=0)
+    action: Literal["BUY", "SELL"]
+    exchange: str = Field(default="SMART", min_length=1)
+    bid: float | None = Field(default=None, ge=0)
+    ask: float | None = Field(default=None, ge=0)
+
+
+class LiveComboQuoteRequest(StrictModel):
+    candidate_id: str = Field(min_length=1)
+    ticker: str = Field(min_length=1)
+    legs: list[LiveComboLeg] = Field(min_length=2)
+    requested_at: datetime
+    maximum_quote_age_seconds: int = Field(gt=0)
+
+    @field_validator("requested_at")
+    @classmethod
+    def require_combo_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("combo request timestamp must be timezone-aware")
+        return value.astimezone(UTC)
+
+
+class LiveComboQuote(StrictModel):
+    """Signed net-debit convention: positive is a debit, negative is a credit."""
+
+    candidate_id: str
+    ticker: str
+    bid_net_debit: float | None = None
+    ask_net_debit: float | None = None
+    synthetic_bid_net_debit: float | None = None
+    synthetic_ask_net_debit: float | None = None
+    maximum_absolute_divergence: float | None = Field(default=None, ge=0)
+    quote_timestamp: datetime | None = None
+    received_at: datetime
+    source_id: str
+    market_data_type: Literal[
+        "live",
+        "frozen",
+        "delayed",
+        "delayed_frozen",
+        "unknown",
+    ] = "unknown"
+    broker_quote_complete: bool = False
+    synthetic_quote_complete: bool = False
+    quote_freshness_verified: bool = False
+    price_convention_verified: bool = False
+    comparison_confirmed: bool = False
+    warnings: list[str] = Field(default_factory=list)
+    read_only: Literal[True] = True
+    transmit: Literal[False] = False
+    order_capability: Literal["forbidden"] = "forbidden"
+
+    @field_validator("quote_timestamp", "received_at")
+    @classmethod
+    def require_combo_quote_timezone(cls, value: datetime | None) -> datetime | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            raise ValueError("combo timestamps must be timezone-aware")
+        return value.astimezone(UTC)
+
+    @model_validator(mode="after")
+    def validate_combo_quote(self) -> LiveComboQuote:
+        if self.comparison_confirmed and (
+            not self.broker_quote_complete
+            or not self.synthetic_quote_complete
+            or not self.quote_freshness_verified
+            or not self.price_convention_verified
+        ):
+            raise ValueError(
+                "confirmed comparison requires broker/synthetic quotes, freshness and convention"
+            )
+        return self
+
+
+class BrokerWhatIfEvidence(StrictModel):
+    """Strict ingestion contract for separately obtained broker preview evidence.
+
+    This model does not request a preview and grants no order capability.  It lets the
+    research engine consume a future broker observation without replacing missing values.
+    """
+
+    candidate_id: str = Field(min_length=1)
+    observed_at: datetime
+    currency: str = Field(min_length=3, max_length=3)
+    estimated_commission: float | None = Field(default=None, ge=0)
+    initial_margin_change: float | None = None
+    maintenance_margin_change: float | None = None
+    buying_power_change: float | None = None
+    source_id: str = Field(min_length=1)
+    account_scope_redacted: Literal[True] = True
+    complete: bool = False
+    warnings: list[str] = Field(default_factory=list)
+    read_only: Literal[True] = True
+    transmit: Literal[False] = False
+    what_if: Literal[True] = True
+    order_capability: Literal["forbidden"] = "forbidden"
+
+    @field_validator("observed_at")
+    @classmethod
+    def require_what_if_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("what-if evidence timestamp must be timezone-aware")
+        return value.astimezone(UTC)
 
 
 class ProviderHealth(StrictModel):
@@ -246,6 +417,13 @@ class LiveOptionMarketDataProvider(Protocol):
     def health(self) -> ProviderHealth: ...
 
     def get_option_chain(self, request: LiveChainRequest) -> LiveOptionChainSnapshot: ...
+
+
+@runtime_checkable
+class LiveComboMarketDataProvider(Protocol):
+    """Optional BAG quote capability; still market data only."""
+
+    def get_combo_quote(self, request: LiveComboQuoteRequest) -> LiveComboQuote: ...
 
 
 class ProviderReadinessReport(StrictModel):
@@ -281,6 +459,7 @@ class ProviderReadinessReport(StrictModel):
     transmit: Literal[False] = False
     what_if: Literal[True] = True
     order_capability: Literal["forbidden"] = "forbidden"
+    assessment_scope: Literal["offline_configuration_only"] = "offline_configuration_only"
 
 
 def _confirmed(environment: Mapping[str, str], name: str) -> bool:

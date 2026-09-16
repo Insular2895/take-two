@@ -1,11 +1,12 @@
-# Guide IBKR read-only — intégration future
+# Guide IBKR read-only — provider hors ligne, validation réelle future
 
-Statut au 18 août 2026 : `configured_not_entitled_not_connected`
+Statut au 16 septembre 2026 : `offline_provider_implemented_live_validation_pending`
 
-La V1 ne dépend pas d'IBKR. Le contrat de configuration locale est prêt, sans clé API,
-mais aucun abonnement OPRA, identifiant de compte ou droit d'usage n'est affirmé et
-aucune connexion n'a été tentée. Une intégration future doit rester un adaptateur de
-données entrant, sans interface d'ordre.
+Le moteur offline ne dépend pas d'IBKR. L'adaptateur de données entrant est maintenant codé :
+qualification, découverte de chaîne, snapshots, normalisation, cache/retry/pacing, BAG et
+conversion vers le moteur. Il reste sans interface d'ordre. Aucun abonnement OPRA ni droit
+d'usage n'est affirmé. Une preuve séparée a observé le handshake paper le 25 août ; la nouvelle
+capture de chaîne n'a pas été exécutée sur IBKR.
 
 ## Paramétrage non secret
 
@@ -35,7 +36,7 @@ TWS/IB Gateway porte l'authentification de l'utilisateur. Le socket API utilise
 4. Ne jamais importer de module d'exécution dans `take_two_options.data`.
 5. Rejouer les données reçues dans une fixture avant de les laisser alimenter un rapport.
 
-## Allowlist proposée
+## Allowlist implémentée
 
 - résolution du sous-jacent et des contrats ;
 - découverte de chaîne via `reqSecDefOptParams` ;
@@ -51,8 +52,8 @@ multiplicateur, exchange, devise et timestamp.
 ## Denylist absolue
 
 `placeOrder`, modification, annulation, global cancel, transmission différée et construction de
-ticket sont absents de l'adaptateur. `ReadOnlyBrokerGateway` lève `ForbiddenOperation` même si un
-appelant tente submit/modify/cancel.
+ticket sont absents de l'adaptateur de marché. Le bridge d'exécution séparé conserve son
+`DisabledGateway` et ses propres blocages ; il n'est pas activé par le provider de chaîne.
 
 ## Sources officielles vérifiées le 2026-08-18
 

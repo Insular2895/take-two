@@ -45,5 +45,17 @@ Mesurer remplissages, slippage, partial fills, rejets et annulations dans un com
 paper. La durée minimale reste à valider dans
 [PAPER_TRADING_PLAN.md](PAPER_TRADING_PLAN.md).
 
-Ce dépôt s'arrête actuellement à la configuration locale non connectée. Il ne met en
-œuvre ni activation de session, ni validation d'entitlement, ni transmission d’ordre.
+## Checkpoint code au 16 septembre 2026
+
+- phases 2 et 4 : implémentées et testées hors ligne, pas encore observées sur une chaîne réelle ;
+- phase 1 : paramètres présents, mais entitlement et licence toujours non confirmés humainement ;
+- phase 3 : briques quantitatives présentes, validation sur chaîne autorisée manquante ;
+- phase 5 : contrat d'ingestion what-if présent, requête broker volontairement absente de cette
+  frontière read-only ;
+- phase 6 : non commencée.
+
+Le transport officiel peut ouvrir une session uniquement après le drapeau CLI explicite
+`--connect-read-only`. Il impose loopback, mode paper, compte `DU`, allowlist TTWO et n'importe
+aucun type d'ordre. Aucune connexion n'a été effectuée pour ce checkpoint. Une preuve antérieure
+du 25 août couvre seulement le handshake paper et la télémétrie de position, pas le nouveau
+provider de chaîne. Aucune transmission d'ordre n'est mise en œuvre.
