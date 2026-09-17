@@ -43,8 +43,9 @@ capacité, jamais une promesse de rendement.
 | Robustesse, stress et allocation entière | `experimental_offline` | Les entrées probabilistes restent expérimentales. |
 | Surveillance par snapshots et replay | `experimental_offline` | Aucune campagne paper/live terminée. |
 | Rapports autonomes | `production_ready_offline` | Les résultats héritent du statut de leurs données. |
-| Provider IBKR/OPRA read-only | `experimental_offline` | Chaîne, normalisation et BAG testés avec transport fake ; entitlement/licence et validation live de la nouvelle implémentation absents. |
-| Contrôle campagne shadow | `experimental_offline` | Manifeste, journaux et statut testés ; seuils humains non approuvés et aucune observation prospective collectée. |
+| Provider IBKR/OPRA read-only | `experimental_offline` | Chaîne, normalisation, BAG et diagnostics de reprise testés avec transport fake ; entitlement/licence et validation live de la nouvelle implémentation absents. |
+| What-if broker | `experimental_offline` | Normalisation redacted et consommation typée codées ; requête broker ordre-shaped et valeurs réelles non observées. |
+| Contrôle campagne shadow | `experimental_offline` | Manifeste, append prospectif, délais et statut testés ; seuils humains non approuvés et aucune observation prospective collectée. |
 | Exécution | `blocked_for_execution` | `transmit=false`, `what_if=true`, confirmation humaine. |
 
 ## Gates de promotion
@@ -137,3 +138,17 @@ séparant décision et réalisation. Aucun seuil par défaut n'est inventé. Le 
 Même lorsque les nombres d'observations demandés sont atteints, le rapport conserve
 `paper_validation_passed=false`, `promotion_eligible=false` et exige une revue humaine. Cela prépare
 la campagne ; cela ne signifie pas qu'elle a commencé ni qu'une stratégie est validée.
+
+## Checkpoint préconnexion offline — 17 septembre 2026
+
+Le normaliseur what-if accepte une transcription redacted déjà obtenue, conserve les inconnues,
+rejette les sentinelles et n'alimente la preview que si candidat, devise et complétude concordent.
+Il n'appelle aucune primitive broker. Les rapports IBKR intègrent désormais les compteurs de
+retry, pacing et cache, avec `stale_fallbacks=0`.
+
+Les commandes shadow savent ajouter décision et réalisation prospectivement. Chaque record porte
+campagne et heure d'écriture ; les délais maximums n'ont pas de défaut et doivent être approuvés
+par le responsable risque. Les brouillons commités restent bloqués par `example_only=true`.
+
+Ce checkpoint clôt le code sûr réalisable sans branchement. Il ne franchit ni
+`LIVE_DATA_READ_ONLY`, ni shadow, ni paper, et n'ajoute aucune capacité d'ordre.

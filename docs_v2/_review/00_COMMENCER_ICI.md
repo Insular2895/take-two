@@ -31,8 +31,11 @@ Le nouveau provider IBKR sait, côté code :
 - préserver la provenance et les timestamps sans transformer une heure de réception en heure
   d’échange ;
 - borner la chaîne, le pacing, les retries et le cache ;
+- exposer des compteurs redacted de retry, pacing, cache expiré et absence de stale fallback ;
 - demander une quote de marché BAG sans créer d’ordre ;
 - comparer cette quote au synthétique des jambes ;
+- normaliser hors ligne une observation what-if déjà obtenue, sans méthode d’ordre ;
+- ajouter prospectivement décisions et réalisations shadow sous manifeste approuvé ;
 - convertir le résultat vers le `MarketSnapshot` canonique du moteur.
 
 Ce code n’a pas encore été validé sur une chaîne TTWO réelle. Une ancienne connexion IBKR Paper a
@@ -57,6 +60,7 @@ complète, les quotes BAG, l’open interest, les Greeks ni les comportements de
 14. [Traçabilité](14_TRACABILITE.md)
 15. [Protocole de branchement IBKR](15_PROTOCOLE_BRANCHEMENT_IBKR.md)
 16. [Contrôle de campagne shadow](16_CAMPAGNE_SHADOW.md)
+17. [What-if hors ligne et preuve de résilience](17_WHAT_IF_ET_RESILIENCE.md)
 
 ## Règle de lecture des statuts
 

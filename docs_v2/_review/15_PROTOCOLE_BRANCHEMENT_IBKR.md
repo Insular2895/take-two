@@ -15,6 +15,7 @@ consentement --connect-read-only
   -> health session 2 indépendante
   -> qualification TTWO + chaîne bornée
   -> rapport identité/complétude/volume/OI/Greeks/timestamps/type
+  -> compteurs retry/pacing/cache, stale fallback fixé à zéro
   -> BAG optionnelle résolue depuis expiration/strike/type
   -> comparaison BAG/synthétique
   -> JSON strict + Markdown humain + snapshots privés
@@ -87,6 +88,10 @@ Tous restent sous `reports/private/`, ignoré par Git :
 - `ibkr_combo_validation.json` : sélection humaine locale des jambes.
 
 Le rapport ne sérialise ni identifiant de compte, ni host, ni client ID, ni credential.
+
+Les diagnostics du provider sont cumulatifs pour l'instance utilisée par le run. Ils prouvent ce
+que le logiciel a compté ; ils ne remplacent pas les codes TWS, la chronologie opérateur ou un test
+de coupure réelle. Une validation doit archiver rapport JSON, Markdown et log redacted ensemble.
 
 ## Ce qui se passe après
 

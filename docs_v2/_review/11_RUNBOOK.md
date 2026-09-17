@@ -108,6 +108,10 @@ rapport inscrira explicitement `NOT_RUN`.
   environnement Python ;
 - aucune erreur ne doit conduire à un fallback synthétique promu.
 
+Le rapport contient les compteurs de retry, pacing et cache du provider. Vérifier en particulier
+que `stale_fallbacks=0`; un cache expiré doit conduire à une nouvelle lecture ou à un échec, jamais
+à une ancienne chaîne présentée comme fraîche.
+
 ## 7. Arrêt
 
 Après la première capture, ne pas démarrer automatiquement shadow ou paper. Archiver le log
@@ -132,3 +136,42 @@ de configuration, les preuves IBKR/holdout, les droits data et sa référence d'
 
 Le statut le plus avancé reste `OBSERVATION_TARGET_REACHED_PENDING_HUMAN_REVIEW` avec
 `paper_validation_passed=false`. Il n'existe aucune transition automatique vers l'exécution.
+
+## 9. Normaliser une observation what-if déjà obtenue
+
+La commande suivante reste entièrement offline. Le fichier commité est volontairement bloqué :
+
+```bash
+ttwo-options paper what-if-normalize \
+  --observation configs/opra/ibkr_what_if_observation.example.json \
+  --evidence-out reports/private/ibkr-what-if-evidence.json \
+  --report-out reports/private/ibkr-what-if-normalization.json
+```
+
+Pour une observation réelle, copier le modèle sous `reports/private/`, retirer tout identifiant de
+compte, transcrire les chaînes retournées par IBKR et mettre `example_only=false`. Le normaliseur
+ne contacte pas IBKR et n'autorise pas l'ordre qui a servi, ailleurs, à produire le preview.
+
+## 10. Ajouter une décision et sa réalisation prospectivement
+
+Après approbation du manifeste et uniquement pendant la fenêtre :
+
+```bash
+ttwo-options paper append-shadow-decision \
+  --manifest reports/private/shadow-campaign.json \
+  --draft reports/private/next-paper-decision.json \
+  --decision-ledger reports/private/paper-decisions.jsonl
+```
+
+Plus tard, lorsque le chemin est réellement observable :
+
+```bash
+ttwo-options paper append-shadow-realization \
+  --manifest reports/private/shadow-campaign.json \
+  --draft reports/private/next-paper-realization.json \
+  --decision-ledger reports/private/paper-decisions.jsonl \
+  --realization-ledger reports/private/paper-realizations.jsonl
+```
+
+Les modèles sous `configs/paper/*.example.json` portent `example_only=true` et sont refusés. Les
+délais maximaux entre événement et écriture sont des seuils humains obligatoires du manifeste.

@@ -1,13 +1,8 @@
 {
-  "$id": "https://schemas.take-two-options.invalid/v11.1/paper_realization_record.schema.json",
+  "$id": "https://schemas.take-two-options.invalid/v11.1/paper_realization_draft.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
-    "campaign_id": {
-      "minLength": 1,
-      "title": "Campaign Id",
-      "type": "string"
-    },
     "decision_id": {
       "title": "Decision Id",
       "type": "string"
@@ -67,26 +62,6 @@
       "title": "Postmortem",
       "type": "string"
     },
-    "previous_hash": {
-      "anyOf": [
-        {
-          "maxLength": 64,
-          "minLength": 64,
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Previous Hash"
-    },
-    "realization_hash": {
-      "maxLength": 64,
-      "minLength": 64,
-      "title": "Realization Hash",
-      "type": "string"
-    },
     "realization_id": {
       "title": "Realization Id",
       "type": "string"
@@ -96,28 +71,6 @@
       "minLength": 64,
       "title": "Realized Path Hash",
       "type": "string"
-    },
-    "record_kind": {
-      "const": "paper_realization",
-      "default": "paper_realization",
-      "title": "Record Kind",
-      "type": "string"
-    },
-    "recorded_at": {
-      "format": "date-time",
-      "title": "Recorded At",
-      "type": "string"
-    },
-    "schema_version": {
-      "const": "1.2",
-      "default": "1.2",
-      "title": "Schema Version",
-      "type": "string"
-    },
-    "sequence": {
-      "exclusiveMinimum": 0,
-      "title": "Sequence",
-      "type": "integer"
     },
     "simulated_only": {
       "const": true,
@@ -150,12 +103,8 @@
     "slippage_eur",
     "fees_eur",
     "pnl_eur",
-    "postmortem",
-    "campaign_id",
-    "recorded_at",
-    "sequence",
-    "realization_hash"
+    "postmortem"
   ],
-  "title": "PaperRealizationRecord",
+  "title": "PaperRealizationDraft",
   "type": "object"
 }

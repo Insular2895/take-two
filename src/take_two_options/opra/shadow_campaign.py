@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Literal
 
 from pydantic import Field, field_validator, model_validator
@@ -11,8 +12,16 @@ from pydantic import Field, field_validator, model_validator
 from take_two_options.knowledge.provenance import stable_hash
 from take_two_options.opra.paper_decisions import (
     ImmutableStrictModel,
+    PaperDecisionDraft,
     PaperDecisionRecord,
+    PaperRealizationDraft,
     PaperRealizationRecord,
+    append_paper_decision,
+    append_paper_realization,
+    build_paper_decision_record,
+    build_paper_realization_record,
+    load_paper_decisions,
+    load_paper_realizations,
     validate_paper_decision_chain,
     validate_paper_realization_chain,
 )
@@ -38,6 +47,8 @@ class ShadowCampaignThresholds(ImmutableStrictModel):
 
     minimum_decisions: int = Field(gt=0)
     minimum_realizations: int = Field(gt=0)
+    maximum_decision_recording_delay_seconds: int = Field(gt=0)
+    maximum_realization_recording_delay_seconds: int = Field(gt=0)
 
     @model_validator(mode="after")
     def require_coherent_counts(self) -> ShadowCampaignThresholds:
@@ -47,7 +58,7 @@ class ShadowCampaignThresholds(ImmutableStrictModel):
 
 
 class ShadowCampaignManifest(ImmutableStrictModel):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.1"] = "1.1"
     campaign_id: str = Field(min_length=1)
     ticker: Literal["TTWO"] = "TTWO"
     mode: Literal["shadow_observation_only"] = "shadow_observation_only"
@@ -92,9 +103,7 @@ class ShadowCampaignManifest(ImmutableStrictModel):
             }
             missing = [name for name, value in required.items() if value is None]
             if missing:
-                raise ValueError(
-                    "approved shadow campaign requires: " + ", ".join(sorted(missing))
-                )
+                raise ValueError("approved shadow campaign requires: " + ", ".join(sorted(missing)))
             if self.example_only:
                 raise ValueError("an example shadow campaign cannot be approved")
         return self
@@ -107,7 +116,7 @@ class ShadowCampaignCheck(ImmutableStrictModel):
 
 
 class ShadowCampaignStatusReport(ImmutableStrictModel):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.1"] = "1.1"
     report_id: str = Field(min_length=1)
     generated_at: datetime
     campaign_id: str = Field(min_length=1)
@@ -137,6 +146,90 @@ class ShadowCampaignStatusReport(ImmutableStrictModel):
         if value.tzinfo is None:
             raise ValueError("shadow report timestamp must be timezone-aware")
         return value.astimezone(UTC)
+
+
+def record_shadow_decision(
+    manifest: ShadowCampaignManifest,
+    draft: PaperDecisionDraft,
+    ledger_path: Path,
+    *,
+    now: Callable[[], datetime] | None = None,
+) -> PaperDecisionRecord:
+    """Append one prospective decision only under an approved frozen manifest."""
+
+    thresholds = _recording_thresholds(manifest)
+    if draft.example_only:
+        raise ValueError("SHADOW_DECISION_DRAFT_MARKED_EXAMPLE_ONLY")
+    recorded_at = _utc((now or (lambda: datetime.now(UTC)))())
+    if not manifest.planned_start_at <= recorded_at <= manifest.planned_end_at:
+        raise ValueError("SHADOW_DECISION_RECORDING_OUTSIDE_CAMPAIGN_WINDOW")
+    if not manifest.planned_start_at <= draft.decided_at <= manifest.planned_end_at:
+        raise ValueError("SHADOW_DECISION_OUTSIDE_CAMPAIGN_WINDOW")
+    if recorded_at < draft.decided_at:
+        raise ValueError("SHADOW_DECISION_TIMESTAMP_IN_FUTURE")
+    delay = (recorded_at - draft.decided_at).total_seconds()
+    if delay > thresholds.maximum_decision_recording_delay_seconds:
+        raise ValueError("SHADOW_DECISION_RECORDING_DELAY_EXCEEDED")
+    if draft.code_commit != manifest.code_commit:
+        raise ValueError("SHADOW_CODE_COMMIT_DRIFT")
+    if draft.config_hash != manifest.strategy_config_hash:
+        raise ValueError("SHADOW_CONFIG_HASH_DRIFT")
+    existing = load_paper_decisions(ledger_path)
+    _validate_decisions_against_manifest(manifest, existing)
+    record = build_paper_decision_record(
+        existing,
+        draft,
+        campaign_id=manifest.campaign_id,
+        recorded_at=recorded_at,
+    )
+    append_paper_decision(
+        ledger_path,
+        record,
+        expected_head_hash=existing[-1].record_hash if existing else None,
+    )
+    return record
+
+
+def record_shadow_realization(
+    manifest: ShadowCampaignManifest,
+    draft: PaperRealizationDraft,
+    decision_ledger_path: Path,
+    realization_ledger_path: Path,
+    *,
+    now: Callable[[], datetime] | None = None,
+) -> PaperRealizationRecord:
+    """Append one outcome linked to an existing prospective decision."""
+
+    thresholds = _recording_thresholds(manifest)
+    if draft.example_only:
+        raise ValueError("SHADOW_REALIZATION_DRAFT_MARKED_EXAMPLE_ONLY")
+    recorded_at = _utc((now or (lambda: datetime.now(UTC)))())
+    if recorded_at < draft.observed_at:
+        raise ValueError("SHADOW_REALIZATION_TIMESTAMP_IN_FUTURE")
+    delay = (recorded_at - draft.observed_at).total_seconds()
+    if delay > thresholds.maximum_realization_recording_delay_seconds:
+        raise ValueError("SHADOW_REALIZATION_RECORDING_DELAY_EXCEEDED")
+    decisions = load_paper_decisions(decision_ledger_path)
+    _validate_decisions_against_manifest(manifest, decisions)
+    if not decisions:
+        raise ValueError("SHADOW_REALIZATION_WITHOUT_DECISION_LEDGER")
+    existing = load_paper_realizations(realization_ledger_path, decisions)
+    if any(record.campaign_id != manifest.campaign_id for record in existing):
+        raise ValueError("SHADOW_REALIZATION_CAMPAIGN_DRIFT")
+    record = build_paper_realization_record(
+        draft,
+        existing=existing,
+        decisions=decisions,
+        campaign_id=manifest.campaign_id,
+        recorded_at=recorded_at,
+    )
+    append_paper_realization(
+        realization_ledger_path,
+        record,
+        expected_head_hash=existing[-1].realization_hash if existing else None,
+        decisions=decisions,
+    )
+    return record
 
 
 def evaluate_shadow_campaign(
@@ -181,6 +274,22 @@ def evaluate_shadow_campaign(
         checks.append(_check("decision_window", "PASS", "SHADOW_DECISIONS_WITHIN_WINDOW"))
     for check_id, matches, passed, failed in (
         (
+            "campaign_id",
+            all(decision.campaign_id == manifest.campaign_id for decision in decisions)
+            and all(
+                realization.campaign_id == manifest.campaign_id for realization in realizations
+            ),
+            "SHADOW_CAMPAIGN_ID_FROZEN",
+            "SHADOW_CAMPAIGN_ID_DRIFT",
+        ),
+        (
+            "example_records",
+            all(not decision.example_only for decision in decisions)
+            and all(not realization.example_only for realization in realizations),
+            "SHADOW_RECORDS_NOT_EXAMPLES",
+            "SHADOW_EXAMPLE_RECORD_PRESENT",
+        ),
+        (
             "code_commit",
             all(decision.code_commit == manifest.code_commit for decision in decisions),
             "SHADOW_CODE_COMMIT_FROZEN",
@@ -188,9 +297,7 @@ def evaluate_shadow_campaign(
         ),
         (
             "strategy_config",
-            all(
-                decision.config_hash == manifest.strategy_config_hash for decision in decisions
-            ),
+            all(decision.config_hash == manifest.strategy_config_hash for decision in decisions),
             "SHADOW_CONFIG_HASH_FROZEN",
             "SHADOW_CONFIG_HASH_DRIFT",
         ),
@@ -199,6 +306,35 @@ def evaluate_shadow_campaign(
             _check(check_id, "PASS" if matches else "FAIL", passed if matches else failed)
         )
         lineage_failures = lineage_failures or not matches
+    decision_delays_valid = all(
+        (decision.recorded_at - decision.decided_at).total_seconds()
+        <= manifest.thresholds.maximum_decision_recording_delay_seconds
+        for decision in decisions
+    )
+    realization_delays_valid = all(
+        (realization.recorded_at - realization.observed_at).total_seconds()
+        <= manifest.thresholds.maximum_realization_recording_delay_seconds
+        for realization in realizations
+    )
+    checks.extend(
+        [
+            _check(
+                "decision_recording_delay",
+                "PASS" if decision_delays_valid else "FAIL",
+                "SHADOW_DECISIONS_RECORDED_PROSPECTIVELY"
+                if decision_delays_valid
+                else "SHADOW_DECISION_RECORDING_DELAY_EXCEEDED",
+            ),
+            _check(
+                "realization_recording_delay",
+                "PASS" if realization_delays_valid else "FAIL",
+                "SHADOW_REALIZATIONS_RECORDED_PROSPECTIVELY"
+                if realization_delays_valid
+                else "SHADOW_REALIZATION_RECORDING_DELAY_EXCEEDED",
+            ),
+        ]
+    )
+    lineage_failures = lineage_failures or not decision_delays_valid or not realization_delays_valid
     if lineage_failures:
         return _report(
             manifest,
@@ -308,3 +444,28 @@ def _utc(value: datetime) -> datetime:
     if value.tzinfo is None:
         raise ValueError("SHADOW_CAMPAIGN_TIMESTAMP_NAIVE")
     return value.astimezone(UTC)
+
+
+def _recording_thresholds(
+    manifest: ShadowCampaignManifest,
+) -> ShadowCampaignThresholds:
+    if manifest.approval_status != "approved" or manifest.example_only:
+        raise ValueError("SHADOW_MANIFEST_NOT_APPROVED")
+    if manifest.thresholds is None:
+        raise ValueError("SHADOW_THRESHOLDS_MISSING")
+    return manifest.thresholds
+
+
+def _validate_decisions_against_manifest(
+    manifest: ShadowCampaignManifest,
+    decisions: list[PaperDecisionRecord],
+) -> None:
+    for decision in decisions:
+        if decision.campaign_id != manifest.campaign_id:
+            raise ValueError("SHADOW_CAMPAIGN_ID_DRIFT")
+        if not manifest.planned_start_at <= decision.decided_at <= manifest.planned_end_at:
+            raise ValueError("SHADOW_DECISION_OUTSIDE_CAMPAIGN_WINDOW")
+        if decision.code_commit != manifest.code_commit:
+            raise ValueError("SHADOW_CODE_COMMIT_DRIFT")
+        if decision.config_hash != manifest.strategy_config_hash:
+            raise ValueError("SHADOW_CONFIG_HASH_DRIFT")

@@ -58,9 +58,7 @@ class OpraProviderConfig(StrictModel):
 
     @classmethod
     def from_environment(cls, environment: Mapping[str, str]) -> OpraProviderConfig:
-        missing = [
-            name for name in TOKEN_OPRA_ENVIRONMENT_VARIABLES if not environment.get(name)
-        ]
+        missing = [name for name in TOKEN_OPRA_ENVIRONMENT_VARIABLES if not environment.get(name)]
         if missing:
             raise OpraConfigurationError(
                 "Missing OPRA configuration variables: " + ", ".join(missing)
@@ -91,9 +89,7 @@ class IbkrTwsProviderConfig(StrictModel):
 
     @classmethod
     def from_environment(cls, environment: Mapping[str, str]) -> IbkrTwsProviderConfig:
-        missing = [
-            name for name in IBKR_TWS_ENVIRONMENT_VARIABLES if not environment.get(name)
-        ]
+        missing = [name for name in IBKR_TWS_ENVIRONMENT_VARIABLES if not environment.get(name)]
         if missing:
             raise OpraConfigurationError(
                 "Missing IBKR TWS configuration variables: " + ", ".join(missing)
@@ -101,16 +97,13 @@ class IbkrTwsProviderConfig(StrictModel):
         provider = environment["OPRA_PROVIDER"].strip().lower()
         if provider not in IBKR_TWS_PROVIDERS:
             raise OpraConfigurationError(
-                "IBKR TWS configuration requires OPRA_PROVIDER=ibkr_tws or "
-                "ibkr_gateway"
+                "IBKR TWS configuration requires OPRA_PROVIDER=ibkr_tws or ibkr_gateway"
             )
         try:
             port = int(environment["IBKR_PORT"])
             client_id = int(environment["IBKR_CLIENT_ID"])
         except ValueError as error:
-            raise OpraConfigurationError(
-                "IBKR_PORT and IBKR_CLIENT_ID must be integers"
-            ) from error
+            raise OpraConfigurationError("IBKR_PORT and IBKR_CLIENT_ID must be integers") from error
         return cls(
             provider=cast(Literal["ibkr_tws", "ibkr_gateway"], provider),
             host=environment["IBKR_HOST"],
@@ -381,9 +374,19 @@ class BrokerWhatIfEvidence(StrictModel):
     observed_at: datetime
     currency: str = Field(min_length=3, max_length=3)
     estimated_commission: float | None = Field(default=None, ge=0)
+    minimum_commission: float | None = Field(default=None, ge=0)
+    maximum_commission: float | None = Field(default=None, ge=0)
+    initial_margin_before: float | None = None
     initial_margin_change: float | None = None
+    initial_margin_after: float | None = None
+    maintenance_margin_before: float | None = None
     maintenance_margin_change: float | None = None
+    maintenance_margin_after: float | None = None
+    equity_with_loan_before: float | None = None
+    equity_with_loan_change: float | None = None
+    equity_with_loan_after: float | None = None
     buying_power_change: float | None = None
+    broker_status: str | None = None
     source_id: str = Field(min_length=1)
     account_scope_redacted: Literal[True] = True
     complete: bool = False
@@ -399,6 +402,45 @@ class BrokerWhatIfEvidence(StrictModel):
         if value.tzinfo is None:
             raise ValueError("what-if evidence timestamp must be timezone-aware")
         return value.astimezone(UTC)
+
+    @field_validator("currency")
+    @classmethod
+    def require_iso_currency_shape(cls, value: str) -> str:
+        if not value.isalpha() or not value.isupper():
+            raise ValueError("what-if currency must be three uppercase letters")
+        return value
+
+    @model_validator(mode="after")
+    def require_complete_evidence_fields(self) -> BrokerWhatIfEvidence:
+        if self.complete and any(
+            value is None
+            for value in (
+                self.estimated_commission,
+                self.initial_margin_change,
+                self.maintenance_margin_change,
+            )
+        ):
+            raise ValueError(
+                "complete what-if evidence requires commission and both margin changes"
+            )
+        if (
+            self.minimum_commission is not None
+            and self.maximum_commission is not None
+            and self.minimum_commission > self.maximum_commission
+        ):
+            raise ValueError("minimum commission cannot exceed maximum commission")
+        if self.estimated_commission is not None:
+            if (
+                self.minimum_commission is not None
+                and self.estimated_commission < self.minimum_commission
+            ):
+                raise ValueError("estimated commission cannot be below its minimum")
+            if (
+                self.maximum_commission is not None
+                and self.estimated_commission > self.maximum_commission
+            ):
+                raise ValueError("estimated commission cannot exceed its maximum")
+        return self
 
 
 class ProviderHealth(StrictModel):
@@ -435,13 +477,9 @@ class ProviderReadinessReport(StrictModel):
     ]
     provider: str | None
     authentication_mode: Literal["tws_session", "api_credentials"] | None
-    provider_protocol: Literal["LiveOptionMarketDataProvider"] = (
-        "LiveOptionMarketDataProvider"
-    )
+    provider_protocol: Literal["LiveOptionMarketDataProvider"] = "LiveOptionMarketDataProvider"
     paper_decision_contract: Literal["PaperDecisionRecord"] = "PaperDecisionRecord"
-    paper_realization_contract: Literal["PaperRealizationRecord"] = (
-        "PaperRealizationRecord"
-    )
+    paper_realization_contract: Literal["PaperRealizationRecord"] = "PaperRealizationRecord"
     required_variables: list[str]
     missing_variables: list[str]
     configuration_errors: list[str]
@@ -534,8 +572,7 @@ def assess_provider_readiness(environment: Mapping[str, str]) -> ProviderReadine
         ]
         if ibkr
         else [
-            "API credentials are loaded only for the selected data vendor and are "
-            "never serialized."
+            "API credentials are loaded only for the selected data vendor and are never serialized."
         ]
     )
     return ProviderReadinessReport(

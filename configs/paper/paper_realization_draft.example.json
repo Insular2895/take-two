@@ -1,0 +1,19 @@
+{
+  "realization_id": "REPLACE_WITH_UNIQUE_REALIZATION_ID",
+  "decision_id": "REPLACE_WITH_DECISION_ID",
+  "decision_record_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "observed_at": "2027-01-11T21:00:00Z",
+  "realized_path_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "paper_entry_timestamp": "2027-01-04T15:00:00Z",
+  "paper_exit_timestamp": "2027-01-11T20:59:00Z",
+  "paper_entry_price": 0.0,
+  "paper_exit_price": 0.0,
+  "slippage_eur": 0.0,
+  "fees_eur": 0.0,
+  "pnl_eur": 0.0,
+  "postmortem": "REPLACE_WITH_FACTUAL_POSTMORTEM",
+  "example_only": true,
+  "simulated_only": true,
+  "transmit": false,
+  "order_capability": "forbidden"
+}

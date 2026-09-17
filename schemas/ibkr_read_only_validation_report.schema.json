@@ -109,6 +109,82 @@
       "title": "IbkrChainValidationEvidence",
       "type": "object"
     },
+    "IbkrProviderDiagnostics": {
+      "additionalProperties": false,
+      "description": "Non-secret counters proving retry, pacing and cache behavior for one provider instance.",
+      "properties": {
+        "cache_expirations": {
+          "minimum": 0,
+          "title": "Cache Expirations",
+          "type": "integer"
+        },
+        "cache_hits": {
+          "minimum": 0,
+          "title": "Cache Hits",
+          "type": "integer"
+        },
+        "cache_misses": {
+          "minimum": 0,
+          "title": "Cache Misses",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "pacing_wait_count": {
+          "minimum": 0,
+          "title": "Pacing Wait Count",
+          "type": "integer"
+        },
+        "pacing_wait_seconds": {
+          "minimum": 0,
+          "title": "Pacing Wait Seconds",
+          "type": "number"
+        },
+        "read_operations": {
+          "minimum": 0,
+          "title": "Read Operations",
+          "type": "integer"
+        },
+        "retry_exhaustions": {
+          "minimum": 0,
+          "title": "Retry Exhaustions",
+          "type": "integer"
+        },
+        "stale_fallbacks": {
+          "const": 0,
+          "default": 0,
+          "title": "Stale Fallbacks",
+          "type": "integer"
+        },
+        "transient_failures": {
+          "minimum": 0,
+          "title": "Transient Failures",
+          "type": "integer"
+        },
+        "transport_attempts": {
+          "minimum": 0,
+          "title": "Transport Attempts",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "captured_at",
+        "read_operations",
+        "transport_attempts",
+        "transient_failures",
+        "retry_exhaustions",
+        "pacing_wait_count",
+        "pacing_wait_seconds",
+        "cache_hits",
+        "cache_misses",
+        "cache_expirations"
+      ],
+      "title": "IbkrProviderDiagnostics",
+      "type": "object"
+    },
     "IbkrValidationCheck": {
       "additionalProperties": false,
       "properties": {
@@ -496,6 +572,17 @@
       "title": "Provider",
       "type": "string"
     },
+    "provider_diagnostics": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IbkrProviderDiagnostics"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "report_id": {
       "title": "Report Id",
       "type": "string"
@@ -514,8 +601,8 @@
       "type": "string"
     },
     "schema_version": {
-      "const": "1.0",
-      "default": "1.0",
+      "const": "1.1",
+      "default": "1.1",
       "title": "Schema Version",
       "type": "string"
     },

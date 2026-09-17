@@ -31,6 +31,8 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
         "baseline_comparison.schema.json",
         "analysis_budget_request.schema.json",
         "broker_what_if_evidence.schema.json",
+        "broker_what_if_normalization_report.schema.json",
+        "broker_what_if_observation.schema.json",
         "comparable_panel_dataset.schema.json",
         "backtest_report.schema.json",
         "calibration_report.schema.json",
@@ -55,7 +57,9 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
         "observation.schema.json",
         "opra_provider_readiness.schema.json",
         "paper_decision_record.schema.json",
+        "paper_decision_draft.schema.json",
         "paper_realization_record.schema.json",
+        "paper_realization_draft.schema.json",
         "shadow_campaign_manifest.schema.json",
         "shadow_campaign_status.schema.json",
         "phase_m_decision_context.schema.json",
@@ -91,9 +95,7 @@ def test_calibration_and_walk_forward_examples_cannot_claim_validation() -> None
 
 def test_position_trajectory_replay_is_chronological_and_advisory() -> None:
     fixture = PositionTrajectoryFixture.model_validate_json(
-        (ROOT / "fixtures/v11/position_trajectory.example.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "fixtures/v11/position_trajectory.example.json").read_text(encoding="utf-8")
     )
     report = replay_position_trajectory(fixture)
     assert [item.action.value for item in report.reports] == [
@@ -107,9 +109,7 @@ def test_position_trajectory_replay_is_chronological_and_advisory() -> None:
 
 def test_position_trajectory_rejects_out_of_order_snapshots() -> None:
     payload = json.loads(
-        (ROOT / "fixtures/v11/position_trajectory.example.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "fixtures/v11/position_trajectory.example.json").read_text(encoding="utf-8")
     )
     payload["snapshots"] = list(reversed(payload["snapshots"]))
     with pytest.raises(ValidationError, match="unique and chronological"):
@@ -118,9 +118,7 @@ def test_position_trajectory_rejects_out_of_order_snapshots() -> None:
 
 def test_observation_error_fixture_covers_every_required_failure_mode() -> None:
     payload = json.loads(
-        (ROOT / "fixtures/v11/observation_error_cases.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "fixtures/v11/observation_error_cases.json").read_text(encoding="utf-8")
     )
     assert {case["case_id"] for case in payload["cases"]} == {
         "future_timestamp",
@@ -140,17 +138,11 @@ def test_observation_error_fixture_covers_every_required_failure_mode() -> None:
 
 def test_observation_error_fixture_produces_auditable_data_hub_diagnostics() -> None:
     payload = json.loads(
-        (ROOT / "fixtures/v11/observation_error_cases.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "fixtures/v11/observation_error_cases.json").read_text(encoding="utf-8")
     )
     cutoff = datetime.fromisoformat(payload["cutoff"].replace("Z", "+00:00"))
     source = SourceProvenance.model_validate(payload["source"])
-    cases = {
-        case["case_id"]: case
-        for case in payload["cases"]
-        if "observations" in case
-    }
+    cases = {case["case_id"]: case for case in payload["cases"] if "observations" in case}
     observations = [
         UnifiedObservation.model_validate(observation)
         for case in cases.values()
@@ -180,9 +172,7 @@ def test_observation_error_fixture_produces_auditable_data_hub_diagnostics() -> 
 
 def test_readiness_and_commercial_docs_preserve_the_research_boundary() -> None:
     readiness = (ROOT / "docs/READINESS.md").read_text(encoding="utf-8")
-    checklist = (ROOT / "docs/COMMERCIALIZATION_CHECKLIST.md").read_text(
-        encoding="utf-8"
-    )
+    checklist = (ROOT / "docs/COMMERCIALIZATION_CHECKLIST.md").read_text(encoding="utf-8")
     security = (ROOT / "docs/SECURITY.md").read_text(encoding="utf-8")
     assert "COMMERCIAL_RESEARCH_PRODUCT" in readiness
     assert "automatic_execution" in readiness

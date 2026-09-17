@@ -44,17 +44,26 @@ def _draft(decision_id: str, decided_at: datetime) -> PaperDecisionDraft:
         decision_confidence_intervals={"expected_return": (-0.2, 0.1)},
         config_hash="b" * 64,
         code_commit="abcdef1234567",
+        example_only=False,
     )
 
 
 def test_paper_decisions_are_frozen_hash_chained_and_append_only(tmp_path: Path) -> None:
-    first = build_paper_decision_record([], _draft("d1", datetime(2026, 8, 8, tzinfo=UTC)))
+    first = build_paper_decision_record(
+        [],
+        _draft("d1", datetime(2026, 8, 8, tzinfo=UTC)),
+        campaign_id="campaign-test",
+        recorded_at=datetime(2026, 8, 8, 0, 1, tzinfo=UTC),
+    )
     with pytest.raises(ValidationError):
         first.classification = "CANDIDATE"
     path = tmp_path / "paper_decisions.jsonl"
     append_paper_decision(path, first, expected_head_hash=None)
     second = build_paper_decision_record(
-        [first], _draft("d2", datetime(2026, 8, 9, tzinfo=UTC))
+        [first],
+        _draft("d2", datetime(2026, 8, 9, tzinfo=UTC)),
+        campaign_id="campaign-test",
+        recorded_at=datetime(2026, 8, 9, 0, 1, tzinfo=UTC),
     )
     append_paper_decision(path, second, expected_head_hash=first.record_hash)
     loaded = load_paper_decisions(path)
@@ -66,7 +75,10 @@ def test_paper_decisions_are_frozen_hash_chained_and_append_only(tmp_path: Path)
 
 def test_realization_is_a_separate_record_linked_to_frozen_decision() -> None:
     decision = build_paper_decision_record(
-        [], _draft("d1", datetime(2026, 8, 8, tzinfo=UTC))
+        [],
+        _draft("d1", datetime(2026, 8, 8, tzinfo=UTC)),
+        campaign_id="campaign-test",
+        recorded_at=datetime(2026, 8, 8, 0, 1, tzinfo=UTC),
     )
     realization = build_paper_realization_record(
         PaperRealizationDraft(
@@ -83,8 +95,11 @@ def test_realization_is_a_separate_record_linked_to_frozen_decision() -> None:
             fees_eur=1,
             pnl_eur=-203,
             postmortem="future-only fixture",
+            example_only=False,
         ),
         decisions=[decision],
+        campaign_id="campaign-test",
+        recorded_at=datetime(2026, 8, 10, 0, 1, tzinfo=UTC),
     )
     assert realization.decision_record_hash == decision.record_hash
     assert realization.record_kind == "paper_realization"
@@ -96,10 +111,16 @@ def test_realizations_are_hash_chained_append_only_and_linked_to_decisions(
     tmp_path: Path,
 ) -> None:
     first_decision = build_paper_decision_record(
-        [], _draft("d1", datetime(2026, 8, 8, tzinfo=UTC))
+        [],
+        _draft("d1", datetime(2026, 8, 8, tzinfo=UTC)),
+        campaign_id="campaign-test",
+        recorded_at=datetime(2026, 8, 8, 0, 1, tzinfo=UTC),
     )
     second_decision = build_paper_decision_record(
-        [first_decision], _draft("d2", datetime(2026, 8, 9, tzinfo=UTC))
+        [first_decision],
+        _draft("d2", datetime(2026, 8, 9, tzinfo=UTC)),
+        campaign_id="campaign-test",
+        recorded_at=datetime(2026, 8, 9, 0, 1, tzinfo=UTC),
     )
     decisions = [first_decision, second_decision]
 
@@ -119,13 +140,21 @@ def test_realizations_are_hash_chained_append_only_and_linked_to_decisions(
             fees_eur=1,
             pnl_eur=-203,
             postmortem="future-only fixture",
+            example_only=False,
         )
 
-    first = build_paper_realization_record(draft(first_decision, "r1"), decisions=decisions)
+    first = build_paper_realization_record(
+        draft(first_decision, "r1"),
+        decisions=decisions,
+        campaign_id="campaign-test",
+        recorded_at=datetime(2026, 8, 12, 0, 1, tzinfo=UTC),
+    )
     second = build_paper_realization_record(
         draft(second_decision, "r2"),
         existing=[first],
         decisions=decisions,
+        campaign_id="campaign-test",
+        recorded_at=datetime(2026, 8, 12, 0, 2, tzinfo=UTC),
     )
     path = tmp_path / "paper_realizations.jsonl"
     append_paper_realization(
@@ -153,7 +182,10 @@ def test_realizations_are_hash_chained_append_only_and_linked_to_decisions(
 
 def test_realization_rejects_backdated_entry() -> None:
     decision = build_paper_decision_record(
-        [], _draft("d1", datetime(2026, 8, 8, tzinfo=UTC))
+        [],
+        _draft("d1", datetime(2026, 8, 8, tzinfo=UTC)),
+        campaign_id="campaign-test",
+        recorded_at=datetime(2026, 8, 8, 0, 1, tzinfo=UTC),
     )
     with pytest.raises(ValueError, match="cannot precede the frozen decision"):
         build_paper_realization_record(
@@ -171,6 +203,9 @@ def test_realization_rejects_backdated_entry() -> None:
                 fees_eur=1,
                 pnl_eur=-203,
                 postmortem="backdated fixture",
+                example_only=False,
             ),
             decisions=[decision],
+            campaign_id="campaign-test",
+            recorded_at=datetime(2026, 8, 10, 0, 1, tzinfo=UTC),
         )

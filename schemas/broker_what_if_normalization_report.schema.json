@@ -1,0 +1,326 @@
+{
+  "$defs": {
+    "BrokerWhatIfEvidence": {
+      "additionalProperties": false,
+      "description": "Strict ingestion contract for separately obtained broker preview evidence.\n\nThis model does not request a preview and grants no order capability.  It lets the\nresearch engine consume a future broker observation without replacing missing values.",
+      "properties": {
+        "account_scope_redacted": {
+          "const": true,
+          "default": true,
+          "title": "Account Scope Redacted",
+          "type": "boolean"
+        },
+        "broker_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Broker Status"
+        },
+        "buying_power_change": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Buying Power Change"
+        },
+        "candidate_id": {
+          "minLength": 1,
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "complete": {
+          "default": false,
+          "title": "Complete",
+          "type": "boolean"
+        },
+        "currency": {
+          "maxLength": 3,
+          "minLength": 3,
+          "title": "Currency",
+          "type": "string"
+        },
+        "equity_with_loan_after": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Equity With Loan After"
+        },
+        "equity_with_loan_before": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Equity With Loan Before"
+        },
+        "equity_with_loan_change": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Equity With Loan Change"
+        },
+        "estimated_commission": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated Commission"
+        },
+        "initial_margin_after": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Initial Margin After"
+        },
+        "initial_margin_before": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Initial Margin Before"
+        },
+        "initial_margin_change": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Initial Margin Change"
+        },
+        "maintenance_margin_after": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maintenance Margin After"
+        },
+        "maintenance_margin_before": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maintenance Margin Before"
+        },
+        "maintenance_margin_change": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maintenance Margin Change"
+        },
+        "maximum_commission": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Commission"
+        },
+        "minimum_commission": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum Commission"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "order_capability": {
+          "const": "forbidden",
+          "default": "forbidden",
+          "title": "Order Capability",
+          "type": "string"
+        },
+        "read_only": {
+          "const": true,
+          "default": true,
+          "title": "Read Only",
+          "type": "boolean"
+        },
+        "source_id": {
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "transmit": {
+          "const": false,
+          "default": false,
+          "title": "Transmit",
+          "type": "boolean"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "what_if": {
+          "const": true,
+          "default": true,
+          "title": "What If",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "observed_at",
+        "currency",
+        "source_id"
+      ],
+      "title": "BrokerWhatIfEvidence",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/broker_what_if_normalization_report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "checks": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Checks",
+      "type": "array"
+    },
+    "connection_attempted": {
+      "const": false,
+      "default": false,
+      "title": "Connection Attempted",
+      "type": "boolean"
+    },
+    "evidence": {
+      "$ref": "#/$defs/BrokerWhatIfEvidence"
+    },
+    "input_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Input Hash",
+      "type": "string"
+    },
+    "maximum_claim": {
+      "const": "sanitized_offline_broker_observation",
+      "default": "sanitized_offline_broker_observation",
+      "title": "Maximum Claim",
+      "type": "string"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "NORMALIZED_COMPLETE",
+        "NORMALIZED_INCOMPLETE"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "strategy_promotion_eligible": {
+      "const": false,
+      "default": false,
+      "title": "Strategy Promotion Eligible",
+      "type": "boolean"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "input_hash",
+    "status",
+    "evidence",
+    "checks"
+  ],
+  "title": "BrokerWhatIfNormalizationReport",
+  "type": "object"
+}

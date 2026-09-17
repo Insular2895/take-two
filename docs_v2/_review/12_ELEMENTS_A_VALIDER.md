@@ -41,7 +41,15 @@ Cela ne coche pas le trajet distant complet.
 
 ## What-if et paper
 
-Non implémenté dans la frontière ordre :
+Codé hors ligne, sans appel broker :
+
+- contrat brut redacted `BrokerWhatIfObservation` ;
+- normalisation stricte vers `BrokerWhatIfEvidence` ;
+- consommation typée par la preview seulement si candidat/devise/complétude concordent ;
+- commandes append-only pour décision et réalisation shadow ;
+- contrôle des délais d'enregistrement prospectifs.
+
+Toujours non implémenté dans la frontière ordre :
 
 - demande IBKR what-if ;
 - commission et marge broker ;
@@ -61,7 +69,7 @@ commencée et les seuils restent `draft_to_validate`. Il faut encore :
 - [ ] valider la période et les tailles minimales avec le responsable risque ;
 - [ ] geler les hashes IBKR, holdout, configuration et commit ;
 - [ ] approuver les droits d'usage des données ;
-- [ ] brancher la production prospective des décisions, sans backfill ;
+- [ ] appeler la commande d'append au moment réel de chaque décision, sans backfill ;
 - [ ] collecter les réalisations futures et les incidents ;
 - [ ] effectuer une revue humaine finale, sans promotion automatique.
 

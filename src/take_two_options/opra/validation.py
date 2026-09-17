@@ -19,7 +19,7 @@ from take_two_options.opra.contracts import (
     LiveOptionChainSnapshot,
     ProviderHealth,
 )
-from take_two_options.opra.ibkr_provider import IbkrProviderError
+from take_two_options.opra.ibkr_provider import IbkrProviderDiagnostics, IbkrProviderError
 
 
 class ComboValidationLeg(StrictModel):
@@ -43,10 +43,7 @@ class ComboValidationPlan(StrictModel):
 
     @model_validator(mode="after")
     def require_distinct_legs(self) -> ComboValidationPlan:
-        identities = {
-            (leg.expiration, leg.strike, leg.option_type)
-            for leg in self.legs
-        }
+        identities = {(leg.expiration, leg.strike, leg.option_type) for leg in self.legs}
         if len(identities) != len(self.legs):
             raise ValueError("combo validation legs must be distinct")
         return self
@@ -80,7 +77,7 @@ class IbkrChainValidationEvidence(StrictModel):
 
 
 class IbkrReadOnlyValidationReport(StrictModel):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.1"] = "1.1"
     report_id: str
     started_at: datetime
     completed_at: datetime
@@ -102,6 +99,7 @@ class IbkrReadOnlyValidationReport(StrictModel):
     requested_market_data_type: Literal["live", "frozen", "delayed", "delayed_frozen"]
     explicit_connection_authorized: Literal[True] = True
     broker_read_observed: bool
+    provider_diagnostics: IbkrProviderDiagnostics | None = None
     independent_second_session_requested: bool
     independent_second_session_verified: bool
     checks: list[IbkrValidationCheck] = Field(min_length=1)
@@ -184,6 +182,7 @@ def validate_ibkr_read_only(
             exercise_second_session,
             checks,
             plan_failure,
+            provider_diagnostics=_provider_diagnostics(provider),
         )
 
     try:
@@ -199,6 +198,7 @@ def validate_ibkr_read_only(
             exercise_second_session,
             checks,
             str(error),
+            provider_diagnostics=_provider_diagnostics(provider),
         )
     if first_health.status != "available_read_only":
         code = f"IBKR_INITIAL_HEALTH_{first_health.status.upper()}"
@@ -213,6 +213,7 @@ def validate_ibkr_read_only(
             checks,
             code,
             broker_read_observed=True,
+            provider_diagnostics=_provider_diagnostics(provider),
         )
     checks.append(_passed("initial_health", "IBKR_PAPER_READ_ONLY_HEALTH_OK"))
 
@@ -231,6 +232,7 @@ def validate_ibkr_read_only(
                 checks,
                 str(error),
                 broker_read_observed=True,
+                provider_diagnostics=_provider_diagnostics(provider),
             )
         second_session_verified = second_health.status == "available_read_only"
         if not second_session_verified:
@@ -246,10 +248,9 @@ def validate_ibkr_read_only(
                 checks,
                 code,
                 broker_read_observed=True,
+                provider_diagnostics=_provider_diagnostics(provider),
             )
-        checks.append(
-            _passed("independent_second_session", "IBKR_INDEPENDENT_SECOND_SESSION_OK")
-        )
+        checks.append(_passed("independent_second_session", "IBKR_INDEPENDENT_SECOND_SESSION_OK"))
     else:
         checks.append(
             IbkrValidationCheck(
@@ -274,6 +275,7 @@ def validate_ibkr_read_only(
             str(error),
             broker_read_observed=True,
             independent_second_session_verified=second_session_verified,
+            provider_diagnostics=_provider_diagnostics(provider),
         )
 
     checks.append(
@@ -328,6 +330,7 @@ def validate_ibkr_read_only(
         "request": request,
         "requested_market_data_type": requested_market_data_type,
         "broker_read_observed": True,
+        "provider_diagnostics": _provider_diagnostics(provider),
         "independent_second_session_requested": exercise_second_session,
         "independent_second_session_verified": second_session_verified,
         "checks": checks,
@@ -369,9 +372,26 @@ def render_ibkr_validation_markdown(report: IbkrReadOnlyValidationReport) -> str
         "|---|---:|---|",
     ]
     lines.extend(
-        f"| `{item.check_id}` | `{item.status}` | `{item.detail_code}` |"
-        for item in report.checks
+        f"| `{item.check_id}` | `{item.status}` | `{item.detail_code}` |" for item in report.checks
     )
+    if report.provider_diagnostics is not None:
+        diagnostics = report.provider_diagnostics
+        lines.extend(
+            [
+                "",
+                "## Reprise, pacing et cache",
+                "",
+                f"- Lectures logiques : `{diagnostics.read_operations}`",
+                f"- Tentatives transport : `{diagnostics.transport_attempts}`",
+                f"- Erreurs transitoires : `{diagnostics.transient_failures}`",
+                f"- Retries épuisés : `{diagnostics.retry_exhaustions}`",
+                f"- Attentes de pacing : `{diagnostics.pacing_wait_count}`",
+                f"- Temps de pacing : `{diagnostics.pacing_wait_seconds}` s",
+                f"- Cache hits/misses : `{diagnostics.cache_hits}` / `{diagnostics.cache_misses}`",
+                f"- Cache expiré : `{diagnostics.cache_expirations}`",
+                f"- Repli vers donnée périmée : `{diagnostics.stale_fallbacks}`",
+            ]
+        )
     if report.chain is not None:
         chain = report.chain
         lines.extend(
@@ -650,6 +670,7 @@ def _failed_outcome(
     *,
     broker_read_observed: bool = False,
     independent_second_session_verified: bool = False,
+    provider_diagnostics: IbkrProviderDiagnostics | None = None,
 ) -> IbkrValidationOutcome:
     completed_at = _utc(clock())
     payload = {
@@ -664,6 +685,7 @@ def _failed_outcome(
         "request": request,
         "requested_market_data_type": requested_market_data_type,
         "broker_read_observed": broker_read_observed,
+        "provider_diagnostics": provider_diagnostics,
         "independent_second_session_requested": second_session_requested,
         "independent_second_session_verified": independent_second_session_verified,
         "checks": checks,
@@ -674,6 +696,16 @@ def _failed_outcome(
         **payload,
     )
     return IbkrValidationOutcome(report=report, snapshot=None)
+
+
+def _provider_diagnostics(provider: IbkrValidationProvider) -> IbkrProviderDiagnostics | None:
+    diagnostics = getattr(provider, "diagnostics", None)
+    if not callable(diagnostics):
+        return None
+    result = diagnostics()
+    if not isinstance(result, IbkrProviderDiagnostics):
+        raise ValueError("IBKR_PROVIDER_DIAGNOSTICS_INVALID")
+    return result
 
 
 def _combo_plan_preflight(

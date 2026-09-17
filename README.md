@@ -73,6 +73,16 @@ ttwo-options data ibkr-validate \
 
 It writes ignored private JSON/Markdown evidence, exercises a second independent session and can
 resolve a human-selected BAG plan from the captured chain. It has not been run against IBKR yet.
+The report now includes redacted retry, pacing, and cache counters with stale fallback fixed to
+zero. A separate offline command can sanitize an already-obtained what-if observation; it does not
+call IBKR's order-shaped what-if operation.
+
+```bash
+ttwo-options paper what-if-normalize \
+  --observation reports/private/ibkr-what-if-observation.json \
+  --evidence-out reports/private/ibkr-what-if-evidence.json \
+  --report-out reports/private/ibkr-what-if-normalization.json
+```
 
 The future shadow campaign also has an offline-only control plane. The committed example is
 deliberately blocked and this command contacts neither IBKR nor another provider:
@@ -86,8 +96,11 @@ ttwo-options paper shadow-status \
 ```
 
 An approved manifest must freeze human-selected thresholds and evidence hashes. Decisions and
-later realizations live in separate hash-chained append-only ledgers. Even when observation targets
-are reached, the software keeps `paper_validation_passed=false` pending human review.
+later realizations live in separate hash-chained append-only ledgers. The CLI can append them only
+under the approved campaign ID, frozen commit/config, active decision window and human-selected
+recording-delay thresholds. Committed drafts are `example_only=true` and refused. Even when
+observation targets are reached, the software keeps `paper_validation_passed=false` pending human
+review.
 
 ## Phase M — Governed prospective context
 

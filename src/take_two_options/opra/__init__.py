@@ -17,6 +17,7 @@ from take_two_options.opra.contracts import (
 )
 from take_two_options.opra.ibkr_provider import (
     IbkrGovernanceError,
+    IbkrProviderDiagnostics,
     IbkrProviderError,
     IbkrReadOnlyMarketDataProvider,
     IbkrReadPolicy,
@@ -28,6 +29,8 @@ from take_two_options.opra.shadow_campaign import (
     ShadowCampaignStatusReport,
     ShadowCampaignThresholds,
     evaluate_shadow_campaign,
+    record_shadow_decision,
+    record_shadow_realization,
 )
 from take_two_options.opra.validation import (
     ComboValidationLeg,
@@ -37,14 +40,22 @@ from take_two_options.opra.validation import (
     render_ibkr_validation_markdown,
     validate_ibkr_read_only,
 )
+from take_two_options.opra.what_if import (
+    BrokerWhatIfNormalizationReport,
+    BrokerWhatIfObservation,
+    normalize_broker_what_if,
+)
 
 __all__ = [
     "BrokerWhatIfEvidence",
+    "BrokerWhatIfNormalizationReport",
+    "BrokerWhatIfObservation",
     "ComboValidationLeg",
     "ComboValidationPlan",
     "IBKR_TWS_ENVIRONMENT_VARIABLES",
     "IbkrGovernanceError",
     "IbkrProviderError",
+    "IbkrProviderDiagnostics",
     "IbkrReadOnlyMarketDataProvider",
     "IbkrReadOnlyValidationReport",
     "IbkrReadPolicy",
@@ -66,6 +77,9 @@ __all__ = [
     "build_official_ibkr_provider",
     "evaluate_shadow_campaign",
     "live_chain_to_market_snapshot",
+    "normalize_broker_what_if",
     "render_ibkr_validation_markdown",
+    "record_shadow_decision",
+    "record_shadow_realization",
     "validate_ibkr_read_only",
 ]

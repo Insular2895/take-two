@@ -17,7 +17,7 @@ from take_two_options.opra.contracts import (
     LiveOptionQuote,
     ProviderHealth,
 )
-from take_two_options.opra.ibkr_provider import IbkrProviderError
+from take_two_options.opra.ibkr_provider import IbkrProviderDiagnostics, IbkrProviderError
 from take_two_options.opra.validation import (
     ComboValidationLeg,
     ComboValidationPlan,
@@ -138,6 +138,20 @@ class StubProvider:
             comparison_confirmed=True,
         )
 
+    def diagnostics(self) -> IbkrProviderDiagnostics:
+        return IbkrProviderDiagnostics(
+            captured_at=NOW,
+            read_operations=1,
+            transport_attempts=2,
+            transient_failures=1,
+            retry_exhaustions=0,
+            pacing_wait_count=1,
+            pacing_wait_seconds=0.1,
+            cache_hits=0,
+            cache_misses=1,
+            cache_expirations=0,
+        )
+
 
 class FailedHealthProvider(StubProvider):
     def health(self) -> ProviderHealth:
@@ -181,6 +195,8 @@ def test_validation_exercises_two_independent_sessions_and_chain() -> None:
     assert outcome.report.chain.greeks_complete_count == 2
     assert outcome.report.request == _request()
     assert outcome.report.broker_read_observed is True
+    assert outcome.report.provider_diagnostics is not None
+    assert outcome.report.provider_diagnostics.transient_failures == 1
     assert outcome.report.order_capability == "forbidden"
     assert outcome.snapshot is provider.snapshot
 
@@ -319,6 +335,7 @@ def test_human_markdown_states_claim_boundary_and_contains_no_connection_identif
     markdown = render_ibkr_validation_markdown(report)
     assert "broker_read_only_chain_promotable" in markdown
     assert "Capacité d’ordre : `forbidden`" in markdown
+    assert "Repli vers donnée périmée : `0`" in markdown
     assert "client_id" not in markdown
     assert "DU" not in markdown
 

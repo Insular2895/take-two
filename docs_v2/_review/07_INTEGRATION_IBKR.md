@@ -37,6 +37,11 @@ Le provider officiel refuse un hôte non loopback et une session configurée `li
 - cache : mémoire seulement, TTL court ;
 - panne après expiration : erreur, jamais ancien snapshot silencieux.
 
+Le provider expose aussi des compteurs sans identifiant de connexion : lectures logiques,
+tentatives transport, erreurs transitoires, retries épuisés, attentes de pacing, hits/misses et
+expirations cache. `stale_fallbacks` est contractuellement fixé à `0`. Ces compteurs sont intégrés
+au rapport `ibkr-validate` quand le provider les fournit.
+
 Ces politiques sont testées offline. Les vraies limites de l’abonnement et le comportement de la
 session devront être observés puis ajustés sans dépasser les règles IBKR.
 
@@ -64,9 +69,16 @@ confondues.
 
 ## What-if, commissions et marge
 
-Le modèle `BrokerWhatIfEvidence` est codé pour ingérer une observation future sans inventer les
-champs manquants. Le provider ne demande pas lui-même le what-if, car cette voie peut nécessiter un
-objet et une méthode du domaine ordre. Cette capacité reste hors de la frontière read-only.
+Le modèle `BrokerWhatIfEvidence` et le normaliseur offline sont codés pour ingérer une observation
+future sans inventer les champs manquants. Les sentinelles, valeurs non finies, commissions
+négatives et devises incohérentes deviennent des inconnues accompagnées de codes explicites. Une
+preview du moteur ne consomme la preuve que si elle est complète, rattachée au même candidat et en
+USD.
+
+Le provider ne demande pas lui-même le what-if. La documentation IBKR décrit ce mécanisme comme
+un `Order` marqué `WhatIf=true` soumis via `placeOrder`, même si IBKR précise qu'il n'est alors pas
+routé. Cette primitive reste volontairement hors de la frontière de marché read-only. Voir
+[le chapitre what-if et résilience](17_WHAT_IF_ET_RESILIENCE.md).
 
 ## Preuve réelle déjà disponible
 

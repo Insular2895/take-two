@@ -14,11 +14,15 @@ from take_two_options.opra.paper_decisions import (
     PaperRealizationDraft,
     build_paper_decision_record,
     build_paper_realization_record,
+    load_paper_decisions,
+    load_paper_realizations,
 )
 from take_two_options.opra.shadow_campaign import (
     ShadowCampaignManifest,
     ShadowCampaignThresholds,
     evaluate_shadow_campaign,
+    record_shadow_decision,
+    record_shadow_realization,
 )
 
 CONFIG_HASH = "a" * 64
@@ -36,6 +40,8 @@ def _manifest(**updates: object) -> ShadowCampaignManifest:
         "thresholds": ShadowCampaignThresholds(
             minimum_decisions=1,
             minimum_realizations=1,
+            maximum_decision_recording_delay_seconds=300,
+            maximum_realization_recording_delay_seconds=300,
         ),
         "code_commit": COMMIT,
         "strategy_config_hash": CONFIG_HASH,
@@ -49,7 +55,11 @@ def _manifest(**updates: object) -> ShadowCampaignManifest:
     return ShadowCampaignManifest.model_validate(payload)
 
 
-def _decision(*, config_hash: str = CONFIG_HASH):
+def _decision(
+    *,
+    config_hash: str = CONFIG_HASH,
+    recorded_at: datetime = datetime(2026, 8, 10, 0, 1, tzinfo=UTC),
+):
     return build_paper_decision_record(
         [],
         PaperDecisionDraft(
@@ -76,7 +86,10 @@ def _decision(*, config_hash: str = CONFIG_HASH):
             decision_confidence_intervals={"expected_return": (-0.2, 0.1)},
             config_hash=config_hash,
             code_commit=COMMIT,
+            example_only=False,
         ),
+        campaign_id="ttwo-shadow-2026-08",
+        recorded_at=recorded_at,
     )
 
 
@@ -96,8 +109,11 @@ def _realization(decision):
             fees_eur=0,
             pnl_eur=0,
             postmortem="NO_POSITION remained the prudent paper decision.",
+            example_only=False,
         ),
         decisions=[decision],
+        campaign_id="ttwo-shadow-2026-08",
+        recorded_at=datetime(2026, 8, 13, 0, 1, tzinfo=UTC),
     )
 
 
@@ -184,6 +200,67 @@ def test_incomplete_campaign_window_never_claims_validation() -> None:
     assert report.paper_validation_passed is False
 
 
+def test_recording_helpers_append_only_prospective_linked_evidence(tmp_path: Path) -> None:
+    manifest = _manifest()
+    decision_template = _decision()
+    decision_draft = PaperDecisionDraft.model_validate(
+        decision_template.model_dump(include=set(PaperDecisionDraft.model_fields))
+    )
+    decision_path = tmp_path / "decisions.jsonl"
+    realization_path = tmp_path / "realizations.jsonl"
+    decision = record_shadow_decision(
+        manifest,
+        decision_draft,
+        decision_path,
+        now=lambda: datetime(2026, 8, 10, 0, 2, tzinfo=UTC),
+    )
+    assert decision.campaign_id == manifest.campaign_id
+    assert load_paper_decisions(decision_path) == [decision]
+
+    realization_template = _realization(decision)
+    realization_draft = PaperRealizationDraft.model_validate(
+        realization_template.model_dump(include=set(PaperRealizationDraft.model_fields))
+    )
+    realization = record_shadow_realization(
+        manifest,
+        realization_draft,
+        decision_path,
+        realization_path,
+        now=lambda: datetime(2026, 8, 13, 0, 2, tzinfo=UTC),
+    )
+    assert realization.campaign_id == manifest.campaign_id
+    assert load_paper_realizations(realization_path, [decision]) == [realization]
+
+
+def test_shadow_decision_delay_is_rejected_before_ledger_creation(tmp_path: Path) -> None:
+    decision_template = _decision()
+    draft = PaperDecisionDraft.model_validate(
+        decision_template.model_dump(include=set(PaperDecisionDraft.model_fields))
+    )
+    ledger = tmp_path / "decisions.jsonl"
+    with pytest.raises(ValueError, match="RECORDING_DELAY_EXCEEDED"):
+        record_shadow_decision(
+            _manifest(),
+            draft,
+            ledger,
+            now=lambda: datetime(2026, 8, 10, 0, 10, tzinfo=UTC),
+        )
+    assert not ledger.exists()
+
+
+def test_evaluator_fails_safe_on_prospective_recording_delay() -> None:
+    report = evaluate_shadow_campaign(
+        _manifest(),
+        [_decision(recorded_at=datetime(2026, 8, 10, 0, 10, tzinfo=UTC))],
+        [],
+        now=lambda: datetime(2026, 8, 14, tzinfo=UTC),
+    )
+    assert report.status == "FAILED_SAFE"
+    assert any(
+        check.detail_code == "SHADOW_DECISION_RECORDING_DELAY_EXCEEDED" for check in report.checks
+    )
+
+
 def test_shadow_status_cli_keeps_the_example_blocked_and_offline(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[1]
     output = tmp_path / "status.json"
@@ -206,3 +283,24 @@ def test_shadow_status_cli_keeps_the_example_blocked_and_offline(tmp_path: Path)
     assert "BLOCKED_DRAFT" in result.output
     assert "connection_attempted=false" in result.output
     assert '"paper_validation_passed": false' in output.read_text(encoding="utf-8")
+
+
+def test_shadow_append_cli_rejects_committed_examples_without_ledger(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[1]
+    ledger = tmp_path / "decisions.jsonl"
+    result = CliRunner().invoke(
+        app,
+        [
+            "paper",
+            "append-shadow-decision",
+            "--manifest",
+            str(root / "configs/paper/shadow_campaign.example.json"),
+            "--draft",
+            str(root / "configs/paper/paper_decision_draft.example.json"),
+            "--decision-ledger",
+            str(ledger),
+        ],
+    )
+    assert result.exit_code == 1
+    assert "SHADOW_MANIFEST_NOT_APPROVED" in result.output
+    assert not ledger.exists()

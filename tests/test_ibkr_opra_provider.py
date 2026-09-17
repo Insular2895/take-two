@@ -294,6 +294,31 @@ def test_cache_and_bounded_transient_retry_are_deterministic() -> None:
     clock.value += 6
     current.get_option_chain(chain_request())
     assert transport.chain_calls == 3
+    diagnostics = current.diagnostics()
+    assert diagnostics.read_operations == 2
+    assert diagnostics.transport_attempts == 3
+    assert diagnostics.transient_failures == 1
+    assert diagnostics.retry_exhaustions == 0
+    assert diagnostics.cache_hits == 1
+    assert diagnostics.cache_misses == 2
+    assert diagnostics.cache_expirations == 1
+    assert diagnostics.stale_fallbacks == 0
+
+
+def test_retry_exhaustion_never_returns_an_expired_cache_entry() -> None:
+    clock = FakeClock()
+    transport = FakeTransport(raw_chain())
+    current = provider(transport, clock=clock)
+    captured = current.get_option_chain(chain_request())
+    clock.value += 6
+    transport.transient_failures = 2
+    with pytest.raises(IbkrProviderError, match="READ_RETRY_EXHAUSTED"):
+        current.get_option_chain(chain_request())
+    diagnostics = current.diagnostics()
+    assert captured.snapshot_id
+    assert diagnostics.retry_exhaustions == 1
+    assert diagnostics.cache_expirations == 1
+    assert diagnostics.stale_fallbacks == 0
 
 
 def test_chain_converts_to_canonical_market_snapshot_without_inventing_inputs() -> None:

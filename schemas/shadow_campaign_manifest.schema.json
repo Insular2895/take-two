@@ -4,6 +4,16 @@
       "additionalProperties": false,
       "description": "Risk-owner values; the software deliberately supplies no defaults.",
       "properties": {
+        "maximum_decision_recording_delay_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Decision Recording Delay Seconds",
+          "type": "integer"
+        },
+        "maximum_realization_recording_delay_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Realization Recording Delay Seconds",
+          "type": "integer"
+        },
         "minimum_decisions": {
           "exclusiveMinimum": 0,
           "title": "Minimum Decisions",
@@ -17,7 +27,9 @@
       },
       "required": [
         "minimum_decisions",
-        "minimum_realizations"
+        "minimum_realizations",
+        "maximum_decision_recording_delay_seconds",
+        "maximum_realization_recording_delay_seconds"
       ],
       "title": "ShadowCampaignThresholds",
       "type": "object"
@@ -137,8 +149,8 @@
       "title": "Risk Owner Approval Reference"
     },
     "schema_version": {
-      "const": "1.0",
-      "default": "1.0",
+      "const": "1.1",
+      "default": "1.1",
       "title": "Schema Version",
       "type": "string"
     },

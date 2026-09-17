@@ -37,9 +37,15 @@ La commande future `ttwo-options data ibkr-validate` produit en plus un rapport 
 rapport Markdown. Elle contrôle deux sessions indépendantes, la chaîne et, si un plan est fourni,
 une BAG. Voir [le protocole de branchement](15_PROTOCOLE_BRANCHEMENT_IBKR.md).
 
-La commande offline `ttwo-options paper shadow-status` vérifie ensuite le manifeste et les deux
-journaux prospectifs. Elle ne lance ni provider ni paper trading et ne peut pas produire
+Les commandes offline `paper append-shadow-decision`, `paper append-shadow-realization` et
+`paper shadow-status` écrivent puis vérifient les deux journaux prospectifs sous manifeste
+approuvé. Elles ne lancent ni provider ni paper trading et ne peuvent pas produire
 `paper_validation_passed=true`. Voir [le contrôle shadow](16_CAMPAGNE_SHADOW.md).
+
+`paper what-if-normalize` ne demande aucun preview au broker : il vérifie et assainit un fichier
+redacted déjà capturé. Une preuve normalisée reste une observation de coûts/marge, jamais une
+preuve de rentabilité ou d'exécution. Voir
+[le chapitre what-if et résilience](17_WHAT_IF_ET_RESILIENCE.md).
 
 ## Validation réelle minimale du nouveau provider
 

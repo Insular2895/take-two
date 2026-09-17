@@ -24,10 +24,17 @@
 - Added a human-gated offline shadow campaign manifest, hash-chained decision and realization
   ledgers, a no-provider status command and strict reports that can never auto-claim paper
   validation.
-- Added a 17-chapter French review dossier under `docs_v2/_review`, aligned stale current-state
+- Added strict offline what-if observation normalization, sentinel/non-finite handling, typed
+  execution-preview consumption and committed example inputs that fail closed by default.
+- Added provider diagnostics for attempts, retry exhaustion, pacing, cache expiry and the invariant
+  of zero stale fallback; diagnostics are embedded in the IBKR validation evidence.
+- Added governed shadow decision/realization append commands with campaign lineage, actual
+  recording timestamps, risk-owner delay thresholds and rejection of committed example drafts.
+- Added an 18-chapter French review dossier under `docs_v2/_review`, aligned stale current-state
   documentation, and preserved the distinction between coded, offline-tested and live-observed.
 - No IBKR connection was made for this checkpoint. Entitlement, licence, full-chain behavior,
-  what-if and the actual shadow/paper campaign remain open; execution remains forbidden.
+  broker-side what-if capture and the actual shadow/paper campaign remain open; execution remains
+  forbidden.
 
 ## 0.12.8 — 2026-08-25
 

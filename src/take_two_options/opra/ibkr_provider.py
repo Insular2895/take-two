@@ -16,7 +16,9 @@ from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime
 from typing import Literal, Protocol
 
-from take_two_options.domain import ExerciseStyle, OptionType
+from pydantic import Field, field_validator
+
+from take_two_options.domain import ExerciseStyle, OptionType, StrictModel
 from take_two_options.knowledge.provenance import stable_hash
 from take_two_options.knowledge.schemas import DatasetLineage, MarketSnapshot, QuoteSnapshot
 from take_two_options.opra.contracts import (
@@ -46,6 +48,29 @@ class IbkrGovernanceError(IbkrProviderError):
 
 class IbkrTransientError(IbkrProviderError):
     """A read request may be retried without broker mutation."""
+
+
+class IbkrProviderDiagnostics(StrictModel):
+    """Non-secret counters proving retry, pacing and cache behavior for one provider instance."""
+
+    captured_at: datetime
+    read_operations: int = Field(ge=0)
+    transport_attempts: int = Field(ge=0)
+    transient_failures: int = Field(ge=0)
+    retry_exhaustions: int = Field(ge=0)
+    pacing_wait_count: int = Field(ge=0)
+    pacing_wait_seconds: float = Field(ge=0)
+    cache_hits: int = Field(ge=0)
+    cache_misses: int = Field(ge=0)
+    cache_expirations: int = Field(ge=0)
+    stale_fallbacks: Literal[0] = 0
+
+    @field_validator("captured_at")
+    @classmethod
+    def require_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("provider diagnostics timestamp must be timezone-aware")
+        return value.astimezone(UTC)
 
 
 @dataclass(frozen=True)
@@ -127,9 +152,7 @@ class RawIbkrChainSnapshot:
     underlying_price: float
     underlying_quote_timestamp: datetime | None
     underlying_received_at: datetime
-    underlying_timestamp_source: Literal[
-        "exchange", "provider", "client_received_at", "unknown"
-    ]
+    underlying_timestamp_source: Literal["exchange", "provider", "client_received_at", "unknown"]
     underlying_market_data_type: MarketDataType
     quotes: tuple[RawIbkrOptionQuote, ...]
     discovered_contract_count: int
@@ -204,6 +227,15 @@ class IbkrReadOnlyMarketDataProvider(LiveOptionMarketDataProvider, LiveComboMark
         self._sleep = sleep or time.sleep
         self._last_request_at: float | None = None
         self._cache: dict[str, _CacheEntry] = {}
+        self._read_operations = 0
+        self._transport_attempts = 0
+        self._transient_failures = 0
+        self._retry_exhaustions = 0
+        self._pacing_wait_count = 0
+        self._pacing_wait_seconds = 0.0
+        self._cache_hits = 0
+        self._cache_misses = 0
+        self._cache_expirations = 0
 
     def _require_governance(self) -> None:
         if not self._entitlement_confirmed:
@@ -221,26 +253,47 @@ class IbkrReadOnlyMarketDataProvider(LiveOptionMarketDataProvider, LiveComboMark
     def _pace(self) -> None:
         current = self._monotonic()
         if self._last_request_at is not None:
-            remaining = (
-                self._policy.minimum_request_interval_seconds
-                - (current - self._last_request_at)
+            remaining = self._policy.minimum_request_interval_seconds - (
+                current - self._last_request_at
             )
             if remaining > 0:
+                self._pacing_wait_count += 1
+                self._pacing_wait_seconds += remaining
                 self._sleep(remaining)
                 current = self._monotonic()
         self._last_request_at = current
 
     def _read_with_retry(self, operation: Callable[[], object]) -> object:
+        self._read_operations += 1
         last_error: IbkrTransientError | None = None
         for attempt in range(self._policy.maximum_attempts):
             self._pace()
+            self._transport_attempts += 1
             try:
                 return operation()
             except IbkrTransientError as error:
+                self._transient_failures += 1
                 last_error = error
                 if attempt + 1 < self._policy.maximum_attempts:
                     self._sleep(self._policy.retry_delay_seconds)
+        self._retry_exhaustions += 1
         raise IbkrProviderError("IBKR_READ_RETRY_EXHAUSTED") from last_error
+
+    def diagnostics(self) -> IbkrProviderDiagnostics:
+        """Return one redacted metrics snapshot without contacting the broker."""
+
+        return IbkrProviderDiagnostics(
+            captured_at=_utc(self._now(), "IBKR_DIAGNOSTICS_TIMESTAMP_NAIVE"),
+            read_operations=self._read_operations,
+            transport_attempts=self._transport_attempts,
+            transient_failures=self._transient_failures,
+            retry_exhaustions=self._retry_exhaustions,
+            pacing_wait_count=self._pacing_wait_count,
+            pacing_wait_seconds=self._pacing_wait_seconds,
+            cache_hits=self._cache_hits,
+            cache_misses=self._cache_misses,
+            cache_expirations=self._cache_expirations,
+        )
 
     def health(self) -> ProviderHealth:
         self._require_governance()
@@ -272,7 +325,11 @@ class IbkrReadOnlyMarketDataProvider(LiveOptionMarketDataProvider, LiveComboMark
         cached = self._cache.get(cache_key)
         current_monotonic = self._monotonic()
         if cached is not None and current_monotonic <= cached.expires_at:
+            self._cache_hits += 1
             return cached.snapshot
+        self._cache_misses += 1
+        if cached is not None:
+            self._cache_expirations += 1
         raw = self._read_with_retry(lambda: self._transport.fetch_chain(self._config, request))
         if not isinstance(raw, RawIbkrChainSnapshot):
             raise IbkrProviderError("IBKR_CHAIN_CONTRACT_INVALID")
@@ -492,7 +549,8 @@ def _normalise_combo(
     )
     fresh = (
         quote_timestamp is not None
-        and 0 <= (received_at - quote_timestamp).total_seconds()
+        and 0
+        <= (received_at - quote_timestamp).total_seconds()
         <= request.maximum_quote_age_seconds
     )
     broker_complete = (
@@ -525,11 +583,7 @@ def _normalise_combo(
     if not live:
         warnings.append("Broker combo quote is not labelled as live market data.")
     confirmed = (
-        broker_complete
-        and synthetic_complete
-        and fresh
-        and live
-        and raw.price_convention_verified
+        broker_complete and synthetic_complete and fresh and live and raw.price_convention_verified
     )
     return LiveComboQuote(
         candidate_id=request.candidate_id,
@@ -588,29 +642,21 @@ def live_chain_to_market_snapshot(snapshot: LiveOptionChainSnapshot) -> MarketSn
             bid_size=int(quote.bid_size) if quote.bid_size is not None else None,
             ask_size=int(quote.ask_size) if quote.ask_size is not None else None,
             volume=int(quote.volume) if quote.volume is not None else None,
-            open_interest=(
-                int(quote.open_interest) if quote.open_interest is not None else None
-            ),
+            open_interest=(int(quote.open_interest) if quote.open_interest is not None else None),
             implied_volatility=quote.implied_volatility,
             delta=quote.delta,
             quote_timestamp=quote.quote_timestamp,
             multiplier=int(quote.multiplier),
             multiplier_status=EvidenceLevel.KNOWN,
             contract_adjustment_status=(
-                EvidenceLevel.KNOWN
-                if quote.deliverable is not None
-                else EvidenceLevel.UNKNOWN
+                EvidenceLevel.KNOWN if quote.deliverable is not None else EvidenceLevel.UNKNOWN
             ),
             deliverable_description=quote.deliverable,
             exchange_timestamp=(
-                quote.quote_timestamp
-                if quote.quote_timestamp_source == "exchange"
-                else None
+                quote.quote_timestamp if quote.quote_timestamp_source == "exchange" else None
             ),
             provider_timestamp=(
-                quote.quote_timestamp
-                if quote.quote_timestamp_source == "provider"
-                else None
+                quote.quote_timestamp if quote.quote_timestamp_source == "provider" else None
             ),
             received_at=quote.received_at,
             price_quality="live_broker",

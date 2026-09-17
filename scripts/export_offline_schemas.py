@@ -43,7 +43,9 @@ from take_two_options.opra.contracts import (
     ProviderReadinessReport,
 )
 from take_two_options.opra.paper_decisions import (
+    PaperDecisionDraft,
     PaperDecisionRecord,
+    PaperRealizationDraft,
     PaperRealizationRecord,
 )
 from take_two_options.opra.shadow_campaign import (
@@ -53,6 +55,10 @@ from take_two_options.opra.shadow_campaign import (
 from take_two_options.opra.validation import (
     ComboValidationPlan,
     IbkrReadOnlyValidationReport,
+)
+from take_two_options.opra.what_if import (
+    BrokerWhatIfNormalizationReport,
+    BrokerWhatIfObservation,
 )
 from take_two_options.phase_m_context import PhaseMDecisionContext
 from take_two_options.quantitative.historical_surfaces import HistoricalSurfaceReport
@@ -89,11 +95,15 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "live_option_chain_snapshot.schema.json": LiveOptionChainSnapshot,
     "live_combo_quote.schema.json": LiveComboQuote,
     "broker_what_if_evidence.schema.json": BrokerWhatIfEvidence,
+    "broker_what_if_observation.schema.json": BrokerWhatIfObservation,
+    "broker_what_if_normalization_report.schema.json": BrokerWhatIfNormalizationReport,
     "ibkr_combo_validation_plan.schema.json": ComboValidationPlan,
     "ibkr_read_only_validation_report.schema.json": IbkrReadOnlyValidationReport,
     "opra_provider_readiness.schema.json": ProviderReadinessReport,
     "paper_decision_record.schema.json": PaperDecisionRecord,
+    "paper_decision_draft.schema.json": PaperDecisionDraft,
     "paper_realization_record.schema.json": PaperRealizationRecord,
+    "paper_realization_draft.schema.json": PaperRealizationDraft,
     "shadow_campaign_manifest.schema.json": ShadowCampaignManifest,
     "shadow_campaign_status.schema.json": ShadowCampaignStatusReport,
     "historical_surface_report.schema.json": HistoricalSurfaceReport,

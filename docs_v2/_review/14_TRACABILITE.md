@@ -9,12 +9,13 @@
 | Transport officiel | `opra/ibkr_official.py` | scan de frontière + tests fake du provider | 07, 11 |
 | Conversion moteur | `live_chain_to_market_snapshot` | test de conversion canonique | 02, 05 |
 | BAG/synthétique | contrats + provider + transport | test combo déterministe | 03, 07 |
-| What-if evidence | `BrokerWhatIfEvidence` | test inconnus préservés | 03, 07, 12 |
+| What-if offline | `opra/what_if.py`, `BrokerWhatIfEvidence` | `test_ibkr_what_if.py`, preview typée | 07, 11, 12, 17 |
+| Diagnostics provider | `IbkrProviderDiagnostics` + rapport | tests retry/cache/validation | 07, 15, 17 |
 | Protocole de validation IBKR | `opra/validation.py`, CLI | `test_ibkr_validation.py` | 09, 11, 15 |
 | Télémétrie positions | `services/ibkr-paper-bridge` | tests service + Worker | 08 |
 | HMAC Python/Worker | fixture canonique partagée | tests bridge + Worker | 08, 09 |
 | Journaux shadow immuables | `opra/paper_decisions.py` | `test_paper_decisions.py` | 09, 16 |
-| Contrôle campagne shadow | `opra/shadow_campaign.py`, CLI | `test_shadow_campaign.py` | 11, 12, 16 |
+| Contrôle campagne shadow | `opra/shadow_campaign.py`, CLI append/status | `test_shadow_campaign.py` | 11, 12, 16 |
 | Contrôle Cloudflare | `cloudflare/src` | Vitest Worker | 08, 10 |
 | Moteur quantitatif | `decision`, `quantitative`, `simulation`, `validation` | suite Python | 06, 09 |
 | Frontière exécution | `data.py`, `intelligence/execution.py`, security gate | tests sécurité | 04 |

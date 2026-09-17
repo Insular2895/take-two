@@ -52,17 +52,12 @@
       "type": "object"
     }
   },
-  "$id": "https://schemas.take-two-options.invalid/v11.1/paper_decision_record.schema.json",
+  "$id": "https://schemas.take-two-options.invalid/v11.1/paper_decision_draft.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
     "best_baseline": {
       "title": "Best Baseline",
-      "type": "string"
-    },
-    "campaign_id": {
-      "minLength": 1,
-      "title": "Campaign Id",
       "type": "string"
     },
     "candidate_set": {
@@ -152,20 +147,6 @@
       "title": "Predictions",
       "type": "array"
     },
-    "previous_hash": {
-      "anyOf": [
-        {
-          "maxLength": 64,
-          "minLength": 64,
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Previous Hash"
-    },
     "raw_metrics": {
       "additionalProperties": {
         "anyOf": [
@@ -186,29 +167,6 @@
       "title": "Raw Metrics",
       "type": "object"
     },
-    "record_hash": {
-      "maxLength": 64,
-      "minLength": 64,
-      "title": "Record Hash",
-      "type": "string"
-    },
-    "record_kind": {
-      "const": "paper_decision",
-      "default": "paper_decision",
-      "title": "Record Kind",
-      "type": "string"
-    },
-    "recorded_at": {
-      "format": "date-time",
-      "title": "Recorded At",
-      "type": "string"
-    },
-    "schema_version": {
-      "const": "1.1",
-      "default": "1.1",
-      "title": "Schema Version",
-      "type": "string"
-    },
     "score_coverages": {
       "additionalProperties": {
         "type": "number"
@@ -219,11 +177,6 @@
     "selected_candidate": {
       "title": "Selected Candidate",
       "type": "string"
-    },
-    "sequence": {
-      "exclusiveMinimum": 0,
-      "title": "Sequence",
-      "type": "integer"
     },
     "snapshot_hash": {
       "maxLength": 64,
@@ -263,12 +216,8 @@
     "predictions",
     "decision_confidence_intervals",
     "config_hash",
-    "code_commit",
-    "campaign_id",
-    "recorded_at",
-    "sequence",
-    "record_hash"
+    "code_commit"
   ],
-  "title": "PaperDecisionRecord",
+  "title": "PaperDecisionDraft",
   "type": "object"
 }

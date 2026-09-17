@@ -8,6 +8,7 @@ from typing import Any
 
 from take_two_options.data import ReadOnlyBrokerGateway
 from take_two_options.intelligence.schemas import ComboQuote, ExecutionPreview
+from take_two_options.opra.contracts import BrokerWhatIfEvidence
 from take_two_options.thesis_scanner.schemas import ThesisCandidate
 
 
@@ -15,30 +16,47 @@ def build_execution_previews(
     candidates: list[ThesisCandidate],
     *,
     combo_quotes: dict[str, ComboQuote] | None = None,
-    what_if_results: dict[str, dict[str, float]] | None = None,
+    what_if_evidence: dict[str, BrokerWhatIfEvidence] | None = None,
 ) -> list[ExecutionPreview]:
     """Build non-transmitting tickets; missing broker facts remain blockers."""
     combo_quotes = combo_quotes or {}
-    what_if_results = what_if_results or {}
+    what_if_evidence = what_if_evidence or {}
     previews: list[ExecutionPreview] = []
     for candidate in candidates:
         combo = combo_quotes.get(candidate.candidate_id)
-        what_if = what_if_results.get(candidate.candidate_id, {})
+        what_if = what_if_evidence.get(candidate.candidate_id)
         blockers: list[str] = []
         if combo is None:
             blockers.append("Live IBKR combo quote is unavailable.")
         elif not combo.executable or combo.ask is None:
             blockers.append("IBKR combo quote is not marked executable.")
         if any(
-            metric.price_quality != "opra"
-            for metric in candidate.decision_metrics.leg_execution
+            metric.price_quality != "opra" for metric in candidate.decision_metrics.leg_execution
         ):
             blockers.append("At least one leg is not backed by a live OPRA quote.")
-        if not what_if:
+        usable_what_if = (
+            what_if is not None
+            and what_if.candidate_id == candidate.candidate_id
+            and what_if.complete
+            and what_if.currency == "USD"
+        )
+        if what_if is None:
             blockers.append(
                 "Account-specific commission/margin what-if is unavailable; "
                 "some smart combos may not support what-if."
             )
+        elif what_if.candidate_id != candidate.candidate_id:
+            blockers.append("Broker what-if evidence references a different candidate.")
+        elif not what_if.complete:
+            blockers.append("Broker what-if evidence is incomplete and was not consumed.")
+        elif what_if.currency != "USD":
+            blockers.append("Broker what-if evidence is not denominated in USD.")
+        commission = what_if.estimated_commission if usable_what_if and what_if else None
+        initial_margin = what_if.initial_margin_change if usable_what_if and what_if else None
+        maintenance_margin = (
+            what_if.maintenance_margin_change if usable_what_if and what_if else None
+        )
+        what_if_source_id = what_if.source_id if usable_what_if and what_if else None
         blockers.append("Contract conIds and deliverables require broker-side resolution.")
         blockers.append("Human confirmation is mandatory; automatic transmission is forbidden.")
         limit = (
@@ -52,8 +70,11 @@ def build_execution_previews(
                 security_type="BAG" if len(candidate.base_candidate.legs) > 1 else "OPT",
                 limit_debit_usd=max(limit, 0.0),
                 combo_quote=combo,
-                estimated_commission_usd=what_if.get("commission_usd"),
-                margin_what_if_usd=what_if.get("margin_usd"),
+                estimated_commission_usd=commission,
+                margin_what_if_usd=initial_margin,
+                maintenance_margin_change_usd=maintenance_margin,
+                what_if_source_id=what_if_source_id,
+                what_if_complete=usable_what_if,
                 blockers=blockers,
             )
         )
@@ -80,8 +101,7 @@ def assert_no_order_capability(obj: Any) -> None:
     exposed = [
         name
         for name in forbidden
-        if callable(getattr(obj, name, None))
-        and not isinstance(obj, ReadOnlyBrokerGateway)
+        if callable(getattr(obj, name, None)) and not isinstance(obj, ReadOnlyBrokerGateway)
     ]
     if exposed:
         raise TypeError(f"order-capable object rejected by V11: {', '.join(exposed)}")

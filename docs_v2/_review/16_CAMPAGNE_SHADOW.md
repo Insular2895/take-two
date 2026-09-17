@@ -28,9 +28,9 @@ Séparer ces objets empêche d'ajuster rétrospectivement une décision après a
 
 ## Pourquoi il n'existe aucun seuil par défaut
 
-La durée, le nombre minimal de décisions et le nombre minimal de réalisations relèvent du
-responsable risque. Les coder arbitrairement transformerait une hypothèse en décision. Le manifeste
-d'exemple porte donc :
+La durée, le nombre minimal de décisions, le nombre minimal de réalisations et les délais maximaux
+d'enregistrement relèvent du responsable risque. Les coder arbitrairement transformerait une
+hypothèse en décision. Le manifeste d'exemple porte donc :
 
 ```text
 approval_status=draft_to_validate
@@ -53,7 +53,8 @@ Une valeur manquante fait échouer la validation du manifeste avant toute campag
 ## Propriétés des journaux
 
 Chaque ligne contient un numéro de séquence, le hash de la ligne précédente et son propre hash.
-L'ajout vérifie la tête attendue avant écriture. Le chargeur refuse :
+Elle contient aussi `campaign_id` et `recorded_at`. L'ajout vérifie la tête attendue avant écriture.
+Le chargeur ou le contrôle refuse :
 
 - une séquence manquante ou déplacée ;
 - une ligne modifiée ;
@@ -62,13 +63,17 @@ L'ajout vérifie la tête attendue avant écriture. Le chargeur refuse :
 - deux réalisations finales pour la même décision ;
 - une entrée paper antérieure à la décision ;
 - une sortie antérieure à l'entrée ou une observation antérieure à la sortie.
+- un brouillon marqué `example_only` ;
+- une campagne, un commit ou une configuration différents ;
+- une décision hors fenêtre ;
+- un délai entre décision/observation et écriture supérieur au seuil approuvé.
 
 Les fichiers privés sont prévus sous `reports/private/`, ignoré par Git. Un hash protège
 l'intégrité ; il ne chiffre pas les données et ne remplace pas les contrôles d'accès.
 
-Le contrat `PaperRealizationRecord` passe à la version `1.1` pour ajouter la séquence et le hash
-précédent. Aucune réalisation réelle n'existait avant cette évolution ; elle ne réécrit donc aucun
-journal de campagne.
+`PaperDecisionRecord` est en version `1.1` et `PaperRealizationRecord` en version `1.2` pour porter
+la campagne et l'heure réelle d'écriture. Aucune campagne réelle n'existait avant cette évolution ;
+elle ne réécrit donc aucun journal de campagne.
 
 ## États du rapport
 
@@ -106,15 +111,28 @@ ttwo-options paper shadow-status \
 
 Sur l'exemple commité, `BLOCKED_DRAFT` et un code de sortie non nul sont attendus. Cette commande
 ne collecte pas de données, ne contacte pas IBKR et n'ajoute aucune ligne aux journaux. La future
-intégration prospective devra appeler les fonctions append-only au moment réel de la décision,
-jamais reconstruire les décisions a posteriori.
+campagne doit appeler les commandes append-only au moment réel de la décision, jamais reconstruire
+les décisions a posteriori :
+
+```bash
+ttwo-options paper append-shadow-decision \
+  --manifest reports/private/shadow-campaign.json \
+  --draft reports/private/next-paper-decision.json
+
+ttwo-options paper append-shadow-realization \
+  --manifest reports/private/shadow-campaign.json \
+  --draft reports/private/next-paper-realization.json
+```
+
+Les modèles de brouillon commités sont volontairement `example_only=true`. Ils montrent la forme,
+mais ne peuvent pas alimenter une campagne approuvée.
 
 ## Ce qui reste réellement à faire
 
 1. Valider entitlement/licence et exécuter le protocole IBKR read-only.
 2. Franchir les gates historique/walk-forward et ouvrir le holdout selon sa procédure séparée.
 3. Faire valider les seuils et la période par le responsable risque.
-4. Brancher l'émission prospective de décisions sur le moteur gelé.
+4. Déclencher l'append au moment réel de chaque sortie du moteur gelé.
 5. Collecter données manquantes, incidents, coûts, slippage et réalisations futures.
 6. Réaliser la revue humaine finale.
 

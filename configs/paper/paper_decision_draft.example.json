@@ -1,0 +1,23 @@
+{
+  "decision_id": "REPLACE_WITH_UNIQUE_DECISION_ID",
+  "decided_at": "2027-01-04T15:00:00Z",
+  "snapshot_id": "REPLACE_WITH_SNAPSHOT_ID",
+  "snapshot_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "candidate_set": ["no_position"],
+  "five_scores": {"opportunity": 0.0, "risk": 0.0},
+  "score_coverages": {"opportunity": 0.0, "risk": 0.0},
+  "raw_metrics": {},
+  "classification": "REPLACE_WITH_FROZEN_CLASSIFICATION",
+  "selected_candidate": "no_position",
+  "best_baseline": "REPLACE_WITH_FROZEN_BASELINE",
+  "no_position_alternative": "no_position",
+  "predictions": [],
+  "decision_confidence_intervals": {},
+  "config_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "code_commit": "REPLACE_ME",
+  "example_only": true,
+  "holdout_used": false,
+  "transmit": false,
+  "what_if": true,
+  "order_capability": "forbidden"
+}
