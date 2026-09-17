@@ -53,9 +53,13 @@ position TTWO paper réelle
 Le premier snapshot réel documenté contenait zéro position TTWO et n’a pas été publié à
 Cloudflare ; il ne prouve donc pas ce trajet complet.
 
+Un vecteur HMAC partagé est désormais rejoué par le client Python et le vérificateur TypeScript.
+Il prouve que le corps exact, le SHA-256, la chaîne canonique et la signature sont compatibles
+entre les deux langages. Il ne prouve ni Cloudflare Access réel, ni le réseau Oracle, ni D1 distant,
+ni l'affichage dashboard : ces preuves restent dans la liste end-to-end ci-dessus.
+
 ## Bridge paper
 
 Les contrats, journal SQLite WAL, outbox, claim, heartbeat, HMAC, idempotence et kill switch sont
 codés. Le runtime instancie toujours `DisabledGateway`. Les tests avec `FakeGateway` prouvent le
 workflow du journal, pas un ordre IBKR.
-

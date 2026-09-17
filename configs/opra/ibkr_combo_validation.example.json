@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "candidate_id": "example-ttwo-bull-call-spread-replace-before-use",
+  "ticker": "TTWO",
+  "legs": [
+    {
+      "expiration": "2027-01-15",
+      "strike": 240.0,
+      "option_type": "CALL",
+      "action": "BUY",
+      "ratio": 1,
+      "exchange": "SMART"
+    },
+    {
+      "expiration": "2027-01-15",
+      "strike": 260.0,
+      "option_type": "CALL",
+      "action": "SELL",
+      "ratio": 1,
+      "exchange": "SMART"
+    }
+  ],
+  "maximum_quote_age_seconds": 30,
+  "example_only": true
+}

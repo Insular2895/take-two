@@ -1,0 +1,106 @@
+{
+  "$defs": {
+    "ComboValidationLeg": {
+      "additionalProperties": false,
+      "description": "A human-selected option identity, resolved to an IBKR conId from the captured chain.",
+      "properties": {
+        "action": {
+          "enum": [
+            "BUY",
+            "SELL"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "exchange": {
+          "default": "SMART",
+          "minLength": 1,
+          "title": "Exchange",
+          "type": "string"
+        },
+        "expiration": {
+          "format": "date",
+          "title": "Expiration",
+          "type": "string"
+        },
+        "option_type": {
+          "$ref": "#/$defs/OptionType"
+        },
+        "ratio": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Ratio",
+          "type": "integer"
+        },
+        "strike": {
+          "exclusiveMinimum": 0,
+          "title": "Strike",
+          "type": "number"
+        }
+      },
+      "required": [
+        "expiration",
+        "strike",
+        "option_type",
+        "action"
+      ],
+      "title": "ComboValidationLeg",
+      "type": "object"
+    },
+    "OptionType": {
+      "enum": [
+        "call",
+        "put"
+      ],
+      "title": "OptionType",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/ibkr_combo_validation_plan.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "candidate_id": {
+      "minLength": 1,
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "example_only": {
+      "default": false,
+      "title": "Example Only",
+      "type": "boolean"
+    },
+    "legs": {
+      "items": {
+        "$ref": "#/$defs/ComboValidationLeg"
+      },
+      "minItems": 2,
+      "title": "Legs",
+      "type": "array"
+    },
+    "maximum_quote_age_seconds": {
+      "default": 30,
+      "exclusiveMinimum": 0,
+      "title": "Maximum Quote Age Seconds",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "ticker": {
+      "minLength": 1,
+      "title": "Ticker",
+      "type": "string"
+    }
+  },
+  "required": [
+    "candidate_id",
+    "ticker",
+    "legs"
+  ],
+  "title": "ComboValidationPlan",
+  "type": "object"
+}

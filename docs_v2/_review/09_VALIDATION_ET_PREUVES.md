@@ -33,6 +33,14 @@ cd services/ibkr-paper-bridge && PYTHONPATH=src ../../.venv/bin/python -m pytest
 Un gate vert signifie que le dépôt respecte les contrats testés à cet instant. Il ne change pas
 automatiquement `OPRA_ENTITLEMENT_CONFIRMED`, `OPRA_LICENSE_REVIEWED`, le holdout ou le statut paper.
 
+La commande future `ttwo-options data ibkr-validate` produit en plus un rapport JSON strict et un
+rapport Markdown. Elle contrôle deux sessions indépendantes, la chaîne et, si un plan est fourni,
+une BAG. Voir [le protocole de branchement](15_PROTOCOLE_BRANCHEMENT_IBKR.md).
+
+La commande offline `ttwo-options paper shadow-status` vérifie ensuite le manifeste et les deux
+journaux prospectifs. Elle ne lance ni provider ni paper trading et ne peut pas produire
+`paper_validation_passed=true`. Voir [le contrôle shadow](16_CAMPAGNE_SHADOW.md).
+
 ## Validation réelle minimale du nouveau provider
 
 À effectuer après validation humaine :
@@ -48,10 +56,12 @@ automatiquement `OPRA_ENTITLEMENT_CONFIRMED`, `OPRA_LICENSE_REVIEWED`, le holdou
 9. quote BAG d’une structure connue ;
 10. comparaison avec l’affichage TWS et validation de la convention signée.
 
+Le contrôle automatisé de « seconde session indépendante » ferme puis rouvre une opération
+broker. Il ne remplace pas encore un test opérateur de coupure réseau au milieu d'une collecte.
+
 ## Promotion
 
 La promotion du snapshot exige aujourd’hui découverte complète, collecte complète, aucune quote
 manquante, type `live` et timestamp provider/exchange. C’est volontairement strict. Une future
 politique plus nuancée devra être validée sur des observations réelles ; elle ne doit pas être
 assouplie uniquement pour faire passer un run.
-

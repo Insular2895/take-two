@@ -12,6 +12,9 @@
 
 ## Validation live read-only
 
+Le protocole, le rapport JSON/Markdown, la seconde session indépendante et la BAG optionnelle sont
+`TESTÉ_OFFLINE`. Les cases restent ouvertes tant que le broker réel n'a pas fourni les preuves.
+
 - [ ] nouvelle commande testée avec `ibapi` officiel ;
 - [ ] qualification TTWO unique ;
 - [ ] chaîne réelle non vide ;
@@ -33,9 +36,12 @@
 - [ ] perte de connexion devient stale/degraded ;
 - [ ] aucun identifiant de compte dans logs ou payload.
 
+Compatibilité locale supplémentaire : le même vecteur HMAC est accepté côté Python et Worker.
+Cela ne coche pas le trajet distant complet.
+
 ## What-if et paper
 
-Non implémenté par le provider read-only :
+Non implémenté dans la frontière ordre :
 
 - demande IBKR what-if ;
 - commission et marge broker ;
@@ -43,10 +49,21 @@ Non implémenté par le provider read-only :
 - partial fills/rejets/annulations ;
 - recovery `orderRef`/`permId`/`execId` ;
 - protection native ;
-- campagne shadow/paper.
+- exécution paper.
 
 Ces éléments nécessitent une décision distincte parce qu’ils élargissent la frontière vers le
 domaine ordre, même en paper.
+
+Le **contrôle offline** de campagne shadow est maintenant codé : manifeste à approbation humaine,
+journaux décision/réalisation hash-chaînés et rapport d'état. La campagne réelle reste non
+commencée et les seuils restent `draft_to_validate`. Il faut encore :
+
+- [ ] valider la période et les tailles minimales avec le responsable risque ;
+- [ ] geler les hashes IBKR, holdout, configuration et commit ;
+- [ ] approuver les droits d'usage des données ;
+- [ ] brancher la production prospective des décisions, sans backfill ;
+- [ ] collecter les réalisations futures et les incidents ;
+- [ ] effectuer une revue humaine finale, sans promotion automatique.
 
 ## Dette documentaire/technique
 
@@ -54,5 +71,6 @@ domaine ordre, même en paper.
   restent volontairement inchangés ;
 - [ ] intégrer la branche IBKR dans `main` après revue ;
 - [ ] aligner la version package et le changelog lors de la release ;
-- [ ] figer un commit de handoff et enregistrer ses résultats de tests ;
-- [ ] mettre à jour le vault après validation de ce checkpoint.
+- [x] figer et pousser le premier commit de handoff (`0eca2f3`) avec ses résultats de tests ;
+- [x] mettre à jour le vault pour le checkpoint provider du 16 septembre ;
+- [ ] figer et pousser le checkpoint protocole de validation du 17 septembre.

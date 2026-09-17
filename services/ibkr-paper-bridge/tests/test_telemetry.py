@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import json
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 from urllib.request import Request
 
@@ -112,9 +114,37 @@ def test_dedicated_client_signs_only_telemetry_route(monkeypatch: pytest.MonkeyP
     assert not hasattr(client, "post_event")
 
 
-def test_telemetry_entrypoint_has_no_execution_import_or_call() -> None:
-    from pathlib import Path
+def test_python_signature_matches_shared_cloudflare_conformance_vector(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture_path = (
+        Path(__file__).resolve().parents[3] / "fixtures/telemetry_hmac_v1.json"
+    )
+    vector = json.loads(fixture_path.read_text(encoding="utf-8"))
+    monkeypatch.setattr(
+        "ttwo_ibkr_bridge.telemetry_client.time.time",
+        lambda: int(vector["timestamp"]),
+    )
+    monkeypatch.setattr(
+        "ttwo_ibkr_bridge.telemetry_client.secrets.token_urlsafe",
+        lambda _length: vector["nonce"],
+    )
+    client = SignedTelemetryClient(
+        TelemetryControlPlaneConfig(
+            base_url="https://control.example",
+            telemetry_id=vector["telemetry_id"],
+            shared_secret=vector["shared_secret"],
+            access_client_id="test-access-id",
+            access_client_secret="test-access-secret",
+        )
+    )
+    body = vector["body"].encode()
+    headers = client._headers(body)
+    assert hashlib.sha256(body).hexdigest() == vector["payload_sha256"]
+    assert headers["X-TTWO-Telemetry-Signature"] == vector["signature"]
 
+
+def test_telemetry_entrypoint_has_no_execution_import_or_call() -> None:
     root = Path(__file__).resolve().parents[1] / "src/ttwo_ibkr_bridge"
     source = "\n".join(
         (root / name).read_text()

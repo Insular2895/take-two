@@ -1,0 +1,310 @@
+"""Offline control plane for a future, human-approved shadow campaign."""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from datetime import UTC, datetime
+from typing import Literal
+
+from pydantic import Field, field_validator, model_validator
+
+from take_two_options.knowledge.provenance import stable_hash
+from take_two_options.opra.paper_decisions import (
+    ImmutableStrictModel,
+    PaperDecisionRecord,
+    PaperRealizationRecord,
+    validate_paper_decision_chain,
+    validate_paper_realization_chain,
+)
+
+ShadowCheckStatus = Literal["PASS", "WARN", "FAIL", "NOT_RUN"]
+ShadowCampaignStatus = Literal[
+    "BLOCKED_DRAFT",
+    "READY_TO_START",
+    "IN_PROGRESS",
+    "OBSERVATION_TARGET_REACHED_PENDING_HUMAN_REVIEW",
+    "WINDOW_ENDED_INCOMPLETE",
+    "FAILED_SAFE",
+]
+ShadowMaximumClaim = Literal[
+    "software_only",
+    "campaign_control_ready",
+    "prospective_observations_recorded",
+]
+
+
+class ShadowCampaignThresholds(ImmutableStrictModel):
+    """Risk-owner values; the software deliberately supplies no defaults."""
+
+    minimum_decisions: int = Field(gt=0)
+    minimum_realizations: int = Field(gt=0)
+
+    @model_validator(mode="after")
+    def require_coherent_counts(self) -> ShadowCampaignThresholds:
+        if self.minimum_realizations > self.minimum_decisions:
+            raise ValueError("minimum realizations cannot exceed minimum decisions")
+        return self
+
+
+class ShadowCampaignManifest(ImmutableStrictModel):
+    schema_version: Literal["1.0"] = "1.0"
+    campaign_id: str = Field(min_length=1)
+    ticker: Literal["TTWO"] = "TTWO"
+    mode: Literal["shadow_observation_only"] = "shadow_observation_only"
+    planned_start_at: datetime
+    planned_end_at: datetime
+    approval_status: Literal["draft_to_validate", "approved"] = "draft_to_validate"
+    thresholds: ShadowCampaignThresholds | None = None
+    code_commit: str | None = Field(default=None, min_length=7, max_length=40)
+    strategy_config_hash: str | None = Field(default=None, min_length=64, max_length=64)
+    ibkr_validation_report_hash: str | None = Field(
+        default=None,
+        min_length=64,
+        max_length=64,
+    )
+    holdout_ledger_hash: str | None = Field(default=None, min_length=64, max_length=64)
+    data_rights_approval_reference: str | None = Field(default=None, min_length=1)
+    risk_owner_approval_reference: str | None = Field(default=None, min_length=1)
+    example_only: bool = True
+    transmit: Literal[False] = False
+    order_capability: Literal["forbidden"] = "forbidden"
+
+    @field_validator("planned_start_at", "planned_end_at")
+    @classmethod
+    def require_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("shadow campaign timestamps must be timezone-aware")
+        return value.astimezone(UTC)
+
+    @model_validator(mode="after")
+    def require_approved_lineage(self) -> ShadowCampaignManifest:
+        if self.planned_end_at <= self.planned_start_at:
+            raise ValueError("shadow campaign end must follow its start")
+        if self.approval_status == "approved":
+            required = {
+                "thresholds": self.thresholds,
+                "code_commit": self.code_commit,
+                "strategy_config_hash": self.strategy_config_hash,
+                "ibkr_validation_report_hash": self.ibkr_validation_report_hash,
+                "holdout_ledger_hash": self.holdout_ledger_hash,
+                "data_rights_approval_reference": self.data_rights_approval_reference,
+                "risk_owner_approval_reference": self.risk_owner_approval_reference,
+            }
+            missing = [name for name, value in required.items() if value is None]
+            if missing:
+                raise ValueError(
+                    "approved shadow campaign requires: " + ", ".join(sorted(missing))
+                )
+            if self.example_only:
+                raise ValueError("an example shadow campaign cannot be approved")
+        return self
+
+
+class ShadowCampaignCheck(ImmutableStrictModel):
+    check_id: str = Field(min_length=1)
+    status: ShadowCheckStatus
+    detail_code: str = Field(min_length=1)
+
+
+class ShadowCampaignStatusReport(ImmutableStrictModel):
+    schema_version: Literal["1.0"] = "1.0"
+    report_id: str = Field(min_length=1)
+    generated_at: datetime
+    campaign_id: str = Field(min_length=1)
+    manifest_hash: str = Field(min_length=64, max_length=64)
+    status: ShadowCampaignStatus
+    maximum_claim: ShadowMaximumClaim
+    decision_count: int = Field(ge=0)
+    realization_count: int = Field(ge=0)
+    missing_realization_count: int = Field(ge=0)
+    no_position_count: int = Field(ge=0)
+    decision_ledger_head_hash: str | None = Field(default=None, min_length=64, max_length=64)
+    realization_ledger_head_hash: str | None = Field(
+        default=None,
+        min_length=64,
+        max_length=64,
+    )
+    checks: tuple[ShadowCampaignCheck, ...] = Field(min_length=1)
+    paper_validation_passed: Literal[False] = False
+    promotion_eligible: Literal[False] = False
+    human_review_required: Literal[True] = True
+    transmit: Literal[False] = False
+    order_capability: Literal["forbidden"] = "forbidden"
+
+    @field_validator("generated_at")
+    @classmethod
+    def require_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("shadow report timestamp must be timezone-aware")
+        return value.astimezone(UTC)
+
+
+def evaluate_shadow_campaign(
+    manifest: ShadowCampaignManifest,
+    decisions: list[PaperDecisionRecord],
+    realizations: list[PaperRealizationRecord],
+    *,
+    now: Callable[[], datetime] | None = None,
+) -> ShadowCampaignStatusReport:
+    """Evaluate prospective evidence without starting a provider or promoting a strategy."""
+
+    validate_paper_decision_chain(decisions)
+    validate_paper_realization_chain(realizations, decisions)
+    generated_at = _utc((now or (lambda: datetime.now(UTC)))())
+    checks: list[ShadowCampaignCheck] = []
+
+    if manifest.approval_status != "approved" or manifest.example_only:
+        checks.append(_check("manifest_approval", "FAIL", "SHADOW_MANIFEST_NOT_APPROVED"))
+        return _report(
+            manifest,
+            decisions,
+            realizations,
+            generated_at,
+            checks,
+            status="BLOCKED_DRAFT",
+            maximum_claim="software_only",
+        )
+    checks.append(_check("manifest_approval", "PASS", "SHADOW_MANIFEST_APPROVED"))
+
+    assert manifest.thresholds is not None
+    assert manifest.code_commit is not None
+    assert manifest.strategy_config_hash is not None
+    lineage_failures = False
+    for decision in decisions:
+        if not manifest.planned_start_at <= decision.decided_at <= manifest.planned_end_at:
+            checks.append(
+                _check("decision_window", "FAIL", "SHADOW_DECISION_OUTSIDE_CAMPAIGN_WINDOW")
+            )
+            lineage_failures = True
+            break
+    else:
+        checks.append(_check("decision_window", "PASS", "SHADOW_DECISIONS_WITHIN_WINDOW"))
+    for check_id, matches, passed, failed in (
+        (
+            "code_commit",
+            all(decision.code_commit == manifest.code_commit for decision in decisions),
+            "SHADOW_CODE_COMMIT_FROZEN",
+            "SHADOW_CODE_COMMIT_DRIFT",
+        ),
+        (
+            "strategy_config",
+            all(
+                decision.config_hash == manifest.strategy_config_hash for decision in decisions
+            ),
+            "SHADOW_CONFIG_HASH_FROZEN",
+            "SHADOW_CONFIG_HASH_DRIFT",
+        ),
+    ):
+        checks.append(
+            _check(check_id, "PASS" if matches else "FAIL", passed if matches else failed)
+        )
+        lineage_failures = lineage_failures or not matches
+    if lineage_failures:
+        return _report(
+            manifest,
+            decisions,
+            realizations,
+            generated_at,
+            checks,
+            status="FAILED_SAFE",
+            maximum_claim="software_only",
+        )
+
+    decision_target_met = len(decisions) >= manifest.thresholds.minimum_decisions
+    realization_target_met = len(realizations) >= manifest.thresholds.minimum_realizations
+    checks.extend(
+        [
+            _check(
+                "decision_target",
+                "PASS" if decision_target_met else "WARN",
+                "SHADOW_DECISION_TARGET_REACHED"
+                if decision_target_met
+                else "SHADOW_DECISION_TARGET_PENDING",
+            ),
+            _check(
+                "realization_target",
+                "PASS" if realization_target_met else "WARN",
+                "SHADOW_REALIZATION_TARGET_REACHED"
+                if realization_target_met
+                else "SHADOW_REALIZATION_TARGET_PENDING",
+            ),
+        ]
+    )
+    status: ShadowCampaignStatus
+    maximum_claim: ShadowMaximumClaim
+    if decision_target_met and realization_target_met:
+        status = "OBSERVATION_TARGET_REACHED_PENDING_HUMAN_REVIEW"
+        maximum_claim = "prospective_observations_recorded"
+    elif generated_at < manifest.planned_start_at and not decisions and not realizations:
+        status = "READY_TO_START"
+        maximum_claim = "campaign_control_ready"
+    elif generated_at > manifest.planned_end_at:
+        status = "WINDOW_ENDED_INCOMPLETE"
+        maximum_claim = "prospective_observations_recorded"
+    else:
+        status = "IN_PROGRESS"
+        maximum_claim = (
+            "prospective_observations_recorded"
+            if decisions or realizations
+            else "campaign_control_ready"
+        )
+    return _report(
+        manifest,
+        decisions,
+        realizations,
+        generated_at,
+        checks,
+        status=status,
+        maximum_claim=maximum_claim,
+    )
+
+
+def _report(
+    manifest: ShadowCampaignManifest,
+    decisions: list[PaperDecisionRecord],
+    realizations: list[PaperRealizationRecord],
+    generated_at: datetime,
+    checks: list[ShadowCampaignCheck],
+    *,
+    status: ShadowCampaignStatus,
+    maximum_claim: ShadowMaximumClaim,
+) -> ShadowCampaignStatusReport:
+    realized = {record.decision_id for record in realizations}
+    payload = {
+        "generated_at": generated_at,
+        "campaign_id": manifest.campaign_id,
+        "manifest_hash": stable_hash(manifest.model_dump(mode="json")),
+        "status": status,
+        "maximum_claim": maximum_claim,
+        "decision_count": len(decisions),
+        "realization_count": len(realizations),
+        "missing_realization_count": sum(
+            decision.decision_id not in realized for decision in decisions
+        ),
+        "no_position_count": sum(
+            decision.selected_candidate == "no_position" for decision in decisions
+        ),
+        "decision_ledger_head_hash": decisions[-1].record_hash if decisions else None,
+        "realization_ledger_head_hash": (
+            realizations[-1].realization_hash if realizations else None
+        ),
+        "checks": tuple(checks),
+    }
+    return ShadowCampaignStatusReport(
+        report_id=f"shadow-status-{stable_hash(payload)[:20]}",
+        **payload,
+    )
+
+
+def _check(
+    check_id: str,
+    status: ShadowCheckStatus,
+    detail_code: str,
+) -> ShadowCampaignCheck:
+    return ShadowCampaignCheck(check_id=check_id, status=status, detail_code=detail_code)
+
+
+def _utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        raise ValueError("SHADOW_CAMPAIGN_TIMESTAMP_NAIVE")
+    return value.astimezone(UTC)

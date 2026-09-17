@@ -44,19 +44,25 @@ Le provider réel implémente désormais `LiveOptionMarketDataProvider` et
 `LiveComboMarketDataProvider`. Sa commande reste désarmée sans consentement explicite :
 
 ```bash
-ttwo-options data ibkr-chain \
+ttwo-options data ibkr-validate \
   --connect-read-only \
   --expiration-start 2027-01-01 \
   --expiration-end 2027-02-01 \
   --minimum-strike 180 \
   --maximum-strike 320 \
   --maximum-contracts 500 \
-  --json-out reports/private/ibkr-chain.json \
+  --maximum-expirations 12 \
+  --combo-plan reports/private/ibkr_combo_validation.json \
+  --report-json-out reports/private/ibkr-validation.json \
+  --report-markdown-out reports/private/ibkr-validation.md \
+  --chain-json-out reports/private/ibkr-chain.json \
   --engine-json-out reports/private/ibkr-market-snapshot.json
 ```
 
 Cette commande n'est à utiliser qu'après validation des droits. Elle ne contient aucune capacité
-d'ordre et n'a pas été exécutée pendant le checkpoint du 16 septembre.
+d'ordre et n'a pas été exécutée contre IBKR pendant les checkpoints du 16–17 septembre. Le plan
+BAG doit être copié depuis l'exemple, aligné sur des contrats effectivement listés, puis marqué
+`example_only=false`.
 
 ## Protocole prospectif à exécuter après validation humaine
 
@@ -75,6 +81,8 @@ d'ordre et n'a pas été exécutée pendant le checkpoint du 16 septembre.
    qualité des fills simulés, rejets, trous de données et changements de régime.
 8. Appliquer purge/embargo et ne jamais retuner sur le holdout final après ouverture.
 9. Produire un rapport Phase M distinct soumis à validation humaine.
+10. Évaluer le manifeste avec `ttwo-options paper shadow-status` ; l'atteinte des cibles reste
+    `PENDING_HUMAN_REVIEW` et ne vaut jamais validation automatique.
 
 ## Critères de blocage immédiat
 

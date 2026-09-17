@@ -11,9 +11,11 @@ from take_two_options.opra.paper_decisions import (
     PaperPrediction,
     PaperRealizationDraft,
     append_paper_decision,
+    append_paper_realization,
     build_paper_decision_record,
     build_paper_realization_record,
     load_paper_decisions,
+    load_paper_realizations,
 )
 
 
@@ -81,9 +83,94 @@ def test_realization_is_a_separate_record_linked_to_frozen_decision() -> None:
             fees_eur=1,
             pnl_eur=-203,
             postmortem="future-only fixture",
-        )
+        ),
+        decisions=[decision],
     )
     assert realization.decision_record_hash == decision.record_hash
     assert realization.record_kind == "paper_realization"
     assert "pnl_eur" not in type(decision).model_fields
     assert realization.paper_exit_timestamp > realization.paper_entry_timestamp
+
+
+def test_realizations_are_hash_chained_append_only_and_linked_to_decisions(
+    tmp_path: Path,
+) -> None:
+    first_decision = build_paper_decision_record(
+        [], _draft("d1", datetime(2026, 8, 8, tzinfo=UTC))
+    )
+    second_decision = build_paper_decision_record(
+        [first_decision], _draft("d2", datetime(2026, 8, 9, tzinfo=UTC))
+    )
+    decisions = [first_decision, second_decision]
+
+    def draft(decision: PaperDecisionDraft, realization_id: str) -> PaperRealizationDraft:
+        record = next(item for item in decisions if item.decision_id == decision.decision_id)
+        return PaperRealizationDraft(
+            realization_id=realization_id,
+            decision_id=record.decision_id,
+            decision_record_hash=record.record_hash,
+            observed_at=datetime(2026, 8, 12, tzinfo=UTC),
+            realized_path_hash="c" * 64,
+            paper_entry_timestamp=record.decided_at,
+            paper_exit_timestamp=datetime(2026, 8, 11, tzinfo=UTC),
+            paper_entry_price=10,
+            paper_exit_price=8,
+            slippage_eur=2,
+            fees_eur=1,
+            pnl_eur=-203,
+            postmortem="future-only fixture",
+        )
+
+    first = build_paper_realization_record(draft(first_decision, "r1"), decisions=decisions)
+    second = build_paper_realization_record(
+        draft(second_decision, "r2"),
+        existing=[first],
+        decisions=decisions,
+    )
+    path = tmp_path / "paper_realizations.jsonl"
+    append_paper_realization(
+        path,
+        first,
+        expected_head_hash=None,
+        decisions=decisions,
+    )
+    append_paper_realization(
+        path,
+        second,
+        expected_head_hash=first.realization_hash,
+        decisions=decisions,
+    )
+    assert load_paper_realizations(path, decisions) == [first, second]
+    assert second.previous_hash == first.realization_hash
+    with pytest.raises(ValueError, match="changed since"):
+        append_paper_realization(
+            path,
+            second,
+            expected_head_hash=first.realization_hash,
+            decisions=decisions,
+        )
+
+
+def test_realization_rejects_backdated_entry() -> None:
+    decision = build_paper_decision_record(
+        [], _draft("d1", datetime(2026, 8, 8, tzinfo=UTC))
+    )
+    with pytest.raises(ValueError, match="cannot precede the frozen decision"):
+        build_paper_realization_record(
+            PaperRealizationDraft(
+                realization_id="r1",
+                decision_id=decision.decision_id,
+                decision_record_hash=decision.record_hash,
+                observed_at=datetime(2026, 8, 10, tzinfo=UTC),
+                realized_path_hash="c" * 64,
+                paper_entry_timestamp=datetime(2026, 8, 7, tzinfo=UTC),
+                paper_exit_timestamp=datetime(2026, 8, 9, tzinfo=UTC),
+                paper_entry_price=10,
+                paper_exit_price=8,
+                slippage_eur=2,
+                fees_eur=1,
+                pnl_eur=-203,
+                postmortem="backdated fixture",
+            ),
+            decisions=[decision],
+        )

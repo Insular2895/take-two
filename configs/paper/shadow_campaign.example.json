@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "campaign_id": "ttwo-shadow-REPLACE_ME",
+  "ticker": "TTWO",
+  "mode": "shadow_observation_only",
+  "planned_start_at": "2027-01-04T14:30:00Z",
+  "planned_end_at": "2027-02-01T21:00:00Z",
+  "approval_status": "draft_to_validate",
+  "thresholds": null,
+  "code_commit": null,
+  "strategy_config_hash": null,
+  "ibkr_validation_report_hash": null,
+  "holdout_ledger_hash": null,
+  "data_rights_approval_reference": null,
+  "risk_owner_approval_reference": null,
+  "example_only": true,
+  "transmit": false,
+  "order_capability": "forbidden"
+}

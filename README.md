@@ -60,6 +60,35 @@ The full chain path has not yet been validated against IBKR. No live-account mod
 [`Oracle A1 runbook`](docs/deployment/ORACLE_A1_IBKR_PAPER_BRIDGE.md), plus the
 [`IBKR provider chapter`](docs_v2/_review/07_INTEGRATION_IBKR.md).
 
+The future connection checkpoint is one explicitly armed command:
+
+```bash
+ttwo-options data ibkr-validate \
+  --connect-read-only \
+  --expiration-start 2027-01-01 \
+  --expiration-end 2027-02-01 \
+  --minimum-strike 180 \
+  --maximum-strike 320
+```
+
+It writes ignored private JSON/Markdown evidence, exercises a second independent session and can
+resolve a human-selected BAG plan from the captured chain. It has not been run against IBKR yet.
+
+The future shadow campaign also has an offline-only control plane. The committed example is
+deliberately blocked and this command contacts neither IBKR nor another provider:
+
+```bash
+ttwo-options paper shadow-status \
+  --manifest configs/paper/shadow_campaign.example.json \
+  --decision-ledger reports/private/paper-decisions.jsonl \
+  --realization-ledger reports/private/paper-realizations.jsonl \
+  --output reports/private/shadow-campaign-status.json
+```
+
+An approved manifest must freeze human-selected thresholds and evidence hashes. Decisions and
+later realizations live in separate hash-chained append-only ledgers. Even when observation targets
+are reached, the software keeps `paper_validation_passed=false` pending human review.
+
 ## Phase M — Governed prospective context
 
 Phase M prospective decisions now use one `PhaseMDecisionContext`. It loads the canonical static

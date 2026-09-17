@@ -23,6 +23,9 @@ tests, documents et risques touchés.
 | TT-D16 | `NO_TRADE` reste une vraie alternative | Le budget ne doit pas forcer une position | L’allocation peut conserver 100 % de cash |
 | TT-D17 | Holdout final non ouvert | Empêcher le retuning sur le dernier test | Le manque de données ne peut pas être fabriqué |
 | TT-D18 | Oracle pour la session persistante | Le Mac ne doit pas être nécessaire en continu | Il faut sécuriser SSH, 2FA et reprise de la VM |
+| TT-D19 | Shadow gouverné sans seuil par défaut | Durée et taille sont des décisions risque, pas des constantes techniques | Un manifeste incomplet reste bloqué |
+| TT-D20 | Décision et réalisation dans deux ledgers | Empêche de réécrire la prévision après le résultat | La réalisation doit référencer le hash exact de la décision |
+| TT-D21 | Aucune promotion paper automatique | Atteindre un compte d'observations ne prouve ni qualité ni sécurité | Le statut maximal exige encore une revue humaine |
 
 ## Compromis principaux
 
@@ -45,3 +48,9 @@ Une estimation IBKR de commission/marge peut nécessiter des objets et appels du
 même avec `whatIf=true`. La décision actuelle est de ne pas introduire cette capacité dans le
 moteur. Le moteur sait ingérer une preuve future, mais ne la demande pas lui-même.
 
+### Shadow préparé contre campagne réellement menée
+
+Le code sait geler un protocole, vérifier ses journaux et compter les observations. Il ne choisit
+pas les seuils, ne fabrique pas de décisions passées et ne conclut pas qu'une campagne est réussie.
+Cette séparation évite de confondre infrastructure testée et preuve prospective effectivement
+collectée.

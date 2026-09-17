@@ -52,6 +52,7 @@ from take_two_options.market_snapshot import (
     snapshot_manifest,
 )
 from take_two_options.opra.contracts import (
+    IbkrTwsProviderConfig,
     LiveChainRequest,
     OpraConfigurationError,
     assess_provider_readiness,
@@ -60,6 +61,19 @@ from take_two_options.opra.ibkr_provider import (
     IbkrProviderError,
     build_official_ibkr_provider,
     live_chain_to_market_snapshot,
+)
+from take_two_options.opra.paper_decisions import (
+    load_paper_decisions,
+    load_paper_realizations,
+)
+from take_two_options.opra.shadow_campaign import (
+    ShadowCampaignManifest,
+    evaluate_shadow_campaign,
+)
+from take_two_options.opra.validation import (
+    ComboValidationPlan,
+    render_ibkr_validation_markdown,
+    validate_ibkr_read_only,
 )
 from take_two_options.phase_m_context import load_phase_m_decision_context
 from take_two_options.reporting.ibkr_ticket import (
@@ -81,11 +95,16 @@ calibration_app = typer.Typer(
     no_args_is_help=True,
     help="Offline historical calibration and walk-forward validation; never uses live fallback.",
 )
+paper_app = typer.Typer(
+    no_args_is_help=True,
+    help="Offline shadow/paper evidence control; never connects or creates an order.",
+)
 app.add_typer(knowledge_app, name="knowledge")
 app.add_typer(data_app, name="data")
 app.add_typer(trade_app, name="trade")
 app.add_typer(position_app, name="position")
 app.add_typer(calibration_app, name="calibration")
+app.add_typer(paper_app, name="paper")
 app.add_typer(legacy_app, name="legacy", hidden=True)
 
 
@@ -214,6 +233,113 @@ def ibkr_chain(
     )
 
 
+@data_app.command("ibkr-validate")
+def ibkr_validate(
+    expiration_start: Annotated[str, typer.Option("--expiration-start")],
+    expiration_end: Annotated[str, typer.Option("--expiration-end")],
+    connect_read_only: Annotated[
+        bool,
+        typer.Option(
+            "--connect-read-only",
+            help="Explicitly permit this command to open the local IBKR paper socket.",
+        ),
+    ] = False,
+    ticker: Annotated[str, typer.Option("--ticker")] = "TTWO",
+    maximum_quote_age_seconds: Annotated[
+        int,
+        typer.Option("--maximum-quote-age-seconds", min=1),
+    ] = 30,
+    minimum_strike: Annotated[float | None, typer.Option("--minimum-strike", min=0.01)] = None,
+    maximum_strike: Annotated[float | None, typer.Option("--maximum-strike", min=0.01)] = None,
+    maximum_contracts: Annotated[
+        int,
+        typer.Option("--maximum-contracts", min=1, max=10_000),
+    ] = 500,
+    maximum_expirations: Annotated[
+        int,
+        typer.Option("--maximum-expirations", min=1, max=60),
+    ] = 12,
+    combo_plan: Annotated[
+        Path | None,
+        typer.Option("--combo-plan", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    exercise_second_session: Annotated[
+        bool,
+        typer.Option("--exercise-second-session/--skip-second-session"),
+    ] = True,
+    report_json_out: Annotated[Path, typer.Option("--report-json-out")] = Path(
+        "reports/private/ibkr-validation.json"
+    ),
+    report_markdown_out: Annotated[Path, typer.Option("--report-markdown-out")] = Path(
+        "reports/private/ibkr-validation.md"
+    ),
+    chain_json_out: Annotated[Path, typer.Option("--chain-json-out")] = Path(
+        "reports/private/ibkr-chain.json"
+    ),
+    engine_json_out: Annotated[Path | None, typer.Option("--engine-json-out")] = Path(
+        "reports/private/ibkr-market-snapshot.json"
+    ),
+) -> None:
+    """Run one evidence-producing IBKR paper read-only validation; never create an order."""
+
+    if not connect_read_only:
+        typer.echo(
+            "IBKR validation connection not attempted. Re-run with --connect-read-only only "
+            "after OPRA entitlement and licence review are recorded.",
+            err=True,
+        )
+        raise typer.Exit(code=2)
+    load_local_environment()
+    try:
+        config = IbkrTwsProviderConfig.from_environment(os.environ)
+        parsed_plan = (
+            ComboValidationPlan.model_validate_json(combo_plan.read_text(encoding="utf-8"))
+            if combo_plan is not None
+            else None
+        )
+        request = LiveChainRequest(
+            ticker=ticker,
+            as_of=datetime.now(UTC),
+            expiration_start=date.fromisoformat(expiration_start),
+            expiration_end=date.fromisoformat(expiration_end),
+            maximum_quote_age_seconds=maximum_quote_age_seconds,
+            minimum_strike=minimum_strike,
+            maximum_strike=maximum_strike,
+            maximum_contracts=maximum_contracts,
+            maximum_expirations=maximum_expirations,
+        )
+        outcome = validate_ibkr_read_only(
+            build_official_ibkr_provider(os.environ),
+            request,
+            provider_name=config.provider,
+            requested_market_data_type=config.market_data_type,
+            combo_plan=parsed_plan,
+            exercise_second_session=exercise_second_session,
+        )
+        _write_model_json(report_json_out, outcome.report.model_dump_json(indent=2))
+        _write_model_json(
+            report_markdown_out,
+            render_ibkr_validation_markdown(outcome.report),
+        )
+        if outcome.snapshot is not None:
+            _write_model_json(chain_json_out, outcome.snapshot.model_dump_json(indent=2))
+            if engine_json_out is not None:
+                _write_model_json(
+                    engine_json_out,
+                    live_chain_to_market_snapshot(outcome.snapshot).model_dump_json(indent=2),
+                )
+    except (IbkrProviderError, OpraConfigurationError, OSError, ValueError) as error:
+        typer.echo(f"IBKR read-only validation blocked safely: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(
+        f"{outcome.report.status}: report={report_json_out}; "
+        f"second_session={str(outcome.report.independent_second_session_verified).lower()}; "
+        "transmit=false; order_capability=forbidden"
+    )
+    if outcome.report.status == "FAILED_SAFE":
+        raise typer.Exit(code=1)
+
+
 def _csv_floats(value: str, *, option_name: str) -> list[float]:
     try:
         values = [float(item.strip()) for item in value.split(",") if item.strip()]
@@ -227,6 +353,44 @@ def _csv_floats(value: str, *, option_name: str) -> list[float]:
 def _write_model_json(path: Path, payload: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(payload, encoding="utf-8")
+
+
+@paper_app.command("shadow-status")
+def paper_shadow_status(
+    manifest: Annotated[
+        Path,
+        typer.Option("--manifest", exists=True, dir_okay=False, readable=True),
+    ],
+    decision_ledger: Annotated[Path, typer.Option("--decision-ledger")] = Path(
+        "reports/private/paper-decisions.jsonl"
+    ),
+    realization_ledger: Annotated[Path, typer.Option("--realization-ledger")] = Path(
+        "reports/private/paper-realizations.jsonl"
+    ),
+    output: Annotated[Path, typer.Option("--output")] = Path(
+        "reports/private/shadow-campaign-status.json"
+    ),
+) -> None:
+    """Evaluate frozen shadow evidence offline; never starts a campaign or provider."""
+
+    try:
+        campaign = ShadowCampaignManifest.model_validate_json(
+            manifest.read_text(encoding="utf-8")
+        )
+        decisions = load_paper_decisions(decision_ledger)
+        realizations = load_paper_realizations(realization_ledger, decisions)
+        report = evaluate_shadow_campaign(campaign, decisions, realizations)
+        _write_model_json(output, report.model_dump_json(indent=2))
+    except (OSError, ValueError) as error:
+        typer.echo(f"Shadow campaign status failed safely: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(
+        f"{report.status}: decisions={report.decision_count}; "
+        f"realizations={report.realization_count}; report={output}; "
+        "connection_attempted=false; paper_validation=false; transmit=false"
+    )
+    if report.status in {"BLOCKED_DRAFT", "WINDOW_ENDED_INCOMPLETE", "FAILED_SAFE"}:
+        raise typer.Exit(code=1)
 
 
 @trade_app.command("phase-m-context")

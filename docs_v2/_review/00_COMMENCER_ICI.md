@@ -55,6 +55,8 @@ complète, les quotes BAG, l’open interest, les Greeks ni les comportements de
 12. [Ce qui reste ouvert](12_ELEMENTS_A_VALIDER.md)
 13. [Glossaire](13_GLOSSAIRE.md)
 14. [Traçabilité](14_TRACABILITE.md)
+15. [Protocole de branchement IBKR](15_PROTOCOLE_BRANCHEMENT_IBKR.md)
+16. [Contrôle de campagne shadow](16_CAMPAGNE_SHADOW.md)
 
 ## Règle de lecture des statuts
 
@@ -83,4 +85,3 @@ licence ou une campagne paper sont validés.
 - Un score peut-il contourner un hard gate ?
 - Une connexion paper peut-elle accepter un compte non `DU` ?
 - Le retour à la santé peut-il démarrer automatiquement le paper trading ?
-

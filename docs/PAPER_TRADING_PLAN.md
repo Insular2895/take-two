@@ -1,6 +1,6 @@
 # Plan de paper trading
 
-Statut au 16 septembre 2026 : `blocked_before_start`. Aucune campagne paper n’a été
+Statut au 17 septembre 2026 : `control_plane_tested_campaign_blocked_before_start`. Aucune campagne paper n’a été
 réalisée. Le plan reste `draft_to_validate` jusqu'à validation du responsable risque.
 
 Blocage actuel : le handshake IBKR paper a été observé le 25 août, mais le nouveau provider de
@@ -15,6 +15,19 @@ doit pas être simulée à partir des mêmes données historiques.
 - stratégie/politique gelée, seuils et univers prédéfinis ;
 - journal immuable des décisions et des changements ;
 - séparation stricte entre paper et toute capacité d’ordre réel.
+
+## Contrôle déjà codé hors ligne
+
+- manifeste strict avec période, seuils humains et hashes de lignée ;
+- approbation impossible tant que droits data, responsable risque, preuve IBKR et holdout manquent ;
+- décisions figées avant résultat dans un journal append-only hash-chaîné ;
+- réalisations futures dans un second journal hash-chaîné, liées au hash exact de la décision ;
+- refus d'une entrée antidatée, d'un doublon, d'une rupture de chaîne ou d'un drift commit/config ;
+- rapport de progression qui ne peut jamais déclarer la validation paper automatiquement.
+
+Le modèle se trouve dans `configs/paper/shadow_campaign.example.json`. Il reste
+`example_only=true`. `ttwo-options paper shadow-status` l'analyse sans ouvrir de connexion et sans
+démarrer la campagne.
 
 ## Mesures
 

@@ -23,15 +23,33 @@ from take_two_options.opra.ibkr_provider import (
     build_official_ibkr_provider,
     live_chain_to_market_snapshot,
 )
+from take_two_options.opra.shadow_campaign import (
+    ShadowCampaignManifest,
+    ShadowCampaignStatusReport,
+    ShadowCampaignThresholds,
+    evaluate_shadow_campaign,
+)
+from take_two_options.opra.validation import (
+    ComboValidationLeg,
+    ComboValidationPlan,
+    IbkrReadOnlyValidationReport,
+    IbkrValidationCheck,
+    render_ibkr_validation_markdown,
+    validate_ibkr_read_only,
+)
 
 __all__ = [
     "BrokerWhatIfEvidence",
+    "ComboValidationLeg",
+    "ComboValidationPlan",
     "IBKR_TWS_ENVIRONMENT_VARIABLES",
     "IbkrGovernanceError",
     "IbkrProviderError",
     "IbkrReadOnlyMarketDataProvider",
+    "IbkrReadOnlyValidationReport",
     "IbkrReadPolicy",
     "IbkrTwsProviderConfig",
+    "IbkrValidationCheck",
     "LiveChainRequest",
     "LiveComboLeg",
     "LiveComboMarketDataProvider",
@@ -41,7 +59,13 @@ __all__ = [
     "LiveOptionMarketDataProvider",
     "OpraProviderConfig",
     "ProviderReadinessReport",
+    "ShadowCampaignManifest",
+    "ShadowCampaignStatusReport",
+    "ShadowCampaignThresholds",
     "assess_provider_readiness",
     "build_official_ibkr_provider",
+    "evaluate_shadow_campaign",
     "live_chain_to_market_snapshot",
+    "render_ibkr_validation_markdown",
+    "validate_ibkr_read_only",
 ]

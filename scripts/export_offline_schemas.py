@@ -46,6 +46,14 @@ from take_two_options.opra.paper_decisions import (
     PaperDecisionRecord,
     PaperRealizationRecord,
 )
+from take_two_options.opra.shadow_campaign import (
+    ShadowCampaignManifest,
+    ShadowCampaignStatusReport,
+)
+from take_two_options.opra.validation import (
+    ComboValidationPlan,
+    IbkrReadOnlyValidationReport,
+)
 from take_two_options.phase_m_context import PhaseMDecisionContext
 from take_two_options.quantitative.historical_surfaces import HistoricalSurfaceReport
 from take_two_options.reporting.pre_opra_final import FinalPreOpraReport
@@ -81,9 +89,13 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "live_option_chain_snapshot.schema.json": LiveOptionChainSnapshot,
     "live_combo_quote.schema.json": LiveComboQuote,
     "broker_what_if_evidence.schema.json": BrokerWhatIfEvidence,
+    "ibkr_combo_validation_plan.schema.json": ComboValidationPlan,
+    "ibkr_read_only_validation_report.schema.json": IbkrReadOnlyValidationReport,
     "opra_provider_readiness.schema.json": ProviderReadinessReport,
     "paper_decision_record.schema.json": PaperDecisionRecord,
     "paper_realization_record.schema.json": PaperRealizationRecord,
+    "shadow_campaign_manifest.schema.json": ShadowCampaignManifest,
+    "shadow_campaign_status.schema.json": ShadowCampaignStatusReport,
     "historical_surface_report.schema.json": HistoricalSurfaceReport,
     "holdout_ledger_entry.schema.json": HoldoutLedgerEntry,
     "readiness.schema.json": FeatureReadiness,

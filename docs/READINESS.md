@@ -44,6 +44,7 @@ capacité, jamais une promesse de rendement.
 | Surveillance par snapshots et replay | `experimental_offline` | Aucune campagne paper/live terminée. |
 | Rapports autonomes | `production_ready_offline` | Les résultats héritent du statut de leurs données. |
 | Provider IBKR/OPRA read-only | `experimental_offline` | Chaîne, normalisation et BAG testés avec transport fake ; entitlement/licence et validation live de la nouvelle implémentation absents. |
+| Contrôle campagne shadow | `experimental_offline` | Manifeste, journaux et statut testés ; seuils humains non approuvés et aucune observation prospective collectée. |
 | Exécution | `blocked_for_execution` | `transmit=false`, `what_if=true`, confirmation humaine. |
 
 ## Gates de promotion
@@ -114,3 +115,25 @@ contrats, gates, normalisation, cache/retry/pacing, conversion moteur et compara
 `experimental_offline`. Le handshake du 25 août est une preuve séparée et plus étroite ; il ne
 promote pas ce provider. `LIVE_DATA_READ_ONLY`, shadow et paper restent non franchis. L'exécution
 reste `blocked_for_execution`.
+
+## Checkpoint protocole de validation — 17 septembre 2026
+
+Une commande unique produit maintenant les preuves machine et humaines : santé initiale, seconde
+session indépendante, chaîne, identité contrat, complétude, couverture volume/OI/Greeks,
+timestamps, type de marché et BAG optionnelle résolue sans `conId` saisi manuellement. Les statuts
+séparent échec sûr, chemin observé non promouvable et promotion stricte des seules données. Ce
+protocole est `experimental_offline` tant qu'il n'a pas été exécuté contre le provider réel.
+
+La compatibilité HMAC Python/Cloudflare est prouvée par un vecteur partagé. Le trajet
+Oracle→Access→Worker→D1→dashboard demeure `requires_live_market_data`/preuve distante requise.
+
+## Checkpoint contrôle shadow — 17 septembre 2026
+
+Le code peut maintenant vérifier un manifeste de campagne, lier un commit, une configuration, une
+preuve IBKR, un holdout et deux approbations humaines, puis contrôler deux journaux hash-chaînés
+séparant décision et réalisation. Aucun seuil par défaut n'est inventé. Le manifeste d'exemple est
+`draft_to_validate` et `example_only=true`, donc bloqué.
+
+Même lorsque les nombres d'observations demandés sont atteints, le rapport conserve
+`paper_validation_passed=false`, `promotion_eligible=false` et exige une revue humaine. Cela prépare
+la campagne ; cela ne signifie pas qu'elle a commencé ni qu'une stratégie est validée.

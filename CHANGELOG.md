@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — 2026-09-16
+## Unreleased — 2026-09-17
 
 ### IBKR read-only option-chain adapter and human study dossier
 
@@ -16,10 +16,18 @@
   order methods.
 - Added the explicitly armed `ttwo-options data ibkr-chain --connect-read-only` command and two
   generated JSON Schemas; private IBKR capture outputs are excluded from Git.
-- Added a 15-chapter French review dossier under `docs_v2/_review`, aligned stale current-state
+- Added a single `ibkr-validate` protocol with health and independent-second-session checks,
+  structured chain coverage evidence, optional human-selected BAG resolution, redacted
+  JSON/Markdown reports and two additional schemas.
+- Added one shared Python/TypeScript HMAC vector proving local telemetry signature conformance
+  across the Oracle publisher and Cloudflare verifier; the remote E2E remains unproven.
+- Added a human-gated offline shadow campaign manifest, hash-chained decision and realization
+  ledgers, a no-provider status command and strict reports that can never auto-claim paper
+  validation.
+- Added a 17-chapter French review dossier under `docs_v2/_review`, aligned stale current-state
   documentation, and preserved the distinction between coded, offline-tested and live-observed.
 - No IBKR connection was made for this checkpoint. Entitlement, licence, full-chain behavior,
-  what-if and shadow/paper validation remain open; execution remains forbidden.
+  what-if and the actual shadow/paper campaign remain open; execution remains forbidden.
 
 ## 0.12.8 — 2026-08-25
 

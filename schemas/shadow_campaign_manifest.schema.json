@@ -1,0 +1,190 @@
+{
+  "$defs": {
+    "ShadowCampaignThresholds": {
+      "additionalProperties": false,
+      "description": "Risk-owner values; the software deliberately supplies no defaults.",
+      "properties": {
+        "minimum_decisions": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum Decisions",
+          "type": "integer"
+        },
+        "minimum_realizations": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum Realizations",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "minimum_decisions",
+        "minimum_realizations"
+      ],
+      "title": "ShadowCampaignThresholds",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/shadow_campaign_manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "approval_status": {
+      "default": "draft_to_validate",
+      "enum": [
+        "draft_to_validate",
+        "approved"
+      ],
+      "title": "Approval Status",
+      "type": "string"
+    },
+    "campaign_id": {
+      "minLength": 1,
+      "title": "Campaign Id",
+      "type": "string"
+    },
+    "code_commit": {
+      "anyOf": [
+        {
+          "maxLength": 40,
+          "minLength": 7,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Code Commit"
+    },
+    "data_rights_approval_reference": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Data Rights Approval Reference"
+    },
+    "example_only": {
+      "default": true,
+      "title": "Example Only",
+      "type": "boolean"
+    },
+    "holdout_ledger_hash": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Holdout Ledger Hash"
+    },
+    "ibkr_validation_report_hash": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ibkr Validation Report Hash"
+    },
+    "mode": {
+      "const": "shadow_observation_only",
+      "default": "shadow_observation_only",
+      "title": "Mode",
+      "type": "string"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "planned_end_at": {
+      "format": "date-time",
+      "title": "Planned End At",
+      "type": "string"
+    },
+    "planned_start_at": {
+      "format": "date-time",
+      "title": "Planned Start At",
+      "type": "string"
+    },
+    "risk_owner_approval_reference": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Risk Owner Approval Reference"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "strategy_config_hash": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Strategy Config Hash"
+    },
+    "thresholds": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ShadowCampaignThresholds"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "ticker": {
+      "const": "TTWO",
+      "default": "TTWO",
+      "title": "Ticker",
+      "type": "string"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "campaign_id",
+    "planned_start_at",
+    "planned_end_at"
+  ],
+  "title": "ShadowCampaignManifest",
+  "type": "object"
+}

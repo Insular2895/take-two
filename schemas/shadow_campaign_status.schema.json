@@ -1,0 +1,190 @@
+{
+  "$defs": {
+    "ShadowCampaignCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "check_id": {
+          "minLength": 1,
+          "title": "Check Id",
+          "type": "string"
+        },
+        "detail_code": {
+          "minLength": 1,
+          "title": "Detail Code",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "WARN",
+            "FAIL",
+            "NOT_RUN"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "check_id",
+        "status",
+        "detail_code"
+      ],
+      "title": "ShadowCampaignCheck",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/shadow_campaign_status.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "campaign_id": {
+      "minLength": 1,
+      "title": "Campaign Id",
+      "type": "string"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/ShadowCampaignCheck"
+      },
+      "minItems": 1,
+      "title": "Checks",
+      "type": "array"
+    },
+    "decision_count": {
+      "minimum": 0,
+      "title": "Decision Count",
+      "type": "integer"
+    },
+    "decision_ledger_head_hash": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Decision Ledger Head Hash"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "human_review_required": {
+      "const": true,
+      "default": true,
+      "title": "Human Review Required",
+      "type": "boolean"
+    },
+    "manifest_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Manifest Hash",
+      "type": "string"
+    },
+    "maximum_claim": {
+      "enum": [
+        "software_only",
+        "campaign_control_ready",
+        "prospective_observations_recorded"
+      ],
+      "title": "Maximum Claim",
+      "type": "string"
+    },
+    "missing_realization_count": {
+      "minimum": 0,
+      "title": "Missing Realization Count",
+      "type": "integer"
+    },
+    "no_position_count": {
+      "minimum": 0,
+      "title": "No Position Count",
+      "type": "integer"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "paper_validation_passed": {
+      "const": false,
+      "default": false,
+      "title": "Paper Validation Passed",
+      "type": "boolean"
+    },
+    "promotion_eligible": {
+      "const": false,
+      "default": false,
+      "title": "Promotion Eligible",
+      "type": "boolean"
+    },
+    "realization_count": {
+      "minimum": 0,
+      "title": "Realization Count",
+      "type": "integer"
+    },
+    "realization_ledger_head_hash": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Realization Ledger Head Hash"
+    },
+    "report_id": {
+      "minLength": 1,
+      "title": "Report Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "BLOCKED_DRAFT",
+        "READY_TO_START",
+        "IN_PROGRESS",
+        "OBSERVATION_TARGET_REACHED_PENDING_HUMAN_REVIEW",
+        "WINDOW_ENDED_INCOMPLETE",
+        "FAILED_SAFE"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "report_id",
+    "generated_at",
+    "campaign_id",
+    "manifest_hash",
+    "status",
+    "maximum_claim",
+    "decision_count",
+    "realization_count",
+    "missing_realization_count",
+    "no_position_count",
+    "checks"
+  ],
+  "title": "ShadowCampaignStatusReport",
+  "type": "object"
+}
