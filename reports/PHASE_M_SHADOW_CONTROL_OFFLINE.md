@@ -1,6 +1,7 @@
 # Phase M — contrôle de campagne shadow hors ligne
 
-Date : 17 septembre 2026  
+Date : 17 septembre 2026
+
 Statut : `CONTROL_PLANE_TESTED_CAMPAIGN_NOT_STARTED`
 
 ## Implémentation

@@ -1,6 +1,7 @@
 # Phase M — protocole de validation IBKR hors ligne
 
-Date : 17 septembre 2026  
+Date : 17 septembre 2026
+
 Statut : `OFFLINE_PROTOCOL_COMPLETE_LIVE_RUN_PENDING`
 
 ## Implémentation

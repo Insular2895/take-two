@@ -73,4 +73,5 @@ commencée et les seuils restent `draft_to_validate`. Il faut encore :
 - [ ] aligner la version package et le changelog lors de la release ;
 - [x] figer et pousser le premier commit de handoff (`0eca2f3`) avec ses résultats de tests ;
 - [x] mettre à jour le vault pour le checkpoint provider du 16 septembre ;
-- [ ] figer et pousser le checkpoint protocole de validation du 17 septembre.
+- [x] figer et pousser le checkpoint protocole/contrôle shadow du 17 septembre
+  (`229c779`).
