@@ -57,6 +57,10 @@ def _quote(con_id: int, strike: float) -> LiveOptionQuote:
         exercise_style="american",
         quote_timestamp_source="provider",
         market_data_type="live",
+        freshness_basis="SOURCE_TIMESTAMP",
+        freshness_status="LIVE_SOURCE_TIMESTAMP_FRESH",
+        freshness_verified=True,
+        source_timestamp_verified=True,
     )
 
 
@@ -82,6 +86,24 @@ def _snapshot(*, promotable: bool = True) -> LiveOptionChainSnapshot:
         missing_quote_count=0,
         contract_discovery_complete=True,
         quote_collection_complete=True,
+        freshness_basis="SOURCE_TIMESTAMP" if promotable else "UNVERIFIED",
+        freshness_status="LIVE_SOURCE_TIMESTAMP_FRESH" if promotable else "DELAYED",
+        freshness_verified=promotable,
+        source_timestamp_verified=promotable,
+        underlying_freshness_basis="SOURCE_TIMESTAMP" if promotable else "UNVERIFIED",
+        underlying_freshness_status=(
+            "LIVE_SOURCE_TIMESTAMP_FRESH" if promotable else "DELAYED"
+        ),
+        underlying_source_timestamp_verified=promotable,
+        required_component_freshness={
+            "underlying": "LIVE_SOURCE_TIMESTAMP_FRESH" if promotable else "DELAYED",
+            **{
+                quote.option_symbol: (
+                    "LIVE_SOURCE_TIMESTAMP_FRESH" if promotable else "DELAYED"
+                )
+                for quote in quotes
+            },
+        },
         promotion_eligible=promotable,
     )
 
@@ -134,6 +156,11 @@ class StubProvider:
             broker_quote_complete=True,
             synthetic_quote_complete=True,
             quote_freshness_verified=True,
+            timestamp_source="provider",
+            freshness_basis="SOURCE_TIMESTAMP",
+            freshness_status="LIVE_SOURCE_TIMESTAMP_FRESH",
+            freshness_verified=True,
+            source_timestamp_verified=True,
             price_convention_verified=True,
             comparison_confirmed=True,
         )

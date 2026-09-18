@@ -42,6 +42,35 @@
       "title": "Comparison Confirmed",
       "type": "boolean"
     },
+    "freshness_basis": {
+      "default": "UNVERIFIED",
+      "enum": [
+        "SOURCE_TIMESTAMP",
+        "BOUNDED_CAPTURE_WINDOW",
+        "UNVERIFIED"
+      ],
+      "title": "Freshness Basis",
+      "type": "string"
+    },
+    "freshness_status": {
+      "default": "INVALID",
+      "enum": [
+        "LIVE_SOURCE_TIMESTAMP_FRESH",
+        "LIVE_CAPTURE_WINDOW_FRESH",
+        "STALE",
+        "DELAYED",
+        "FROZEN",
+        "INCOMPLETE",
+        "INVALID"
+      ],
+      "title": "Freshness Status",
+      "type": "string"
+    },
+    "freshness_verified": {
+      "default": false,
+      "title": "Freshness Verified",
+      "type": "boolean"
+    },
     "market_data_type": {
       "default": "unknown",
       "enum": [
@@ -111,6 +140,11 @@
       "title": "Source Id",
       "type": "string"
     },
+    "source_timestamp_verified": {
+      "default": false,
+      "title": "Source Timestamp Verified",
+      "type": "boolean"
+    },
     "synthetic_ask_net_debit": {
       "anyOf": [
         {
@@ -142,6 +176,17 @@
     },
     "ticker": {
       "title": "Ticker",
+      "type": "string"
+    },
+    "timestamp_source": {
+      "default": "unknown",
+      "enum": [
+        "exchange",
+        "provider",
+        "client_received_at",
+        "unknown"
+      ],
+      "title": "Timestamp Source",
       "type": "string"
     },
     "transmit": {

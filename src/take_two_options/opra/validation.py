@@ -73,6 +73,19 @@ class IbkrChainValidationEvidence(StrictModel):
     live_option_quote_count: int = Field(ge=0)
     underlying_timestamp_verified: bool
     underlying_live: bool
+    freshness_basis: Literal["SOURCE_TIMESTAMP", "BOUNDED_CAPTURE_WINDOW", "UNVERIFIED"]
+    freshness_status: Literal[
+        "LIVE_SOURCE_TIMESTAMP_FRESH",
+        "LIVE_CAPTURE_WINDOW_FRESH",
+        "STALE",
+        "DELAYED",
+        "FROZEN",
+        "INCOMPLETE",
+        "INVALID",
+    ]
+    freshness_verified: bool
+    source_timestamp_verified: bool
+    required_component_freshness: dict[str, str]
     promotion_eligible: bool
 
 
@@ -410,6 +423,9 @@ def render_ibkr_validation_markdown(report: IbkrReadOnlyValidationReport) -> str
                 f"- Open interest présent : `{chain.open_interest_present_count}`",
                 f"- Greeks complets : `{chain.greeks_complete_count}`",
                 f"- Timestamps provider/exchange : `{chain.provider_timestamp_count}`",
+                f"- Statut de fraîcheur : `{chain.freshness_status}`",
+                f"- Base de fraîcheur : `{chain.freshness_basis}`",
+                f"- Timestamp source vérifié : `{chain.source_timestamp_verified}`",
                 f"- Options live : `{chain.live_option_quote_count}`",
                 f"- Sous-jacent live et horodaté provider : "
                 f"`{chain.underlying_live and chain.underlying_timestamp_verified}`",
@@ -429,6 +445,9 @@ def render_ibkr_validation_markdown(report: IbkrReadOnlyValidationReport) -> str
                 f"`{report.combo.synthetic_ask_net_debit}`",
                 f"- Divergence maximale : `{report.combo.maximum_absolute_divergence}`",
                 f"- Fraîcheur vérifiée : `{report.combo.quote_freshness_verified}`",
+                f"- Statut de fraîcheur : `{report.combo.freshness_status}`",
+                f"- Base de fraîcheur : `{report.combo.freshness_basis}`",
+                f"- Timestamp source vérifié : `{report.combo.source_timestamp_verified}`",
                 f"- Convention signée vérifiée : `{report.combo.price_convention_verified}`",
                 f"- Comparaison confirmée : `{report.combo.comparison_confirmed}`",
             ]
@@ -482,14 +501,18 @@ def _chain_evidence(snapshot: LiveOptionChainSnapshot) -> IbkrChainValidationEvi
             for quote in quotes
         ),
         provider_timestamp_count=sum(
-            quote.quote_timestamp_source in {"exchange", "provider"} for quote in quotes
+            quote.source_timestamp_verified for quote in quotes
         ),
         live_option_quote_count=sum(quote.market_data_type == "live" for quote in quotes),
         underlying_timestamp_verified=(
-            snapshot.underlying_quote_timestamp is not None
-            and snapshot.underlying_timestamp_source in {"exchange", "provider"}
+            snapshot.underlying_source_timestamp_verified
         ),
         underlying_live=snapshot.underlying_market_data_type == "live",
+        freshness_basis=snapshot.freshness_basis,
+        freshness_status=snapshot.freshness_status,
+        freshness_verified=snapshot.freshness_verified,
+        source_timestamp_verified=snapshot.source_timestamp_verified,
+        required_component_freshness=dict(snapshot.required_component_freshness),
         promotion_eligible=snapshot.promotion_eligible,
     )
 
@@ -565,6 +588,17 @@ def _append_chain_checks(
                 "IBKR_LIVE_DATA_COMPLETE" if live_complete else "IBKR_NON_LIVE_DATA_PRESENT"
             ),
             evidence=[f"live_option_quotes={evidence.live_option_quote_count}/{total}"],
+        )
+    )
+    checks.append(
+        IbkrValidationCheck(
+            check_id="freshness_verification",
+            status="PASS" if evidence.freshness_verified else "WARN",
+            detail_code=evidence.freshness_status,
+            evidence=[
+                f"basis={evidence.freshness_basis}",
+                f"source_timestamp_verified={evidence.source_timestamp_verified}",
+            ],
         )
     )
     checks.append(

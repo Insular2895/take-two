@@ -84,15 +84,15 @@
           </div>
           <p id="broker-explanation" class="note"></p>
           <form id="exit-policy-form" class="exit-policy-grid">
-            <label>Pré-alerte : valeur nette restante (€)<input name="warning_net_liquidation_value" type="number" min="0" step="1" placeholder="900" required></label>
-            <label>Sortie automatique : plancher (€)<input name="automatic_exit_net_liquidation_value" type="number" min="0" step="1" placeholder="800" required></label>
+            <label>Pré-alerte : PnL de liquidation (€)<input name="warning_liquidation_pnl_policy" type="number" max="0" step="1" placeholder="-200" required></label>
+            <label>Sortie automatique : PnL de liquidation (€)<input name="automatic_exit_liquidation_pnl_policy" type="number" max="0" step="1" placeholder="-300" required></label>
             <label>Slippage maximal total (€)<input name="maximum_exit_slippage_policy" type="number" min="0" step="1" placeholder="25" required></label>
             <label>Âge maximal de cotation (sec)<input name="maximum_quote_age_seconds" type="number" min="5" max="60" step="1" value="30" required></label>
             <label class="check-label"><input name="automatic_exit_enabled" type="checkbox"> Activer la sortie automatique paper</label>
             <div class="policy-action"><button type="submit">ENREGISTRER LA POLITIQUE PAPER</button></div>
           </form>
           <p id="exit-policy-error" class="error"></p>
-          <p class="warning-text">Le plancher déclenche une intention de fermeture du combo entier. Il ne garantit jamais le prix final : spread, gap, liquidité et slippage restent possibles.</p>
+          <p class="warning-text">Le seuil porte sur le PnL de liquidation signé, coûts de sortie inclus. Il ne garantit jamais le prix final : spread, gap, liquidité et slippage restent possibles.</p>
         </section>
 
         <section class="card"><h2>CONTROLS</h2><div class="actions"><button id="safe-mode">SAFE MODE</button><button id="monitor-toggle">PAUSE MONITORING</button><button id="export-data">EXPORT DATA</button><button id="logout">LOGOUT</button></div><p class="note">SAFE MODE ne ferme rien. PAUSE MONITORING ne change aucune vérité broker.</p></section>

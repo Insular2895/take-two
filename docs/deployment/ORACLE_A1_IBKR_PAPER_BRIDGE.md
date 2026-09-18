@@ -185,5 +185,5 @@ logged in on the VM and may still require periodic IBKR reauthentication.
 6. Exercise simulated failures and partial fills.
 7. Enable a short paper execution window and submit the smallest representative combo.
 8. Reconcile execution price plus commissions/fees before showing final net P&L.
-9. Prove native protective orders and automatic-floor behavior in paper.
+9. Prove native protective orders and signed liquidation-PnL exit behavior in paper.
 10. Only then consider keeping paper dispatch continuously enabled.

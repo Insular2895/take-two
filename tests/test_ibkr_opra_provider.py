@@ -80,6 +80,7 @@ class FakeTransport:
             received_at=NOW,
             market_data_type="live",
             price_convention_verified=True,
+            timestamp_source="provider",
         )
 
 
@@ -209,6 +210,14 @@ def test_live_session_and_non_allowlisted_ticker_are_rejected() -> None:
     request = chain_request().model_copy(update={"ticker": "AAPL"})
     with pytest.raises(IbkrGovernanceError, match="ALLOWLIST"):
         provider(FakeTransport(raw_chain())).get_option_chain(request)
+    live_gateway_port = config().model_copy(update={"port": 4001})
+    with pytest.raises(IbkrGovernanceError, match="PAPER_PORT_REQUIRED"):
+        IbkrReadOnlyMarketDataProvider(
+            live_gateway_port,
+            FakeTransport(raw_chain()),
+            entitlement_confirmed=True,
+            license_reviewed=True,
+        )
 
 
 def test_chain_is_qualified_normalised_hashed_and_promotion_eligible() -> None:
@@ -217,6 +226,9 @@ def test_chain_is_qualified_normalised_hashed_and_promotion_eligible() -> None:
     assert result.contract_discovery_complete is True
     assert result.quote_collection_complete is True
     assert result.promotion_eligible is True
+    assert result.freshness_status == "LIVE_SOURCE_TIMESTAMP_FRESH"
+    assert result.freshness_basis == "SOURCE_TIMESTAMP"
+    assert result.source_timestamp_verified is True
     assert result.missing_quote_count == 0
     assert result.quotes[0].con_id == 101
     assert result.quotes[0].volume == 300
@@ -224,6 +236,36 @@ def test_chain_is_qualified_normalised_hashed_and_promotion_eligible() -> None:
     assert result.quotes[0].delta == 0.55
     assert len(result.provider_metadata_hash) == 64
     assert len(result.raw_snapshot_hash) == 64
+
+
+def test_live_client_receipt_capture_is_fresh_without_inventing_source_timestamp() -> None:
+    item = quote()
+    changed_quote = RawIbkrOptionQuote(
+        **{
+            **item.__dict__,
+            "quote_timestamp": None,
+            "timestamp_source": "client_received_at",
+        }
+    )
+    changed_chain = RawIbkrChainSnapshot(
+        **{
+            **raw_chain(changed_quote).__dict__,
+            "underlying_quote_timestamp": None,
+            "underlying_timestamp_source": "client_received_at",
+        }
+    )
+    result = provider(FakeTransport(changed_chain)).get_option_chain(chain_request())
+    assert result.promotion_eligible is True
+    assert result.freshness_status == "LIVE_CAPTURE_WINDOW_FRESH"
+    assert result.freshness_basis == "BOUNDED_CAPTURE_WINDOW"
+    assert result.freshness_verified is True
+    assert result.source_timestamp_verified is False
+    assert result.quotes[0].source_timestamp_verified is False
+    canonical = live_chain_to_market_snapshot(result)
+    assert canonical.quotes[0].exchange_timestamp is None
+    assert canonical.quotes[0].provider_timestamp is None
+    assert canonical.exchange_timestamp is None
+    assert canonical.provider_timestamp is None
 
 
 def test_client_receipt_timestamp_and_delayed_data_cannot_be_promoted() -> None:
@@ -238,8 +280,8 @@ def test_client_receipt_timestamp_and_delayed_data_cannot_be_promoted() -> None:
     )
     result = provider(FakeTransport(raw_chain(changed))).get_option_chain(chain_request())
     assert result.promotion_eligible is False
-    assert any("client receipt" in warning for warning in result.warnings)
-    assert any("not labelled as live" in warning for warning in result.warnings)
+    assert result.freshness_status == "DELAYED"
+    assert any("client-receipt provenance" in warning for warning in result.warnings)
 
 
 def test_underlying_timestamp_and_market_type_are_required_for_promotion() -> None:
@@ -253,8 +295,58 @@ def test_underlying_timestamp_and_market_type_are_required_for_promotion() -> No
     )
     result = provider(FakeTransport(changed)).get_option_chain(chain_request())
     assert result.promotion_eligible is False
-    assert any("Underlying freshness" in warning for warning in result.warnings)
-    assert any("Underlying snapshot" in warning for warning in result.warnings)
+    assert result.freshness_status == "DELAYED"
+    assert result.underlying_freshness_status == "DELAYED"
+
+
+def test_one_stale_option_or_underlying_makes_the_whole_chain_stale() -> None:
+    stale_quote = RawIbkrOptionQuote(
+        **{
+            **quote().__dict__,
+            "quote_timestamp": NOW - timedelta(seconds=20),
+        }
+    )
+    option_result = provider(FakeTransport(raw_chain(stale_quote))).get_option_chain(
+        chain_request()
+    )
+    assert option_result.freshness_status == "STALE"
+    assert option_result.promotion_eligible is False
+
+    stale_underlying = RawIbkrChainSnapshot(
+        **{
+            **raw_chain().__dict__,
+            "underlying_quote_timestamp": NOW - timedelta(seconds=20),
+        }
+    )
+    underlying_result = provider(FakeTransport(stale_underlying)).get_option_chain(
+        chain_request()
+    )
+    assert underlying_result.freshness_status == "STALE"
+    assert underlying_result.promotion_eligible is False
+
+
+@pytest.mark.parametrize("market_data_type", ["frozen", "delayed_frozen"])
+def test_frozen_market_data_is_never_promotable(market_data_type: str) -> None:
+    frozen = RawIbkrOptionQuote(
+        **{**quote().__dict__, "market_data_type": market_data_type}
+    )
+    result = provider(FakeTransport(raw_chain(frozen))).get_option_chain(chain_request())
+    assert result.freshness_status == "FROZEN"
+    assert result.promotion_eligible is False
+
+
+def test_future_source_timestamp_is_invalid_not_silently_dropped() -> None:
+    future = RawIbkrOptionQuote(
+        **{
+            **quote().__dict__,
+            "quote_timestamp": NOW + timedelta(seconds=1),
+        }
+    )
+    result = provider(FakeTransport(raw_chain(future))).get_option_chain(chain_request())
+    assert result.returned_quote_count == 1
+    assert result.quotes[0].freshness_status == "INVALID"
+    assert result.freshness_status == "INVALID"
+    assert result.promotion_eligible is False
 
 
 def test_live_capture_rejects_a_stale_as_of_before_transport() -> None:
@@ -353,6 +445,8 @@ def test_combo_quote_compares_bag_with_executable_leg_synthetic() -> None:
     assert result.maximum_absolute_divergence == pytest.approx(0.05)
     assert result.comparison_confirmed is True
     assert result.quote_freshness_verified is True
+    assert result.freshness_status == "LIVE_SOURCE_TIMESTAMP_FRESH"
+    assert result.source_timestamp_verified is True
     assert result.price_convention_verified is True
     assert result.transmit is False
 
@@ -382,6 +476,61 @@ def test_unverified_combo_keeps_observed_prices_but_not_confirmation() -> None:
     assert result.maximum_absolute_divergence == pytest.approx(0.05)
     assert result.broker_quote_complete is True
     assert result.quote_freshness_verified is False
+    assert result.comparison_confirmed is False
+
+
+def test_stale_combo_quote_is_visible_but_not_confirmed() -> None:
+    transport = FakeTransport(raw_chain())
+    transport.fetch_combo_quote = lambda config, request: RawIbkrComboQuote(  # type: ignore[method-assign]
+        bid_net_debit=5.05,
+        ask_net_debit=5.45,
+        quote_timestamp=NOW - timedelta(seconds=20),
+        received_at=NOW,
+        market_data_type="live",
+        price_convention_verified=True,
+        timestamp_source="provider",
+    )
+    request = LiveComboQuoteRequest(
+        candidate_id="candidate-stale",
+        ticker="TTWO",
+        requested_at=NOW,
+        maximum_quote_age_seconds=10,
+        legs=[
+            LiveComboLeg(con_id=101, action="BUY", bid=6.2, ask=6.4),
+            LiveComboLeg(con_id=102, action="SELL", bid=1.0, ask=1.1),
+        ],
+    )
+    result = provider(transport).get_combo_quote(request)
+    assert result.freshness_status == "STALE"
+    assert result.quote_freshness_verified is False
+    assert result.comparison_confirmed is False
+
+
+def test_combo_with_material_collection_error_is_incomplete() -> None:
+    transport = FakeTransport(raw_chain())
+    transport.fetch_combo_quote = lambda config, request: RawIbkrComboQuote(  # type: ignore[method-assign]
+        bid_net_debit=5.05,
+        ask_net_debit=5.45,
+        quote_timestamp=None,
+        received_at=NOW,
+        market_data_type="live",
+        price_convention_verified=True,
+        timestamp_source="client_received_at",
+        collection_complete=False,
+        warnings=("material broker error",),
+    )
+    request = LiveComboQuoteRequest(
+        candidate_id="candidate-incomplete",
+        ticker="TTWO",
+        requested_at=NOW,
+        maximum_quote_age_seconds=10,
+        legs=[
+            LiveComboLeg(con_id=101, action="BUY", bid=6.2, ask=6.4),
+            LiveComboLeg(con_id=102, action="SELL", bid=1.0, ask=1.1),
+        ],
+    )
+    result = provider(transport).get_combo_quote(request)
+    assert result.freshness_status == "INCOMPLETE"
     assert result.comparison_confirmed is False
 
 

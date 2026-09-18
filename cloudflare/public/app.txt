@@ -169,8 +169,8 @@ function render(data) {
   const policy = broker.exit_policy;
   const policyForm = $("#exit-policy-form");
   if (policy && policyForm.dataset.loadedFor !== position.id) {
-    policyForm.elements.warning_net_liquidation_value.value = policy.warning_net_liquidation_value;
-    policyForm.elements.automatic_exit_net_liquidation_value.value = policy.automatic_exit_net_liquidation_value;
+    policyForm.elements.warning_liquidation_pnl_policy.value = policy.warning_liquidation_pnl_policy ?? "";
+    policyForm.elements.automatic_exit_liquidation_pnl_policy.value = policy.automatic_exit_liquidation_pnl_policy ?? "";
     policyForm.elements.maximum_exit_slippage_policy.value = policy.maximum_exit_slippage_policy;
     policyForm.elements.maximum_quote_age_seconds.value = policy.maximum_quote_age_seconds;
     policyForm.elements.automatic_exit_enabled.checked = Boolean(policy.automatic_exit_enabled);
@@ -303,8 +303,9 @@ $("#exit-policy-form").addEventListener("submit", async (event) => {
   const number = (name) => Number(form.get(name));
   try {
     await protectedMutation("/api/broker/exit-policy", {
-      warning_net_liquidation_value: number("warning_net_liquidation_value"),
-      automatic_exit_net_liquidation_value: number("automatic_exit_net_liquidation_value"),
+      trigger_metric: "LIQUIDATION_PNL_POLICY",
+      warning_liquidation_pnl_policy: number("warning_liquidation_pnl_policy"),
+      automatic_exit_liquidation_pnl_policy: number("automatic_exit_liquidation_pnl_policy"),
       maximum_exit_slippage_policy: number("maximum_exit_slippage_policy"),
       maximum_quote_age_seconds: number("maximum_quote_age_seconds"),
       automatic_exit_enabled: form.get("automatic_exit_enabled") === "on",

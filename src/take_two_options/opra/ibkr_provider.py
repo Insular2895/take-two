@@ -22,20 +22,22 @@ from take_two_options.domain import ExerciseStyle, OptionType, StrictModel
 from take_two_options.knowledge.provenance import stable_hash
 from take_two_options.knowledge.schemas import DatasetLineage, MarketSnapshot, QuoteSnapshot
 from take_two_options.opra.contracts import (
+    FreshnessBasis,
     IbkrTwsProviderConfig,
     LiveChainRequest,
     LiveComboMarketDataProvider,
     LiveComboQuote,
     LiveComboQuoteRequest,
+    LiveFreshnessStatus,
     LiveOptionChainSnapshot,
     LiveOptionMarketDataProvider,
     LiveOptionQuote,
     ProviderHealth,
+    TimestampSource,
 )
 from take_two_options.quantitative.contracts import EvidenceLevel
 
 MarketDataType = Literal["live", "frozen", "delayed", "delayed_frozen", "unknown"]
-TimestampSource = Literal["exchange", "provider", "client_received_at"]
 
 
 class IbkrProviderError(RuntimeError):
@@ -152,7 +154,7 @@ class RawIbkrChainSnapshot:
     underlying_price: float
     underlying_quote_timestamp: datetime | None
     underlying_received_at: datetime
-    underlying_timestamp_source: Literal["exchange", "provider", "client_received_at", "unknown"]
+    underlying_timestamp_source: TimestampSource
     underlying_market_data_type: MarketDataType
     quotes: tuple[RawIbkrOptionQuote, ...]
     discovered_contract_count: int
@@ -171,6 +173,16 @@ class RawIbkrComboQuote:
     market_data_type: MarketDataType
     price_convention_verified: bool
     warnings: tuple[str, ...] = ()
+    timestamp_source: TimestampSource = "client_received_at"
+    collection_complete: bool = True
+
+
+@dataclass(frozen=True)
+class _FreshnessAssessment:
+    basis: FreshnessBasis
+    status: LiveFreshnessStatus
+    verified: bool
+    source_timestamp_verified: bool
 
 
 class IbkrReadOnlyTransport(Protocol):
@@ -214,6 +226,9 @@ class IbkrReadOnlyMarketDataProvider(LiveOptionMarketDataProvider, LiveComboMark
     ) -> None:
         if config.session_mode != "paper":
             raise IbkrGovernanceError("IBKR_LIVE_SESSION_FORBIDDEN")
+        paper_port = 4002 if config.provider == "ibkr_gateway" else 7497
+        if config.port != paper_port:
+            raise IbkrGovernanceError("IBKR_PAPER_PORT_REQUIRED")
         if not config.read_only_api or config.transmit or config.order_capability != "forbidden":
             raise IbkrGovernanceError("IBKR_READ_ONLY_INVARIANT_VIOLATION")
         self._config = config
@@ -377,6 +392,86 @@ def build_official_ibkr_provider(
     )
 
 
+def _component_freshness(
+    *,
+    timestamp_source: TimestampSource,
+    source_timestamp: datetime | None,
+    received_at: datetime,
+    requested_at: datetime,
+    collection_completed_at: datetime,
+    maximum_age_seconds: int,
+    market_data_type: MarketDataType,
+    component_complete: bool,
+    collection_complete: bool,
+) -> _FreshnessAssessment:
+    """Classify provenance and freshness without promoting receipt time to source time."""
+
+    if not component_complete or not collection_complete:
+        return _FreshnessAssessment("UNVERIFIED", "INCOMPLETE", False, False)
+    if received_at < requested_at or collection_completed_at < received_at:
+        return _FreshnessAssessment("UNVERIFIED", "INVALID", False, False)
+
+    source_verified = timestamp_source in {"exchange", "provider"}
+    if source_verified:
+        if source_timestamp is None:
+            return _FreshnessAssessment("UNVERIFIED", "INCOMPLETE", False, False)
+        source_age = (received_at - source_timestamp).total_seconds()
+        if source_age < 0:
+            return _FreshnessAssessment("SOURCE_TIMESTAMP", "INVALID", False, False)
+        if source_age > maximum_age_seconds:
+            return _FreshnessAssessment("SOURCE_TIMESTAMP", "STALE", False, True)
+        basis: FreshnessBasis = "SOURCE_TIMESTAMP"
+    elif timestamp_source == "client_received_at":
+        capture_age = (collection_completed_at - requested_at).total_seconds()
+        component_capture_age = (received_at - requested_at).total_seconds()
+        if capture_age < 0 or component_capture_age < 0:
+            return _FreshnessAssessment("BOUNDED_CAPTURE_WINDOW", "INVALID", False, False)
+        if capture_age > maximum_age_seconds or component_capture_age > maximum_age_seconds:
+            return _FreshnessAssessment("BOUNDED_CAPTURE_WINDOW", "STALE", False, False)
+        basis = "BOUNDED_CAPTURE_WINDOW"
+    else:
+        return _FreshnessAssessment("UNVERIFIED", "INVALID", False, False)
+
+    if market_data_type == "delayed":
+        return _FreshnessAssessment(basis, "DELAYED", False, source_verified)
+    if market_data_type in {"frozen", "delayed_frozen"}:
+        return _FreshnessAssessment(basis, "FROZEN", False, source_verified)
+    if market_data_type != "live":
+        return _FreshnessAssessment(basis, "INVALID", False, source_verified)
+    status: LiveFreshnessStatus = (
+        "LIVE_SOURCE_TIMESTAMP_FRESH"
+        if basis == "SOURCE_TIMESTAMP"
+        else "LIVE_CAPTURE_WINDOW_FRESH"
+    )
+    return _FreshnessAssessment(basis, status, True, source_verified)
+
+
+def _aggregate_freshness(
+    assessments: list[_FreshnessAssessment],
+    *,
+    complete: bool,
+) -> _FreshnessAssessment:
+    if not complete or not assessments:
+        return _FreshnessAssessment("UNVERIFIED", "INCOMPLETE", False, False)
+    statuses = {item.status for item in assessments}
+    for status in ("INVALID", "INCOMPLETE", "DELAYED", "FROZEN", "STALE"):
+        if status in statuses:
+            return _FreshnessAssessment(
+                "UNVERIFIED",
+                status,
+                False,
+                all(item.source_timestamp_verified for item in assessments),
+            )
+    all_verified = all(item.verified for item in assessments)
+    all_source = all(item.basis == "SOURCE_TIMESTAMP" for item in assessments)
+    return _FreshnessAssessment(
+        "SOURCE_TIMESTAMP" if all_source else "BOUNDED_CAPTURE_WINDOW",
+        "LIVE_SOURCE_TIMESTAMP_FRESH" if all_source else "LIVE_CAPTURE_WINDOW_FRESH",
+        all_verified,
+        all(item.source_timestamp_verified for item in assessments),
+    )
+
+
 def _normalise_chain(
     raw: RawIbkrChainSnapshot,
     *,
@@ -395,6 +490,7 @@ def _normalise_chain(
 
     warnings = list(raw.warnings)
     quotes: list[LiveOptionQuote] = []
+    quote_assessments: list[_FreshnessAssessment] = []
     missing = 0
     seen_con_ids: set[int] = set()
     for item in raw.quotes:
@@ -410,12 +506,12 @@ def _normalise_chain(
             raise IbkrProviderError("IBKR_OPTION_STRIKE_OUTSIDE_REQUEST")
         if request.maximum_strike is not None and contract.strike > request.maximum_strike:
             raise IbkrProviderError("IBKR_OPTION_STRIKE_OUTSIDE_REQUEST")
-        quote_timestamp = _utc(
-            item.quote_timestamp or item.received_at,
-            "IBKR_QUOTE_TIMESTAMP_NAIVE",
+        source_timestamp = (
+            _utc(item.quote_timestamp, "IBKR_QUOTE_TIMESTAMP_NAIVE")
+            if item.quote_timestamp is not None
+            else None
         )
         quote_received_at = _utc(item.received_at, "IBKR_QUOTE_RECEIPT_NAIVE")
-        age = (quote_received_at - quote_timestamp).total_seconds()
         valid_market = (
             item.bid is not None
             and item.ask is not None
@@ -423,9 +519,22 @@ def _normalise_chain(
             and _finite_non_negative(item.ask)
             and item.ask >= item.bid
         )
-        if age < 0 or age > request.maximum_quote_age_seconds or not valid_market:
+        if not valid_market:
             missing += 1
             continue
+        assessment = _component_freshness(
+            timestamp_source=item.timestamp_source,
+            source_timestamp=source_timestamp,
+            received_at=quote_received_at,
+            requested_at=requested_at,
+            collection_completed_at=received_at,
+            maximum_age_seconds=request.maximum_quote_age_seconds,
+            market_data_type=item.market_data_type,
+            component_complete=True,
+            collection_complete=raw.quote_collection_complete,
+        )
+        quote_assessments.append(assessment)
+        effective_quote_timestamp = source_timestamp or quote_received_at
         quotes.append(
             LiveOptionQuote(
                 option_symbol=contract.local_symbol,
@@ -433,7 +542,7 @@ def _normalise_chain(
                 option_type=OptionType.CALL if contract.right == "C" else OptionType.PUT,
                 strike=contract.strike,
                 expiration=contract.expiration,
-                quote_timestamp=quote_timestamp,
+                quote_timestamp=effective_quote_timestamp,
                 received_at=quote_received_at,
                 bid=item.bid,
                 ask=item.ask,
@@ -460,6 +569,10 @@ def _normalise_chain(
                 provider_stream=item.provider_stream,
                 quote_timestamp_source=item.timestamp_source,
                 market_data_type=item.market_data_type,
+                freshness_basis=assessment.basis,
+                freshness_status=assessment.status,
+                freshness_verified=assessment.verified,
+                source_timestamp_verified=assessment.source_timestamp_verified,
             )
         )
     missing += max(raw.discovered_contract_count - len(raw.quotes), 0)
@@ -468,10 +581,6 @@ def _normalise_chain(
     if missing:
         warnings.append(f"{missing} discovered contract(s) lacked a usable fresh two-sided quote.")
     quote_collection_complete = raw.quote_collection_complete and missing == 0
-    timestamp_quality_complete = all(
-        quote.quote_timestamp_source != "client_received_at" for quote in quotes
-    )
-    live_market_complete = all(quote.market_data_type == "live" for quote in quotes)
     underlying_quote_timestamp = (
         _utc(raw.underlying_quote_timestamp, "IBKR_UNDERLYING_TIMESTAMP_NAIVE")
         if raw.underlying_quote_timestamp is not None
@@ -481,31 +590,34 @@ def _normalise_chain(
         raw.underlying_received_at,
         "IBKR_UNDERLYING_RECEIPT_NAIVE",
     )
-    underlying_freshness_verified = (
-        underlying_quote_timestamp is not None
-        and 0
-        <= (underlying_received_at - underlying_quote_timestamp).total_seconds()
-        <= request.maximum_quote_age_seconds
+    underlying_assessment = _component_freshness(
+        timestamp_source=raw.underlying_timestamp_source,
+        source_timestamp=underlying_quote_timestamp,
+        received_at=underlying_received_at,
+        requested_at=requested_at,
+        collection_completed_at=received_at,
+        maximum_age_seconds=request.maximum_quote_age_seconds,
+        market_data_type=raw.underlying_market_data_type,
+        component_complete=True,
+        collection_complete=raw.quote_collection_complete,
     )
-    underlying_timestamp_verified = raw.underlying_timestamp_source in {"exchange", "provider"}
-    underlying_live = raw.underlying_market_data_type == "live"
-    promotion_eligible = (
-        raw.contract_discovery_complete
-        and quote_collection_complete
-        and timestamp_quality_complete
-        and live_market_complete
-        and underlying_freshness_verified
-        and underlying_timestamp_verified
-        and underlying_live
+    chain_complete = raw.contract_discovery_complete and quote_collection_complete
+    aggregate = _aggregate_freshness(
+        [underlying_assessment, *quote_assessments],
+        complete=chain_complete,
     )
-    if not timestamp_quality_complete:
-        warnings.append("At least one quote uses client receipt time instead of provider time.")
-    if not live_market_complete:
-        warnings.append("At least one quote is not labelled as live market data.")
-    if not underlying_freshness_verified or not underlying_timestamp_verified:
-        warnings.append("Underlying freshness is not verified by a provider/exchange timestamp.")
-    if not underlying_live:
-        warnings.append("Underlying snapshot is not labelled as live market data.")
+    promotion_eligible = chain_complete and aggregate.verified
+    if not aggregate.source_timestamp_verified:
+        warnings.append(
+            "At least one required component uses truthful client-receipt provenance; "
+            "no provider/exchange timestamp was inferred."
+        )
+    if aggregate.status == "LIVE_CAPTURE_WINDOW_FRESH":
+        warnings.append(
+            "Freshness is verified by a bounded live capture window, not by source timestamps."
+        )
+    elif not aggregate.verified:
+        warnings.append(f"Required-component freshness is {aggregate.status}.")
 
     raw_payload = asdict(raw)
     metadata_payload = [asdict(quote.contract) for quote in raw.quotes]
@@ -530,6 +642,20 @@ def _normalise_chain(
         missing_quote_count=missing,
         contract_discovery_complete=raw.contract_discovery_complete,
         quote_collection_complete=quote_collection_complete,
+        freshness_basis=aggregate.basis,
+        freshness_status=aggregate.status,
+        freshness_verified=aggregate.verified,
+        source_timestamp_verified=aggregate.source_timestamp_verified,
+        underlying_freshness_basis=underlying_assessment.basis,
+        underlying_freshness_status=underlying_assessment.status,
+        underlying_source_timestamp_verified=underlying_assessment.source_timestamp_verified,
+        required_component_freshness={
+            "underlying": underlying_assessment.status,
+            **{
+                quote.option_symbol: quote.freshness_status
+                for quote in quotes
+            },
+        },
         promotion_eligible=promotion_eligible,
         warnings=warnings,
     )
@@ -547,18 +673,23 @@ def _normalise_combo(
         if raw.quote_timestamp is not None
         else None
     )
-    fresh = (
-        quote_timestamp is not None
-        and 0
-        <= (received_at - quote_timestamp).total_seconds()
-        <= request.maximum_quote_age_seconds
-    )
     broker_complete = (
         raw.bid_net_debit is not None
         and raw.ask_net_debit is not None
         and _finite(raw.bid_net_debit)
         and _finite(raw.ask_net_debit)
         and raw.ask_net_debit >= raw.bid_net_debit
+    )
+    assessment = _component_freshness(
+        timestamp_source=raw.timestamp_source,
+        source_timestamp=quote_timestamp,
+        received_at=received_at,
+        requested_at=_utc(request.requested_at, "IBKR_COMBO_REQUEST_NAIVE"),
+        collection_completed_at=received_at,
+        maximum_age_seconds=request.maximum_quote_age_seconds,
+        market_data_type=raw.market_data_type,
+        component_complete=broker_complete,
+        collection_complete=raw.collection_complete,
     )
     synthetic_bid, synthetic_ask = _synthetic_combo(request)
     synthetic_complete = synthetic_bid is not None and synthetic_ask is not None
@@ -573,17 +704,22 @@ def _normalise_combo(
             abs(raw.ask_net_debit - synthetic_ask),
         ]
     warnings = list(raw.warnings)
-    if not fresh:
-        warnings.append("Broker combo quote is missing a fresh provider timestamp.")
+    if assessment.status == "LIVE_CAPTURE_WINDOW_FRESH":
+        warnings.append(
+            "Broker combo freshness uses a bounded client-receipt capture window; "
+            "no provider/exchange timestamp was inferred."
+        )
+    elif not assessment.verified:
+        warnings.append(f"Broker combo freshness is {assessment.status}.")
     if not raw.price_convention_verified:
         warnings.append("IBKR BAG signed-price convention is not yet verified on this session.")
     if not synthetic_complete:
         warnings.append("Synthetic combo comparison is incomplete because a leg quote is missing.")
-    live = raw.market_data_type == "live"
-    if not live:
-        warnings.append("Broker combo quote is not labelled as live market data.")
     confirmed = (
-        broker_complete and synthetic_complete and fresh and live and raw.price_convention_verified
+        broker_complete
+        and synthetic_complete
+        and assessment.verified
+        and raw.price_convention_verified
     )
     return LiveComboQuote(
         candidate_id=request.candidate_id,
@@ -595,11 +731,16 @@ def _normalise_combo(
         maximum_absolute_divergence=max(divergences) if divergences else None,
         quote_timestamp=quote_timestamp,
         received_at=received_at,
+        timestamp_source=raw.timestamp_source,
+        freshness_basis=assessment.basis,
+        freshness_status=assessment.status,
+        freshness_verified=assessment.verified,
+        source_timestamp_verified=assessment.source_timestamp_verified,
         source_id=f"ibkr-combo-{stable_hash({'request': request, 'raw': asdict(raw)})[:20]}",
         market_data_type=raw.market_data_type,
         broker_quote_complete=broker_complete,
         synthetic_quote_complete=synthetic_complete,
-        quote_freshness_verified=fresh,
+        quote_freshness_verified=assessment.verified,
         price_convention_verified=raw.price_convention_verified,
         comparison_confirmed=confirmed,
         warnings=warnings,
@@ -653,10 +794,16 @@ def live_chain_to_market_snapshot(snapshot: LiveOptionChainSnapshot) -> MarketSn
             ),
             deliverable_description=quote.deliverable,
             exchange_timestamp=(
-                quote.quote_timestamp if quote.quote_timestamp_source == "exchange" else None
+                quote.quote_timestamp
+                if quote.quote_timestamp_source == "exchange"
+                and quote.source_timestamp_verified
+                else None
             ),
             provider_timestamp=(
-                quote.quote_timestamp if quote.quote_timestamp_source == "provider" else None
+                quote.quote_timestamp
+                if quote.quote_timestamp_source == "provider"
+                and quote.source_timestamp_verified
+                else None
             ),
             received_at=quote.received_at,
             price_quality="live_broker",
@@ -665,9 +812,20 @@ def live_chain_to_market_snapshot(snapshot: LiveOptionChainSnapshot) -> MarketSn
         for quote in snapshot.quotes
     ]
     lineage_hash = stable_hash(snapshot.model_dump(mode="json"))
-    earliest_quote = min(quote.quote_timestamp for quote in snapshot.quotes)
-    latest_quote = max(quote.quote_timestamp for quote in snapshot.quotes)
-    spot_timestamp = snapshot.underlying_quote_timestamp or snapshot.received_at
+    effective_component_timestamps = [
+        quote.quote_timestamp for quote in snapshot.quotes
+    ] + [
+        snapshot.underlying_quote_timestamp
+        or snapshot.underlying_received_at
+        or snapshot.received_at
+    ]
+    earliest_quote = min(effective_component_timestamps)
+    latest_quote = max(effective_component_timestamps)
+    spot_timestamp = (
+        snapshot.underlying_quote_timestamp
+        or snapshot.underlying_received_at
+        or snapshot.received_at
+    )
     freshness_age = max((snapshot.received_at - earliest_quote).total_seconds(), 0.0)
     warnings = list(snapshot.warnings)
     if not snapshot.promotion_eligible:
@@ -679,15 +837,21 @@ def live_chain_to_market_snapshot(snapshot: LiveOptionChainSnapshot) -> MarketSn
         spot=snapshot.underlying_price,
         spot_timestamp=spot_timestamp,
         exchange_timestamp=(
-            spot_timestamp if snapshot.underlying_timestamp_source == "exchange" else None
+            spot_timestamp
+            if snapshot.underlying_timestamp_source == "exchange"
+            and snapshot.underlying_source_timestamp_verified
+            else None
         ),
         provider_timestamp=(
-            spot_timestamp if snapshot.underlying_timestamp_source == "provider" else None
+            spot_timestamp
+            if snapshot.underlying_timestamp_source == "provider"
+            and snapshot.underlying_source_timestamp_verified
+            else None
         ),
         received_at=snapshot.received_at,
         freshness_age_seconds=freshness_age,
         freshness_status=(
-            EvidenceLevel.KNOWN if snapshot.promotion_eligible else EvidenceLevel.ESTIMATED
+            EvidenceLevel.KNOWN if snapshot.freshness_verified else EvidenceLevel.ESTIMATED
         ),
         quote_quality="live_broker",
         source_ids=[snapshot.snapshot_id],

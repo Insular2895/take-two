@@ -18,8 +18,9 @@ interface BrokerStateRow {
 }
 
 interface ExitPolicyBody {
-  warning_net_liquidation_value?: number;
-  automatic_exit_net_liquidation_value?: number;
+  trigger_metric?: "LIQUIDATION_PNL_POLICY";
+  warning_liquidation_pnl_policy?: number;
+  automatic_exit_liquidation_pnl_policy?: number;
   maximum_exit_slippage_policy?: number;
   maximum_quote_age_seconds?: number;
   automatic_exit_enabled?: boolean;
@@ -64,7 +65,7 @@ async function brokerStatus(env: Env): Promise<Response> {
   const state = await brokerState(env.DB);
   const position = await activePosition(env.DB);
   const policy = position
-    ? await env.DB.prepare("SELECT * FROM position_exit_policies WHERE position_id=?")
+    ? await env.DB.prepare("SELECT * FROM position_exit_policies_v2 WHERE position_id=?")
       .bind(position.id).first<Record<string, unknown>>()
     : null;
   const intents = position
@@ -133,38 +134,43 @@ async function configureExitPolicy(
   if (position.state !== "PAPER_OPEN" && position.state !== "PARTIAL_CLOSE") {
     return Response.json({ error: "PAPER_POSITION_REQUIRED" }, { status: 409 });
   }
-  const warning = body.warning_net_liquidation_value;
-  const exit = body.automatic_exit_net_liquidation_value;
+  const warning = body.warning_liquidation_pnl_policy;
+  const exit = body.automatic_exit_liquidation_pnl_policy;
   const slippage = body.maximum_exit_slippage_policy;
   const quoteAge = body.maximum_quote_age_seconds ?? 30;
   if (![warning, exit, slippage].every((item) => typeof item === "number" && Number.isFinite(item)) ||
-      warning! < 0 || exit! < 0 || warning! < exit! || slippage! < 0 ||
+      body.trigger_metric !== "LIQUIDATION_PNL_POLICY" ||
+      warning! > 0 || exit! > 0 || warning! < exit! || slippage! < 0 ||
       !Number.isInteger(quoteAge) || quoteAge < 5 || quoteAge > 60 ||
       typeof body.automatic_exit_enabled !== "boolean") {
     throw new Error("INVALID_EXIT_POLICY");
   }
   const now = new Date().toISOString();
   await env.DB.prepare(
-    `INSERT INTO position_exit_policies(
-      position_id,mode,policy_currency,warning_net_liquidation_value,
-      automatic_exit_net_liquidation_value,maximum_exit_slippage_policy,
+    `INSERT INTO position_exit_policies_v2(
+      position_id,mode,policy_version,trigger_metric,policy_currency,
+      warning_liquidation_pnl_policy,automatic_exit_liquidation_pnl_policy,
+      maximum_exit_slippage_policy,
       maximum_quote_age_seconds,automatic_exit_enabled,native_protection_required,
-      created_at,created_by,updated_at,updated_by
-    ) VALUES(?,'PAPER',?,?,?,?,?,?,1,?,?,?,?)
+      configuration_status,legacy_policy_detected,created_at,created_by,updated_at,updated_by
+    ) VALUES(?,'PAPER',2,'LIQUIDATION_PNL_POLICY',?,?,?,?,?,?,1,'CONFIGURED',0,?,?,?,?)
     ON CONFLICT(position_id) DO UPDATE SET
-      warning_net_liquidation_value=excluded.warning_net_liquidation_value,
-      automatic_exit_net_liquidation_value=excluded.automatic_exit_net_liquidation_value,
+      warning_liquidation_pnl_policy=excluded.warning_liquidation_pnl_policy,
+      automatic_exit_liquidation_pnl_policy=excluded.automatic_exit_liquidation_pnl_policy,
       maximum_exit_slippage_policy=excluded.maximum_exit_slippage_policy,
       maximum_quote_age_seconds=excluded.maximum_quote_age_seconds,
       automatic_exit_enabled=excluded.automatic_exit_enabled,
+      configuration_status='CONFIGURED',legacy_policy_detected=0,
       updated_at=excluded.updated_at,updated_by=excluded.updated_by`,
   ).bind(
     position.id, position.policy_currency, warning, exit, slippage, quoteAge,
     body.automatic_exit_enabled ? 1 : 0, now, auth.actor, now, auth.actor,
   ).run();
   await audit(env.DB, "PAPER_EXIT_POLICY_CONFIGURED", auth.actor, position.id, {
-    warning_net_liquidation_value: warning,
-    automatic_exit_net_liquidation_value: exit,
+    policy_version: 2,
+    trigger_metric: "LIQUIDATION_PNL_POLICY",
+    warning_liquidation_pnl_policy: warning,
+    automatic_exit_liquidation_pnl_policy: exit,
     maximum_exit_slippage_policy: slippage,
     maximum_quote_age_seconds: quoteAge,
     automatic_exit_enabled: body.automatic_exit_enabled,
@@ -191,7 +197,7 @@ export async function queueAcknowledgedPaperClose(
   if (!["PAPER_OPEN", "PARTIAL_CLOSE"].includes(String(preview.position_state))) {
     throw new Error("PAPER_POSITION_REQUIRED");
   }
-  const policy = await env.DB.prepare("SELECT * FROM position_exit_policies WHERE position_id=?")
+  const policy = await env.DB.prepare("SELECT * FROM position_exit_policies_v2 WHERE position_id=?")
     .bind(String(preview.position_id)).first<Record<string, unknown>>();
   if (!policy) throw new Error("PAPER_EXIT_POLICY_REQUIRED");
   const quoteTimestamp = Date.parse(String(preview.quote_timestamp));
@@ -253,28 +259,54 @@ export async function queueAcknowledgedPaperClose(
 
 export type AutomaticExitEvaluation = "NOT_CONFIGURED" | "HOLD" | "WARNING" | "QUEUED" | "BLOCKED";
 
+export function classifyLiquidationPnl(
+  projection: Pick<
+    PnlProjection,
+    | "liquidation_pnl"
+    | "estimated_close_cash_flow_policy"
+    | "estimated_exit_commission"
+    | "estimated_exit_slippage"
+    | "estimated_exit_fx"
+  >,
+  warningLiquidationPnlPolicy: number,
+  automaticExitLiquidationPnlPolicy: number,
+): "HOLD" | "WARNING" | "EXIT" | "BLOCKED" {
+  const requiredValues = [
+    projection.liquidation_pnl,
+    projection.estimated_exit_commission,
+    projection.estimated_exit_slippage,
+    projection.estimated_exit_fx,
+  ];
+  if (requiredValues.some((value) => value === null || !Number.isFinite(value))) return "BLOCKED";
+  if (
+    !Number.isFinite(warningLiquidationPnlPolicy) ||
+    !Number.isFinite(automaticExitLiquidationPnlPolicy) ||
+    warningLiquidationPnlPolicy > 0 ||
+    automaticExitLiquidationPnlPolicy > 0 ||
+    warningLiquidationPnlPolicy < automaticExitLiquidationPnlPolicy
+  ) return "BLOCKED";
+  const liquidationPnl = projection.liquidation_pnl!;
+  if (liquidationPnl > warningLiquidationPnlPolicy) return "HOLD";
+  if (liquidationPnl > automaticExitLiquidationPnlPolicy) return "WARNING";
+  return "EXIT";
+}
+
 export async function evaluateAutomaticPaperExit(
   env: Env,
   position: PositionRow,
   projection: PnlProjection,
 ): Promise<AutomaticExitEvaluation> {
   if (position.state !== "PAPER_OPEN" && position.state !== "PARTIAL_CLOSE") return "NOT_CONFIGURED";
-  const policy = await env.DB.prepare("SELECT * FROM position_exit_policies WHERE position_id=?")
+  const policy = await env.DB.prepare("SELECT * FROM position_exit_policies_v2 WHERE position_id=?")
     .bind(position.id).first<Record<string, unknown>>();
-  if (!policy || !policy.automatic_exit_enabled) return "NOT_CONFIGURED";
-  if (projection.data_freshness !== "FRESH" || projection.estimated_close_cash_flow_policy === null) return "BLOCKED";
-
-  const currentValue = projection.estimated_close_cash_flow_policy;
-  const warningFloor = Number(policy.warning_net_liquidation_value);
-  const exitFloor = Number(policy.automatic_exit_net_liquidation_value);
-  if (currentValue > warningFloor) return "HOLD";
-  if (currentValue > exitFloor) {
-    await audit(env.DB, "PAPER_EXIT_FLOOR_WARNING", "monitor", position.id, {
-      current_net_liquidation_value: currentValue,
-      warning_net_liquidation_value: warningFloor,
-      automatic_exit_net_liquidation_value: exitFloor,
-    }, `paper-floor-warning:${position.id}:${projection.timestamp}`);
-    return "WARNING";
+  if (!policy || !policy.automatic_exit_enabled || policy.configuration_status !== "CONFIGURED") {
+    return "NOT_CONFIGURED";
+  }
+  if (policy.trigger_metric !== "LIQUIDATION_PNL_POLICY" || Number(policy.policy_version) !== 2) {
+    return "BLOCKED";
+  }
+  if (projection.data_freshness !== "FRESH" || projection.required_data_freshness.effective_timestamp === null) {
+    return "BLOCKED";
   }
 
   const state = await brokerState(env.DB);
@@ -294,11 +326,26 @@ export async function evaluateAutomaticPaperExit(
   const legs = inverseStructureLegs(dossier, position.quantity_remaining);
   if (legs.some((leg) => !Number.isInteger(leg.con_id) || Number(leg.con_id) <= 0)) return "BLOCKED";
 
+  const warningThreshold = Number(policy.warning_liquidation_pnl_policy);
+  const exitThreshold = Number(policy.automatic_exit_liquidation_pnl_policy);
+  const economicDecision = classifyLiquidationPnl(projection, warningThreshold, exitThreshold);
+  if (economicDecision === "BLOCKED") return "BLOCKED";
+  if (economicDecision === "HOLD") return "HOLD";
+  if (economicDecision === "WARNING") {
+    await audit(env.DB, "PAPER_EXIT_PNL_WARNING", "monitor", position.id, {
+      trigger_metric: "LIQUIDATION_PNL_POLICY",
+      liquidation_pnl_policy: projection.liquidation_pnl,
+      warning_liquidation_pnl_policy: warningThreshold,
+      automatic_exit_liquidation_pnl_policy: exitThreshold,
+    }, `paper-pnl-warning:${position.id}:${projection.timestamp}`);
+    return "WARNING";
+  }
+
   const intentId = randomId("broker-intent");
   const orderRef = `TTWO-P-${intentId.slice(-24)}`;
   const createdAt = new Date().toISOString();
   const expiresAt = new Date(Date.now() + Number(policy.maximum_quote_age_seconds) * 1000).toISOString();
-  const idempotencyKey = `automatic-floor:${position.id}:${policy.updated_at}`;
+  const idempotencyKey = `automatic-liquidation-pnl:${position.id}:${policy.updated_at}`;
   const command = {
     schema_version: "1.0",
     intent_id: intentId,
@@ -314,14 +361,15 @@ export async function evaluateAutomaticPaperExit(
     legs,
     quote_timestamp: projection.required_data_freshness.effective_timestamp,
     quote_provider: projection.provider,
-    estimated_close_cash_flow_policy: currentValue,
+    estimated_close_cash_flow_policy: projection.estimated_close_cash_flow_policy,
+    liquidation_pnl_policy: projection.liquidation_pnl,
     estimated_commission_policy: projection.estimated_exit_commission,
     estimated_slippage_policy: projection.estimated_exit_slippage,
     maximum_exit_slippage_policy: policy.maximum_exit_slippage_policy,
     trigger: {
-      kind: "NET_LIQUIDATION_VALUE_FLOOR",
-      observed_value: currentValue,
-      configured_floor: exitFloor,
+      kind: "LIQUIDATION_PNL_POLICY",
+      observed_liquidation_pnl_policy: projection.liquidation_pnl,
+      configured_exit_liquidation_pnl_policy: exitThreshold,
     },
     pricing_policy: "REFRESH_COMBO_QUOTE_AND_USE_BOUNDED_LIMIT",
   };
@@ -337,8 +385,9 @@ export async function evaluateAutomaticPaperExit(
   if (inserted.meta.changes) {
     await audit(env.DB, "PAPER_AUTOMATIC_EXIT_QUEUED", "monitor", position.id, {
       intent_id: intentId,
-      current_net_liquidation_value: currentValue,
-      automatic_exit_net_liquidation_value: exitFloor,
+      trigger_metric: "LIQUIDATION_PNL_POLICY",
+      liquidation_pnl_policy: projection.liquidation_pnl,
+      automatic_exit_liquidation_pnl_policy: exitThreshold,
     });
     return "QUEUED";
   }

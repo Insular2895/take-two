@@ -132,7 +132,8 @@ export class TTWOPositionMonitor {
           automaticExit === "QUEUED" ? "CRITICAL" : "WARNING",
           {
             evaluation: automaticExit,
-            net_liquidation_value: projection.estimated_close_cash_flow_policy,
+            trigger_metric: "LIQUIDATION_PNL_POLICY",
+            liquidation_pnl_policy: projection.liquidation_pnl,
             required_data_freshness: projection.required_data_freshness,
           },
           `paper-exit:${automaticExit}:${position.id}:${projection.timestamp}`,

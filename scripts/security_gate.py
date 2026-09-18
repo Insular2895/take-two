@@ -9,6 +9,7 @@ from pathlib import Path
 
 from take_two_options.intelligence.execution import (
     assert_all_execution_paths_forbidden,
+    assert_execution_security_boundaries,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -90,9 +91,11 @@ def main() -> int:
                     f"{path.relative_to(ROOT)}: network-capable HTML ({html_pattern})"
                 )
     execution_boundary = assert_all_execution_paths_forbidden()
+    security_boundaries = assert_execution_security_boundaries(ROOT)
     result = {
         "status": "passed" if not failures else "failed",
         "execution_boundary": execution_boundary,
+        "security_boundaries": security_boundaries,
         "failures": failures,
     }
     print(json.dumps(result, indent=2))

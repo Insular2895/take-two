@@ -202,6 +202,8 @@ class OfficialIbkrReadOnlyTransport:
                 market_data_type=quote["market_data_type"],
                 price_convention_verified=self._combo_price_convention_verified,
                 warnings=tuple(_error_warnings(session.error_codes)),
+                timestamp_source="client_received_at",
+                collection_complete=not _material_error_codes(session.error_codes),
             )
         finally:
             _disconnect(session, thread)

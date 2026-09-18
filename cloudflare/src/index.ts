@@ -383,6 +383,7 @@ async function exportData(env: Env, auth: AuthContext): Promise<Response> {
     "close_previews", "monitoring_events", "audit_events", "analysis_requests",
     "analysis_runs", "analysis_candidate_summaries", "analysis_candidate_details",
     "candidate_selections", "planned_positions", "position_exit_policies",
+    "position_exit_policies_v2",
     "broker_execution_intents", "broker_execution_events", "broker_bridge_heartbeats",
     "broker_telemetry_latest",
   ] as const;

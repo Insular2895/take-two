@@ -37,6 +37,18 @@ OPRA_GOVERNANCE_VARIABLES = (
 )
 IBKR_TWS_PROVIDERS = frozenset({"ibkr_tws", "ibkr_gateway"})
 
+TimestampSource = Literal["exchange", "provider", "client_received_at", "unknown"]
+FreshnessBasis = Literal["SOURCE_TIMESTAMP", "BOUNDED_CAPTURE_WINDOW", "UNVERIFIED"]
+LiveFreshnessStatus = Literal[
+    "LIVE_SOURCE_TIMESTAMP_FRESH",
+    "LIVE_CAPTURE_WINDOW_FRESH",
+    "STALE",
+    "DELAYED",
+    "FROZEN",
+    "INCOMPLETE",
+    "INVALID",
+]
+
 
 class OpraConfigurationError(ValueError):
     """Raised when the future provider configuration is incomplete."""
@@ -184,11 +196,7 @@ class LiveOptionQuote(StrictModel):
     rho: float | None = None
     provider_greek_convention: str | None = None
     provider_stream: str | None = None
-    quote_timestamp_source: Literal[
-        "exchange",
-        "provider",
-        "client_received_at",
-    ] = "provider"
+    quote_timestamp_source: TimestampSource = "provider"
     market_data_type: Literal[
         "live",
         "frozen",
@@ -196,6 +204,10 @@ class LiveOptionQuote(StrictModel):
         "delayed_frozen",
         "unknown",
     ] = "unknown"
+    freshness_basis: FreshnessBasis = "UNVERIFIED"
+    freshness_status: LiveFreshnessStatus = "INVALID"
+    freshness_verified: bool = False
+    source_timestamp_verified: bool = False
 
     @field_validator("quote_timestamp", "received_at")
     @classmethod
@@ -208,8 +220,6 @@ class LiveOptionQuote(StrictModel):
     def validate_market(self) -> LiveOptionQuote:
         if self.ask < self.bid:
             raise ValueError("live ask cannot be below bid")
-        if self.received_at < self.quote_timestamp:
-            raise ValueError("received_at cannot precede the provider quote timestamp")
         return self
 
 
@@ -226,12 +236,7 @@ class LiveOptionChainSnapshot(StrictModel):
     source_latency_milliseconds: float = Field(ge=0)
     underlying_quote_timestamp: datetime | None = None
     underlying_received_at: datetime | None = None
-    underlying_timestamp_source: Literal[
-        "exchange",
-        "provider",
-        "client_received_at",
-        "unknown",
-    ] = "unknown"
+    underlying_timestamp_source: TimestampSource = "unknown"
     underlying_market_data_type: Literal[
         "live",
         "frozen",
@@ -244,6 +249,14 @@ class LiveOptionChainSnapshot(StrictModel):
     missing_quote_count: int = Field(default=0, ge=0)
     contract_discovery_complete: bool = False
     quote_collection_complete: bool = False
+    freshness_basis: FreshnessBasis = "UNVERIFIED"
+    freshness_status: LiveFreshnessStatus = "INVALID"
+    freshness_verified: bool = False
+    source_timestamp_verified: bool = False
+    underlying_freshness_basis: FreshnessBasis = "UNVERIFIED"
+    underlying_freshness_status: LiveFreshnessStatus = "INVALID"
+    underlying_source_timestamp_verified: bool = False
+    required_component_freshness: dict[str, LiveFreshnessStatus] = Field(default_factory=dict)
     promotion_eligible: bool = False
     warnings: list[str] = Field(default_factory=list)
     read_only: Literal[True] = True
@@ -279,6 +292,9 @@ class LiveOptionChainSnapshot(StrictModel):
             not self.contract_discovery_complete
             or not self.quote_collection_complete
             or self.missing_quote_count
+            or not self.freshness_verified
+            or self.freshness_status
+            not in {"LIVE_SOURCE_TIMESTAMP_FRESH", "LIVE_CAPTURE_WINDOW_FRESH"}
         ):
             raise ValueError("promotion eligibility requires complete discovery and quotes")
         return self
@@ -322,6 +338,11 @@ class LiveComboQuote(StrictModel):
     maximum_absolute_divergence: float | None = Field(default=None, ge=0)
     quote_timestamp: datetime | None = None
     received_at: datetime
+    timestamp_source: TimestampSource = "unknown"
+    freshness_basis: FreshnessBasis = "UNVERIFIED"
+    freshness_status: LiveFreshnessStatus = "INVALID"
+    freshness_verified: bool = False
+    source_timestamp_verified: bool = False
     source_id: str
     market_data_type: Literal[
         "live",
@@ -355,6 +376,7 @@ class LiveComboQuote(StrictModel):
             not self.broker_quote_complete
             or not self.synthetic_quote_complete
             or not self.quote_freshness_verified
+            or not self.freshness_verified
             or not self.price_convention_verified
         ):
             raise ValueError(

@@ -16,10 +16,19 @@ le 25 août 2026 est isolée sous `services/ibkr-paper-bridge`; elle démarre d�
 live, exige un compte `DU`, n'expose aucun port broker, journalise avant dispatch et transforme un
 timeout ambigu en réconciliation obligatoire plutôt qu'en nouvel envoi.
 
-Le test `assert_all_execution_paths_forbidden()` inspecte tous les fichiers Python du
-package pour les imports/constructeurs d’ordre interdits et `transmit=True`. Le script
-`scripts/security_gate.py` ajoute un scan de secrets à haute confiance et de capacités
-réseau dans les rapports HTML V11.
+Le test `assert_all_execution_paths_forbidden()` inspecte tous les fichiers Python du package
+pour les imports, définitions et appels d’ordre interdits ainsi que `transmit=True`. Le script
+`scripts/security_gate.py` sépare et rapporte cinq frontières : moteur de recherche interdit
+d'ordre, provider marché read-only interdit d'ordre, télémétrie read-only interdite d'ordre,
+adaptateur paper désactivé et exécution live interdite. Un contrôle AST distinct prouve que le
+runtime du bridge construit toujours `DisabledGateway`; le protocole `PaperGateway` peut conserver
+son interface sans constituer une capacité active.
+
+L'audit runtime Cloudflare est un gate CI : `npm audit --omit=dev --audit-level=high`. Les quatre
+alertes high initiales du 17 septembre 2026 concernaient uniquement la chaîne dev/test
+Wrangler → Miniflare → Sharp. Les mises à niveau mineures compatibles vers Wrangler `4.134.0`,
+plugin Vitest `1.1.12`, types Workers `5.20260917.1` et Sharp transitif `0.35.4` ramènent les audits
+complet et runtime à zéro vulnérabilité. Ces outils ne figurent pas dans le bundle Worker dry-run.
 
 ## Exécution locale
 
@@ -31,7 +40,7 @@ pytest -q
 Les fichiers `.env*` sont ignorés par Git, sauf exemple sans secret. Le scanner vérifie
 les fichiers suivis sans afficher le contenu d’un environnement local.
 
-## État de préparation au 16 septembre 2026
+## État de préparation au 17 septembre 2026
 
 - frontière d'exécution et scan offline : `COMPLETE_SOFTWARE_CONTROLS` ;
 - IBKR : handshake paper et compte `DU` observés le 25 août dans le bridge Oracle ; le provider
@@ -39,6 +48,8 @@ les fichiers suivis sans afficher le contenu d’un environnement local.
   avant I/O tant que l'entitlement et la licence ne sont pas confirmés ;
 - transport de chaîne : loopback, paper et compte `DU` obligatoires ; aucune importation de type
   d'ordre, aucun submit/modify/cancel/exercise ;
+- `PRELIVE_HARDENING=COMPLETE`, mais `IBKR_LIVE_DATA_VALIDATION=NOT_RUN`, entitlement OPRA non
+  confirmé, campagne shadow non commencée et exécution paper toujours désactivée ;
 - audit de frontière :
   [`audits/PRE_ENTITLEMENT_BOUNDARY_2026-08-18.md`](audits/PRE_ENTITLEMENT_BOUNDARY_2026-08-18.md) ;
 - revue indépendante, threat model, SAST/dépendances, pentest et réponse à incident :

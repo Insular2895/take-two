@@ -1,6 +1,6 @@
 # Guide IBKR read-only — provider hors ligne, validation réelle future
 
-Statut au 16 septembre 2026 : `offline_provider_implemented_live_validation_pending`
+Statut au 17 septembre 2026 : `READY_FOR_LIVE_READONLY_VALIDATION`
 
 Le moteur offline ne dépend pas d'IBKR. L'adaptateur de données entrant est maintenant codé :
 qualification, découverte de chaîne, snapshots, normalisation, cache/retry/pacing, BAG et
@@ -49,11 +49,37 @@ IBKR indique que `reqContractDetails` sur un contrat incomplet peut retourner un
 Chaque quote intégrée doit conserver `conId`, expiration, strike, right, trading class,
 multiplicateur, exchange, devise et timestamp.
 
+## Provenance et fraîcheur
+
+La provenance du timestamp et la preuve de fraîcheur sont deux faits distincts :
+
+- `SOURCE_TIMESTAMP` exige un vrai timestamp exchange/provider, non futur et assez récent ;
+- `BOUNDED_CAPTURE_WINDOW` accepte un snapshot live reçu dans la fenêtre bornée de la requête
+  lorsque TWS ne fournit aucun timestamp source ;
+- `UNVERIFIED` ne peut jamais être promu.
+
+Un timestamp `client_received_at` reste étiqueté comme tel. Il n'est jamais copié dans
+`exchange_timestamp` ou `provider_timestamp`. Une chaîne n'est promouvable que si le sous-jacent
+et chaque jambe requise sont complets et classés `LIVE_SOURCE_TIMESTAMP_FRESH` ou
+`LIVE_CAPTURE_WINDOW_FRESH`. Les données delayed, frozen, invalides, incomplètes ou périmées
+restent visibles pour diagnostic mais ne sont pas promouvables. Une BAG est évaluée séparément :
+sa propre fraîcheur ne peut pas être déduite de celle des jambes.
+
 ## Denylist absolue
 
 `placeOrder`, modification, annulation, global cancel, transmission différée et construction de
 ticket sont absents de l'adaptateur de marché. Le bridge d'exécution séparé conserve son
 `DisabledGateway` et ses propres blocages ; il n'est pas activé par le provider de chaîne.
+
+## Statut opérationnel exact
+
+- `IBKR_PROVIDER_IMPLEMENTATION = READY_FOR_LIVE_READONLY_VALIDATION`
+- `IBKR_LIVE_DATA_VALIDATION = NOT_RUN`
+- `OPRA_ENTITLEMENT = UNCONFIRMED`
+- `SHADOW_CAMPAIGN = NOT_STARTED`
+- `PAPER_EXECUTION = DISABLED`
+- `LIVE_EXECUTION = FORBIDDEN`
+- `HOLDOUT = UNOPENED`
 
 ## Sources officielles vérifiées le 2026-08-18
 

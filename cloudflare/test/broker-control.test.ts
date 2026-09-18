@@ -2,6 +2,9 @@ import { env } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
 
 import { syntheticDemoDossier } from "../src/demo";
+import { classifyLiquidationPnl, evaluateAutomaticPaperExit } from "../src/broker-control";
+import { activePosition } from "../src/db";
+import { calculateProjection } from "../src/domain";
 import { handleRequest } from "../src/index";
 
 const TEST_ACCESS = {
@@ -163,8 +166,9 @@ describe("isolated IBKR paper control plane", () => {
       kill_switch: false,
     })).status).toBe(200);
     expect((await browserRequest(testEnv, session, "/api/broker/exit-policy", "POST", {
-      warning_net_liquidation_value: 900,
-      automatic_exit_net_liquidation_value: 800,
+      trigger_metric: "LIQUIDATION_PNL_POLICY",
+      warning_liquidation_pnl_policy: -200,
+      automatic_exit_liquidation_pnl_policy: -300,
       maximum_exit_slippage_policy: 25,
       maximum_quote_age_seconds: 60,
       automatic_exit_enabled: true,
@@ -200,12 +204,15 @@ describe("isolated IBKR paper control plane", () => {
   it("queues an automatic floor exit once and blocks an overlapping manual intent", async () => {
     const testEnv = brokerEnv();
     const session = await accessSession(testEnv);
+    const automaticDossier = canonicalPaperDossier("automatic");
+    automaticDossier.entry_cash_flow_policy = -3000;
+    automaticDossier.capital_required_policy = 3000;
     expect((await browserRequest(
       testEnv,
       session,
       "/api/positions/import",
       "POST",
-      canonicalPaperDossier("automatic"),
+      automaticDossier,
     )).status).toBe(201);
     expect((await healthyHeartbeat(testEnv)).status).toBe(200);
     expect((await browserRequest(testEnv, session, "/api/broker/control", "POST", {
@@ -213,8 +220,9 @@ describe("isolated IBKR paper control plane", () => {
       kill_switch: false,
     })).status).toBe(200);
     expect((await browserRequest(testEnv, session, "/api/broker/exit-policy", "POST", {
-      warning_net_liquidation_value: 1600,
-      automatic_exit_net_liquidation_value: 1500,
+      trigger_metric: "LIQUIDATION_PNL_POLICY",
+      warning_liquidation_pnl_policy: -1500,
+      automatic_exit_liquidation_pnl_policy: -1525,
       maximum_exit_slippage_policy: 25,
       maximum_quote_age_seconds: 60,
       automatic_exit_enabled: true,
@@ -255,5 +263,157 @@ describe("isolated IBKR paper control plane", () => {
     const status = await (await browserRequest(testEnv, session, "/api/broker/status")).json<Record<string, unknown>>();
     expect(status.kill_switch).toBe(true);
     expect(status.dispatch_ready).toBe(false);
+  });
+
+  it("uses signed liquidation PnL identically for debit and credit structures", () => {
+    const projection = (
+      liquidationPnl: number | null,
+      closeCashFlow: number | null,
+      costs: number | null = 0,
+    ) => ({
+      liquidation_pnl: liquidationPnl,
+      estimated_close_cash_flow_policy: closeCashFlow,
+      estimated_exit_commission: costs,
+      estimated_exit_slippage: costs,
+      estimated_exit_fx: costs,
+    });
+
+    expect(classifyLiquidationPnl(projection(20, -80), -50, -100)).toBe("HOLD"); // credit profitable
+    expect(classifyLiquidationPnl(projection(-60, -160), -50, -100)).toBe("WARNING"); // credit losing
+    expect(classifyLiquidationPnl(projection(-120, -220), -50, -100)).toBe("EXIT"); // credit severe loss
+    expect(classifyLiquidationPnl(projection(-20, 80), -50, -100)).toBe("HOLD"); // debit profitable
+    expect(classifyLiquidationPnl(projection(-60, 40), -50, -100)).toBe("WARNING"); // debit losing
+
+    // A negative close cash flow is economically normal for a credit structure and
+    // can never trigger the policy without a breached liquidation PnL threshold.
+    expect(classifyLiquidationPnl(projection(20, -10_000), -50, -100)).toBe("HOLD");
+    expect(classifyLiquidationPnl(projection(null, -220), -50, -100)).toBe("BLOCKED");
+    expect(classifyLiquidationPnl(projection(null, -220, null), -50, -100)).toBe("BLOCKED");
+  });
+
+  it("fails closed when migrating a legacy positive-threshold policy", async () => {
+    const testEnv = brokerEnv();
+    const session = await accessSession(testEnv);
+    const dossier = canonicalPaperDossier("legacy-policy");
+    expect((await browserRequest(testEnv, session, "/api/positions/import", "POST", dossier)).status).toBe(201);
+    const now = new Date().toISOString();
+    await testEnv.DB.prepare(
+      `INSERT INTO position_exit_policies(
+        position_id,mode,policy_currency,warning_net_liquidation_value,
+        automatic_exit_net_liquidation_value,maximum_exit_slippage_policy,
+        maximum_quote_age_seconds,automatic_exit_enabled,native_protection_required,
+        created_at,created_by,updated_at,updated_by
+      ) VALUES(?,'PAPER','EUR',900,800,25,30,1,1,?,'legacy',?,'legacy')`,
+    ).bind(dossier.position_id, now, now).run();
+
+    // Simulate the data transform contained in migration 0009 for an upgrade DB.
+    await testEnv.DB.prepare(
+      `INSERT OR IGNORE INTO position_exit_policies_v2(
+        position_id,mode,policy_version,trigger_metric,policy_currency,
+        warning_liquidation_pnl_policy,automatic_exit_liquidation_pnl_policy,
+        maximum_exit_slippage_policy,maximum_quote_age_seconds,automatic_exit_enabled,
+        native_protection_required,configuration_status,legacy_policy_detected,
+        created_at,created_by,updated_at,updated_by
+      ) SELECT position_id,mode,2,'LIQUIDATION_PNL_POLICY',policy_currency,NULL,NULL,
+        maximum_exit_slippage_policy,maximum_quote_age_seconds,0,native_protection_required,
+        'REQUIRES_EXPLICIT_RECONFIGURATION',1,created_at,created_by,updated_at,updated_by
+        FROM position_exit_policies WHERE position_id=?`,
+    ).bind(dossier.position_id).run();
+    const migrated = await testEnv.DB.prepare(
+      "SELECT * FROM position_exit_policies_v2 WHERE position_id=?",
+    ).bind(dossier.position_id).first<Record<string, unknown>>();
+    expect(migrated).toMatchObject({
+      trigger_metric: "LIQUIDATION_PNL_POLICY",
+      configuration_status: "REQUIRES_EXPLICIT_RECONFIGURATION",
+      legacy_policy_detected: 1,
+      automatic_exit_enabled: 0,
+      warning_liquidation_pnl_policy: null,
+      automatic_exit_liquidation_pnl_policy: null,
+    });
+  });
+
+  it("blocks automatic exits for every missing-data and operational safety gate", async () => {
+    const testEnv = brokerEnv();
+    const session = await accessSession(testEnv);
+    const dossier = canonicalPaperDossier("blocked-gates");
+    dossier.entry_cash_flow_policy = -3000;
+    dossier.capital_required_policy = 3000;
+    expect((await browserRequest(testEnv, session, "/api/positions/import", "POST", dossier)).status).toBe(201);
+    expect((await healthyHeartbeat(testEnv)).status).toBe(200);
+    expect((await browserRequest(testEnv, session, "/api/broker/control", "POST", {
+      mode: "PAPER",
+      kill_switch: false,
+    })).status).toBe(200);
+    expect((await browserRequest(testEnv, session, "/api/broker/exit-policy", "POST", {
+      trigger_metric: "LIQUIDATION_PNL_POLICY",
+      warning_liquidation_pnl_policy: -1500,
+      automatic_exit_liquidation_pnl_policy: -1525,
+      maximum_exit_slippage_policy: 25,
+      maximum_quote_age_seconds: 60,
+      automatic_exit_enabled: true,
+    })).status).toBe(200);
+    const position = await activePosition(testEnv.DB);
+    expect(position).not.toBeNull();
+    const projection = calculateProjection(
+      dossier,
+      dossier.last_imported_snapshot!,
+      dossier.quantity,
+      new Date(),
+    );
+
+    expect(await evaluateAutomaticPaperExit(testEnv, position!, {
+      ...projection,
+      liquidation_pnl: null,
+      estimated_exit_commission: null,
+    })).toBe("BLOCKED");
+    expect(await evaluateAutomaticPaperExit(testEnv, position!, {
+      ...projection,
+      liquidation_pnl: null,
+      estimated_exit_fx: null,
+    })).toBe("BLOCKED");
+    expect(await evaluateAutomaticPaperExit(testEnv, position!, {
+      ...projection,
+      data_freshness: "STALE",
+    })).toBe("BLOCKED");
+    expect(await evaluateAutomaticPaperExit(testEnv, position!, {
+      ...projection,
+      data_freshness: "INSUFFICIENT_DATA",
+    })).toBe("BLOCKED");
+    expect(await evaluateAutomaticPaperExit(testEnv, position!, {
+      ...projection,
+      provider: "SYNTHETIC_TEST",
+    })).toBe("BLOCKED");
+
+    const missingConIdDossier = structuredClone(dossier);
+    missingConIdDossier.legs[0]!.con_id = null;
+    const missingConIdPosition = {
+      ...position!,
+      canonical_dossier_json: JSON.stringify(missingConIdDossier),
+    };
+    expect(await evaluateAutomaticPaperExit(
+      testEnv,
+      missingConIdPosition,
+      projection,
+    )).toBe("BLOCKED");
+
+    await testEnv.DB.prepare("UPDATE system_state SET broker_kill_switch=1 WHERE singleton=1").run();
+    expect(await evaluateAutomaticPaperExit(testEnv, position!, projection)).toBe("BLOCKED");
+    await testEnv.DB.prepare(
+      "UPDATE system_state SET broker_kill_switch=0,safe_mode=1 WHERE singleton=1",
+    ).run();
+    expect(await evaluateAutomaticPaperExit(testEnv, position!, projection)).toBe("BLOCKED");
+    await testEnv.DB.prepare(
+      "UPDATE system_state SET safe_mode=0,broker_mode='DISABLED',broker_kill_switch=1 WHERE singleton=1",
+    ).run();
+    expect(await evaluateAutomaticPaperExit(testEnv, position!, projection)).toBe("BLOCKED");
+    await testEnv.DB.prepare(
+      `UPDATE system_state SET broker_mode='PAPER',broker_kill_switch=0,
+       broker_bridge_status='OFFLINE' WHERE singleton=1`,
+    ).run();
+    expect(await evaluateAutomaticPaperExit(testEnv, position!, projection)).toBe("BLOCKED");
+
+    expect((await testEnv.DB.prepare(
+      "SELECT count(*) AS total FROM broker_execution_intents",
+    ).first<{ total: number }>())?.total).toBe(0);
   });
 });

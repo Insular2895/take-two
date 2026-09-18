@@ -10,8 +10,8 @@ The user approved an Oracle Cloud Ampere A1 VM running IB Gateway and an isolate
 local Mac/VS Code session is not required. The target outcome is:
 
 - observe the paper position and its net liquidation P&L after estimated or actual fees;
-- warn before a configured capital floor;
-- queue a whole-combo exit automatically at the configured floor;
+- warn before a configured signed liquidation-PnL threshold;
+- queue a whole-combo exit automatically at the configured liquidation-PnL threshold;
 - allow a manual close from a fresh preview followed by one sensitive confirmation;
 - install a broker-native protective order automatically after a paper entry;
 - recover order and fill state after a process, VM, network, or personal-computer interruption.
@@ -41,10 +41,11 @@ to IB Gateway. The browser never receives a broker credential. The research engi
 
 ## Implemented foundation
 
-Migration `0007_ibkr_paper_control.sql` creates:
+Migrations `0007_ibkr_paper_control.sql` and
+`0009_fix_paper_exit_pnl_semantics.sql` create:
 
 - fail-closed system state: `broker_mode=DISABLED`, kill switch engaged, bridge health unknown;
-- a per-position warning floor, automatic-exit floor, slippage ceiling, and quote-age ceiling;
+- signed liquidation-PnL warning/exit thresholds, a slippage ceiling, and a quote-age ceiling;
 - idempotent paper intents with immutable command economics;
 - append-only broker events, heartbeat history, and anti-replay nonces;
 - a claim lease. An expired claim becomes `AMBIGUOUS`; it is never automatically redispatched.
@@ -56,7 +57,7 @@ The Worker implements:
   CSRF, recent authentication, and the existing action password;
 - a two-step manual flow: create preview, then confirm; confirmation queues an idempotent paper
   intent only when the paper bridge is healthy and every gate passes;
-- automatic floor evaluation by the Durable Object monitor;
+- automatic signed liquidation-PnL evaluation by the Durable Object monitor;
 - signed internal heartbeat, claim, and event routes with a 60-second clock window and nonce
   replay defense;
 - SAFE MODE engaging the broker kill switch and blocking every unclaimed ready intent;
@@ -116,7 +117,12 @@ READY -> CLAIMED -> BROKER_ACKNOWLEDGED -> PARTIAL_FILL -> FILLED
 
 - An intent identity and command JSON never change.
 - A manual preview has one `manual-close:<preview_id>` idempotency key.
-- An automatic floor policy produces at most one intent per policy revision.
+- An automatic liquidation-PnL policy produces at most one intent per policy revision.
+- Credit and debit positions use the same trigger metric: entry cash flow plus signed estimated
+  close cash flow after required exit costs. A negative close cash flow alone never triggers an
+  exit.
+- Migration `0009` leaves legacy positive-threshold rows disabled with null V2 thresholds until
+  an operator explicitly configures signed PnL values.
 - `AMBIGUOUS` means reconcile with IBKR by `orderRef`/`permId`; never guess and never resend.
 - Every partial execution uses its IBKR `execId`; commission/fees attach to that execution.
 - D1 is the application control ledger. IBKR is the final truth for orders, executions, and fees.
