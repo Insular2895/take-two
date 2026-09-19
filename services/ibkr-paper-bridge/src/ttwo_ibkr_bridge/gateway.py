@@ -5,14 +5,14 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Protocol
 
-from .contracts import GatewayEvent, GatewayHealth, PaperCommand
+from .contracts import GatewayEvent, GatewayHealth, PaperCommand, RecoveryIdentity
 
 
 class PaperGateway(Protocol):
     def health(self, open_intent_count: int) -> GatewayHealth: ...
 
     def recover(
-        self, unresolved: Sequence[tuple[str, str]]
+        self, unresolved: Sequence[RecoveryIdentity]
     ) -> Sequence[tuple[str, GatewayEvent]]: ...
 
     def execute_bounded_combo(self, command: PaperCommand) -> Sequence[GatewayEvent]: ...
@@ -29,7 +29,7 @@ class DisabledGateway:
             detail={"adapter": "DISABLED", "live_mode_available": False},
         )
 
-    def recover(self, unresolved: Sequence[tuple[str, str]]) -> Sequence[tuple[str, GatewayEvent]]:
+    def recover(self, unresolved: Sequence[RecoveryIdentity]) -> Sequence[tuple[str, GatewayEvent]]:
         return []
 
     def execute_bounded_combo(self, command: PaperCommand) -> Sequence[GatewayEvent]:

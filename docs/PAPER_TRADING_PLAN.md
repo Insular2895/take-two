@@ -1,6 +1,6 @@
 # Plan de paper trading
 
-Statut au 17 septembre 2026 : `control_plane_tested_campaign_blocked_before_start`. Aucune campagne paper n’a été
+Statut au 19 septembre 2026 : `paper_adapter_ready_offline_runtime_disabled`. Aucune campagne paper n’a été
 réalisée. Le plan reste `draft_to_validate` jusqu'à validation du responsable risque.
 
 Blocage actuel : le handshake IBKR paper a été observé le 25 août, mais le nouveau provider de
@@ -42,3 +42,14 @@ démarrer la campagne.
 La durée, la taille minimale, les seuils d’erreur et les limites de perte sont à
 valider par le responsable risque. Le résultat doit inclure échecs et périodes sans
 trade. Une campagne paper ne déverrouille pas l’exécution dans cette version.
+
+## Premier test contrôlé futur
+
+Le runbook est désormais préparé, mais non exécuté. Le premier test sera TTWO uniquement, quantité
+représentative minimale, un seul BAG LMT, pendant les heures liquides, avec données live, tick
+`reqMarketRule` valide, structure simple, client ID dédié, aucune session concurrente, logs API
+Detail, aucune protection/ladder automatique et kill switch testé avant l’ouverture de fenêtre.
+
+Les résultats seront séparés en : chemin système, fill du simulateur Paper et exécutabilité Live
+(`NOT_PROVEN_BY_PAPER_ALONE`). Tout reprice nécessitera marché frais, ticket quantitatif complet et
+nouvelle confirmation humaine.

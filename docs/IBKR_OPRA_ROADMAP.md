@@ -33,10 +33,12 @@ Ajouter commissions estimées et marge what-if si disponible. Le ticket reste li
 expirant, journalisé et soumis à confirmation humaine avec :
 
 ```text
-transmit=false
+local_preview.transmit=false
+what_if.transmit=false
 what_if=true
 human_confirmation_required=true
-order_capability=forbidden
+default_runtime=DisabledGateway
+paper_adapter=READY_OFFLINE_DISARMED
 ```
 
 ## Phase 6 — Paper
@@ -58,4 +60,6 @@ Le transport officiel peut ouvrir une session uniquement après le drapeau CLI e
 `--connect-read-only`. Il impose loopback, mode paper, compte `DU`, allowlist TTWO et n'importe
 aucun type d'ordre. Aucune connexion n'a été effectuée pour ce checkpoint. Une preuve antérieure
 du 25 août couvre seulement le handshake paper et la télémétrie de position, pas le nouveau
-provider de chaîne. Aucune transmission d'ordre n'est mise en œuvre.
+provider de chaîne. La primitive Paper est maintenant isolée et testable dans
+`paper_gateway.py`, mais absente du runtime par défaut. Aucun ordre n’a été transmis. Live reste
+interdit.

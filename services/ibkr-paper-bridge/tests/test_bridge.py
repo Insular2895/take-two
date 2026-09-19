@@ -12,6 +12,7 @@ from ttwo_ibkr_bridge.contracts import (
     GatewayEvent,
     GatewayHealth,
     PaperCommand,
+    RecoveryIdentity,
 )
 from ttwo_ibkr_bridge.journal import BridgeJournal, JournalConflict
 from ttwo_ibkr_bridge.runtime import BridgeRuntime
@@ -36,6 +37,8 @@ def command_payload() -> dict[str, Any]:
         ],
         "maximum_exit_slippage_policy": 25,
         "pricing_policy": "REFRESH_COMBO_QUOTE_AND_USE_BOUNDED_LIMIT",
+        "time_in_force": "DAY",
+        "transmit": False,
     }
 
 
@@ -51,8 +54,18 @@ def test_command_accepts_only_paper_close_combos() -> None:
 
     opening = command_payload()
     opening["legs"][0]["action"] = "BUY_TO_OPEN"
-    with pytest.raises(ContractError, match="never open"):
+    with pytest.raises(ContractError, match="must close"):
         PaperCommand.from_mapping(opening)
+
+    transmitted = command_payload()
+    transmitted["transmit"] = True
+    with pytest.raises(ContractError, match="transmission remains disabled"):
+        PaperCommand.from_mapping(transmitted)
+
+    unsupported_tif = command_payload()
+    unsupported_tif["time_in_force"] = "DTC"
+    with pytest.raises(ContractError, match="unsupported time_in_force"):
+        PaperCommand.from_mapping(unsupported_tif)
 
 
 def test_journal_detects_mutated_replays(tmp_path: Path) -> None:
@@ -92,7 +105,7 @@ class FakeGateway:
     def health(self, open_intent_count: int) -> GatewayHealth:
         return GatewayHealth(self.healthy, self.healthy, open_intent_count, {"adapter": "FAKE"})
 
-    def recover(self, unresolved: list[tuple[str, str]]) -> list[tuple[str, GatewayEvent]]:
+    def recover(self, unresolved: list[RecoveryIdentity]) -> list[tuple[str, GatewayEvent]]:
         return []
 
     def execute_bounded_combo(self, command: PaperCommand) -> list[GatewayEvent]:
@@ -104,6 +117,33 @@ class FakeGateway:
                 occurred_at=datetime.now(UTC),
                 broker_order_id=42,
                 broker_perm_id=84,
+            )
+        ]
+
+
+class RecoveryRequiredGateway(FakeGateway):
+    def __init__(self) -> None:
+        super().__init__(healthy=True)
+        self.recovery_inputs: list[list[RecoveryIdentity]] = []
+
+    def recover(self, unresolved: list[RecoveryIdentity]) -> list[tuple[str, GatewayEvent]]:
+        self.recovery_inputs.append(unresolved)
+        identity = unresolved[0]
+        return [
+            (
+                identity.intent_id,
+                GatewayEvent(
+                    broker_event_key="recovery-observation-unresolved-123",
+                    event_type="RECOVERY_OBSERVATION",
+                    occurred_at=datetime.now(UTC),
+                    broker_order_id=identity.broker_order_id,
+                    broker_perm_id=identity.broker_perm_id,
+                    detail={
+                        "canonical_execution_status": "RECONCILIATION_REQUIRED",
+                        "execution_condition": "STATE_UNKNOWN",
+                        "raw_evidence_hash": "a" * 64,
+                    },
+                ),
             )
         ]
 
@@ -126,16 +166,52 @@ def test_runtime_never_claims_while_gateway_is_unhealthy(tmp_path: Path) -> None
     journal.close()
 
 
-def test_runtime_journals_before_execution_and_posts_events(tmp_path: Path) -> None:
+def test_runtime_records_transmit_false_without_calling_gateway(tmp_path: Path) -> None:
     client = FakeClient(claimed_intent())
     gateway = FakeGateway(healthy=True)
     journal = BridgeJournal(tmp_path / "bridge.sqlite3")
     runtime = BridgeRuntime(client, journal, gateway)  # type: ignore[arg-type]
     assert runtime.tick() is True
-    assert [command.intent_id for command in gateway.executed] == ["broker-intent_123"]
+    assert gateway.executed == []
     assert [(intent_id, event.event_type) for intent_id, event in client.events] == [
-        ("broker-intent_123", "BROKER_ACKNOWLEDGED")
+        ("broker-intent_123", "LOCAL_NOT_TRANSMITTED")
     ]
     assert journal.unposted_events() == []
-    assert journal.unresolved_order_refs() == [("broker-intent_123", "TTWO-P-123")]
+    assert journal.unresolved_order_refs() == []
     journal.close()
+
+
+def test_restart_recovers_same_perm_id_and_never_claims_a_duplicate(tmp_path: Path) -> None:
+    journal_path = tmp_path / "bridge.sqlite3"
+    before_restart = BridgeJournal(journal_path)
+    raw = command_payload()
+    before_restart.remember_claim(PaperCommand.from_mapping(raw), raw)
+    before_restart.mark_dispatch_started("broker-intent_123")
+    before_restart.remember_event(
+        "broker-intent_123",
+        GatewayEvent(
+            broker_event_key="pre-restart-working-123",
+            event_type="ORDER_STATUS",
+            occurred_at=datetime.now(UTC),
+            broker_order_id=42,
+            broker_perm_id=84,
+            detail={
+                "canonical_execution_status": "WORKING",
+                "execution_condition": "WORKING_NO_FILL_YET",
+                "raw_evidence_hash": "b" * 64,
+            },
+        ),
+    )
+    before_restart.close()
+
+    after_restart = BridgeJournal(journal_path)
+    client = FakeClient(claimed_intent())
+    gateway = RecoveryRequiredGateway()
+    runtime = BridgeRuntime(client, after_restart, gateway)  # type: ignore[arg-type]
+    assert runtime.tick() is False
+    assert len(gateway.recovery_inputs) == 1
+    assert gateway.recovery_inputs[0][0].broker_perm_id == 84
+    assert client.next_claim is not None
+    assert gateway.executed == []
+    assert after_restart.unresolved_orders()[0].broker_perm_id == 84
+    after_restart.close()

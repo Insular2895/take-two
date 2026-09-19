@@ -45,9 +45,10 @@ verification, preventing a concurrent burst from bypassing the limit.
 
 ## Trading boundary
 
-The repository safety scan fails on executable broker-order method names or `transmit: true` in the
-cloud runtime. Close output is an immutable BAG-shaped preview with `transmit=false`, `what_if=true`,
-human confirmation, and `order_capability=forbidden`. There is no cancel, modify, exercise,
+The repository safety scan fails on executable broker-order SDK methods. It allows exactly one
+`transmit:true` command builder in `paper-entry.ts`, only when the source also proves
+`dispatch_authorized=false` and `paper_runtime_default=DISABLED`. Close output remains an immutable
+BAG-shaped preview with `transmit=false`, `what_if=true` and human confirmation. There is no cancel, modify, exercise,
 automatic retry, individual-leg close, or silent legging route.
 
 The IBKR telemetry path is a separate capability boundary. Cloudflare Access first requires a

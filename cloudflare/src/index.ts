@@ -385,12 +385,20 @@ async function exportData(env: Env, auth: AuthContext): Promise<Response> {
     "candidate_selections", "planned_positions", "position_exit_policies",
     "position_exit_policies_v2",
     "broker_execution_intents", "broker_execution_events", "broker_bridge_heartbeats",
+    "broker_order_state_latest", "broker_order_lifecycle_events", "broker_order_errors",
+    "broker_executions", "broker_commissions", "broker_market_snapshots",
+    "broker_reprice_proposals",
     "broker_telemetry_latest",
+    "material_execution_drift_policies", "execution_revalidation_tickets",
+    "paper_entry_previews", "paper_entry_confirmations",
+    "paper_entry_operator_attestations", "paper_entry_intents",
+    "paper_entry_what_if_evidence", "paper_entry_lifecycle_events",
+    "paper_entry_executions", "paper_entry_commissions",
   ] as const;
   const results = await env.DB.batch(tables.map((table) => env.DB.prepare(`SELECT * FROM ${table}`)));
   const payload = Object.fromEntries(tables.map((table, index) => [table, results[index]?.results ?? []]));
   await audit(env.DB, "DATA_EXPORTED", auth.actor, null, { format: "json", secrets_included: false });
-  return new Response(JSON.stringify({ exported_at: new Date().toISOString(), schema_version: "1.1", ...payload }, null, 2), {
+  return new Response(JSON.stringify({ exported_at: new Date().toISOString(), schema_version: "1.2", ...payload }, null, 2), {
     headers: { "Content-Type": "application/json", "Content-Disposition": `attachment; filename="take-two-control-${new Date().toISOString().slice(0, 10)}.json"` },
   });
 }

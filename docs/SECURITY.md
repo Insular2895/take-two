@@ -2,9 +2,9 @@
 
 ## Invariants
 
-- aucune soumission, modification, annulation ou exercice d’ordre ;
-- `transmit=false`, `what_if=true`, `order_capability=forbidden` et confirmation
-  humaine obligatoire ;
+- aucune soumission, modification, annulation ou exercice dans le runtime par défaut ;
+- moteur/provider/télémétrie : `order_capability=forbidden` ; adaptateur Paper isolé :
+  `READY_OFFLINE_DISARMED`, confirmation humaine obligatoire et Live absent ;
 - connecteurs live désactivés par défaut et injectés comme ports read-only ;
 - aucune clé dans le dépôt, les rapports, l’HTML ou les logs ;
 - erreur réseau fail-closed et données manquantes jamais remplacées ;
@@ -23,6 +23,15 @@ d'ordre, provider marché read-only interdit d'ordre, télémétrie read-only in
 adaptateur paper désactivé et exécution live interdite. Un contrôle AST distinct prouve que le
 runtime du bridge construit toujours `DisabledGateway`; le protocole `PaperGateway` peut conserver
 son interface sans constituer une capacité active.
+
+La préparation finale ajoutée le 19 septembre 2026 ne change pas le runtime par défaut. Les
+fermetures refusent toujours `transmit=true`. Une entrée confirmée peut contenir ce drapeau dans
+son contrat immuable, mais reste `dispatch_authorized=0` dans D1 et `main.py` construit toujours
+`DisabledGateway`. Les normaliseurs de callbacks,
+le diagnostic de marketability et le repricing borné sont des fonctions pures sans primitive de
+soumission, modification ou annulation. Les preuves affichables excluent le payload brut et
+l’advanced rejection JSON ; compte, mot de passe, token, secret et clé API sont nettoyés avant la
+persistance structurée.
 
 L'audit runtime Cloudflare est un gate CI : `npm audit --omit=dev --audit-level=high`. Les quatre
 alertes high initiales du 17 septembre 2026 concernaient uniquement la chaîne dev/test
@@ -48,8 +57,8 @@ les fichiers suivis sans afficher le contenu d’un environnement local.
   avant I/O tant que l'entitlement et la licence ne sont pas confirmés ;
 - transport de chaîne : loopback, paper et compte `DU` obligatoires ; aucune importation de type
   d'ordre, aucun submit/modify/cancel/exercise ;
-- `PRELIVE_HARDENING=COMPLETE`, mais `IBKR_LIVE_DATA_VALIDATION=NOT_RUN`, entitlement OPRA non
-  confirmé, campagne shadow non commencée et exécution paper toujours désactivée ;
+- `PAPER_ADAPTER_CODE=READY_OFFLINE`, mais `PAPER_RUNTIME_DEFAULT=DISABLED`,
+  `PAPER_REAL_ORDER_TEST=NOT_RUN`, entitlement OPRA non confirmé et campagne shadow non commencée ;
 - audit de frontière :
   [`audits/PRE_ENTITLEMENT_BOUNDARY_2026-08-18.md`](audits/PRE_ENTITLEMENT_BOUNDARY_2026-08-18.md) ;
 - revue indépendante, threat model, SAST/dépendances, pentest et réponse à incident :

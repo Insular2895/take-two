@@ -21,6 +21,7 @@ from take_two_options.decision.engine_verdict import EngineVerdictReport
 from take_two_options.decision.quality_scores import FiveScoreReport
 from take_two_options.decision.severity_gates import SeverityGateReport
 from take_two_options.empirical_calibration import EmpiricalCalibrationReport
+from take_two_options.execution_revalidation import ExecutionRevalidationTicket
 from take_two_options.historical_data.contracts import HistoricalDatasetManifest
 from take_two_options.historical_data.data_rights import DataUsageRightsReport
 from take_two_options.historical_data.event_regimes import EventRegimeReport
@@ -77,6 +78,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "data_usage_rights.schema.json": DataUsageRightsReport,
     "empirical_calibration.schema.json": EmpiricalCalibrationReport,
     "engine_verdict_report.schema.json": EngineVerdictReport,
+    "execution_revalidation_ticket.schema.json": ExecutionRevalidationTicket,
     "five_score_report.schema.json": FiveScoreReport,
     "final_pre_opra_report.schema.json": FinalPreOpraReport,
     "severity_gate_report.schema.json": SeverityGateReport,

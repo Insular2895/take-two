@@ -69,5 +69,5 @@ def test_current_security_boundaries_are_reported_separately() -> None:
     assert result["research_engine_order_capability"] == "forbidden"
     assert result["read_only_market_provider_order_capability"] == "forbidden"
     assert result["read_only_telemetry_order_capability"] == "forbidden"
-    assert result["paper_execution_adapter"] == "disabled"
+    assert result["paper_execution_adapter"] == "ready_offline_disarmed"
     assert result["live_execution_capability"] == "forbidden"

@@ -8,9 +8,9 @@ const forbidden = [
   /\bcancelOrder\b/,
   /\bmodifyOrder\b/,
   /\bexerciseOptions\b/,
-  /transmit\s*:\s*true/,
 ];
 const violations = [];
+let governedPaperTransmitLiterals = 0;
 
 function scan(path) {
   for (const entry of readdirSync(path)) {
@@ -19,6 +19,16 @@ function scan(path) {
     else if (/\.(ts|js|html|txt)$/.test(entry)) {
       const contents = readFileSync(target, "utf8");
       for (const expression of forbidden) if (expression.test(contents)) violations.push(`${target}: ${expression}`);
+      const transmitMatches = contents.match(/transmit\s*:\s*true/g) || [];
+      if (transmitMatches.length) {
+        const isolated = target === join("src", "paper-entry.ts") &&
+          transmitMatches.length === 1 &&
+          contents.includes("status: \"CONFIRMED\"") &&
+          contents.includes("dispatch_authorized: false") &&
+          contents.includes("paper_runtime_default: \"DISABLED\"");
+        if (!isolated) violations.push(`${target}: ungoverned transmit:true literal`);
+        else governedPaperTransmitLiterals += 1;
+      }
     }
   }
 }
@@ -28,4 +38,10 @@ if (violations.length) {
   process.stderr.write(`Forbidden broker capability detected:\n${violations.join("\n")}\n`);
   process.exit(1);
 }
-process.stdout.write("Worker scan passed: no direct broker SDK call or transmit:true literal.\n");
+if (governedPaperTransmitLiterals !== 1) {
+  process.stderr.write("Exactly one locked PAPER_ENTRY command builder is required.\n");
+  process.exit(1);
+}
+process.stdout.write(
+  "Worker scan passed: no broker SDK call; one locked PAPER_ENTRY command builder; runtime disabled.\n",
+);

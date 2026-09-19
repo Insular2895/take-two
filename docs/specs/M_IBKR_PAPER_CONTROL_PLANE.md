@@ -1,6 +1,6 @@
 # Phase M — isolated IBKR paper control plane
 
-Status: **signed read-only telemetry implemented; execution adapter disabled**
+Status: **Paper entry adapter ready offline and disarmed; default runtime disabled**
 Decision owner: project owner
 Decision date: 2026-08-25
 
@@ -16,8 +16,9 @@ local Mac/VS Code session is not required. The target outcome is:
 - install a broker-native protective order automatically after a paper entry;
 - recover order and fill state after a process, VM, network, or personal-computer interruption.
 
-This approval applies to **paper trading only**. It is not approval for a live account, opening
-orders, commercial/multi-tenant execution, or bypassing IBKR warnings.
+This approval applies to **paper trading preparation only**. The current patch models opening
+orders but does not authorize or run one. It is not approval for a live account,
+commercial/multi-tenant execution, or bypassing IBKR warnings.
 
 ## Architecture
 
@@ -41,22 +42,28 @@ to IB Gateway. The browser never receives a broker credential. The research engi
 
 ## Implemented foundation
 
-Migrations `0007_ibkr_paper_control.sql` and
-`0009_fix_paper_exit_pnl_semantics.sql` create:
+Migrations `0007_ibkr_paper_control.sql`, `0009_fix_paper_exit_pnl_semantics.sql`,
+`0010_order_lifecycle_readiness.sql` and `0011_final_paper_entry_readiness.sql` create:
 
 - fail-closed system state: `broker_mode=DISABLED`, kill switch engaged, bridge health unknown;
 - signed liquidation-PnL warning/exit thresholds, a slippage ceiling, and a quote-age ceiling;
 - idempotent paper intents with immutable command economics;
 - append-only broker events, heartbeat history, and anti-replay nonces;
 - a claim lease. An expired claim becomes `AMBIGUOUS`; it is never automatically redispatched.
+- a typed broker lifecycle projection plus append-only raw/canonical evidence, errors, executions,
+  commissions, immutable submission snapshots and preview-only reprice proposals.
+- immutable revalidation tickets, entry previews/confirmations, operator attestations, Paper-entry
+  intents, what-if evidence, lifecycle events, simulated executions and commissions.
 
 The Worker implements:
 
 - `GET /api/broker/status`;
 - `POST /api/broker/control` and `POST /api/broker/exit-policy`, protected by Cloudflare Access,
   CSRF, recent authentication, and the existing action password;
-- a two-step manual flow: create preview, then confirm; confirmation queues an idempotent paper
-  intent only when the paper bridge is healthy and every gate passes;
+- the legacy two-step close flow: create preview, then confirm; confirmation queues an idempotent
+  close intent only when the paper bridge is healthy and every close gate passes;
+- a separate selected-candidate Paper-entry preview/confirmation flow that always persists the
+  entry with `dispatch_authorized=0`; browser confirmation is not dispatch authority;
 - automatic signed liquidation-PnL evaluation by the Durable Object monitor;
 - signed internal heartbeat, claim, and event routes with a 60-second clock window and nonce
   replay defense;
@@ -71,14 +78,22 @@ The Worker implements:
 
 The isolated service under `services/ibkr-paper-bridge` implements:
 
-- strict paper-only command validation, including `DU` account guard and close-only combo legs;
+- strict paper-only command validation, including `DU` account guard, legacy close legs and
+  governed `PAPER_ENTRY` open legs;
 - an outbound Cloudflare client using both an Access service token and application HMAC;
 - a local SQLite WAL journal, durable outbox, immutable-command hash, and restart recovery hook;
 - a non-root, read-only Docker service with no published ports;
 - a separate official-API telemetry adapter restricted to loopback, paper port `4002`, one `DU`
   account and symbol `TTWO`; it returns redacted positions, per-contract quotes and broker-reported
   P&L while preserving missing values as missing;
-- a deliberately disabled gateway adapter;
+- a default `DisabledGateway` and a separate `IbkrPaperExecutionGateway` that is disarmed unless
+  injected by a future operator-only composition root;
+- pure offline normalizers for future `openOrder`, `orderStatus`, `error`, `execDetails`,
+  `commissionReport` and callback-boundary evidence, without any broker mutation method;
+- explicit `transmit=false` handling that records `LOCAL_NOT_TRANSMITTED` without invoking the
+  gateway, and restart identities based on `orderRef`, `orderId`, `permId` and `execId`;
+- debit/credit marketability diagnostics and bounded-reprice previews that fail closed on stale,
+  delayed, absent or sign-unverified combo data;
 - a separate persistent telemetry runtime and hardened systemd unit that can only publish snapshots.
 
 The telemetry adapter is not imported by the bridge runtime and exposes no place, modify, cancel,
@@ -97,22 +112,31 @@ Signed read-only publication is implemented and tested. Production activation st
 dedicated Cloudflare Access service token entered privately on the VM. The following remain blocked:
 
 1. group IBKR option legs into the governed Take Two position without guessing from symbols alone;
-2. combo quote refresh and tick-size validation immediately before dispatch;
-3. bounded BAG limit construction and paper submission;
-4. `openOrder`, `orderStatus`, `execDetails`, error, and commission callback normalization;
-5. recovery using `orderRef`, `permId`, `execId`, open orders, and recent executions;
+2. wiring real broker collection into the implemented combo-quote, contract, pacing and
+   market-rule validation immediately before dispatch;
+3. observing BAG limit/tick behavior and the first Paper submission against real broker evidence;
+4. wiring the existing offline Paper gateway to the official persistent API transport;
+5. proving recovery against real open orders and recent executions;
 6. actual-fill/commission reconciliation into the user-visible net P&L;
 7. broker-native protective-order creation after a verified paper entry;
 8. fault-injection, disconnect, partial-fill, and weekly reauthentication tests.
 
-Until those items pass paper tests, `DisabledGateway` reports unhealthy, the Worker kill switch
-stays engaged, and no bridge command can be claimed.
+Until those items pass paper tests, `DisabledGateway` reports unhealthy and the Worker kill switch
+stays engaged. In particular, no new `paper_entry_intents` row is dispatch-authorized or claimable;
+the older close-intent control path remains a separate, disabled runtime.
+
+The complete offline model and its evidence rules are documented in
+[`IBKR_ORDER_LIFECYCLE.md`](IBKR_ORDER_LIFECYCLE.md),
+[`IBKR_NO_FILL_DIAGNOSTICS.md`](IBKR_NO_FILL_DIAGNOSTICS.md) and
+[`IBKR_BOUNDED_REPRICING.md`](IBKR_BOUNDED_REPRICING.md).
 
 ## State and idempotency rules
 
 ```text
-READY -> CLAIMED -> BROKER_ACKNOWLEDGED -> PARTIAL_FILL -> FILLED
-                  \-> REJECTED | CANCELLED | EXPIRED | AMBIGUOUS
+CREATED -> READY -> CLAIMED -> PENDING_SUBMIT -> PRE_SUBMITTED -> WORKING
+                                                            \-> PARTIALLY_FILLED -> FILLED
+                                                            \-> CANCELLED | REJECTED
+                                                            \-> RECONCILIATION_REQUIRED
 ```
 
 - An intent identity and command JSON never change.
@@ -125,6 +149,10 @@ READY -> CLAIMED -> BROKER_ACKNOWLEDGED -> PARTIAL_FILL -> FILLED
   an operator explicitly configures signed PnL values.
 - `AMBIGUOUS` means reconcile with IBKR by `orderRef`/`permId`; never guess and never resend.
 - Every partial execution uses its IBKR `execId`; commission/fees attach to that execution.
+- `WORKING_NO_FILL_YET` is non-terminal and never becomes `NO_LIQUIDITY` without separate,
+  explicitly defined market evidence.
+- `transmit=true` is not alone proof of broker acceptance; raw status and callback evidence remain
+  visible alongside the canonical projection.
 - D1 is the application control ledger. IBKR is the final truth for orders, executions, and fees.
 
 ## Mandatory activation gates

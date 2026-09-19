@@ -10,7 +10,7 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
-from .contracts import GatewayEvent, PaperCommand
+from .contracts import GatewayEvent, PaperCommand, RecoveryIdentity
 
 
 class JournalConflict(RuntimeError):
@@ -42,6 +42,18 @@ class BridgeJournal:
               event_type TEXT NOT NULL,
               payload_json TEXT NOT NULL,
               posted_at TEXT
+            );
+            CREATE TABLE IF NOT EXISTS broker_identities (
+              intent_id TEXT PRIMARY KEY REFERENCES intents(intent_id),
+              broker_order_id INTEGER,
+              broker_perm_id INTEGER
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_journal_perm_id
+              ON broker_identities(broker_perm_id)
+              WHERE broker_perm_id IS NOT NULL AND broker_perm_id > 0;
+            CREATE TABLE IF NOT EXISTS broker_executions (
+              exec_id TEXT PRIMARY KEY,
+              intent_id TEXT NOT NULL REFERENCES intents(intent_id)
             );
             """
         )
@@ -77,7 +89,13 @@ class BridgeJournal:
 
     def remember_event(self, intent_id: str, event: GatewayEvent) -> None:
         payload = json.dumps(event.as_payload(), sort_keys=True, separators=(",", ":"))
-        terminal = event.event_type in {"FILLED", "REJECTED", "CANCELLED", "EXPIRED"}
+        terminal = event.event_type in {
+            "LOCAL_NOT_TRANSMITTED",
+            "FILLED",
+            "REJECTED",
+            "CANCELLED",
+            "EXPIRED",
+        }
         with self._connection:
             self._connection.execute(
                 """INSERT OR IGNORE INTO events(
@@ -85,6 +103,20 @@ class BridgeJournal:
                    ) VALUES(?,?,?,?)""",
                 (event.broker_event_key, intent_id, event.event_type, payload),
             )
+            if event.broker_order_id is not None or event.broker_perm_id is not None:
+                self._connection.execute(
+                    """INSERT INTO broker_identities(intent_id,broker_order_id,broker_perm_id)
+                       VALUES(?,?,?)
+                       ON CONFLICT(intent_id) DO UPDATE SET
+                         broker_order_id=coalesce(excluded.broker_order_id,broker_order_id),
+                         broker_perm_id=coalesce(excluded.broker_perm_id,broker_perm_id)""",
+                    (intent_id, event.broker_order_id, event.broker_perm_id),
+                )
+            if event.broker_exec_id:
+                self._connection.execute(
+                    "INSERT OR IGNORE INTO broker_executions(exec_id,intent_id) VALUES(?,?)",
+                    (event.broker_exec_id, intent_id),
+                )
             self._connection.execute(
                 """UPDATE intents SET state=?,
                    terminal_at=CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE terminal_at END
@@ -109,13 +141,34 @@ class BridgeJournal:
             ]
 
     def unresolved_order_refs(self) -> list[tuple[str, str]]:
+        return [(item.intent_id, item.order_ref) for item in self.unresolved_orders()]
+
+    def unresolved_orders(self) -> list[RecoveryIdentity]:
         with closing(
             self._connection.execute(
-                """SELECT intent_id,order_ref FROM intents
-               WHERE terminal_at IS NULL AND dispatch_started_at IS NOT NULL ORDER BY claimed_at"""
+                """SELECT i.intent_id,i.order_ref,b.broker_order_id,b.broker_perm_id
+                   FROM intents i LEFT JOIN broker_identities b ON b.intent_id=i.intent_id
+                   WHERE i.terminal_at IS NULL AND i.dispatch_started_at IS NOT NULL
+                   ORDER BY i.claimed_at"""
             )
         ) as cursor:
-            return [(row["intent_id"], row["order_ref"]) for row in cursor.fetchall()]
+            rows = cursor.fetchall()
+        recovered: list[RecoveryIdentity] = []
+        for row in rows:
+            exec_rows = self._connection.execute(
+                "SELECT exec_id FROM broker_executions WHERE intent_id=? ORDER BY exec_id",
+                (row["intent_id"],),
+            ).fetchall()
+            recovered.append(
+                RecoveryIdentity(
+                    intent_id=row["intent_id"],
+                    order_ref=row["order_ref"],
+                    broker_order_id=row["broker_order_id"],
+                    broker_perm_id=row["broker_perm_id"],
+                    broker_exec_ids=tuple(item["exec_id"] for item in exec_rows),
+                )
+            )
+        return recovered
 
     def close(self) -> None:
         self._connection.close()

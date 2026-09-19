@@ -256,6 +256,55 @@ def assert_disabled_gateway_runtime(main_path: Path) -> dict[str, str]:
     return {"status": "disabled", "runtime_gateway": "DisabledGateway"}
 
 
+def assert_isolated_paper_adapter(adapter_path: Path, main_path: Path) -> dict[str, Any]:
+    """Prove the only order-capable source is Paper-only and not runtime-wired."""
+
+    source = adapter_path.read_text(encoding="utf-8")
+    tree = ast.parse(source, filename=str(adapter_path))
+    class_names = {
+        node.name for node in tree.body if isinstance(node, ast.ClassDef)
+    }
+    if "IbkrPaperExecutionGateway" not in class_names:
+        raise AssertionError(f"{adapter_path}: Paper adapter class is missing")
+    called_methods = {
+        node.func.attr
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+    }
+    if "place_order" not in called_methods:
+        raise AssertionError(f"{adapter_path}: isolated Paper order primitive is missing")
+    constants = {
+        node.value
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Constant) and isinstance(node.value, int)
+    }
+    if constants.intersection({7496, 4001}):
+        raise AssertionError(f"{adapter_path}: Live port literal is forbidden")
+    if not {7497, 4002}.issubset(constants):
+        raise AssertionError(f"{adapter_path}: both documented Paper ports are required")
+    forbidden_escape_hatches = (
+        "ALLOW_LIVE",
+        "DISABLE_SAFETY",
+        "SKIP_PREFLIGHT",
+        "reqGlobalCancel",
+        "exerciseOptions",
+    )
+    if any(value in source for value in forbidden_escape_hatches):
+        raise AssertionError(f"{adapter_path}: forbidden execution escape hatch")
+    if 'armed_for_governed_paper_entry: bool = False' not in source:
+        raise AssertionError(f"{adapter_path}: Paper adapter must default disarmed")
+    main_source = main_path.read_text(encoding="utf-8")
+    if "IbkrPaperExecutionGateway" in main_source or "paper_gateway" in main_source:
+        raise AssertionError(f"{main_path}: Paper adapter must not be runtime-wired")
+    return {
+        "status": "ready_offline_disarmed",
+        "adapter": "IbkrPaperExecutionGateway",
+        "paper_ports": [4002, 7497],
+        "live_ports": [],
+        "runtime_wired": False,
+    }
+
+
 def assert_execution_security_boundaries(
     repository_root: Path | None = None,
 ) -> dict[str, Any]:
@@ -277,18 +326,24 @@ def assert_execution_security_boundaries(
     ]
     market = assert_read_only_modules_forbid_orders(market_paths)
     telemetry = assert_read_only_modules_forbid_orders(telemetry_paths)
-    paper = assert_disabled_gateway_runtime(telemetry_root / "main.py")
+    main_path = telemetry_root / "main.py"
+    paper = assert_disabled_gateway_runtime(main_path)
+    paper_adapter = assert_isolated_paper_adapter(
+        telemetry_root / "paper_gateway.py",
+        main_path,
+    )
     return {
         "status": "execution_security_boundaries_enforced",
         "research_engine_order_capability": "forbidden",
         "read_only_market_provider_order_capability": "forbidden",
         "read_only_telemetry_order_capability": "forbidden",
-        "paper_execution_adapter": "disabled",
+        "paper_execution_adapter": "ready_offline_disarmed",
         "live_execution_capability": "forbidden",
         "details": {
             "research": research,
             "market_provider": market,
             "telemetry": telemetry,
             "paper_runtime": paper,
+            "paper_adapter": paper_adapter,
         },
     }

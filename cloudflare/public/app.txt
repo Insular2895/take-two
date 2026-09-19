@@ -9,7 +9,7 @@ import {
 } from "/research-state.js";
 
 const state = {
-  csrf: "", data: null, broker: null, telemetry: null, preview: null, range: "all", actionPrompt: null,
+  csrf: "", data: null, broker: null, telemetry: null, paperEntry: null, preview: null, range: "all", actionPrompt: null,
   workspace: window.location.hash === "#position" ? "position" : "research",
   research: {
     analyses: [], analysis: null, candidates: [], selectedAnalysisId: null,
@@ -21,6 +21,7 @@ const $ = (selector) => document.querySelector(selector);
 const h = (value) => String(value ?? "—").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 const money = (value, currency = "EUR") => value === null || value === undefined ? "N/A" : new Intl.NumberFormat("fr-FR", { style: "currency", currency, maximumFractionDigits: 0, signDisplay: "exceptZero" }).format(Number(value));
 const amount = (value, currency = "EUR") => value === null || value === undefined ? "N/A" : new Intl.NumberFormat("fr-FR", { style: "currency", currency, maximumFractionDigits: 0 }).format(Number(value));
+const price = (value, currency = "USD") => value === null || value === undefined ? "N/A" : new Intl.NumberFormat("fr-FR", { style: "currency", currency, minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(Number(value));
 const percent = (value) => value === null || value === undefined ? "N/A" : new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 1, signDisplay: "exceptZero" }).format(Number(value));
 const age = (timestamp) => {
   if (!timestamp) return "N/A";
@@ -137,6 +138,76 @@ function renderTelemetry(result) {
       : "Télémétrie périmée ou hors ligne : ne pas utiliser ces chiffres pour décider d’une fermeture.";
 }
 
+function renderExecution(execution, currency = "USD") {
+  const latest = execution?.latest;
+  const badge = $("#execution-status");
+  badge.className = "pill execution-pill neutral";
+  if (!latest) {
+    badge.textContent = "NO ORDER EVIDENCE";
+    $("#execution-summary").textContent = "Aucune preuve broker. Un non-fill ne sera jamais présenté comme un rejet ou une absence de contrepartie sans preuve.";
+    for (const selector of ["#execution-broker-status", "#execution-transmitted", "#execution-quantities", "#execution-age", "#execution-limit", "#execution-combo", "#execution-cancellation", "#execution-rejection"]) $(selector).textContent = "—";
+    $("#execution-no-fill").textContent = "UNKNOWN — aucune explication ne sera inventée.";
+    $("#execution-errors").textContent = "Aucun code/message broker persisté.";
+    $("#execution-timeline").innerHTML = "<li>Aucun événement d’exécution.</li>";
+    $("#execution-reprice").textContent = "Aucune proposition. Le repricing automatique est désactivé.";
+    return;
+  }
+  const status = String(latest.canonical_execution_status || "RECONCILIATION_REQUIRED");
+  const tone = status === "FILLED" ? "filled" : status === "PARTIALLY_FILLED" ? "partial" : ["REJECTED"].includes(status) ? "rejected" : ["CANCELLED", "API_CANCELLED"].includes(status) ? "cancelled" : ["AMBIGUOUS", "RECONCILIATION_REQUIRED"].includes(status) ? "ambiguous" : ["LOCAL_NOT_TRANSMITTED", "INACTIVE"].includes(status) ? "not-transmitted" : "working";
+  badge.classList.add(tone);
+  badge.textContent = status.replaceAll("_", " ");
+  $("#execution-summary").textContent = `${latest.intent_type || "ORDER"} · ${latest.execution_condition || "NONE"} · raw broker status ${latest.raw_broker_status || "UNKNOWN"}`;
+  $("#execution-broker-status").textContent = latest.raw_broker_status || "UNKNOWN";
+  $("#execution-transmitted").textContent = latest.transmitted_to_broker ? "YES — broker evidence" : "NO / NOT PROVEN";
+  $("#execution-quantities").textContent = `${latest.cumulative_filled_quantity ?? 0} / ${latest.remaining_quantity ?? "?"}`;
+  const startedAt = latest.working_since || latest.submitted_at || latest.broker_submission_attempted_at;
+  $("#execution-age").textContent = startedAt ? age(startedAt).replace(" ago", "") : "NOT STARTED / UNKNOWN";
+  const snapshot = execution.market_snapshot;
+  $("#execution-limit").textContent = snapshot ? `${price(snapshot.requested_limit, currency)} ${String(snapshot.cash_flow_type).toLowerCase()}` : "N/A — no immutable snapshot";
+  $("#execution-combo").textContent = snapshot ? `bid ${price(snapshot.combo_bid, currency)} · ask ${price(snapshot.combo_ask, currency)} · mid ${price(snapshot.combo_midpoint, currency)}` : "N/A";
+  $("#execution-cancellation").textContent = latest.cancellation_cause || "NONE / UNKNOWN";
+  $("#execution-rejection").textContent = latest.rejection_category || "NONE";
+  const explanations = {
+    WORKING_NO_FILL_YET: "Ordre accepté et toujours actif, rempli 0 fois pour le moment. Aucune preuve de rejet, d’annulation ou d’absence de contrepartie.",
+    PARTIAL_FILL_ACTIVE: "Exécution partielle : le reliquat reste distinct du volume déjà exécuté.",
+    BROKER_HELD: "IBKR indique que l’ordre est retenu. Consulter whyHeld et les erreurs broker.",
+    TIF_CONDITION_NOT_SATISFIED: "La condition temporelle IOC/FOK/DAY n’a pas été satisfaite d’après la preuve broker ; ce n’est pas une preuve générale d’absence de liquidité.",
+    STATE_UNKNOWN: "État broker non prouvé. Réconciliation requise avant toute nouvelle intention.",
+  };
+  $("#execution-no-fill").textContent = explanations[latest.execution_condition] || (status === "FILLED" ? "Ordre intégralement exécuté." : status === "REJECTED" ? "Ordre rejeté selon une preuve broker persistée." : status === "LOCAL_NOT_TRANSMITTED" ? "Ordre créé localement mais non transmis au broker." : "UNKNOWN_NO_FILL_REASON — aucune cause supplémentaire prouvée.");
+  $("#execution-errors").innerHTML = execution.errors?.length ? execution.errors.map((item) => `<article><strong>${h(item.normalized_category)} · IBKR ${h(item.broker_error_code)}</strong><p>${h(item.redacted_broker_message)}</p><small>${h(item.occurred_at)}</small></article>`).join("") : "Aucun code/message broker persisté.";
+  $("#execution-timeline").innerHTML = execution.timeline?.length ? execution.timeline.map((item) => `<li><time>${h(new Date(item.occurred_at).toLocaleTimeString("fr-FR"))}</time><strong>${h(item.evidence_kind)}</strong><span>${h(item.canonical_execution_status || item.raw_broker_status || "EVIDENCE ONLY")}${item.execution_condition && item.execution_condition !== "NONE" ? ` · ${h(item.execution_condition)}` : ""}</span></li>`).join("") : "<li>Aucun événement d’exécution.</li>";
+  $("#execution-reprice").innerHTML = execution.reprice_proposals?.length ? execution.reprice_proposals.map((item) => `<article><strong>${h(item.status)}</strong><p>${h(price(item.current_limit, currency))} → ${h(price(item.proposed_limit, currency))} · impact capital ${h(money(item.incremental_capital_impact, currency))}</p><small>Preview uniquement · action automatique interdite</small></article>`).join("") : "Aucune proposition. Le repricing automatique est désactivé.";
+}
+
+function renderPaperEntry(payload) {
+  const latest = payload?.latest;
+  const raw = String(latest?.status || "EXECUTION_LOCKED");
+  const labels = {
+    CONFIRMED: "PAPER READY FOR CONFIRMATION",
+    BROKER_SUBMISSION_ATTEMPTED: "SUBMISSION ATTEMPTED",
+    WORKING: "WORKING — NO FILL YET",
+    PARTIALLY_FILLED: "PARTIAL FILL",
+    FILLED: "FILLED — PAPER SIMULATION",
+  };
+  $("#paper-entry-status").textContent = labels[raw] || raw.replaceAll("_", " ");
+  $("#paper-entry-market").textContent = latest ? "FROZEN IN REVALIDATION TICKET" : "NOT PROVEN";
+  $("#paper-entry-limit").textContent = latest?.proposed_limit ?? "—";
+  $("#paper-entry-revalidation").textContent = latest
+    ? `${latest.verdict} · ${latest.material_drift_status}`
+    : "REQUIRED";
+  $("#paper-entry-broker").textContent = payload?.paper_runtime_default || "DISABLED";
+  $("#paper-entry-fill").textContent = raw === "FILLED"
+    ? "PAPER_SIMULATED_FILL"
+    : raw === "PARTIALLY_FILLED" ? "PARTIAL PAPER SIMULATION" : "NOT PROVEN / NOT SUBMITTED";
+  $("#paper-entry-reason").textContent = latest?.last_error_code || (
+    latest?.dispatch_authorized ? "GOVERNED PAPER CLAIM MAY PROCEED" : "OPERATOR PREFLIGHT REQUIRED"
+  );
+  $("#paper-entry-explanation").textContent = latest
+    ? `Dossier ${latest.dossier_id} · intent ${latest.intent_id} · aucune preuve Live.`
+    : "Le code adaptateur est prêt hors ligne, mais le runtime reste DisabledGateway. Aucun ordre Paper n’est autorisé par cet écran.";
+}
+
 function render(data) {
   state.data = data; state.csrf = data.csrf_token;
   const system = data.system || {};
@@ -163,6 +234,7 @@ function render(data) {
   $("#broker-explanation").textContent = brokerReady
     ? "Pont paper sain. Une confirmation de clôture peut créer une intention idempotente pour la VM."
     : "Aucune fermeture automatique n’est possible : adaptateur/VM non prêt ou kill switch engagé.";
+  renderExecution(broker.execution, position.native_currency || "USD");
   $("#close-card-explanation").textContent = brokerReady
     ? "Un seul aperçu du combo complet, puis une confirmation explicite avant mise en file paper. Aucun fallback jambe par jambe."
     : "Un seul aperçu de combo complet. Aucun ordre n’est transmis et aucun fallback jambe par jambe n’existe.";
@@ -255,11 +327,14 @@ function render(data) {
 
 async function refresh() {
   try {
-    const [dashboard, broker, telemetry] = await Promise.all([
+    const [dashboard, broker, telemetry, paperEntry] = await Promise.all([
       api("/api/dashboard"), api("/api/broker/status"), api("/api/broker/telemetry"),
+      api("/api/broker/paper-entry/status"),
     ]);
     state.broker = broker;
+    state.paperEntry = paperEntry;
     renderTelemetry(telemetry);
+    renderPaperEntry(paperEntry);
     render(dashboard);
   } catch (error) { console.error(error); }
 }

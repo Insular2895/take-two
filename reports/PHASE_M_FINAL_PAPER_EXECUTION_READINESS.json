@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "report_date": "2026-09-19",
+  "branch": "codex/m-ibkr-paper-control-readonly",
+  "starting_commit": "f2bb94da2758d11256c02c18f53bde701041fffb",
+  "current_commit": "f2bb94da2758d11256c02c18f53bde701041fffb",
+  "statuses": {
+    "execution_revalidation": "READY_OFFLINE",
+    "paper_entry_control_plane": "READY_OFFLINE_LOCKED",
+    "paper_adapter_code": "READY_OFFLINE_DISARMED",
+    "paper_runtime_default": "DISABLED",
+    "paper_real_order_test": "NOT_RUN",
+    "live_execution": "FORBIDDEN",
+    "holdout": "UNOPENED"
+  },
+  "safety": {
+    "runtime_gateway": "DisabledGateway",
+    "paper_adapter_runtime_wired": false,
+    "paper_adapter_armed_by_default": false,
+    "paper_entry_dispatch_authorized": false,
+    "live_ports_allowed": false,
+    "live_accounts_allowed": false,
+    "automatic_repricing_allowed": false,
+    "leg_by_leg_fallback_allowed": false
+  },
+  "revalidation": {
+    "schema": "execution-revalidation/1.0",
+    "original_market_embedded": true,
+    "exact_selected_leg_coverage_required": true,
+    "canonical_economics_recalculation_required": true,
+    "same_market_greeks_must_remain_equal": true,
+    "hard_blockers_precede_material_drift": true,
+    "material_drift_policy_versioned": true,
+    "default_investment_thresholds_invented": false,
+    "unconfigured_reprice_policy_result": "REVIEW_REQUIRED",
+    "candidate_universe_rerun_preserves_history": true
+  },
+  "paper_entry": {
+    "intent_type": "PAPER_ENTRY",
+    "application_actions": ["BUY_TO_OPEN", "SELL_TO_OPEN"],
+    "wire_actions": ["BUY", "SELL"],
+    "combo_submission_mode": "WHOLE_BAG",
+    "allowed_guarantee_mode_for_first_test": "GUARANTEED",
+    "order_type": "LMT",
+    "time_in_force": "DAY",
+    "global_hard_ceiling_eur": 1500,
+    "human_confirmation_required": true
+  },
+  "migrations": {
+    "prior_migrations_modified": false,
+    "added": [
+      "0010_order_lifecycle_readiness.sql",
+      "0011_final_paper_entry_readiness.sql"
+    ],
+    "clean_apply": "PASS",
+    "upgrade_0001_0009_to_0010_0011": "PASS",
+    "clean_integrity": "ok",
+    "upgrade_integrity": "ok",
+    "foreign_key_violations": 0,
+    "paper_entry_table_count": 8
+  },
+  "historical_50_eur_test": {
+    "root_cause": "UNRESOLVED_NO_BROKER_EVIDENCE",
+    "hypotheses_ranked": false,
+    "hypotheses": [
+      "ORDER_NEVER_TRANSMITTED",
+      "READ_ONLY_API",
+      "ORDER_PRECAUTION",
+      "INVALID_CONTRACT_OR_BAG",
+      "INVALID_TICK",
+      "PAPER_SIMULATOR_LIMITATION",
+      "MARKET_DATA_PERMISSION",
+      "COMPETING_SESSION",
+      "TRADING_PERMISSION",
+      "PRICE_TOO_FAR",
+      "WORKING_NO_FILL_YET"
+    ]
+  },
+  "tests": {
+    "root_ruff": "PASS",
+    "root_mypy": "PASS",
+    "root_mypy_source_files": 201,
+    "root_pytest_passed": 460,
+    "root_pytest_warnings": 1,
+    "bridge_ruff": "PASS",
+    "bridge_pytest_passed": 107,
+    "cloudflare_test_files": 8,
+    "cloudflare_pytest_equivalent_passed": 74,
+    "cloudflare_typecheck": "PASS",
+    "cloudflare_safety_scan": "PASS",
+    "offline_json_schemas": 45,
+    "offline_artifact_validation": "PASS",
+    "research_registry": "PASS",
+    "phase10_audit": "PASS",
+    "phase11_gate": "PASS",
+    "security_gate": "PASS",
+    "pip_check": "PASS",
+    "npm_ci_vulnerabilities": 0,
+    "npm_runtime_audit_vulnerabilities": 0,
+    "wrangler_dry_run": "PASS",
+    "wrangler_upload_kib": 322.68,
+    "wrangler_gzip_kib": 74.93,
+    "git_diff_check": "PASS"
+  },
+  "not_proven_offline": [
+    "OPRA_ENTITLEMENT_AND_USAGE_RIGHTS",
+    "US_OPTIONS_AND_SHORT_OPTION_PERMISSIONS",
+    "CURRENT_CONTRACT_IDENTITIES_AND_DELIVERABLES",
+    "BAG_QUOTE_SIGN_AND_MARKET_RULE_BEHAVIOR",
+    "BROKER_COMBO_GUARANTEE_AND_PAPER_FILL_BEHAVIOR",
+    "WHAT_IF_MARGIN_COMMISSION_AND_PRECAUTIONS",
+    "CALLBACK_ORDER_SESSION_PACING_AND_RECONNECT",
+    "RECOVERY_AGAINST_REAL_BROKER_STATE",
+    "OFFICIAL_PERSISTENT_IBAPI_TRANSPORT_WIRING",
+    "APPROVED_MATERIAL_EXECUTION_DRIFT_POLICY",
+    "OPERATOR_ATTESTATION_AND_ONE_INTENT_AUTHORIZATION",
+    "SHADOW_OR_PAPER_CAMPAIGN",
+    "LIVE_EXECUTABILITY"
+  ],
+  "external_actions": {
+    "remote_deployment": false,
+    "remote_d1_migration": false,
+    "ibkr_connection": false,
+    "paper_order": false,
+    "order_modification": false,
+    "order_cancellation": false,
+    "live_account_connection": false,
+    "holdout_opened": false,
+    "git_commit_created": false,
+    "git_push_performed": false
+  }
+}

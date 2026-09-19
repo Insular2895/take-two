@@ -1,6 +1,6 @@
 # Oracle A1 + IB Gateway paper bridge runbook
 
-Status: **VM/API read-only path validated; signed telemetry implemented; dispatch remains disabled**
+Status: **Paper adapter ready offline; default runtime disabled; no Paper order tested**
 
 ## Provisioning checkpoint — 2026-08-25
 
@@ -175,12 +175,40 @@ contain an account identifier, payload, request header, URL, or secret. Once ena
 terminal, VNC tunnel, or VS Code window is required for telemetry. IB Gateway itself must remain
 logged in on the VM and may still require periodic IBKR reauthentication.
 
+## First controlled Paper-entry preflight — do not run without separate authorization
+
+1. Confirm the checked-out commit/config and back up D1; do not deploy from an unreviewed tree.
+2. Log into **Paper Trading**, verify exactly one redacted `DU` account, Gateway port `4002`
+   (or TWS `7497`) and loopback-only client access. Never use a Live port.
+3. Keep Read-Only API enabled while verifying connectivity, contract qualification, market rules,
+   quotes, permissions and account values. The order-shaped what-if belongs to the later bounded
+   execution window, not this read-only market-data step.
+4. Verify `maintainAndResubmitOrdersOnReconnect` is off; bypass/percentage precaution overrides
+   are off; no competing username session exists.
+5. Enable **Create API Message Log** and logging level **Detail** for the bounded test window. Logs
+   stay private, redacted and outside Git.
+6. Test the kill switch before arming. Confirm the fresh revalidation ticket, whole BAG, valid
+   tick/size, liquid-hours timezone, signed price convention, capital/max-loss cap and explicit
+   preview.
+7. Record an operator attestation. Only then temporarily disable Read-Only API and arm the
+   governed Paper gateway while dispatch remains locked. Request and persist the non-routed
+   what-if; authorize that one confirmed intent only after its result/fallback gates pass. Code
+   must never toggle the broker setting.
+8. Observe `openOrder`, `orderStatus`, errors, executions and commissions. Do not automatically
+   reprice, protect, cancel or resend. If truth is uncertain, stop at reconciliation.
+9. Re-engage the kill switch and Read-Only API after the test; archive only redacted evidence.
+
+The test uses TTWO, the smallest representative quantity, one BAG LMT, DAY, no IOC/FOK, no
+automatic repricing and no protective automation. Its purpose is lifecycle evidence, not profit.
+
+Official setup reference: [Installing/configuring TWS for the API](https://ibkrcampus.com/campus/trading-lessons/installing-configuring-tws-for-the-api/).
+
 ## Later activation order
 
 1. Create and harden OCI A1.
 2. Install official IB Gateway ARM64 and log into Paper Trading.
 3. Install the official TWS API locally on the VM.
-4. Add and test the real adapter with Read-Only still enabled.
+4. Wire the isolated adapter to the official persistent API transport with Read-Only still enabled.
 5. Verify positions, combo quotes, `DU` account guard, callbacks, and recovery.
 6. Exercise simulated failures and partial fills.
 7. Enable a short paper execution window and submit the smallest representative combo.

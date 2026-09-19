@@ -40,6 +40,7 @@ def test_committed_json_schemas_are_current_and_strict() -> None:
         "data_usage_rights.schema.json",
         "empirical_calibration.schema.json",
         "engine_verdict_report.schema.json",
+        "execution_revalidation_ticket.schema.json",
         "event.schema.json",
         "event_regime_report.schema.json",
         "five_score_report.schema.json",

@@ -76,5 +76,7 @@ Research monitoring may still have no market-data provider configured. Separatel
 can publish a redacted, TTWO-only IBKR Paper snapshot to a signed telemetry-only route. D1 stores
 only the latest validated broker snapshot; the authenticated UI labels stale/offline data and
 never receives broker or machine credentials. The publisher has no order route or broker mutation
-method. `read_only=true`, `transmit=false`, `what_if=true`, `human_confirmation_required=true`,
-`execution_enabled=false`, and `order_capability=forbidden` remain contract and runtime boundaries.
+method. `read_only=true`, `what_if=true`, `human_confirmation_required=true`,
+`execution_enabled=false`, and `order_capability=forbidden` remain the telemetry/research runtime
+boundaries. A separately persisted Paper-entry command may contain `transmit=true`, but remains
+unclaimable with `dispatch_authorized=false` while the production bridge uses `DisabledGateway`.

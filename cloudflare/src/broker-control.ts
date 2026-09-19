@@ -1,5 +1,19 @@
 import { hasFreshSensitiveAuth, requireActionPassword, requireCsrf } from "./auth";
+import {
+  executionDiagnosticsForPosition,
+  lifecycleEventOwner,
+  persistBridgeLifecycleEvidence,
+  recordClaimedLifecycle,
+  recordControlStatusLifecycle,
+  recordInitialLifecycle,
+} from "./broker-lifecycle-store";
+import type { StoredBridgeEventBody } from "./broker-lifecycle-store";
+import { LIFECYCLE_EVIDENCE_EVENTS } from "./broker-lifecycle";
 import { verifyBridgeRequest } from "./broker-security";
+import {
+  persistExecutionRevalidationTicket,
+  routePaperEntryAuthenticated,
+} from "./paper-entry";
 import { activePosition, audit } from "./db";
 import type { PositionRow } from "./db";
 import { inverseStructureLegs, randomId, validateDossier } from "./domain";
@@ -26,15 +40,7 @@ interface ExitPolicyBody {
   automatic_exit_enabled?: boolean;
 }
 
-interface BridgeEventBody {
-  broker_event_key?: string;
-  event_type?: string;
-  occurred_at?: string;
-  broker_order_id?: number | null;
-  broker_perm_id?: number | null;
-  broker_exec_id?: string | null;
-  detail?: Record<string, unknown>;
-}
+type BridgeEventBody = StoredBridgeEventBody;
 
 function parseBody<T>(text: string): T {
   try {
@@ -75,6 +81,12 @@ async function brokerStatus(env: Env): Promise<Response> {
        FROM broker_execution_intents WHERE position_id=? ORDER BY created_at DESC LIMIT 20`,
     ).bind(position.id).all<Record<string, unknown>>()
     : { results: [] };
+  const execution = position
+    ? await executionDiagnosticsForPosition(env.DB, position.id)
+    : {
+      latest: null, timeline: [], errors: [], executions: [], commissions: [],
+      market_snapshot: null, reprice_proposals: [],
+    };
   return Response.json({
     mode: state.broker_mode,
     kill_switch: Boolean(state.broker_kill_switch),
@@ -86,6 +98,7 @@ async function brokerStatus(env: Env): Promise<Response> {
     active_position_id: position?.id ?? null,
     exit_policy: policy,
     recent_intents: intents.results,
+    execution,
     safety: { live_mode_available: false, account_prefix_required: "DU", public_broker_port: false },
   });
 }
@@ -235,6 +248,8 @@ export async function queueAcknowledgedPaperClose(
     estimated_slippage_policy: preview.estimated_slippage,
     maximum_exit_slippage_policy: policy.maximum_exit_slippage_policy,
     pricing_policy: "REFRESH_COMBO_QUOTE_AND_USE_BOUNDED_LIMIT",
+    time_in_force: "DAY",
+    transmit: false,
   };
   await env.DB.prepare(
     `INSERT OR IGNORE INTO broker_execution_intents(
@@ -249,6 +264,13 @@ export async function queueAcknowledgedPaperClose(
     "SELECT intent_id,status,order_ref,created_at,expires_at FROM broker_execution_intents WHERE idempotency_key=?",
   ).bind(`manual-close:${previewId}`).first<Record<string, unknown>>();
   if (!stored) throw new Error("PAPER_POSITION_INTENT_ALREADY_ACTIVE");
+  await recordInitialLifecycle(env.DB, {
+    intent_id: String(stored.intent_id),
+    order_ref: String(stored.order_ref),
+    requested_quantity: Number(preview.quantity),
+    created_at: String(stored.created_at),
+    position_id: String(preview.position_id),
+  });
   await audit(env.DB, "PAPER_CLOSE_QUEUED", auth.actor, String(preview.position_id), {
     preview_id: previewId,
     intent_id: stored?.intent_id,
@@ -372,6 +394,8 @@ export async function evaluateAutomaticPaperExit(
       configured_exit_liquidation_pnl_policy: exitThreshold,
     },
     pricing_policy: "REFRESH_COMBO_QUOTE_AND_USE_BOUNDED_LIMIT",
+    time_in_force: "DAY",
+    transmit: false,
   };
   const inserted = await env.DB.prepare(
     `INSERT OR IGNORE INTO broker_execution_intents(
@@ -383,6 +407,13 @@ export async function evaluateAutomaticPaperExit(
     JSON.stringify(command), createdAt, expiresAt,
   ).run();
   if (inserted.meta.changes) {
+    await recordInitialLifecycle(env.DB, {
+      intent_id: intentId,
+      order_ref: orderRef,
+      requested_quantity: position.quantity_remaining,
+      created_at: createdAt,
+      position_id: position.id,
+    });
     await audit(env.DB, "PAPER_AUTOMATIC_EXIT_QUEUED", "monitor", position.id, {
       intent_id: intentId,
       trigger_metric: "LIQUIDATION_PNL_POLICY",
@@ -430,6 +461,14 @@ async function claimNextIntent(env: Env, bridgeId: string, receivedAt: string): 
   if (state.broker_mode !== "PAPER" || state.safe_mode || state.broker_kill_switch || !heartbeatIsFresh(state) || state.broker_bridge_id !== bridgeId) {
     return Response.json({ error: "PAPER_BROKER_DISPATCH_BLOCKED" }, { status: 409 });
   }
+  const expiredClaims = await env.DB.prepare(
+    `SELECT intent_id,order_ref,requested_quantity,created_at,position_id
+     FROM broker_execution_intents WHERE status='CLAIMED' AND claim_expires_at < ?`,
+  ).bind(receivedAt).all<Record<string, unknown>>();
+  const expiredReady = await env.DB.prepare(
+    `SELECT intent_id,order_ref,requested_quantity,created_at,position_id
+     FROM broker_execution_intents WHERE status='READY' AND expires_at < ?`,
+  ).bind(receivedAt).all<Record<string, unknown>>();
   await env.DB.prepare(
     `UPDATE broker_execution_intents SET status='AMBIGUOUS',completed_at=?,last_error_code='CLAIM_LEASE_EXPIRED'
      WHERE status='CLAIMED' AND claim_expires_at < ?`,
@@ -438,6 +477,32 @@ async function claimNextIntent(env: Env, bridgeId: string, receivedAt: string): 
     `UPDATE broker_execution_intents SET status='EXPIRED',completed_at=?,last_error_code='DISPATCH_WINDOW_EXPIRED'
      WHERE status='READY' AND expires_at < ?`,
   ).bind(receivedAt, receivedAt).run();
+  for (const item of expiredClaims.results) {
+    await recordControlStatusLifecycle(env.DB, {
+      intent_id: String(item.intent_id), order_ref: String(item.order_ref),
+      requested_quantity: Number(item.requested_quantity), created_at: String(item.created_at),
+      position_id: String(item.position_id),
+    }, {
+      canonical: "RECONCILIATION_REQUIRED",
+      condition: "STATE_UNKNOWN",
+      evidenceKind: "LEASE_EXPIRED",
+      occurredAt: receivedAt,
+      reason: "CLAIM_LEASE_EXPIRED",
+    });
+  }
+  for (const item of expiredReady.results) {
+    await recordControlStatusLifecycle(env.DB, {
+      intent_id: String(item.intent_id), order_ref: String(item.order_ref),
+      requested_quantity: Number(item.requested_quantity), created_at: String(item.created_at),
+      position_id: String(item.position_id),
+    }, {
+      canonical: "EXPIRED",
+      condition: "NONE",
+      evidenceKind: "ORDER_STATUS",
+      occurredAt: receivedAt,
+      reason: "DISPATCH_WINDOW_EXPIRED",
+    });
+  }
   const candidate = await env.DB.prepare(
     "SELECT intent_id FROM broker_execution_intents WHERE status='READY' AND expires_at>=? ORDER BY created_at ASC LIMIT 1",
   ).bind(receivedAt).first<{ intent_id: string }>();
@@ -458,6 +523,13 @@ async function claimNextIntent(env: Env, bridgeId: string, receivedAt: string): 
     randomId("broker-event"), `claim:${candidate.intent_id}:${receivedAt}`, candidate.intent_id,
     receivedAt, receivedAt, bridgeId,
   ).run();
+  await recordClaimedLifecycle(env.DB, {
+    intent_id: String(intent?.intent_id),
+    order_ref: String(intent?.order_ref),
+    requested_quantity: Number(intent?.requested_quantity),
+    created_at: String(intent?.created_at),
+    position_id: String(intent?.position_id),
+  }, bridgeId, receivedAt);
   return Response.json({
     intent_id: intent?.intent_id,
     status: intent?.status,
@@ -477,11 +549,17 @@ const EVENT_STATUS: Record<string, string> = {
 };
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-  CLAIMED: ["BROKER_ACKNOWLEDGED", "PARTIAL_FILL", "FILLED", "REJECTED", "CANCELLED", "EXPIRED", "AMBIGUOUS"],
+  CLAIMED: ["BROKER_ACKNOWLEDGED", "PARTIAL_FILL", "FILLED", "REJECTED", "CANCELLED", "EXPIRED", "AMBIGUOUS", "BLOCKED"],
   BROKER_ACKNOWLEDGED: ["PARTIAL_FILL", "FILLED", "REJECTED", "CANCELLED", "AMBIGUOUS"],
   PARTIAL_FILL: ["PARTIAL_FILL", "FILLED", "CANCELLED", "AMBIGUOUS"],
   AMBIGUOUS: ["BROKER_ACKNOWLEDGED", "PARTIAL_FILL", "FILLED", "REJECTED", "CANCELLED"],
 };
+
+const LEGACY_EVENT_TYPES = [
+  ...Object.keys(EVENT_STATUS),
+  "COMMISSION_REPORT",
+  "RECOVERY_OBSERVATION",
+];
 
 async function recordBrokerEvent(
   env: Env,
@@ -492,7 +570,7 @@ async function recordBrokerEvent(
 ): Promise<Response> {
   const body = parseBody<BridgeEventBody>(bodyText);
   const eventType = String(body.event_type ?? "");
-  const allowedEvents = [...Object.keys(EVENT_STATUS), "COMMISSION_REPORT", "RECOVERY_OBSERVATION"];
+  const allowedEvents = [...LEGACY_EVENT_TYPES, ...LIFECYCLE_EVIDENCE_EVENTS];
   if (!allowedEvents.includes(eventType) || !/^[a-zA-Z0-9:._-]{8,180}$/.test(String(body.broker_event_key ?? "")) ||
       !Number.isFinite(Date.parse(String(body.occurred_at ?? ""))) ||
       (body.broker_order_id != null && !Number.isInteger(body.broker_order_id)) ||
@@ -503,29 +581,55 @@ async function recordBrokerEvent(
   const intent = await env.DB.prepare("SELECT * FROM broker_execution_intents WHERE intent_id=?")
     .bind(intentId).first<Record<string, unknown>>();
   if (!intent) return Response.json({ error: "BROKER_INTENT_NOT_FOUND" }, { status: 404 });
-  if (intent.claimed_by && intent.claimed_by !== bridgeId) return Response.json({ error: "BROKER_INTENT_CLAIM_MISMATCH" }, { status: 409 });
+  if (intent.claimed_by !== bridgeId) return Response.json({ error: "BROKER_INTENT_CLAIM_MISMATCH" }, { status: 409 });
 
+  const eventOwner = await lifecycleEventOwner(env.DB, String(body.broker_event_key));
+  if (eventOwner && eventOwner !== intentId) {
+    return Response.json({ error: "BROKER_EVENT_IDENTITY_CONFLICT" }, { status: 409 });
+  }
+  if (eventOwner) {
+    return Response.json({ accepted: true, duplicate: true, event_id: body.broker_event_key });
+  }
   const existing = await env.DB.prepare("SELECT event_id FROM broker_execution_events WHERE broker_event_key=?")
     .bind(body.broker_event_key).first<{ event_id: string }>();
   if (existing) return Response.json({ accepted: true, duplicate: true, event_id: existing.event_id });
 
-  const nextStatus = EVENT_STATUS[eventType];
-  if (nextStatus && !(ALLOWED_TRANSITIONS[String(intent.status)] ?? []).includes(nextStatus)) {
-    return Response.json({ error: "BROKER_EVENT_TRANSITION_INVALID" }, { status: 409 });
-  }
+  const lifecycle = await persistBridgeLifecycleEvidence(
+    env.DB,
+    bridgeId,
+    receivedAt,
+    {
+      intent_id: String(intent.intent_id),
+      order_ref: String(intent.order_ref),
+      requested_quantity: Number(intent.requested_quantity),
+      created_at: String(intent.created_at),
+      position_id: String(intent.position_id),
+    },
+    body,
+    bodyText,
+  );
+  const nextStatus = lifecycle.coarse ?? EVENT_STATUS[eventType] ?? null;
   const eventId = randomId("broker-event");
-  const terminal = ["FILLED", "REJECTED", "CANCELLED", "EXPIRED", "AMBIGUOUS"].includes(nextStatus ?? "");
-  const statements: D1PreparedStatement[] = [env.DB.prepare(
-    `INSERT INTO broker_execution_events(
-      event_id,broker_event_key,intent_id,event_type,occurred_at,received_at,bridge_id,
-      broker_order_id,broker_perm_id,broker_exec_id,detail_json
-    ) VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
-  ).bind(
-    eventId, body.broker_event_key, intentId, eventType, body.occurred_at, receivedAt, bridgeId,
-    body.broker_order_id ?? null, body.broker_perm_id ?? null, body.broker_exec_id ?? null,
-    JSON.stringify(body.detail ?? {}),
-  )];
-  if (nextStatus) {
+  const terminal = ["FILLED", "REJECTED", "CANCELLED", "EXPIRED", "AMBIGUOUS", "BLOCKED"]
+    .includes(nextStatus ?? "");
+  const statements: D1PreparedStatement[] = [];
+  if (LEGACY_EVENT_TYPES.includes(eventType)) {
+    statements.push(env.DB.prepare(
+      `INSERT INTO broker_execution_events(
+        event_id,broker_event_key,intent_id,event_type,occurred_at,received_at,bridge_id,
+        broker_order_id,broker_perm_id,broker_exec_id,detail_json
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
+    ).bind(
+      eventId, body.broker_event_key, intentId, eventType, body.occurred_at, receivedAt, bridgeId,
+      body.broker_order_id ?? null, body.broker_perm_id ?? null, body.broker_exec_id ?? null,
+      JSON.stringify(body.detail ?? {}),
+    ));
+  }
+  const transitionAllowed = nextStatus && (
+    nextStatus === intent.status ||
+    (ALLOWED_TRANSITIONS[String(intent.status)] ?? []).includes(nextStatus)
+  );
+  if (nextStatus && transitionAllowed) {
     statements.push(env.DB.prepare(
       `UPDATE broker_execution_intents SET status=?,broker_order_id=coalesce(?,broker_order_id),
        broker_perm_id=coalesce(?,broker_perm_id),completed_at=?,last_error_code=? WHERE intent_id=?`,
@@ -533,18 +637,24 @@ async function recordBrokerEvent(
       nextStatus, body.broker_order_id ?? null, body.broker_perm_id ?? null,
       terminal ? receivedAt : null,
       ["REJECTED", "CANCELLED", "EXPIRED", "AMBIGUOUS"].includes(nextStatus)
-        ? String(body.detail?.error_code ?? nextStatus)
+        ? String(body.detail?.broker_error_code ?? nextStatus)
         : null,
       intentId,
     ));
   }
-  await env.DB.batch(statements);
+  if (statements.length) await env.DB.batch(statements);
   await audit(env.DB, `PAPER_BROKER_${eventType}`, `bridge:${bridgeId}`, String(intent.position_id), {
     intent_id: intentId,
     broker_order_id: body.broker_order_id ?? null,
     broker_perm_id: body.broker_perm_id ?? null,
   });
-  return Response.json({ accepted: true, duplicate: false, event_id: eventId, intent_status: nextStatus ?? intent.status });
+  return Response.json({
+    accepted: true,
+    duplicate: false,
+    event_id: LEGACY_EVENT_TYPES.includes(eventType) ? eventId : body.broker_event_key,
+    intent_status: transitionAllowed ? nextStatus : intent.status,
+    canonical_execution_status: lifecycle.canonical,
+  });
 }
 
 export async function routeBrokerInternal(request: Request, env: Env, path: string): Promise<Response | null> {
@@ -553,6 +663,9 @@ export async function routeBrokerInternal(request: Request, env: Env, path: stri
   const verified = await verifyBridgeRequest(request, env);
   if (path === "/internal/broker/heartbeat") {
     return recordHeartbeat(env, verified.bridgeId, verified.receivedAt, verified.bodyText);
+  }
+  if (path === "/internal/broker/revalidation") {
+    return persistExecutionRevalidationTicket(env, verified.bodyText, verified.receivedAt);
   }
   if (path === "/internal/broker/intents/claim") {
     return claimNextIntent(env, verified.bridgeId, verified.receivedAt);
@@ -577,6 +690,14 @@ export async function routeBrokerAuthenticated(
   path: string,
   readJsonBody: () => Promise<unknown>,
 ): Promise<Response | null> {
+  const paperEntry = await routePaperEntryAuthenticated(
+    request,
+    env,
+    auth,
+    path,
+    readJsonBody,
+  );
+  if (paperEntry) return paperEntry;
   if (path === "/api/broker/status" && request.method === "GET") return brokerStatus(env);
   if (path === "/api/broker/control" && request.method === "POST") {
     return configureBrokerControl(request, env, auth, await readJsonBody());
