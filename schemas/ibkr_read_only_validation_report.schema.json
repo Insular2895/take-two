@@ -1,0 +1,739 @@
+{
+  "$defs": {
+    "IbkrChainValidationEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "discovered_contract_count": {
+          "minimum": 0,
+          "title": "Discovered Contract Count",
+          "type": "integer"
+        },
+        "freshness_basis": {
+          "enum": [
+            "SOURCE_TIMESTAMP",
+            "BOUNDED_CAPTURE_WINDOW",
+            "UNVERIFIED"
+          ],
+          "title": "Freshness Basis",
+          "type": "string"
+        },
+        "freshness_status": {
+          "enum": [
+            "LIVE_SOURCE_TIMESTAMP_FRESH",
+            "LIVE_CAPTURE_WINDOW_FRESH",
+            "STALE",
+            "DELAYED",
+            "FROZEN",
+            "INCOMPLETE",
+            "INVALID"
+          ],
+          "title": "Freshness Status",
+          "type": "string"
+        },
+        "freshness_verified": {
+          "title": "Freshness Verified",
+          "type": "boolean"
+        },
+        "greeks_complete_count": {
+          "minimum": 0,
+          "title": "Greeks Complete Count",
+          "type": "integer"
+        },
+        "identity_complete_count": {
+          "minimum": 0,
+          "title": "Identity Complete Count",
+          "type": "integer"
+        },
+        "live_option_quote_count": {
+          "minimum": 0,
+          "title": "Live Option Quote Count",
+          "type": "integer"
+        },
+        "missing_quote_count": {
+          "minimum": 0,
+          "title": "Missing Quote Count",
+          "type": "integer"
+        },
+        "open_interest_present_count": {
+          "minimum": 0,
+          "title": "Open Interest Present Count",
+          "type": "integer"
+        },
+        "promotion_eligible": {
+          "title": "Promotion Eligible",
+          "type": "boolean"
+        },
+        "provider_metadata_hash": {
+          "maxLength": 64,
+          "minLength": 64,
+          "title": "Provider Metadata Hash",
+          "type": "string"
+        },
+        "provider_timestamp_count": {
+          "minimum": 0,
+          "title": "Provider Timestamp Count",
+          "type": "integer"
+        },
+        "raw_snapshot_hash": {
+          "maxLength": 64,
+          "minLength": 64,
+          "title": "Raw Snapshot Hash",
+          "type": "string"
+        },
+        "required_component_freshness": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Required Component Freshness",
+          "type": "object"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "source_latency_milliseconds": {
+          "minimum": 0,
+          "title": "Source Latency Milliseconds",
+          "type": "number"
+        },
+        "source_timestamp_verified": {
+          "title": "Source Timestamp Verified",
+          "type": "boolean"
+        },
+        "underlying_live": {
+          "title": "Underlying Live",
+          "type": "boolean"
+        },
+        "underlying_price": {
+          "exclusiveMinimum": 0,
+          "title": "Underlying Price",
+          "type": "number"
+        },
+        "underlying_timestamp_verified": {
+          "title": "Underlying Timestamp Verified",
+          "type": "boolean"
+        },
+        "usable_quote_count": {
+          "minimum": 0,
+          "title": "Usable Quote Count",
+          "type": "integer"
+        },
+        "volume_present_count": {
+          "minimum": 0,
+          "title": "Volume Present Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "snapshot_id",
+        "raw_snapshot_hash",
+        "provider_metadata_hash",
+        "underlying_price",
+        "source_latency_milliseconds",
+        "discovered_contract_count",
+        "usable_quote_count",
+        "missing_quote_count",
+        "identity_complete_count",
+        "volume_present_count",
+        "open_interest_present_count",
+        "greeks_complete_count",
+        "provider_timestamp_count",
+        "live_option_quote_count",
+        "underlying_timestamp_verified",
+        "underlying_live",
+        "freshness_basis",
+        "freshness_status",
+        "freshness_verified",
+        "source_timestamp_verified",
+        "required_component_freshness",
+        "promotion_eligible"
+      ],
+      "title": "IbkrChainValidationEvidence",
+      "type": "object"
+    },
+    "IbkrProviderDiagnostics": {
+      "additionalProperties": false,
+      "description": "Non-secret counters proving retry, pacing and cache behavior for one provider instance.",
+      "properties": {
+        "cache_expirations": {
+          "minimum": 0,
+          "title": "Cache Expirations",
+          "type": "integer"
+        },
+        "cache_hits": {
+          "minimum": 0,
+          "title": "Cache Hits",
+          "type": "integer"
+        },
+        "cache_misses": {
+          "minimum": 0,
+          "title": "Cache Misses",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "pacing_wait_count": {
+          "minimum": 0,
+          "title": "Pacing Wait Count",
+          "type": "integer"
+        },
+        "pacing_wait_seconds": {
+          "minimum": 0,
+          "title": "Pacing Wait Seconds",
+          "type": "number"
+        },
+        "read_operations": {
+          "minimum": 0,
+          "title": "Read Operations",
+          "type": "integer"
+        },
+        "retry_exhaustions": {
+          "minimum": 0,
+          "title": "Retry Exhaustions",
+          "type": "integer"
+        },
+        "stale_fallbacks": {
+          "const": 0,
+          "default": 0,
+          "title": "Stale Fallbacks",
+          "type": "integer"
+        },
+        "transient_failures": {
+          "minimum": 0,
+          "title": "Transient Failures",
+          "type": "integer"
+        },
+        "transport_attempts": {
+          "minimum": 0,
+          "title": "Transport Attempts",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "captured_at",
+        "read_operations",
+        "transport_attempts",
+        "transient_failures",
+        "retry_exhaustions",
+        "pacing_wait_count",
+        "pacing_wait_seconds",
+        "cache_hits",
+        "cache_misses",
+        "cache_expirations"
+      ],
+      "title": "IbkrProviderDiagnostics",
+      "type": "object"
+    },
+    "IbkrValidationCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "check_id": {
+          "minLength": 1,
+          "title": "Check Id",
+          "type": "string"
+        },
+        "detail_code": {
+          "minLength": 1,
+          "title": "Detail Code",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "WARN",
+            "FAIL",
+            "NOT_RUN"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "check_id",
+        "status",
+        "detail_code"
+      ],
+      "title": "IbkrValidationCheck",
+      "type": "object"
+    },
+    "LiveChainRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "as_of": {
+          "format": "date-time",
+          "title": "As Of",
+          "type": "string"
+        },
+        "expiration_end": {
+          "format": "date",
+          "title": "Expiration End",
+          "type": "string"
+        },
+        "expiration_start": {
+          "format": "date",
+          "title": "Expiration Start",
+          "type": "string"
+        },
+        "include_greeks": {
+          "default": true,
+          "title": "Include Greeks",
+          "type": "boolean"
+        },
+        "maximum_contracts": {
+          "default": 1500,
+          "exclusiveMinimum": 0,
+          "maximum": 10000,
+          "title": "Maximum Contracts",
+          "type": "integer"
+        },
+        "maximum_expirations": {
+          "default": 24,
+          "exclusiveMinimum": 0,
+          "maximum": 60,
+          "title": "Maximum Expirations",
+          "type": "integer"
+        },
+        "maximum_quote_age_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Quote Age Seconds",
+          "type": "integer"
+        },
+        "maximum_strike": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Strike"
+        },
+        "minimum_strike": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum Strike"
+        },
+        "ticker": {
+          "minLength": 1,
+          "title": "Ticker",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ticker",
+        "as_of",
+        "expiration_start",
+        "expiration_end",
+        "maximum_quote_age_seconds"
+      ],
+      "title": "LiveChainRequest",
+      "type": "object"
+    },
+    "LiveComboQuote": {
+      "additionalProperties": false,
+      "description": "Signed net-debit convention: positive is a debit, negative is a credit.",
+      "properties": {
+        "ask_net_debit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ask Net Debit"
+        },
+        "bid_net_debit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bid Net Debit"
+        },
+        "broker_quote_complete": {
+          "default": false,
+          "title": "Broker Quote Complete",
+          "type": "boolean"
+        },
+        "candidate_id": {
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "comparison_confirmed": {
+          "default": false,
+          "title": "Comparison Confirmed",
+          "type": "boolean"
+        },
+        "freshness_basis": {
+          "default": "UNVERIFIED",
+          "enum": [
+            "SOURCE_TIMESTAMP",
+            "BOUNDED_CAPTURE_WINDOW",
+            "UNVERIFIED"
+          ],
+          "title": "Freshness Basis",
+          "type": "string"
+        },
+        "freshness_status": {
+          "default": "INVALID",
+          "enum": [
+            "LIVE_SOURCE_TIMESTAMP_FRESH",
+            "LIVE_CAPTURE_WINDOW_FRESH",
+            "STALE",
+            "DELAYED",
+            "FROZEN",
+            "INCOMPLETE",
+            "INVALID"
+          ],
+          "title": "Freshness Status",
+          "type": "string"
+        },
+        "freshness_verified": {
+          "default": false,
+          "title": "Freshness Verified",
+          "type": "boolean"
+        },
+        "market_data_type": {
+          "default": "unknown",
+          "enum": [
+            "live",
+            "frozen",
+            "delayed",
+            "delayed_frozen",
+            "unknown"
+          ],
+          "title": "Market Data Type",
+          "type": "string"
+        },
+        "maximum_absolute_divergence": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Absolute Divergence"
+        },
+        "order_capability": {
+          "const": "forbidden",
+          "default": "forbidden",
+          "title": "Order Capability",
+          "type": "string"
+        },
+        "price_convention_verified": {
+          "default": false,
+          "title": "Price Convention Verified",
+          "type": "boolean"
+        },
+        "quote_freshness_verified": {
+          "default": false,
+          "title": "Quote Freshness Verified",
+          "type": "boolean"
+        },
+        "quote_timestamp": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote Timestamp"
+        },
+        "read_only": {
+          "const": true,
+          "default": true,
+          "title": "Read Only",
+          "type": "boolean"
+        },
+        "received_at": {
+          "format": "date-time",
+          "title": "Received At",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_timestamp_verified": {
+          "default": false,
+          "title": "Source Timestamp Verified",
+          "type": "boolean"
+        },
+        "synthetic_ask_net_debit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Synthetic Ask Net Debit"
+        },
+        "synthetic_bid_net_debit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Synthetic Bid Net Debit"
+        },
+        "synthetic_quote_complete": {
+          "default": false,
+          "title": "Synthetic Quote Complete",
+          "type": "boolean"
+        },
+        "ticker": {
+          "title": "Ticker",
+          "type": "string"
+        },
+        "timestamp_source": {
+          "default": "unknown",
+          "enum": [
+            "exchange",
+            "provider",
+            "client_received_at",
+            "unknown"
+          ],
+          "title": "Timestamp Source",
+          "type": "string"
+        },
+        "transmit": {
+          "const": false,
+          "default": false,
+          "title": "Transmit",
+          "type": "boolean"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "ticker",
+        "received_at",
+        "source_id"
+      ],
+      "title": "LiveComboQuote",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.take-two-options.invalid/v11.1/ibkr_read_only_validation_report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "broker_read_observed": {
+      "title": "Broker Read Observed",
+      "type": "boolean"
+    },
+    "chain": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IbkrChainValidationEvidence"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/IbkrValidationCheck"
+      },
+      "minItems": 1,
+      "title": "Checks",
+      "type": "array"
+    },
+    "combo": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LiveComboQuote"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "completed_at": {
+      "format": "date-time",
+      "title": "Completed At",
+      "type": "string"
+    },
+    "explicit_connection_authorized": {
+      "const": true,
+      "default": true,
+      "title": "Explicit Connection Authorized",
+      "type": "boolean"
+    },
+    "failure_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Failure Code"
+    },
+    "human_gates_still_required": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Human Gates Still Required",
+      "type": "array"
+    },
+    "independent_second_session_requested": {
+      "title": "Independent Second Session Requested",
+      "type": "boolean"
+    },
+    "independent_second_session_verified": {
+      "title": "Independent Second Session Verified",
+      "type": "boolean"
+    },
+    "maximum_claim": {
+      "enum": [
+        "software_only",
+        "broker_read_only_path_observed",
+        "broker_read_only_chain_promotable",
+        "broker_read_only_chain_and_combo_promotable"
+      ],
+      "title": "Maximum Claim",
+      "type": "string"
+    },
+    "order_capability": {
+      "const": "forbidden",
+      "default": "forbidden",
+      "title": "Order Capability",
+      "type": "string"
+    },
+    "provider": {
+      "title": "Provider",
+      "type": "string"
+    },
+    "provider_diagnostics": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IbkrProviderDiagnostics"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "report_id": {
+      "title": "Report Id",
+      "type": "string"
+    },
+    "request": {
+      "$ref": "#/$defs/LiveChainRequest"
+    },
+    "requested_market_data_type": {
+      "enum": [
+        "live",
+        "frozen",
+        "delayed",
+        "delayed_frozen"
+      ],
+      "title": "Requested Market Data Type",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.1",
+      "default": "1.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "started_at": {
+      "format": "date-time",
+      "title": "Started At",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "FAILED_SAFE",
+        "CAPTURED_NOT_PROMOTABLE",
+        "CHAIN_PROMOTION_ELIGIBLE",
+        "CHAIN_AND_COMBO_PROMOTION_ELIGIBLE"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "ticker": {
+      "title": "Ticker",
+      "type": "string"
+    },
+    "transmit": {
+      "const": false,
+      "default": false,
+      "title": "Transmit",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "report_id",
+    "started_at",
+    "completed_at",
+    "status",
+    "maximum_claim",
+    "provider",
+    "ticker",
+    "request",
+    "requested_market_data_type",
+    "broker_read_observed",
+    "independent_second_session_requested",
+    "independent_second_session_verified",
+    "checks"
+  ],
+  "title": "IbkrReadOnlyValidationReport",
+  "type": "object"
+}

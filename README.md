@@ -2,6 +2,10 @@
 
 > Lecture française : [`docs/LECTURE_FR.md`](docs/LECTURE_FR.md) regroupe le handoff, les livres,
 > les sources, les formules, la recherche des phases 1 à 11 et le plan complet en français.
+>
+> Dossier d'étude humain : [`docs_v2/_review/00_COMMENCER_ICI.md`](docs_v2/_review/00_COMMENCER_ICI.md)
+> explique l'architecture, chaque décision importante, les invariants de sécurité, IBKR,
+> Cloudflare, les niveaux de preuve et le runbook de reprise.
 
 Read-only, generic, knowledge-driven option research for bounded-risk trade
 requests. The active pipeline loads provenance-aware recipes, enumerates listed
@@ -16,8 +20,8 @@ Phase M-CF0 adds one private Cloudflare Workers application under [`cloudflare/`
 Cloudflare Access authentication, a bundled dashboard and API, D1 persistence, and a SQLite
 Durable Object alarm monitor.
 The Python engine exports the immutable dossier; Cloudflare does not duplicate pricing or model
-training and cannot transmit a broker order. No VPS, production Docker, database server, or
-always-on Mac is required.
+training. The research dashboard alone needs no VPS, production Docker, database server, or
+always-on Mac.
 
 ```bash
 python -m take_two_options.cloud.export_position \
@@ -38,6 +42,65 @@ secret verifier. Wrangler returns the real `take-two-control.<account>.workers.d
 domain is optional later. See the
 [`zero-cost deployment guide`](docs/cloudflare/ZERO_COST_DEPLOYMENT.md) and
 [`CF0 architecture`](docs/cloudflare/ARCHITECTURE.md).
+
+## IBKR paper bridge et données de marché — frontières séparées
+
+An isolated paper-only control plane is now staged under
+[`services/ibkr-paper-bridge`](services/ibkr-paper-bridge). It targets an Oracle A1 ARM64 VM so the
+personal Mac and VS Code can be off. D1 keeps immutable intents/events; the VM polls outbound,
+journals locally before broker work, and will later connect to IB Gateway paper on localhost port
+`4002`. It does not use an IBKR API key.
+
+The execution adapter remains deliberately disabled and the broker kill switch defaults on. A
+separate market-data-only adapter can now qualify TTWO options, capture bounded chains and BAG
+quotes, and convert them to the canonical engine snapshot. It is tested offline, refuses live
+accounts and non-loopback hosts, and does not connect unless `--connect-read-only` is supplied.
+The full chain path has not yet been validated against IBKR. No live-account mode exists. See the
+[`paper control specification`](docs/specs/M_IBKR_PAPER_CONTROL_PLANE.md) and
+[`Oracle A1 runbook`](docs/deployment/ORACLE_A1_IBKR_PAPER_BRIDGE.md), plus the
+[`IBKR provider chapter`](docs_v2/_review/07_INTEGRATION_IBKR.md).
+
+The future connection checkpoint is one explicitly armed command:
+
+```bash
+ttwo-options data ibkr-validate \
+  --connect-read-only \
+  --expiration-start 2027-01-01 \
+  --expiration-end 2027-02-01 \
+  --minimum-strike 180 \
+  --maximum-strike 320
+```
+
+It writes ignored private JSON/Markdown evidence, exercises a second independent session and can
+resolve a human-selected BAG plan from the captured chain. It has not been run against IBKR yet.
+The report now includes redacted retry, pacing, and cache counters with stale fallback fixed to
+zero. A separate offline command can sanitize an already-obtained what-if observation; it does not
+call IBKR's order-shaped what-if operation.
+
+```bash
+ttwo-options paper what-if-normalize \
+  --observation reports/private/ibkr-what-if-observation.json \
+  --evidence-out reports/private/ibkr-what-if-evidence.json \
+  --report-out reports/private/ibkr-what-if-normalization.json
+```
+
+The future shadow campaign also has an offline-only control plane. The committed example is
+deliberately blocked and this command contacts neither IBKR nor another provider:
+
+```bash
+ttwo-options paper shadow-status \
+  --manifest configs/paper/shadow_campaign.example.json \
+  --decision-ledger reports/private/paper-decisions.jsonl \
+  --realization-ledger reports/private/paper-realizations.jsonl \
+  --output reports/private/shadow-campaign-status.json
+```
+
+An approved manifest must freeze human-selected thresholds and evidence hashes. Decisions and
+later realizations live in separate hash-chained append-only ledgers. The CLI can append them only
+under the approved campaign ID, frozen commit/config, active decision window and human-selected
+recording-delay thresholds. Committed drafts are `example_only=true` and refused. Even when
+observation targets are reached, the software keeps `paper_validation_passed=false` pending human
+review.
 
 ## Phase M — Governed prospective context
 

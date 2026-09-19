@@ -26,7 +26,7 @@ from take_two_options.cloud.research_contracts import (
 )
 from take_two_options.config.loader import load_prospective_budget_config
 from take_two_options.decision.request import load_trade_request
-from take_two_options.domain import OptionType
+from take_two_options.domain import ExerciseStyle, OptionType
 from take_two_options.knowledge.compiler import compile_knowledge
 from take_two_options.knowledge.loader import load_knowledge
 from take_two_options.knowledge.provenance import stable_hash
@@ -38,6 +38,7 @@ from take_two_options.knowledge.schemas import (
 from take_two_options.optimization.complexity import complexity_penalty
 from take_two_options.optimization.pareto import pareto_rank
 from take_two_options.phase_m_context import build_phase_m_decision_context
+from take_two_options.quantitative.contracts import EvidenceLevel
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REQUEST = ROOT / "configs/trades/ttwo_gta6_1000eur.yaml"
@@ -77,6 +78,7 @@ def synthetic_demo_snapshot() -> MarketSnapshot:
                         symbol=symbol,
                         expiration=expiration,
                         option_type=option_type,
+                        exercise_style=ExerciseStyle.AMERICAN,
                         strike=float(strike),
                         bid=bid,
                         ask=ask,
@@ -86,6 +88,9 @@ def synthetic_demo_snapshot() -> MarketSnapshot:
                         delta=round(delta, 6),
                         quote_timestamp=as_of,
                         multiplier=100,
+                        multiplier_status=EvidenceLevel.KNOWN,
+                        contract_adjustment_status=EvidenceLevel.KNOWN,
+                        deliverable_description="standard listed deliverable",
                         price_quality="modeled",
                         source_id="synthetic-demo-chain-v1",
                     )
@@ -122,6 +127,8 @@ def _quantity(candidate: CompiledStrategyCandidate) -> int:
 def _relative_spread(candidate: CompiledStrategyCandidate) -> float | None:
     spreads = []
     for leg in candidate.legs:
+        if leg.quote.bid is None or leg.quote.ask is None:
+            return None
         mid = (leg.quote.bid + leg.quote.ask) / 2
         if mid > 0:
             spreads.append((leg.quote.ask - leg.quote.bid) / mid)

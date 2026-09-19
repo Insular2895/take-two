@@ -75,13 +75,17 @@ describe("private Cloudflare Access boundary", () => {
     expect(dashboardHtml).toContain("TTWO — POSITION CONTROL");
     expect(dashboardHtml).toContain("action-password-dialog");
     expect(dashboardHtml).toContain("candidate-compare-title");
+    expect(dashboardHtml).toContain("telemetry-status");
+    expect(dashboardHtml).toContain("IBKR PAPER — LIVE READ-ONLY");
     expect(dashboardHtml).toContain("Non calculé");
     const styles = await request("/styles.css", session);
     expect(styles.headers.get("Content-Type")).toContain("text/css");
     expect(await styles.text()).toContain("#candidate-compare-dialog");
     const app = await request("/app.js", session);
     expect(app.headers.get("Content-Type")).toContain("text/javascript");
-    expect(await app.text()).toContain("Non borné");
+    const appJavaScript = await app.text();
+    expect(appJavaScript).toContain("Non borné");
+    expect(appJavaScript).toContain("/api/broker/telemetry");
   });
 
   it("rejects Access identities without an email", async () => {

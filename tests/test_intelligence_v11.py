@@ -59,6 +59,7 @@ from take_two_options.intelligence.valuation import (
 from take_two_options.intelligence.volatility_calibration import (
     calibrate_local_volatility,
 )
+from take_two_options.opra.contracts import BrokerWhatIfEvidence
 from take_two_options.quantitative.model_uncertainty import EnsembleWeightBasis
 from take_two_options.thesis_scanner.schemas import ThesisScanReport
 
@@ -495,6 +496,39 @@ def test_execution_previews_cannot_transmit() -> None:
     gateway = execution_gateway()
     with pytest.raises(ForbiddenOperation):
         gateway.submit_order({"symbol": "TTWO"})
+
+
+def test_execution_preview_consumes_only_complete_typed_what_if_evidence() -> None:
+    candidate = select_candidate_pool(_base_report(), 1)[0]
+    complete = BrokerWhatIfEvidence(
+        candidate_id=candidate.candidate_id,
+        observed_at=datetime(2026, 7, 28, tzinfo=UTC),
+        currency="USD",
+        estimated_commission=2.5,
+        initial_margin_change=-100,
+        maintenance_margin_change=-80,
+        source_id="ibkr-paper-redacted",
+        complete=True,
+    )
+    preview = build_execution_previews(
+        [candidate],
+        what_if_evidence={candidate.candidate_id: complete},
+    )[0]
+    assert preview.estimated_commission_usd == pytest.approx(2.5)
+    assert preview.margin_what_if_usd == pytest.approx(-100)
+    assert preview.maintenance_margin_change_usd == pytest.approx(-80)
+    assert preview.what_if_source_id == "ibkr-paper-redacted"
+    assert preview.what_if_complete is True
+
+    incomplete = complete.model_copy(update={"complete": False})
+    blocked = build_execution_previews(
+        [candidate],
+        what_if_evidence={candidate.candidate_id: incomplete},
+    )[0]
+    assert blocked.estimated_commission_usd is None
+    assert blocked.margin_what_if_usd is None
+    assert blocked.what_if_complete is False
+    assert "Broker what-if evidence is incomplete and was not consumed." in blocked.blockers
 
 
 def test_order_capable_adapter_is_rejected() -> None:

@@ -21,6 +21,7 @@ from take_two_options.decision.engine_verdict import EngineVerdictReport
 from take_two_options.decision.quality_scores import FiveScoreReport
 from take_two_options.decision.severity_gates import SeverityGateReport
 from take_two_options.empirical_calibration import EmpiricalCalibrationReport
+from take_two_options.execution_revalidation import ExecutionRevalidationTicket
 from take_two_options.historical_data.contracts import HistoricalDatasetManifest
 from take_two_options.historical_data.data_rights import DataUsageRightsReport
 from take_two_options.historical_data.event_regimes import EventRegimeReport
@@ -37,12 +38,28 @@ from take_two_options.intelligence.schemas import (
     UnifiedObservation,
 )
 from take_two_options.opra.contracts import (
+    BrokerWhatIfEvidence,
+    LiveComboQuote,
     LiveOptionChainSnapshot,
     ProviderReadinessReport,
 )
 from take_two_options.opra.paper_decisions import (
+    PaperDecisionDraft,
     PaperDecisionRecord,
+    PaperRealizationDraft,
     PaperRealizationRecord,
+)
+from take_two_options.opra.shadow_campaign import (
+    ShadowCampaignManifest,
+    ShadowCampaignStatusReport,
+)
+from take_two_options.opra.validation import (
+    ComboValidationPlan,
+    IbkrReadOnlyValidationReport,
+)
+from take_two_options.opra.what_if import (
+    BrokerWhatIfNormalizationReport,
+    BrokerWhatIfObservation,
 )
 from take_two_options.phase_m_context import PhaseMDecisionContext
 from take_two_options.quantitative.historical_surfaces import HistoricalSurfaceReport
@@ -61,6 +78,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "data_usage_rights.schema.json": DataUsageRightsReport,
     "empirical_calibration.schema.json": EmpiricalCalibrationReport,
     "engine_verdict_report.schema.json": EngineVerdictReport,
+    "execution_revalidation_ticket.schema.json": ExecutionRevalidationTicket,
     "five_score_report.schema.json": FiveScoreReport,
     "final_pre_opra_report.schema.json": FinalPreOpraReport,
     "severity_gate_report.schema.json": SeverityGateReport,
@@ -77,9 +95,19 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "historical_option_dataset_summary.schema.json": HistoricalOptionDatasetSummary,
     "market_context_summary.schema.json": MarketContextSummary,
     "live_option_chain_snapshot.schema.json": LiveOptionChainSnapshot,
+    "live_combo_quote.schema.json": LiveComboQuote,
+    "broker_what_if_evidence.schema.json": BrokerWhatIfEvidence,
+    "broker_what_if_observation.schema.json": BrokerWhatIfObservation,
+    "broker_what_if_normalization_report.schema.json": BrokerWhatIfNormalizationReport,
+    "ibkr_combo_validation_plan.schema.json": ComboValidationPlan,
+    "ibkr_read_only_validation_report.schema.json": IbkrReadOnlyValidationReport,
     "opra_provider_readiness.schema.json": ProviderReadinessReport,
     "paper_decision_record.schema.json": PaperDecisionRecord,
+    "paper_decision_draft.schema.json": PaperDecisionDraft,
     "paper_realization_record.schema.json": PaperRealizationRecord,
+    "paper_realization_draft.schema.json": PaperRealizationDraft,
+    "shadow_campaign_manifest.schema.json": ShadowCampaignManifest,
+    "shadow_campaign_status.schema.json": ShadowCampaignStatusReport,
     "historical_surface_report.schema.json": HistoricalSurfaceReport,
     "holdout_ledger_entry.schema.json": HoldoutLedgerEntry,
     "readiness.schema.json": FeatureReadiness,

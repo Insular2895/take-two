@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 
 from take_two_options.candidate_generation.factory import build_candidate
-from take_two_options.domain import OptionType, PositionSide
+from take_two_options.domain import ExerciseStyle, OptionType, PositionSide
 from take_two_options.knowledge.schemas import (
     Architecture,
     Catalyst,
@@ -21,6 +21,7 @@ from take_two_options.knowledge.schemas import (
     StrategyCatalog,
     TradeRequest,
 )
+from take_two_options.quantitative.contracts import EvidenceLevel
 from take_two_options.thesis_scanner.schemas import (
     QuoteRejectionSummary,
     ThesisChain,
@@ -131,6 +132,7 @@ def _snapshot(quote: ThesisQuote) -> QuoteSnapshot:
         symbol=quote.symbol,
         expiration=quote.expiration,
         option_type=quote.option_type,
+        exercise_style=ExerciseStyle.AMERICAN,
         strike=quote.strike,
         bid=quote.bid,
         ask=quote.ask,
@@ -140,6 +142,19 @@ def _snapshot(quote: ThesisQuote) -> QuoteSnapshot:
         delta=quote.delta,
         quote_timestamp=quote.quote_timestamp,
         multiplier=quote.multiplier,
+        multiplier_status=(
+            EvidenceLevel.KNOWN
+            if quote.multiplier_status == "confirmed"
+            else EvidenceLevel.HEURISTIC
+        ),
+        contract_adjustment_status=(
+            EvidenceLevel.KNOWN
+            if quote.standard_contract is True
+            else EvidenceLevel.UNKNOWN
+        ),
+        deliverable_description=(
+            "standard listed deliverable" if quote.standard_contract is True else None
+        ),
         price_quality=quality,
         source_id=quote.source_id,
     )

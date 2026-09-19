@@ -1,8 +1,9 @@
 # Phase M future — plan de validation finale OPRA
 
-Statut actuel au 18 août 2026 : `CONFIGURED_NOT_ENTITLED`. La Phase M n'est pas
-démarrée. Ce plan n'autorise ni connexion aujourd'hui, ni ordre réel, ni création
-d'un faux holdout.
+Statut code au 16 septembre 2026 : `OFFLINE_PROVIDER_IMPLEMENTED_LIVE_VALIDATION_PENDING`.
+L'entitlement et la licence restent non confirmés. Ce plan n'autorise ni ordre réel ni création
+d'un faux holdout. Le handshake paper observé le 25 août ne vaut pas validation de la nouvelle
+capture de chaîne.
 
 ## Configuration IBKR retenue jusqu'au point d'arrêt
 
@@ -37,9 +38,31 @@ ttwo-options pre-opra-finalize --config configs/pre_opra/v1/ttwo_research.yaml
 ```
 
 Cette commande ne se connecte pas et ne démarre pas la Phase M. Elle reconstruit les
-preuves agrégées et valide uniquement la forme de la configuration. Le provider réel
-implémentera `LiveOptionMarketDataProvider`, limité à `health()` et
-`get_option_chain()`.
+preuves agrégées et valide uniquement la forme de la configuration.
+
+Le provider réel implémente désormais `LiveOptionMarketDataProvider` et
+`LiveComboMarketDataProvider`. Sa commande reste désarmée sans consentement explicite :
+
+```bash
+ttwo-options data ibkr-validate \
+  --connect-read-only \
+  --expiration-start 2027-01-01 \
+  --expiration-end 2027-02-01 \
+  --minimum-strike 180 \
+  --maximum-strike 320 \
+  --maximum-contracts 500 \
+  --maximum-expirations 12 \
+  --combo-plan reports/private/ibkr_combo_validation.json \
+  --report-json-out reports/private/ibkr-validation.json \
+  --report-markdown-out reports/private/ibkr-validation.md \
+  --chain-json-out reports/private/ibkr-chain.json \
+  --engine-json-out reports/private/ibkr-market-snapshot.json
+```
+
+Cette commande n'est à utiliser qu'après validation des droits. Elle ne contient aucune capacité
+d'ordre et n'a pas été exécutée contre IBKR pendant les checkpoints du 16–17 septembre. Le plan
+BAG doit être copié depuis l'exemple, aligné sur des contrats effectivement listés, puis marqué
+`example_only=false`.
 
 ## Protocole prospectif à exécuter après validation humaine
 
@@ -58,6 +81,8 @@ implémentera `LiveOptionMarketDataProvider`, limité à `health()` et
    qualité des fills simulés, rejets, trous de données et changements de régime.
 8. Appliquer purge/embargo et ne jamais retuner sur le holdout final après ouverture.
 9. Produire un rapport Phase M distinct soumis à validation humaine.
+10. Évaluer le manifeste avec `ttwo-options paper shadow-status` ; l'atteinte des cibles reste
+    `PENDING_HUMAN_REVIEW` et ne vaut jamais validation automatique.
 
 ## Critères de blocage immédiat
 

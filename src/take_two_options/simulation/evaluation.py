@@ -7,6 +7,12 @@ from datetime import date
 from statistics import fmean, median
 
 from take_two_options.knowledge.schemas import CompiledStrategyCandidate, ModelMetrics, TradeRequest
+from take_two_options.quantitative.contracts import (
+    Measure,
+    ModelEligibility,
+    require_measure,
+)
+from take_two_options.quantitative.pricing import CanonicalMarketState
 from take_two_options.research_statistics import (
     conditional_value_at_risk,
     empirical_quantile,
@@ -22,32 +28,65 @@ def evaluate_path_set(
     *,
     request: TradeRequest,
     start_date: date,
+    market_state: CanonicalMarketState,
 ) -> ModelMetrics:
+    require_measure(
+        path_set.measure,
+        Measure.REAL_WORLD,
+        context="real-world PnL and probability evaluation",
+    )
     results = [
         execute_path(
             candidate,
             path,
             start_date=start_date,
+            market_state=market_state,
             commission_per_contract_side=request.execution_policy.commission_per_contract_side,
             slippage_per_contract_side=request.execution_policy.slippage_per_contract_side,
+            fx_costs=(0.0 if request.currency == "USD" else None),
         )
         for path in path_set.paths
     ]
     pnls = [result.pnl for result in results]
-    maximum_loss = max(candidate.risk.maximum_loss, 0.01)
-    returns = [pnl / maximum_loss for pnl in pnls]
+    maximum_loss = candidate.risk.maximum_loss
+    returns = (
+        [pnl / maximum_loss for pnl in pnls]
+        if maximum_loss is not None and maximum_loss > 0
+        else None
+    )
     reasons = Counter(result.exit_reason for result in results)
     return ModelMetrics(
         model_id=path_set.model_id,
+        measure=path_set.measure,
+        eligibility=(
+            path_set.eligibility
+            if returns is not None
+            else ModelEligibility.BLOCKED
+        ),
+        eligibility_reasons=(
+            [] if returns is not None else ["BLOCKED_CAPITAL_AT_RISK_UNKNOWN"]
+        ),
         paths=len(results),
         seed=path_set.seed,
         probability_profit=sum(value > 0 for value in pnls) / len(pnls),
-        probability_gain_50=sum(value > 0.5 for value in returns) / len(returns),
-        probability_gain_80=sum(value > 0.8 for value in returns) / len(returns),
-        probability_gain_100=sum(value > 1.0 for value in returns) / len(returns),
-        probability_loss_50=sum(value < -0.5 for value in returns) / len(returns),
-        probability_loss_70=sum(value < -0.7 for value in returns) / len(returns),
-        probability_near_total_loss=sum(value < -0.95 for value in returns) / len(returns),
+        probability_gain_50=(
+            sum(value > 0.5 for value in returns) / len(returns) if returns else None
+        ),
+        probability_gain_80=(
+            sum(value > 0.8 for value in returns) / len(returns) if returns else None
+        ),
+        probability_gain_100=(
+            sum(value > 1.0 for value in returns) / len(returns) if returns else None
+        ),
+        probability_loss_50=(
+            sum(value < -0.5 for value in returns) / len(returns) if returns else None
+        ),
+        probability_loss_70=(
+            sum(value < -0.7 for value in returns) / len(returns) if returns else None
+        ),
+        probability_near_total_loss=(
+            sum(value < -0.95 for value in returns) / len(returns) if returns else None
+        ),
         expected_pnl=fmean(pnls),
         median_pnl=median(pnls),
         quantiles={

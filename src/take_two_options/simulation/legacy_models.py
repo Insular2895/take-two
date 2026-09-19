@@ -7,7 +7,11 @@ import random
 from dataclasses import dataclass
 
 from take_two_options.domain import MarketDataBundle, SimulationModel
-from take_two_options.quantitative.contracts import DEFAULT_QUANT_CONVENTIONS, Measure
+from take_two_options.quantitative.contracts import (
+    DEFAULT_QUANT_CONVENTIONS,
+    Measure,
+    ModelEligibility,
+)
 
 
 @dataclass(frozen=True)
@@ -17,6 +21,7 @@ class SimulationPaths:
     terminal_variances: list[float]
     assumptions: list[str]
     measure: Measure = Measure.RISK_NEUTRAL
+    eligibility: ModelEligibility = ModelEligibility.DIAGNOSTIC_ONLY
 
 
 def _poisson(rng: random.Random, intensity: float) -> int:

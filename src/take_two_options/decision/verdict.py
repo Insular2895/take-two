@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from take_two_options.knowledge.schemas import CompiledStrategyCandidate, Verdict
+from take_two_options.quantitative.contracts import ModelEligibility
 
 
 def decide_verdict(
@@ -13,7 +14,11 @@ def decide_verdict(
 ) -> Verdict:
     if not data_available:
         return Verdict.BLOCKED_INSUFFICIENT_DATA
-    if any(candidate.status == "admissible" for candidate in candidates):
+    if any(
+        candidate.status == "admissible"
+        and candidate.evaluation.decision_status is ModelEligibility.DECISION_ELIGIBLE
+        for candidate in candidates
+    ):
         return Verdict.TRADE_ADMISSIBLE
     if any(
         candidate.evaluation.validation is not None

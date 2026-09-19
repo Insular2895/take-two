@@ -1,0 +1,31 @@
+[Unit]
+Description=Take Two IBKR Paper read-only telemetry
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/apps/take-two/services/ibkr-paper-bridge
+EnvironmentFile=/etc/take-two/ibkr-telemetry.env
+ExecStart=/home/ubuntu/.venvs/ibkr-api/bin/ttwo-ibkr-telemetry
+Restart=always
+RestartSec=15
+TimeoutStopSec=20
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

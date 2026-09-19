@@ -29,10 +29,11 @@ from take_two_options.budget import (
 from take_two_options.candidate_generation.factory import build_candidate
 from take_two_options.config.loader import load_prospective_budget_config
 from take_two_options.decision.request import load_trade_request
-from take_two_options.domain import OptionType, PositionSide
+from take_two_options.domain import ExerciseStyle, OptionType, PositionSide
 from take_two_options.knowledge.compiler import compile_knowledge
 from take_two_options.knowledge.loader import load_knowledge
 from take_two_options.knowledge.schemas import Architecture, QuoteSnapshot
+from take_two_options.quantitative.contracts import EvidenceLevel
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -301,6 +302,7 @@ def test_factory_evaluates_540_per_unit_as_distinct_whole_contract_candidates() 
         symbol="TTWO270820C00100000",
         expiration=date(2027, 8, 20),
         option_type=OptionType.CALL,
+        exercise_style=ExerciseStyle.AMERICAN,
         strike=100,
         bid=5.30,
         ask=5.393,
@@ -309,6 +311,9 @@ def test_factory_evaluates_540_per_unit_as_distinct_whole_contract_candidates() 
         implied_volatility=0.30,
         quote_timestamp=datetime(2026, 8, 24, 20, tzinfo=UTC),
         multiplier=100,
+        multiplier_status=EvidenceLevel.KNOWN,
+        contract_adjustment_status=EvidenceLevel.KNOWN,
+        deliverable_description="standard listed deliverable",
         price_quality="eod_bid_ask",
         source_id="unit-test",
     )
@@ -366,11 +371,15 @@ def test_factory_mixed_expiry_v2_excludes_common_expiry_proxy(
     recipe = next(item for item in catalog.recipes if item.architecture is architecture)
     common_quote = {
         "option_type": OptionType.CALL,
+        "exercise_style": ExerciseStyle.AMERICAN,
         "volume": 100,
         "open_interest": 500,
         "implied_volatility": 0.30,
         "quote_timestamp": datetime(2026, 8, 24, 20, tzinfo=UTC),
         "multiplier": 100,
+        "multiplier_status": EvidenceLevel.KNOWN,
+        "contract_adjustment_status": EvidenceLevel.KNOWN,
+        "deliverable_description": "standard listed deliverable",
         "price_quality": "eod_bid_ask",
         "source_id": "unit-test",
     }
@@ -409,7 +418,11 @@ def test_factory_mixed_expiry_v2_excludes_common_expiry_proxy(
         mixed_expiry_lifecycle=lifecycle,
     )
 
-    assert candidate.risk.maximum_loss > 0  # Legacy proxy retained for V1 reproduction.
+    assert candidate.risk.maximum_loss is None
+    assert candidate.risk.maximum_loss_status is EvidenceLevel.UNKNOWN
+    assert candidate.risk.diagnostic_common_expiry_maximum_loss is not None
+    assert candidate.risk.diagnostic_common_expiry_maximum_loss > 0
+    assert candidate.risk.budget_remaining is None
     assert candidate.budget_diagnostics is not None
     assert candidate.budget_diagnostics.maximum_loss is None
     assert candidate.budget_diagnostics.budget_status is (

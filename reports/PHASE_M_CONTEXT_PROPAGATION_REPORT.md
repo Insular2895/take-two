@@ -1,5 +1,9 @@
 # Phase M context propagation report
 
+> Historical file note (2026-08-30): the file list below describes the Phase M implementation at
+> that date. The former `src/take_two_options/engine.py` was later migrated into
+> `src/take_two_options/decision/pipeline.py` and deleted during PRE-OPRA consolidation.
+
 Date: 2026-08-24
 
 ## Initial finding

@@ -3,6 +3,8 @@ from statistics import fmean
 
 import pytest
 
+from take_two_options.quantitative.contracts import EvidenceLevel
+from take_two_options.quantitative.costs import EconomicComponent, reconcile_pnl
 from take_two_options.simulation.exit_state import (
     ExitState,
     advance_exit_state,
@@ -18,6 +20,37 @@ from take_two_options.simulation.uncertainty import (
     estimate_path_probabilities,
     estimate_probability,
 )
+
+
+def _path_result(
+    pnl: float,
+    exit_day: int,
+    exit_reason: str,
+    maximum_drawdown: float,
+) -> PathExecutionResult:
+    zero = EconomicComponent(
+        value=0.0,
+        evidence=EvidenceLevel.NOT_APPLICABLE,
+        source="uncertainty unit-test fixture",
+    )
+    reconciliation = reconcile_pnl(
+        gross_pnl=pnl,
+        entry_bid_ask_cost=zero,
+        exit_bid_ask_cost=zero,
+        entry_slippage=zero,
+        exit_slippage=zero,
+        commissions=zero,
+        exercise_assignment_settlement_costs=zero,
+        fx_costs=zero,
+    )
+    return PathExecutionResult(
+        pnl=pnl,
+        exit_day=exit_day,
+        exit_reason=exit_reason,
+        maximum_drawdown=maximum_drawdown,
+        return_on_risk=None,
+        reconciliation=reconciliation,
+    )
 
 
 def test_exit_state_machine_is_serializable_chronological_and_terminal() -> None:
@@ -117,9 +150,9 @@ def test_weighted_probability_reports_ess_without_fake_binomial_interval() -> No
 
 def test_all_canonical_path_probabilities_receive_uncertainty_sidecars() -> None:
     results = [
-        PathExecutionResult(60.0, 2, "profit_target", 1.0),
-        PathExecutionResult(-80.0, 3, "stop_loss", 80.0),
-        PathExecutionResult(10.0, 4, "time_exit", 3.0),
+        _path_result(60.0, 2, "profit_target", 1.0),
+        _path_result(-80.0, 3, "stop_loss", 80.0),
+        _path_result(10.0, 4, "time_exit", 3.0),
     ]
     report = estimate_path_probabilities(results, maximum_loss=100.0, minimum_paths=100)
 
@@ -174,12 +207,12 @@ def test_circular_block_bootstrap_is_seeded_and_preserves_dependency_blocks() ->
 
 def test_exit_discretization_gap_must_be_measured_before_lsm_expansion() -> None:
     coarse = [
-        PathExecutionResult(10.0, 2, "time_exit", 1.0),
-        PathExecutionResult(-5.0, 2, "stop_loss", 6.0),
+        _path_result(10.0, 2, "time_exit", 1.0),
+        _path_result(-5.0, 2, "stop_loss", 6.0),
     ]
     fine = [
-        PathExecutionResult(12.0, 3, "profit_target", 1.0),
-        PathExecutionResult(-5.5, 2, "stop_loss", 6.5),
+        _path_result(12.0, 3, "profit_target", 1.0),
+        _path_result(-5.5, 2, "stop_loss", 6.5),
     ]
     report = compare_exit_discretizations(coarse, fine, materiality_tolerance=1.0)
 

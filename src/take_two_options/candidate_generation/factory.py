@@ -31,6 +31,19 @@ from take_two_options.knowledge.schemas import (
     StrategyRecipe,
     TradeRequest,
 )
+from take_two_options.quantitative.contracts import EvidenceLevel
+from take_two_options.quantitative.pricing import require_contract_economics
+
+
+def _quote_prices(quote: QuoteSnapshot) -> tuple[float, float]:
+    if quote.bid is None or quote.ask is None:
+        raise ValueError("BLOCKED_BID_ASK_UNKNOWN")
+    return quote.bid, quote.ask
+
+
+def _entry_price(side: PositionSide, quote: QuoteSnapshot) -> float:
+    bid, ask = _quote_prices(quote)
+    return ask if side is PositionSide.LONG else bid
 
 
 def terminal_payoff(legs: Sequence[CandidateLeg], spot: float) -> float:
@@ -42,7 +55,8 @@ def terminal_payoff(legs: Sequence[CandidateLeg], spot: float) -> float:
             if quote.option_type.value == "call"
             else max(quote.strike - spot, 0.0)
         )
-        payoff += leg.side.sign * leg.quantity * quote.multiplier * intrinsic
+        multiplier = require_contract_economics(quote)
+        payoff += leg.side.sign * leg.quantity * multiplier * intrinsic
     return payoff
 
 
@@ -72,9 +86,27 @@ def _risk(
     request: TradeRequest,
 ) -> CandidateRisk:
     execution = request.execution_policy
+    if any(leg.quote.bid is None or leg.quote.ask is None for leg in legs):
+        raise ValueError("BLOCKED_BID_ASK_UNKNOWN")
+    theoretical_mid_entry = 0.0
+    for leg in legs:
+        bid, ask = _quote_prices(leg.quote)
+        theoretical_mid_entry += (
+            leg.side.sign
+            * leg.quantity
+            * require_contract_economics(leg.quote)
+            * ((bid + ask) / 2)
+        )
     entry_cash = sum(
-        leg.side.sign * leg.quantity * leg.quote.multiplier * leg.entry_price for leg in legs
+        leg.side.sign
+        * leg.quantity
+        * require_contract_economics(leg.quote)
+        * leg.entry_price
+        for leg in legs
     )
+    entry_bid_ask_cost = entry_cash - theoretical_mid_entry
+    if entry_bid_ask_cost < -1e-8:
+        raise ValueError("executable entry cannot improve on the declared midpoint")
     contract_sides = sum(leg.quantity for leg in legs)
     fees = execution.commission_per_contract_side * contract_sides
     slippage = execution.slippage_per_contract_side * contract_sides
@@ -89,11 +121,14 @@ def _risk(
     fx = request.fx_rate_to_usd or (1.0 if request.currency == "USD" else 0.0)
     budget_usd = request.budget * fx
     return CandidateRisk(
+        theoretical_mid_entry=round(theoretical_mid_entry, 4),
+        entry_bid_ask_cost=round(max(entry_bid_ask_cost, 0.0), 4),
         entry_debit=round(entry_cash, 4),
         fees=round(fees, 4),
         slippage=round(slippage, 4),
         total_cost=round(entry_cash + costs, 4),
         maximum_loss=round(maximum_loss, 4),
+        maximum_loss_status=EvidenceLevel.KNOWN,
         maximum_gain=round(maximum_gain, 4) if maximum_gain is not None else None,
         break_even_points=_break_evens(legs, entry_cash, costs),
         budget_remaining=round((budget_usd - maximum_loss) / fx, 4) if fx else 0.0,
@@ -122,12 +157,18 @@ def build_candidate(
         raise ValueError("PHASE_M_CONTEXT_PROVENANCE_INCOMPLETE")
     if phase_m_context_id is not None and mixed_expiry_lifecycle is None:
         raise ValueError("PHASE_M_LIFECYCLE_CONTEXT_MISSING")
+    if any(quote.bid is None or quote.ask is None for _, _, quote in leg_specs):
+        raise ValueError("BLOCKED_BID_ASK_UNKNOWN")
+    if any(quote.exercise_style is None for _, _, quote in leg_specs):
+        raise ValueError("BLOCKED_EXERCISE_STYLE_UNKNOWN")
+    for _, _, quote in leg_specs:
+        require_contract_economics(quote)
     legs = [
         CandidateLeg(
             side=side,
             quantity=ratio * quantity,
             quote=quote,
-            entry_price=quote.ask if side is PositionSide.LONG else quote.bid,
+            entry_price=_entry_price(side, quote),
         )
         for side, ratio, quote in leg_specs
     ]
@@ -146,6 +187,20 @@ def build_candidate(
         partial_recovery_feasible=partial_recovery,
     )
     risk = _risk(architecture, legs, request)
+    expirations = sorted({leg.quote.expiration for leg in legs})
+    mixed_expiry = len(expirations) > 1
+    if mixed_expiry:
+        common_expiry_proxy = risk.maximum_loss
+        risk = CandidateRisk.model_validate(
+            {
+                **risk.model_dump(),
+                "maximum_loss": None,
+                "maximum_loss_status": EvidenceLevel.UNKNOWN,
+                "diagnostic_common_expiry_maximum_loss": common_expiry_proxy,
+                "maximum_gain": None,
+                "budget_remaining": None,
+            }
+        )
     thesis_compatible = request.directional_thesis in recipe.allowed_theses
     liquidity_policy = request.liquidity_policy
     liquidity_compatible = all(
@@ -156,6 +211,8 @@ def build_candidate(
                 if quote.volume is None
                 else quote.volume >= liquidity_policy.minimum_volume
             )
+            and quote.bid is not None
+            and quote.ask is not None
             and quote.bid > 0
             and quote.ask > 0
             and (quote.ask - quote.bid) / ((quote.ask + quote.bid) / 2)
@@ -163,13 +220,16 @@ def build_candidate(
         )
         for _, _, quote in leg_specs
     )
-    synthetic_combo_exit = sum(
-        leg.side.sign
-        * leg.quantity
-        * leg.quote.multiplier
-        * (leg.quote.bid if leg.side is PositionSide.LONG else leg.quote.ask)
-        for leg in legs
-    )
+    synthetic_combo_exit = 0.0
+    for leg in legs:
+        bid, ask = _quote_prices(leg.quote)
+        exit_price = bid if leg.side is PositionSide.LONG else ask
+        synthetic_combo_exit += (
+            leg.side.sign
+            * leg.quantity
+            * require_contract_economics(leg.quote)
+            * exit_price
+        )
     synthetic_combo_mid = (risk.entry_debit + synthetic_combo_exit) / 2
     synthetic_combo_relative_spread = (
         (risk.entry_debit - synthetic_combo_exit) / abs(synthetic_combo_mid)
@@ -197,16 +257,23 @@ def build_candidate(
         if legacy_fx is None:
             hard_vetoes.append("FX_RATE_MISSING")
         else:
-            maximum_loss_request_currency = risk.maximum_loss / legacy_fx
-            if maximum_loss_request_currency > request.maximum_loss:
+            if risk.maximum_loss is None:
+                hard_vetoes.append("CAPITAL_AT_RISK_UNKNOWN")
+                maximum_loss_request_currency = None
+            else:
+                maximum_loss_request_currency = risk.maximum_loss / legacy_fx
+            if (
+                maximum_loss_request_currency is not None
+                and maximum_loss_request_currency > request.maximum_loss
+            ):
                 hard_vetoes.append("MAXIMUM_LOSS_EXCEEDED")
-            if maximum_loss_request_currency > request.budget * (
-                1 - request.safety_reserve_fraction
+            spendable_budget = request.budget * (1 - request.safety_reserve_fraction)
+            if (
+                maximum_loss_request_currency is not None
+                and maximum_loss_request_currency > spendable_budget
             ):
                 hard_vetoes.append("BUDGET_EXCEEDED")
     else:
-        expirations = sorted({leg.quote.expiration for leg in legs})
-        mixed_expiry = len(expirations) > 1
         lifecycle_configuration = (
             mixed_expiry_lifecycle or MixedExpiryLifecycleConfiguration()
         )
@@ -239,7 +306,7 @@ def build_candidate(
             architecture=architecture.value,
             currency="USD",
             required_entry_cash=risk.total_cost,
-            maximum_loss=None if mixed_expiry else risk.maximum_loss,
+            maximum_loss=risk.maximum_loss,
             buying_power_requirement=(
                 risk.maximum_loss if credit_structure and not mixed_expiry else None
             ),
@@ -263,7 +330,9 @@ def build_candidate(
             mixed_expiry_lifecycle=(lifecycle_configuration if mixed_expiry else None),
             analytical_loss_bound=None,
             analytical_bound_validated=False,
-            legacy_common_expiry_maximum_loss=(risk.maximum_loss if mixed_expiry else None),
+            legacy_common_expiry_maximum_loss=(
+                risk.diagnostic_common_expiry_maximum_loss if mixed_expiry else None
+            ),
         )
         budget_evaluation = evaluate_budget_policy(
             budget_candidate,

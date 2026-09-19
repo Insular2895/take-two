@@ -1,5 +1,10 @@
 # Audit des valeurs codées en dur
 
+> Mise à jour PRE-OPRA du 2026-08-30 : cet audit conserve les observations historiques, mais
+> `src/take_two_options/engine.py` et `src/take_two_options/scoring.py` ont depuis été migrés puis
+> supprimés. L'orchestration autoritative est `decision/pipeline.py`; le ranking actif est
+> Pareto-first et les modèles non éligibles ne peuvent plus piloter une décision.
+
 ## Conclusion
 
 Le dépôt n'a pas de strike ni d'échéance TTWO spécifique figé dans son moteur central de génération.
@@ -43,7 +48,7 @@ marché, la cible correcte est le dataset/provider, pas un fichier de politique.
 | Fichier / symbole | Valeur actuelle | Catégorie | Justification | Code | Config | Cible | Tests requis |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `domain.py:FundamentalSnapshot.validate_scenario_probabilities` | somme = 1 | `mathematical_invariant` | Une distribution doit totaliser 1 ; seule la tolérance numérique est implémentation | oui | non | aucune | somme invalide rejetée, tolérance flottante |
-| `quantitative/svi.py:raw_svi_total_variance` et `intelligence/valuation.py:_normal_cdf` | coefficients/formules publiées | `mathematical_invariant` | Formules mathématiques, pas décisions métier | oui | non | registre de formules | tests de référence et lineage |
+| `quantitative/svi.py:raw_svi_total_variance` et `quantitative/pricing.py:_normal_cdf_batch` | coefficients/formules publiées | `mathematical_invariant` | Formules mathématiques, pas décisions métier | oui | non | registre de formules | tests de référence et lineage |
 | Tolérances flottantes dans SVI, probabilités, symétrie | `1e-6`, `1e-8`, `1e-10`, `1e-12` | `software_default` | Garde numérique locale ; externaliser aveuglément nuirait à la stabilité | oui | non, sauf tolérance de convergence utilisateur | `numerical_policy` seulement si matériel | tests limites/scale et non-régression |
 | `domain.py:PricingConfiguration` | grids `100/100`, bornes `25..1000` | `software_default` | Discrétisation technique déjà exposée dans un objet | oui | oui | `model_universe.pricing_numerics` | convergence multi-grid et coût/temps |
 | `domain.py:MarketDataBundle` | paths `512`, seed `42` | `software_default` | Paramètres de calcul/reproductibilité, pas faits de marché | fallback technique oui | oui | `validation_policy.monte_carlo` | reproductibilité et convergence avec plusieurs path counts |
@@ -91,7 +96,7 @@ marché, la cible correcte est le dataset/provider, pas un fichier de politique.
 | même config `profile_weights` | trois vecteurs de poids | `configurable_policy` | Classement heuristique explicite, mais non calibré | non | oui | `optimization_objective.secondary_ranking` | sommes, sensibilité, corrélations, aucune promotion primaire |
 | `configs/research/default.yaml:ranking_policy` | poids 0.25/0.20/.../0.05 | `configurable_policy` | Déjà secondaire et expérimental ; meilleur emplacement que Python | non | oui | `optimization_objective.secondary_ranking` | somme/clefs, permutation, sensibilité |
 | `decision/ranking.py` liquidité | OI / (OI + `100`) | `incorrectly_hardcoded` | Échelle de saturation non documentée, influence le ranking | non | oui ou calibration empirique | `optimization_objective.normalization.liquidity` | scale OI, missing, sensibilité |
-| `scoring.py:score_candidate` | nombreux 0.70/0.80/0.90, coefficients 2/4/30, moyenne égale | `incorrectly_hardcoded` | Score legacy opaque/non versionné au regard du nouveau brief | legacy isolé seulement | oui si conservé | `optimization_objective.legacy_secondary` | snapshot legacy, jamais score primaire, sensibilité |
+| `scoring.py:score_candidate` (supprimé le 2026-08-30) | nombreux 0.70/0.80/0.90, coefficients 2/4/30, moyenne égale | `incorrectly_hardcoded` | Le score legacy opaque/non versionné a été retiré après migration de ses consommateurs | non | non | historique uniquement | test d'absence du module et du second pipeline |
 | `thesis_scanner/ranking.py:_criteria` | missing liquidity 0.35, mix 0.50/0.35/0.15, theta 2 %, préférences 1/0.65/0.45 | `incorrectly_hardcoded` | Heuristiques Python en plus des poids YAML | non | oui | `optimization_objective.profile_normalization` | missingness, monotonicité, ablation, sensibilité |
 | `intelligence/covariance.py` | poids récence 0.45/0.35/0.20, event 0.25, régime 0.30 | `configurable_policy` | Pondération modèle non présente dans `V11Policy` | non | oui | `model_universe.covariance.weighting` | poids N fenêtres, somme, stabilité PSD |
 | `intelligence/valuation.py:summarize_robustness` | score 0.65/0.20/0.15, gates 0.5/0.8/0.25 | `incorrectly_hardcoded` | Composite et verdict influencés par coefficients non versionnés | non | oui | `validation_policy.robustness` ; futur `model_agreement` distinct | monotonie, ablation, score version, désaccord extrême |

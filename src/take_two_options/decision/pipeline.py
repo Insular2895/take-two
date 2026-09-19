@@ -46,6 +46,8 @@ from take_two_options.optimization.parameter_stability import local_stability
 from take_two_options.optimization.pareto import pareto_rank
 from take_two_options.optimization.trial_registry import TrialRegistry
 from take_two_options.phase_m_context import PhaseMDecisionContext
+from take_two_options.quantitative.contracts import ModelEligibility
+from take_two_options.quantitative.pricing import CanonicalMarketState
 from take_two_options.reporting.decision_report import write_decision_report
 from take_two_options.reporting.ibkr_ticket import (
     write_blocked_ticket_status,
@@ -54,6 +56,7 @@ from take_two_options.reporting.ibkr_ticket import (
 from take_two_options.simulation.conditional_monte_carlo import simulate_conditional_paths
 from take_two_options.simulation.evaluation import evaluate_path_set
 from take_two_options.simulation.model_ensemble import summarize_models
+from take_two_options.simulation.path_execution import PathExecutionError
 from take_two_options.validation.gates import evaluate_validation_gates
 from take_two_options.validation.holdout import contaminated_holdout_ids
 from take_two_options.validation.placebo import placebo_diagnostics
@@ -121,6 +124,7 @@ def _progressive_final_evaluation(
     maximum_paths: int,
     seed: int,
     registry: TrialRegistry,
+    market_state: CanonicalMarketState,
 ) -> int:
     series = load_historical_series(series_path, ticker=request.ticker, cutoff=snapshot.as_of)
     previous: dict[str, float] = {}
@@ -138,17 +142,38 @@ def _progressive_final_evaluation(
         )
         converged = bool(previous)
         for candidate in candidates:
-            metrics = [
-                evaluate_path_set(
-                    candidate,
-                    path_set,
-                    request=request,
-                    start_date=request.as_of,
+            try:
+                metrics = [
+                    evaluate_path_set(
+                        candidate,
+                        path_set,
+                        request=request,
+                        start_date=request.as_of,
+                        market_state=market_state,
+                    )
+                    for path_set in path_sets
+                ]
+            except (ArithmeticError, ValueError, PathExecutionError) as error:
+                reason = f"{type(error).__name__}:{error}"
+                candidate.status = "blocked"
+                candidate.evaluation.decision_status = ModelEligibility.BLOCKED
+                candidate.evaluation.decision_reasons = [reason]
+                candidate.evaluation.numerical_failures = [reason]
+                registry.register(
+                    stage="fine_search",
+                    outcome="failed",
+                    architecture=candidate.architecture,
+                    candidate_id=candidate.candidate_id,
+                    parameters={"progressive_final_paths": path_count},
+                    reason=reason,
                 )
-                for path_set in path_sets
-            ]
+                converged = False
+                continue
             candidate.evaluation = summarize_models(metrics)
-            current = candidate.evaluation.conservative_expected_pnl or 0.0
+            current = candidate.evaluation.conservative_expected_pnl
+            if current is None:
+                converged = False
+                continue
             if candidate.candidate_id in previous:
                 tolerance = max(abs(current) * 0.05, 5.0)
                 converged = (
@@ -317,6 +342,14 @@ def analyze_trade(
                 phase_m_context=phase_m_context,
             )
     run.data_snapshot_id = snapshot.snapshot_id
+    if snapshot.lineage is not None:
+        run.dataset_id = snapshot.lineage.dataset_id
+        run.dataset_hash = snapshot.lineage.dataset_hash
+    run.model_versions = {
+        "canonical_pricer": "quantlib-authoritative-v1",
+        "conditional_paths": "pre-opra-v1",
+    }
+    market_state = CanonicalMarketState.from_snapshot(snapshot)
     historical_path = _historical_path(request.ticker)
     series = load_historical_series(
         historical_path, ticker=request.ticker, cutoff=snapshot.as_of
@@ -417,7 +450,11 @@ def analyze_trade(
             enumeration.candidates,
             key=lambda item: (
                 len(item.hard_vetoes),
-                item.risk.maximum_loss,
+                (
+                    item.risk.maximum_loss
+                    if item.risk.maximum_loss is not None
+                    else float("inf")
+                ),
                 item.candidate_id,
             ),
         ):
@@ -563,12 +600,19 @@ def analyze_trade(
         maximum_per_architecture=int(config["coarse_maximum_per_architecture"]),
     )
     score_by_id = {score.candidate_id: score for score in coarse.scores}
+
+    def coarse_sort_key(candidate: CompiledStrategyCandidate) -> tuple[float, float]:
+        score = score_by_id[candidate.candidate_id]
+        if (
+            score.conservative_expected_pnl is None
+            or score.worst_model_loss_probability is None
+        ):
+            raise ValueError("selected coarse candidate is missing decision statistics")
+        return (-score.conservative_expected_pnl, score.worst_model_loss_probability)
+
     base_candidates = sorted(
         coarse.selected,
-        key=lambda candidate: (
-            -score_by_id[candidate.candidate_id].conservative_expected_pnl,
-            score_by_id[candidate.candidate_id].worst_model_loss_probability,
-        ),
+        key=coarse_sort_key,
     )[: int(config["fine_maximum_base_candidates"])]
     fine = fine_search(
         base_candidates,
@@ -576,6 +620,7 @@ def analyze_trade(
         search_spaces={space.recipe_id: space for space in enumeration.search_spaces},
         path_sets=path_sets,
         request=request,
+        market_state=market_state,
         registry=registry,
     )
     for candidate in fine:
@@ -595,6 +640,7 @@ def analyze_trade(
             maximum_paths=int(config["final_paths_maximum"]),
             seed=seed,
             registry=registry,
+            market_state=market_state,
         )
     else:
         final_paths = 0
@@ -627,6 +673,8 @@ def analyze_trade(
         candidate.status = (
             "admissible"
             if candidate.evaluation.validation.status == "PASSED"
+            and candidate.evaluation.decision_status
+            is ModelEligibility.DECISION_ELIGIBLE
             and (
                 candidate.budget_diagnostics is None
                 or candidate.budget_diagnostics.paper_eligible
@@ -711,8 +759,14 @@ def analyze_trade(
     }
     audit_path.write_text(json.dumps(audit_payload, indent=2), encoding="utf-8")
     horizon_listed = any(not space.horizon_gap for space in enumeration.search_spaces)
+    model_evidence_available = any(
+        path_set.eligibility is ModelEligibility.DECISION_ELIGIBLE
+        for path_set in path_sets
+    )
     verdict = decide_verdict(
-        finalists, data_available=True, horizon_listed=horizon_listed
+        finalists,
+        data_available=model_evidence_available,
+        horizon_listed=horizon_listed,
     )
     holdout_status_value = (
         finalists[0].evaluation.validation.status
@@ -728,8 +782,16 @@ def analyze_trade(
         }
     )
     no_trade_reasons.extend(enumeration.warnings)
+    if not model_evidence_available:
+        no_trade_reasons.append("NO_DECISION_ELIGIBLE_REAL_WORLD_MODEL")
     if refresh_warning:
         no_trade_reasons.append(f"refresh warning: {refresh_warning}")
+    comparison_candidates = finalists
+    if not comparison_candidates:
+        comparison_candidates = sorted(
+            fine or coarse.selected or feasible,
+            key=lambda candidate: candidate.candidate_id,
+        )[:5]
     report = DecisionReport(
         report_id=f"decision-{run.run_id}",
         created_at=datetime.now(UTC),
@@ -781,7 +843,7 @@ def analyze_trade(
                 ),
                 "status": candidate.status,
             }
-            for candidate in finalists
+            for candidate in comparison_candidates
         ],
         no_trade_reasons=no_trade_reasons,
         sources=_sources(catalog, snapshot),

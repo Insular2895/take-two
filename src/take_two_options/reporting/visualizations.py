@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import html
+from collections.abc import Callable
 from pathlib import Path
 
 from take_two_options.candidate_generation.factory import terminal_payoff
-from take_two_options.knowledge.schemas import DecisionReport
+from take_two_options.knowledge.schemas import CompiledStrategyCandidate, DecisionReport
 
 FIGURE_NAMES = [
     "payoff_at_expiration",
@@ -55,6 +56,56 @@ def _bars(title: str, labels: list[str], values: list[float], note: str) -> str:
     )
 
 
+def _available_series(
+    candidates: list[CompiledStrategyCandidate],
+    value_for: Callable[[CompiledStrategyCandidate], float | None],
+    *,
+    labels_for: Callable[[CompiledStrategyCandidate], str] | None = None,
+) -> tuple[list[str], list[float]]:
+    pairs: list[tuple[str, float]] = []
+    for candidate in candidates:
+        value = value_for(candidate)
+        if value is None:
+            continue
+        label = (
+            labels_for(candidate)
+            if labels_for is not None
+            else candidate.candidate_id[-6:]
+        )
+        pairs.append((label, value))
+    return [item[0] for item in pairs], [item[1] for item in pairs]
+
+
+def _minimum_probability_profit(candidate: CompiledStrategyCandidate) -> float | None:
+    values = [metric.probability_profit for metric in candidate.evaluation.model_metrics]
+    return min(values) if values else None
+
+
+def _maximum_probability_loss(candidate: CompiledStrategyCandidate) -> float | None:
+    values = [
+        metric.probability_loss_70
+        for metric in candidate.evaluation.model_metrics
+        if metric.probability_loss_70 is not None
+    ]
+    return max(values) if values else None
+
+
+def _maximum_metric(
+    candidate: CompiledStrategyCandidate,
+    name: str,
+) -> float | None:
+    values = [float(getattr(metric, name)) for metric in candidate.evaluation.model_metrics]
+    return max(values) if values else None
+
+
+def _iv_sensitivity(candidate: CompiledStrategyCandidate) -> float | None:
+    higher = candidate.evaluation.stress_results.get("iv_plus_10pct_proxy")
+    lower = candidate.evaluation.stress_results.get("iv_minus_10pct_proxy")
+    if higher is None or lower is None:
+        return None
+    return higher - lower
+
+
 def _figure_data(report: DecisionReport, name: str) -> tuple[list[str], list[float], str]:
     candidates = report.candidates
     labels = [candidate.candidate_id[-6:] for candidate in candidates]
@@ -83,101 +134,98 @@ def _figure_data(report: DecisionReport, name: str) -> tuple[list[str], list[flo
     if name == "cost_by_strike":
         return labels, [candidate.risk.total_cost for candidate in candidates], "Modeled USD cost."
     if name == "probability_gain_by_strike":
+        series_labels, values = _available_series(
+            candidates,
+            _minimum_probability_profit,
+        )
         return (
-            labels,
-            [
-                min(
-                    (
-                        metric.probability_profit
-                        for metric in candidate.evaluation.model_metrics
-                    ),
-                    default=0,
-                )
-                for candidate in candidates
-            ],
+            series_labels,
+            values,
             "Conservative probability across separate simulation models.",
         )
     if name == "probability_loss_70_by_strike":
+        series_labels, values = _available_series(
+            candidates,
+            _maximum_probability_loss,
+        )
         return (
-            labels,
-            [
-                max(
-                    (
-                        metric.probability_loss_70
-                        for metric in candidate.evaluation.model_metrics
-                    ),
-                    default=0,
-                )
-                for candidate in candidates
-            ],
+            series_labels,
+            values,
             "Higher bars indicate more simulated severe-loss risk.",
         )
     if name in {"expectation_by_profit_target", "stop_sensitivity", "dte_sensitivity"}:
-        return (
-            [
+        series_labels, values = _available_series(
+            candidates,
+            lambda candidate: candidate.evaluation.conservative_expected_pnl,
+            labels_for=lambda candidate: (
                 f"{candidate.exit_policy.profit_target}/"
                 f"{candidate.exit_policy.stop_loss}/"
                 f"{candidate.exit_policy.maximum_holding_days}"
-                for candidate in candidates
-            ],
-            [candidate.evaluation.conservative_expected_pnl or 0 for candidate in candidates],
+            ),
+        )
+        return (
+            series_labels,
+            values,
             "Parameters are experimental search points, not universal thresholds.",
         )
     if name == "drawdown_by_profit_target":
+        series_labels, values = _available_series(
+            candidates,
+            lambda candidate: _maximum_metric(candidate, "simulated_drawdown"),
+        )
         return (
-            labels,
-            [
-                max(
-                    (
-                        metric.simulated_drawdown
-                        for metric in candidate.evaluation.model_metrics
-                    ),
-                    default=0,
-                )
-                for candidate in candidates
-            ],
+            series_labels,
+            values,
             "Worst simulated path drawdown by displayed candidate.",
         )
     if name == "duration_by_profit_target":
+        series_labels, values = _available_series(
+            candidates,
+            lambda candidate: _maximum_metric(candidate, "mean_exit_days"),
+        )
         return (
-            labels,
-            [
-                max(
-                    (
-                        metric.mean_exit_days
-                        for metric in candidate.evaluation.model_metrics
-                    ),
-                    default=0,
-                )
-                for candidate in candidates
-            ],
+            series_labels,
+            values,
             "Mean modeled exit time; no execution recommendation.",
         )
     if name == "iv_sensitivity":
+        series_labels, values = _available_series(candidates, _iv_sensitivity)
         return (
-            labels,
-            [
-                candidate.evaluation.stress_results.get("iv_plus_10pct_proxy", 0)
-                - candidate.evaluation.stress_results.get("iv_minus_10pct_proxy", 0)
-                for candidate in candidates
-            ],
+            series_labels,
+            values,
             "Proxy only; detailed future IV-surface forecasting remains unavailable.",
         )
     if name == "pareto_frontier":
+        series_labels, values = _available_series(
+            candidates,
+            lambda candidate: (
+                float(candidate.pareto_rank)
+                if candidate.pareto_rank is not None
+                else None
+            ),
+        )
         return (
-            labels,
-            [float(candidate.pareto_rank or 0) for candidate in candidates],
+            series_labels,
+            values,
             "Pareto rank precedes the explanatory score.",
         )
     if name == "local_stability":
+        series_labels, values = _available_series(
+            candidates,
+            lambda candidate: candidate.evaluation.local_stability,
+        )
         return (
-            labels,
-            [candidate.evaluation.local_stability or 0 for candidate in candidates],
+            series_labels,
+            values,
             "Isolated optima receive low or unavailable stability.",
         )
+    series_labels, values = _available_series(
+        candidates,
+        lambda candidate: candidate.evaluation.conservative_expected_pnl,
+    )
     return (
-        labels,
-        [candidate.evaluation.conservative_expected_pnl or 0 for candidate in candidates],
+        series_labels,
+        values,
         "Figure is bounded by the candidates and data available in this run.",
     )
 

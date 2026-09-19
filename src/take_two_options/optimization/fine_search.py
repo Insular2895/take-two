@@ -13,9 +13,12 @@ from take_two_options.knowledge.schemas import (
 )
 from take_two_options.optimization.complexity import complexity_penalty
 from take_two_options.optimization.trial_registry import TrialRegistry
+from take_two_options.quantitative.contracts import ModelEligibility
+from take_two_options.quantitative.pricing import CanonicalMarketState
 from take_two_options.simulation.conditional_monte_carlo import ConditionalPathSet
 from take_two_options.simulation.evaluation import evaluate_path_set
 from take_two_options.simulation.model_ensemble import summarize_models
+from take_two_options.simulation.path_execution import PathExecutionError
 
 
 def fine_search(
@@ -25,6 +28,7 @@ def fine_search(
     search_spaces: dict[str, StrategySearchSpace],
     path_sets: list[ConditionalPathSet],
     request: TradeRequest,
+    market_state: CanonicalMarketState,
     registry: TrialRegistry,
 ) -> list[CompiledStrategyCandidate]:
     evaluated: list[CompiledStrategyCandidate] = []
@@ -83,15 +87,33 @@ def fine_search(
                 capital_recovery_rule=recovery_rule,
                 origin=recipe.profit_targets.origin,
             )
-            model_metrics = [
-                evaluate_path_set(
-                    variant,
-                    path_set,
-                    request=request,
-                    start_date=request.as_of,
+            try:
+                model_metrics = [
+                    evaluate_path_set(
+                        variant,
+                        path_set,
+                        request=request,
+                        start_date=request.as_of,
+                        market_state=market_state,
+                    )
+                    for path_set in path_sets
+                ]
+            except (ArithmeticError, ValueError, PathExecutionError) as error:
+                reason = f"{type(error).__name__}:{error}"
+                variant.status = "blocked"
+                variant.evaluation.decision_status = ModelEligibility.BLOCKED
+                variant.evaluation.decision_reasons = [reason]
+                variant.evaluation.numerical_failures = [reason]
+                evaluated.append(variant)
+                registry.register(
+                    stage="fine_search",
+                    outcome="failed",
+                    architecture=variant.architecture,
+                    candidate_id=variant.candidate_id,
+                    parameters=parameters,
+                    reason=reason,
                 )
-                for path_set in path_sets
-            ]
+                continue
             variant.evaluation = summarize_models(model_metrics)
             variant.evaluation.complexity_penalty = complexity_penalty(variant)
             evaluated.append(variant)

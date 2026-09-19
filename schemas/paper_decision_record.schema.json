@@ -60,6 +60,11 @@
       "title": "Best Baseline",
       "type": "string"
     },
+    "campaign_id": {
+      "minLength": 1,
+      "title": "Campaign Id",
+      "type": "string"
+    },
     "candidate_set": {
       "items": {
         "type": "string"
@@ -109,6 +114,11 @@
     "decision_id": {
       "title": "Decision Id",
       "type": "string"
+    },
+    "example_only": {
+      "default": true,
+      "title": "Example Only",
+      "type": "boolean"
     },
     "five_scores": {
       "additionalProperties": {
@@ -188,9 +198,14 @@
       "title": "Record Kind",
       "type": "string"
     },
+    "recorded_at": {
+      "format": "date-time",
+      "title": "Recorded At",
+      "type": "string"
+    },
     "schema_version": {
-      "const": "1.0",
-      "default": "1.0",
+      "const": "1.1",
+      "default": "1.1",
       "title": "Schema Version",
       "type": "string"
     },
@@ -249,6 +264,8 @@
     "decision_confidence_intervals",
     "config_hash",
     "code_commit",
+    "campaign_id",
+    "recorded_at",
     "sequence",
     "record_hash"
   ],

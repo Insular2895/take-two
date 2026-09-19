@@ -31,6 +31,7 @@ from take_two_options.knowledge.schemas import (
     StrategyRecipe,
     TradeRequest,
 )
+from take_two_options.quantitative.contracts import EvidenceLevel
 
 
 class EnumerationResult(StrictModel):
@@ -71,6 +72,15 @@ def _quotes_for_space(
             continue
         moneyness = quote.strike / snapshot.spot
         if not search_space.minimum_moneyness <= moneyness <= search_space.maximum_moneyness:
+            continue
+        if (
+            quote.bid is None
+            or quote.ask is None
+            or quote.exercise_style is None
+            or quote.multiplier is None
+            or quote.multiplier_status is not EvidenceLevel.KNOWN
+            or quote.contract_adjustment_status is not EvidenceLevel.KNOWN
+        ):
             continue
         grouped[(quote.expiration, quote.option_type)].append(quote)
     for quotes in grouped.values():

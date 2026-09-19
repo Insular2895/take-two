@@ -43,7 +43,9 @@ capacité, jamais une promesse de rendement.
 | Robustesse, stress et allocation entière | `experimental_offline` | Les entrées probabilistes restent expérimentales. |
 | Surveillance par snapshots et replay | `experimental_offline` | Aucune campagne paper/live terminée. |
 | Rapports autonomes | `production_ready_offline` | Les résultats héritent du statut de leurs données. |
-| Port IBKR/OPRA read-only | `configured_not_entitled` | Socket TWS paper paramétré sans clé API ; session, entitlement et quotes combo absents. |
+| Provider IBKR/OPRA read-only | `experimental_offline` | Chaîne, normalisation, BAG et diagnostics de reprise testés avec transport fake ; entitlement/licence et validation live de la nouvelle implémentation absents. |
+| What-if broker | `experimental_offline` | Normalisation redacted et consommation typée codées ; requête broker ordre-shaped et valeurs réelles non observées. |
+| Contrôle campagne shadow | `experimental_offline` | Manifeste, append prospectif, délais et statut testés ; seuils humains non approuvés et aucune observation prospective collectée. |
 | Exécution | `blocked_for_execution` | `transmit=false`, `what_if=true`, confirmation humaine. |
 
 ## Gates de promotion
@@ -106,3 +108,47 @@ power, marge combo, commissions et exécution restent à observer en Phase M. Le
 `UNOPENED`, OPRA `NOT_STARTED` et aucune capacité d'ordre n'existe.
 
 `NEXT_PHASE = M — OPRA READ-ONLY + SHADOW/PAPER VALIDATION`.
+
+## Checkpoint provider IBKR — 16 septembre 2026
+
+Le provider officiel de marché est présent derrière une commande à consentement explicite. Les
+contrats, gates, normalisation, cache/retry/pacing, conversion moteur et comparaison BAG sont
+`experimental_offline`. Le handshake du 25 août est une preuve séparée et plus étroite ; il ne
+promote pas ce provider. `LIVE_DATA_READ_ONLY`, shadow et paper restent non franchis. L'exécution
+reste `blocked_for_execution`.
+
+## Checkpoint protocole de validation — 17 septembre 2026
+
+Une commande unique produit maintenant les preuves machine et humaines : santé initiale, seconde
+session indépendante, chaîne, identité contrat, complétude, couverture volume/OI/Greeks,
+timestamps, type de marché et BAG optionnelle résolue sans `conId` saisi manuellement. Les statuts
+séparent échec sûr, chemin observé non promouvable et promotion stricte des seules données. Ce
+protocole est `experimental_offline` tant qu'il n'a pas été exécuté contre le provider réel.
+
+La compatibilité HMAC Python/Cloudflare est prouvée par un vecteur partagé. Le trajet
+Oracle→Access→Worker→D1→dashboard demeure `requires_live_market_data`/preuve distante requise.
+
+## Checkpoint contrôle shadow — 17 septembre 2026
+
+Le code peut maintenant vérifier un manifeste de campagne, lier un commit, une configuration, une
+preuve IBKR, un holdout et deux approbations humaines, puis contrôler deux journaux hash-chaînés
+séparant décision et réalisation. Aucun seuil par défaut n'est inventé. Le manifeste d'exemple est
+`draft_to_validate` et `example_only=true`, donc bloqué.
+
+Même lorsque les nombres d'observations demandés sont atteints, le rapport conserve
+`paper_validation_passed=false`, `promotion_eligible=false` et exige une revue humaine. Cela prépare
+la campagne ; cela ne signifie pas qu'elle a commencé ni qu'une stratégie est validée.
+
+## Checkpoint préconnexion offline — 17 septembre 2026
+
+Le normaliseur what-if accepte une transcription redacted déjà obtenue, conserve les inconnues,
+rejette les sentinelles et n'alimente la preview que si candidat, devise et complétude concordent.
+Il n'appelle aucune primitive broker. Les rapports IBKR intègrent désormais les compteurs de
+retry, pacing et cache, avec `stale_fallbacks=0`.
+
+Les commandes shadow savent ajouter décision et réalisation prospectivement. Chaque record porte
+campagne et heure d'écriture ; les délais maximums n'ont pas de défaut et doivent être approuvés
+par le responsable risque. Les brouillons commités restent bloqués par `example_only=true`.
+
+Ce checkpoint clôt le code sûr réalisable sans branchement. Il ne franchit ni
+`LIVE_DATA_READ_ONLY`, ni shadow, ni paper, et n'ajoute aucune capacité d'ordre.

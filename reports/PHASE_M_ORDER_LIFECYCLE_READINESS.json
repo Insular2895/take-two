@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "report_date": "2026-09-18",
+  "branch": "codex/m-ibkr-paper-control-readonly",
+  "starting_commit": "f2bb94da2758d11256c02c18f53bde701041fffb",
+  "statuses": {
+    "ORDER_LIFECYCLE_MODEL": "READY_OFFLINE",
+    "NO_FILL_DIAGNOSTICS": "READY_OFFLINE",
+    "REPRICE_PROPOSAL": "READY_OFFLINE",
+    "ACTUAL_PAPER_GATEWAY": "DISABLED",
+    "PAPER_ORDER_TRANSMISSION": "DISABLED",
+    "LIVE_EXECUTION": "FORBIDDEN",
+    "HOLDOUT": "UNOPENED"
+  },
+  "migration": {
+    "name": "0010_order_lifecycle_readiness.sql",
+    "additive": true,
+    "prior_migrations_modified": false,
+    "clean_local_database": "PASS",
+    "upgrade_0001_0009_to_0010": "PASS",
+    "tables": [
+      "broker_order_state_latest",
+      "broker_order_lifecycle_events",
+      "broker_order_errors",
+      "broker_executions",
+      "broker_commissions",
+      "broker_market_snapshots",
+      "broker_reprice_proposals"
+    ]
+  },
+  "evidence_callbacks": [
+    "openOrder",
+    "openOrderEnd",
+    "orderStatus",
+    "error",
+    "execDetails",
+    "execDetailsEnd",
+    "commissionReport",
+    "completedOrdersEnd"
+  ],
+  "execution_quality_evidence": {
+    "submission_snapshot_joined_by_intent_id": true,
+    "optional_near_fill_combo_quote": true,
+    "optional_execution_delay": true,
+    "optional_slippage_metrics": true,
+    "optional_partial_fill_sequence": true,
+    "historical_scores_automatically_updated": false
+  },
+  "historical_50_eur_test": {
+    "root_cause": "UNRESOLVED_NO_BROKER_EVIDENCE",
+    "hypotheses_only": [
+      "TRANSMIT_FALSE",
+      "API/TWS_PRECAUTION",
+      "MISSING_MARKET_DATA",
+      "PRICE_PRECAUTION",
+      "INVALID/UNVERIFIED_ORDER_STATE"
+    ]
+  },
+  "repricing": {
+    "mode": "PREVIEW_ONLY",
+    "automatic_action_allowed": false,
+    "mutable_field": "combo_limit_price_only",
+    "leg_by_leg_fallback": false,
+    "automatic_chasing": false
+  },
+  "tests": {
+    "root_python": 450,
+    "root_python_warning_count": 1,
+    "bridge_python": 44,
+    "cloudflare": 72,
+    "cloudflare_test_files": 8,
+    "offline_json_schemas": 44,
+    "ruff": "PASS",
+    "mypy_source_files": 200,
+    "mypy": "PASS",
+    "pip_check": "PASS",
+    "npm_runtime_audit_vulnerabilities": 0,
+    "wrangler_dry_run": "PASS"
+  },
+  "security_boundaries": {
+    "runtime_gateway": "DisabledGateway",
+    "paper_execution_adapter": "disabled",
+    "paper_commands_require_transmit_false": true,
+    "live_execution_capability": "forbidden",
+    "order_mutation_wired": false
+  },
+  "external_actions": {
+    "remote_deployment": false,
+    "remote_d1_migration": false,
+    "ibkr_connection": false,
+    "paper_order": false,
+    "order_modification": false,
+    "order_cancellation": false,
+    "live_account_connection": false,
+    "holdout_opened": false
+  }
+}

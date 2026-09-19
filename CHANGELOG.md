@@ -1,5 +1,57 @@
 # Changelog
 
+## Unreleased — 2026-09-17
+
+### IBKR read-only option-chain adapter and human study dossier
+
+- Added a paper-only, loopback-only IBKR market-data provider using the official TWS API at runtime,
+  with contract qualification, bounded option-chain snapshots, spot, bid/ask, sizes, volume, open
+  interest, model Greeks and explicit timestamp provenance.
+- Added governed entitlement/licence gates before network I/O, TTWO allowlisting, bounded retry,
+  pacing, a short in-memory cache with no stale fallback, strict completeness and deterministic
+  hashes.
+- Added BAG snapshot quotes and comparison with executable per-leg synthetic prices; the signed
+  convention remains unconfirmed until observed in a real session.
+- Added an ingestion-only broker what-if evidence contract without adding order imports or broker
+  order methods.
+- Added the explicitly armed `ttwo-options data ibkr-chain --connect-read-only` command and two
+  generated JSON Schemas; private IBKR capture outputs are excluded from Git.
+- Added a single `ibkr-validate` protocol with health and independent-second-session checks,
+  structured chain coverage evidence, optional human-selected BAG resolution, redacted
+  JSON/Markdown reports and two additional schemas.
+- Added one shared Python/TypeScript HMAC vector proving local telemetry signature conformance
+  across the Oracle publisher and Cloudflare verifier; the remote E2E remains unproven.
+- Added a human-gated offline shadow campaign manifest, hash-chained decision and realization
+  ledgers, a no-provider status command and strict reports that can never auto-claim paper
+  validation.
+- Added strict offline what-if observation normalization, sentinel/non-finite handling, typed
+  execution-preview consumption and committed example inputs that fail closed by default.
+- Added provider diagnostics for attempts, retry exhaustion, pacing, cache expiry and the invariant
+  of zero stale fallback; diagnostics are embedded in the IBKR validation evidence.
+- Added governed shadow decision/realization append commands with campaign lineage, actual
+  recording timestamps, risk-owner delay thresholds and rejection of committed example drafts.
+- Added an 18-chapter French review dossier under `docs_v2/_review`, aligned stale current-state
+  documentation, and preserved the distinction between coded, offline-tested and live-observed.
+- No IBKR connection was made for this checkpoint. Entitlement, licence, full-chain behavior,
+  broker-side what-if capture and the actual shadow/paper campaign remain open; execution remains
+  forbidden.
+
+## 0.12.8 — 2026-08-25
+
+### Persistent IBKR Paper read-only telemetry
+
+- Added a dedicated signed machine route and strict schema for redacted TTWO-only IBKR Paper
+  snapshots, with separate HMAC identity, timestamp/body verification and nonce replay defense.
+- Added a latest-only D1 projection plus authenticated freshness API and responsive Position
+  workspace card for gateway state, collection age, positions, quotes, market value and
+  broker-reported P&L.
+- Added an outbound-only Python telemetry daemon and hardened systemd unit for the Oracle A1 VM;
+  it has no claim, event, order, cancel, modify, exercise, or execution capability.
+- Preserved unknown values as null, exposed quote/data completeness, and labelled broker P&L as
+  not yet reconciled with final commissions and fees.
+- Kept broker execution disabled, the kill switch engaged, and the telemetry credential unusable
+  on every broker-control route.
+
 ## 0.12.7 — 2026-08-25
 
 ### Cloud comparison clarity and maximum-gain currency correction

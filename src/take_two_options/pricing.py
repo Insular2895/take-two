@@ -228,12 +228,20 @@ def estimate_execution(candidate: StrategyCandidate, bundle: MarketDataBundle) -
             assert first is not None and second is not None
             width = abs(first.contract.strike - second.contract.strike)
             scale = option_legs[0].quantity * first.contract.multiplier
-            margin_requirement = max(width * scale + total_entry_cost, 0.01)
-            margin_status = MarginStatus.ESTIMATED
-            total_capital_required = margin_requirement
-            notes.append(
-                "Bounded vertical credit margin is an analytical estimate, not broker margin"
-            )
+            analytical_requirement = width * scale + total_entry_cost
+            if analytical_requirement > 0:
+                margin_requirement = analytical_requirement
+                margin_status = MarginStatus.ESTIMATED
+                total_capital_required = margin_requirement
+                notes.append(
+                    "Bounded vertical credit margin is an analytical estimate, not broker margin"
+                )
+            else:
+                margin_status = MarginStatus.UNKNOWN
+                total_capital_required = None
+                notes.append(
+                    "Analytical vertical capital was non-positive; broker margin remains unknown"
+                )
         else:
             margin_status = MarginStatus.UNKNOWN
             total_capital_required = None

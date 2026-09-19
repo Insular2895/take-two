@@ -3,6 +3,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "assessment_scope": {
+      "const": "offline_configuration_only",
+      "default": "offline_configuration_only",
+      "title": "Assessment Scope",
+      "type": "string"
+    },
     "authentication_mode": {
       "anyOf": [
         {

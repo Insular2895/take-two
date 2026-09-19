@@ -58,6 +58,10 @@ jobs:
         working-directory: cloudflare
         run: npm run check
 
+      - name: Reject high or critical runtime dependency vulnerabilities
+        working-directory: cloudflare
+        run: npm run audit:runtime
+
       - name: Build Cloudflare deployment bundle
         working-directory: cloudflare
         run: npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/take-two-cf0-dist"

@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from take_two_options.domain import StrictModel
 from take_two_options.knowledge.provenance import stable_hash
@@ -42,6 +42,7 @@ class PaperDecisionDraft(ImmutableStrictModel):
     decision_confidence_intervals: dict[str, tuple[float, float]]
     config_hash: str = Field(min_length=64, max_length=64)
     code_commit: str = Field(min_length=7, max_length=40)
+    example_only: bool = True
     holdout_used: Literal[False] = False
     transmit: Literal[False] = False
     what_if: Literal[True] = True
@@ -56,11 +57,26 @@ class PaperDecisionDraft(ImmutableStrictModel):
 
 
 class PaperDecisionRecord(PaperDecisionDraft):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.1"] = "1.1"
+    campaign_id: str = Field(min_length=1)
+    recorded_at: datetime
     sequence: int = Field(gt=0)
     previous_hash: str | None = Field(default=None, min_length=64, max_length=64)
     record_hash: str = Field(min_length=64, max_length=64)
     record_kind: Literal["paper_decision"] = "paper_decision"
+
+    @field_validator("recorded_at")
+    @classmethod
+    def require_recording_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("paper decision recording timestamp must be timezone-aware")
+        return value.astimezone(UTC)
+
+    @model_validator(mode="after")
+    def require_prospective_recording(self) -> PaperDecisionRecord:
+        if self.recorded_at < self.decided_at:
+            raise ValueError("paper decision cannot be recorded before it was decided")
+        return self
 
 
 def _decision_payload(record: PaperDecisionRecord) -> dict[str, object]:
@@ -98,11 +114,17 @@ def load_paper_decisions(path: Path) -> list[PaperDecisionRecord]:
 
 
 def build_paper_decision_record(
-    existing: list[PaperDecisionRecord], draft: PaperDecisionDraft
+    existing: list[PaperDecisionRecord],
+    draft: PaperDecisionDraft,
+    *,
+    campaign_id: str,
+    recorded_at: datetime,
 ) -> PaperDecisionRecord:
     validate_paper_decision_chain(existing)
     provisional = PaperDecisionRecord(
         **draft.model_dump(),
+        campaign_id=campaign_id,
+        recorded_at=recorded_at,
         sequence=len(existing) + 1,
         previous_hash=existing[-1].record_hash if existing else None,
         record_hash="0" * 64,
@@ -145,6 +167,7 @@ class PaperRealizationDraft(ImmutableStrictModel):
     fees_eur: float = Field(ge=0)
     pnl_eur: float
     postmortem: str
+    example_only: bool = True
     simulated_only: Literal[True] = True
     transmit: Literal[False] = False
     order_capability: Literal["forbidden"] = "forbidden"
@@ -156,14 +179,140 @@ class PaperRealizationDraft(ImmutableStrictModel):
             raise ValueError("paper realization timestamps must be timezone-aware")
         return value.astimezone(UTC)
 
+    @model_validator(mode="after")
+    def require_future_only_chronology(self) -> PaperRealizationDraft:
+        if self.paper_exit_timestamp < self.paper_entry_timestamp:
+            raise ValueError("paper exit cannot precede paper entry")
+        if self.observed_at < self.paper_exit_timestamp:
+            raise ValueError("paper realization cannot be recorded before the paper exit")
+        return self
+
 
 class PaperRealizationRecord(PaperRealizationDraft):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.2"] = "1.2"
+    campaign_id: str = Field(min_length=1)
+    recorded_at: datetime
+    sequence: int = Field(gt=0)
+    previous_hash: str | None = Field(default=None, min_length=64, max_length=64)
     realization_hash: str = Field(min_length=64, max_length=64)
     record_kind: Literal["paper_realization"] = "paper_realization"
 
+    @field_validator("recorded_at")
+    @classmethod
+    def require_recording_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("paper realization recording timestamp must be timezone-aware")
+        return value.astimezone(UTC)
 
-def build_paper_realization_record(draft: PaperRealizationDraft) -> PaperRealizationRecord:
-    provisional = PaperRealizationRecord(**draft.model_dump(), realization_hash="0" * 64)
-    payload = provisional.model_dump(mode="json", exclude={"realization_hash"})
-    return provisional.model_copy(update={"realization_hash": stable_hash(payload)})
+    @model_validator(mode="after")
+    def require_prospective_recording(self) -> PaperRealizationRecord:
+        if self.recorded_at < self.observed_at:
+            raise ValueError("paper realization cannot be recorded before it was observed")
+        return self
+
+
+def _realization_payload(record: PaperRealizationRecord) -> dict[str, object]:
+    payload = record.model_dump(mode="json")
+    payload.pop("realization_hash")
+    return payload
+
+
+def validate_paper_realization_chain(
+    records: list[PaperRealizationRecord],
+    decisions: list[PaperDecisionRecord] | None = None,
+) -> None:
+    previous_hash: str | None = None
+    realization_ids: set[str] = set()
+    realized_decision_ids: set[str] = set()
+    decisions_by_id = (
+        {decision.decision_id: decision for decision in decisions}
+        if decisions is not None
+        else None
+    )
+    if decisions is not None:
+        validate_paper_decision_chain(decisions)
+    for sequence, record in enumerate(records, start=1):
+        if record.sequence != sequence:
+            raise ValueError("paper realization sequence is not contiguous")
+        if record.previous_hash != previous_hash:
+            raise ValueError("paper realization previous_hash chain is broken")
+        if record.realization_hash != stable_hash(_realization_payload(record)):
+            raise ValueError("paper realization record hash is invalid")
+        if record.realization_id in realization_ids:
+            raise ValueError("paper realization IDs must be unique and immutable")
+        if record.decision_id in realized_decision_ids:
+            raise ValueError("a paper decision can have only one final realization")
+        if decisions_by_id is not None:
+            decision = decisions_by_id.get(record.decision_id)
+            if decision is None:
+                raise ValueError("paper realization references an unknown decision")
+            if decision.record_hash != record.decision_record_hash:
+                raise ValueError("paper realization decision hash does not match")
+            if decision.campaign_id != record.campaign_id:
+                raise ValueError("paper realization campaign does not match its decision")
+            if record.paper_entry_timestamp < decision.decided_at:
+                raise ValueError("paper entry cannot precede the frozen decision")
+        realization_ids.add(record.realization_id)
+        realized_decision_ids.add(record.decision_id)
+        previous_hash = record.realization_hash
+
+
+def load_paper_realizations(
+    path: Path,
+    decisions: list[PaperDecisionRecord] | None = None,
+) -> list[PaperRealizationRecord]:
+    if not path.is_file():
+        return []
+    records = [
+        PaperRealizationRecord.model_validate_json(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    validate_paper_realization_chain(records, decisions)
+    return records
+
+
+def build_paper_realization_record(
+    draft: PaperRealizationDraft,
+    existing: list[PaperRealizationRecord] | None = None,
+    decisions: list[PaperDecisionRecord] | None = None,
+    *,
+    campaign_id: str,
+    recorded_at: datetime,
+) -> PaperRealizationRecord:
+    existing_records = existing or []
+    validate_paper_realization_chain(existing_records, decisions)
+    provisional = PaperRealizationRecord(
+        **draft.model_dump(),
+        campaign_id=campaign_id,
+        recorded_at=recorded_at,
+        sequence=len(existing_records) + 1,
+        previous_hash=(existing_records[-1].realization_hash if existing_records else None),
+        realization_hash="0" * 64,
+    )
+    record = provisional.model_copy(
+        update={"realization_hash": stable_hash(_realization_payload(provisional))}
+    )
+    validate_paper_realization_chain([*existing_records, record], decisions)
+    return record
+
+
+def append_paper_realization(
+    path: Path,
+    record: PaperRealizationRecord,
+    *,
+    expected_head_hash: str | None,
+    decisions: list[PaperDecisionRecord] | None = None,
+) -> None:
+    existing = load_paper_realizations(path, decisions)
+    actual_head = existing[-1].realization_hash if existing else None
+    if actual_head != expected_head_hash:
+        raise ValueError("paper realization ledger changed since it was read")
+    validate_paper_realization_chain([*existing, record], decisions)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor = os.open(path, os.O_APPEND | os.O_CREAT | os.O_WRONLY, 0o600)
+    try:
+        os.write(descriptor, (record.model_dump_json() + "\n").encode())
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)

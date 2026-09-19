@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from enum import StrEnum
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import Field, model_validator
 
@@ -412,6 +412,85 @@ class ThesisScanReport(StrictModel):
     data_sources: list[str]
     output_files: list[str] = Field(default_factory=list)
     order_capability: Literal["forbidden"] = "forbidden"
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_v10_embedded_contract_metadata(cls, data: Any) -> Any:
+        """Hydrate legacy embedded candidates from their explicit V10 chain record."""
+        if not isinstance(data, dict):
+            return data
+        migrated = dict(data)
+        chain = migrated.get("chain")
+        candidates = migrated.get("candidates")
+        if not isinstance(chain, dict) or not isinstance(candidates, list):
+            return data
+        chain_quotes = chain.get("quotes")
+        if not isinstance(chain_quotes, list):
+            return data
+        quote_by_symbol = {
+            quote.get("symbol"): quote
+            for quote in chain_quotes
+            if isinstance(quote, dict) and isinstance(quote.get("symbol"), str)
+        }
+        migrated_candidates: list[Any] = []
+        changed = False
+        for raw_candidate in candidates:
+            if not isinstance(raw_candidate, dict):
+                migrated_candidates.append(raw_candidate)
+                continue
+            candidate = dict(raw_candidate)
+            raw_base = candidate.get("base_candidate")
+            if not isinstance(raw_base, dict):
+                migrated_candidates.append(candidate)
+                continue
+            base = dict(raw_base)
+            raw_legs = base.get("legs")
+            if not isinstance(raw_legs, list):
+                migrated_candidates.append(candidate)
+                continue
+            legs: list[Any] = []
+            for raw_leg in raw_legs:
+                if not isinstance(raw_leg, dict) or not isinstance(raw_leg.get("quote"), dict):
+                    legs.append(raw_leg)
+                    continue
+                leg = dict(raw_leg)
+                embedded = dict(leg["quote"])
+                chain_quote = quote_by_symbol.get(embedded.get("symbol"))
+                if not isinstance(chain_quote, dict):
+                    legs.append(leg)
+                    continue
+                if "exercise_style" not in embedded:
+                    embedded["exercise_style"] = "american"
+                    changed = True
+                if "multiplier_status" not in embedded:
+                    embedded["multiplier_status"] = (
+                        "KNOWN"
+                        if chain_quote.get("multiplier_status") == "confirmed"
+                        else "HEURISTIC"
+                    )
+                    changed = True
+                if "contract_adjustment_status" not in embedded:
+                    standard_contract = chain_quote.get("standard_contract")
+                    embedded["contract_adjustment_status"] = (
+                        "KNOWN" if standard_contract is True else "UNKNOWN"
+                    )
+                    if standard_contract is True:
+                        embedded["deliverable_description"] = "standard listed deliverable"
+                    changed = True
+                leg["quote"] = embedded
+                legs.append(leg)
+            base["legs"] = legs
+            candidate["base_candidate"] = base
+            migrated_candidates.append(candidate)
+        if not changed:
+            return data
+        migrated["candidates"] = migrated_candidates
+        limitations = list(migrated.get("limitations") or [])
+        marker = "Legacy embedded contract metadata migrated from the explicit V10 chain record."
+        if marker not in limitations:
+            limitations.append(marker)
+        migrated["limitations"] = limitations
+        return migrated
 
 
 def side_label(side: PositionSide) -> Literal["ACHETER", "VENDRE"]:

@@ -53,7 +53,7 @@ def advance_exit_state(
     *,
     day: int,
     pnl: float,
-    return_on_risk: float,
+    return_on_risk: float | None,
     is_final_checkpoint: bool,
     profit_target: float | None,
     stop_loss: float | None,
@@ -75,9 +75,17 @@ def advance_exit_state(
 
     peak_pnl = max(previous.peak_pnl, pnl)
     maximum_drawdown = max(previous.maximum_drawdown, peak_pnl - pnl)
-    if profit_target is not None and return_on_risk >= profit_target:
+    if (
+        profit_target is not None
+        and return_on_risk is not None
+        and return_on_risk >= profit_target
+    ):
         state = ExitState.PROFIT_TARGET
-    elif stop_loss is not None and return_on_risk <= -stop_loss:
+    elif (
+        stop_loss is not None
+        and return_on_risk is not None
+        and return_on_risk <= -stop_loss
+    ):
         state = ExitState.STOP_LOSS
     elif is_final_checkpoint:
         state = ExitState.TIME_EXIT

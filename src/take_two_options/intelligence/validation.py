@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from take_two_options.intelligence.schemas import CandidateValidationSummary, SimulationRegime
 from take_two_options.intelligence.valuation import StrategyPathValuation
+from take_two_options.quantitative.pricing import require_contract_economics
 from take_two_options.thesis_scanner.schemas import HistoricalEvidence, ThesisCandidate
 
 
@@ -34,12 +35,15 @@ def validate_candidate(
         for item in valuations
         if item.metrics.regime in {SimulationRegime.ADVERSE, SimulationRegime.RUPTURE}
     ]
-    spread_cost = sum(
-        (leg.quote.ask - leg.quote.bid)
-        * leg.quantity
-        * leg.quote.multiplier
-        for leg in candidate.base_candidate.legs
-    )
+    spread_cost = 0.0
+    for leg in candidate.base_candidate.legs:
+        if leg.quote.bid is None or leg.quote.ask is None:
+            raise ValueError("BLOCKED_BID_ASK_UNKNOWN")
+        spread_cost += (
+            (leg.quote.ask - leg.quote.bid)
+            * leg.quantity
+            * require_contract_economics(leg.quote)
+        )
     baseline = min(neutral, default=-float("inf"))
     results = {
         "worst_neutral_expected_pnl_usd": baseline,

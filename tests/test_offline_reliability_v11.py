@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import json
 import math
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from take_two_options.domain import OptionType
-from take_two_options.intelligence._numpy import np
+from take_two_options.domain import ExerciseStyle, OptionType
 from take_two_options.intelligence.backtesting import (
     WalkForwardCase,
     WalkForwardDataset,
@@ -44,7 +43,13 @@ from take_two_options.intelligence.schemas import (
     SourceProvenance,
     UnifiedObservation,
 )
-from take_two_options.intelligence.valuation import _black_scholes
+from take_two_options.knowledge.schemas import QuoteSnapshot
+from take_two_options.quantitative.contracts import EvidenceLevel, VolatilityPolicy
+from take_two_options.quantitative.pricing import (
+    CanonicalMarketState,
+    VolatilityState,
+    price_option,
+)
 
 
 def _source(source_id: str = "official-source") -> SourceProvenance:
@@ -413,17 +418,45 @@ def test_property_european_call_value_is_monotone_in_spot(
     strike: float,
     volatility: float,
 ) -> None:
-    spots = np.asarray([lower, lower + increment], dtype=float)
-    values = _black_scholes(
-        spot=spots,
-        strike=strike,
-        time_years=0.5,
-        volatility=np.asarray([volatility, volatility]),
-        rate=0.03,
-        dividend_yield=0.0,
+    contract = QuoteSnapshot(
+        symbol="TEST260702C",
+        expiration=date(2026, 7, 2),
         option_type=OptionType.CALL,
+        strike=strike,
+        exercise_style=ExerciseStyle.EUROPEAN,
+        quote_timestamp=datetime(2026, 1, 2, tzinfo=UTC),
+        multiplier=100,
+        multiplier_status=EvidenceLevel.KNOWN,
+        contract_adjustment_status=EvidenceLevel.KNOWN,
+        deliverable_description="standard listed deliverable",
+        price_quality="modeled",
+        source_id="hypothesis-canonical-pricing",
     )
-    assert float(values[1]) + 1e-10 >= float(values[0])
+    market_state = CanonicalMarketState(
+        risk_free_rate=0.03,
+        risk_free_rate_status=EvidenceLevel.KNOWN,
+        continuous_dividend_yield=0.0,
+        dividend_status=EvidenceLevel.KNOWN,
+        source_ids=("hypothesis-canonical-pricing",),
+    )
+    volatility_state = VolatilityState(
+        annual_volatility=volatility,
+        policy=VolatilityPolicy.CONFIGURED_STRESS,
+        evidence=EvidenceLevel.UNVALIDATED,
+        source_id="hypothesis-canonical-pricing",
+        assumptions=("Property-based monotonicity test",),
+    )
+    values = [
+        price_option(
+            contract,
+            market_state,
+            spot=spot,
+            valuation_time=datetime(2026, 1, 2, tzinfo=UTC),
+            volatility_state=volatility_state,
+        ).price_per_share
+        for spot in (lower, lower + increment)
+    ]
+    assert values[1] + 1e-10 >= values[0]
 
 
 @settings(max_examples=40, deadline=None)

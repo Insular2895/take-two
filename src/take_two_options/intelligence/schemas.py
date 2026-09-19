@@ -698,7 +698,10 @@ class ExecutionPreview(StrictModel):
     limit_debit_usd: float
     combo_quote: ComboQuote | None = None
     estimated_commission_usd: float | None = Field(default=None, ge=0)
-    margin_what_if_usd: float | None = Field(default=None, ge=0)
+    margin_what_if_usd: float | None = None
+    maintenance_margin_change_usd: float | None = None
+    what_if_source_id: str | None = None
+    what_if_complete: bool = False
     transmit: Literal[False] = False
     what_if: Literal[True] = True
     human_confirmation_required: Literal[True] = True

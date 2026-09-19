@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0",
+  "report_date": "2026-09-17",
+  "starting_commit": "ae2e4204e26d608460202b5f0c556e8a47a630c7",
+  "statuses": {
+    "PRELIVE_HARDENING": "COMPLETE",
+    "RESEARCH_WORKBENCH": "READY",
+    "IBKR_PROVIDER_IMPLEMENTATION": "READY_FOR_LIVE_READONLY_VALIDATION",
+    "IBKR_LIVE_DATA_VALIDATION": "NOT_RUN",
+    "OPRA_ENTITLEMENT": "UNCONFIRMED",
+    "SHADOW_CAMPAIGN": "NOT_STARTED",
+    "PAPER_EXECUTION": "DISABLED",
+    "LIVE_EXECUTION": "FORBIDDEN",
+    "HOLDOUT": "UNOPENED"
+  },
+  "exit_policy": {
+    "policy_version": 2,
+    "trigger_metric": "LIQUIDATION_PNL_POLICY",
+    "legacy_policies": "REQUIRES_EXPLICIT_RECONFIGURATION",
+    "fallback_to_close_cash_flow": false
+  },
+  "freshness": {
+    "bases": ["SOURCE_TIMESTAMP", "BOUNDED_CAPTURE_WINDOW", "UNVERIFIED"],
+    "statuses": [
+      "LIVE_SOURCE_TIMESTAMP_FRESH",
+      "LIVE_CAPTURE_WINDOW_FRESH",
+      "STALE",
+      "DELAYED",
+      "FROZEN",
+      "INCOMPLETE",
+      "INVALID"
+    ],
+    "client_receipt_promoted_to_source_timestamp": false,
+    "stale_fallbacks": 0
+  },
+  "security_boundaries": {
+    "research_engine_order_capability": "forbidden",
+    "read_only_market_provider_order_capability": "forbidden",
+    "read_only_telemetry_order_capability": "forbidden",
+    "paper_execution_adapter": "disabled",
+    "live_execution_capability": "forbidden"
+  },
+  "npm_audit": {
+    "before_high": 4,
+    "after_total": 0,
+    "after_runtime_high_or_critical": 0,
+    "sharp_advisory": "GHSA-rgj7-g3m4-5g8c",
+    "runtime_bundle_contains_affected_tooling": false
+  },
+  "tests": {
+    "python": 450,
+    "cloudflare": 67,
+    "bridge": 14,
+    "offline_json_schemas": 44,
+    "ruff": "PASS",
+    "mypy": "PASS",
+    "pip_check": "PASS",
+    "wrangler_dry_run": "PASS",
+    "local_d1_clean": "PASS",
+    "local_d1_upgrade_0001_0008": "PASS",
+    "local_d1_legacy_policy_upgrade": "PASS"
+  },
+  "external_actions": {
+    "remote_deployment": false,
+    "remote_d1_migration": false,
+    "ibkr_connection": false,
+    "opra_connection": false,
+    "broker_order": false,
+    "holdout_opened": false
+  }
+}

@@ -6,14 +6,19 @@ from datetime import date, datetime
 from enum import StrEnum
 from typing import Any, Literal
 
-from pydantic import Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from take_two_options.budget import (
     BudgetDiagnostics,
     FlexibleBudgetPolicyV2,
     LifecycleCapitalRequirement,
 )
-from take_two_options.domain import OptionType, PositionSide, StrictModel
+from take_two_options.domain import ExerciseStyle, OptionType, PositionSide, StrictModel
+from take_two_options.quantitative.contracts import (
+    EvidenceLevel,
+    Measure,
+    ModelEligibility,
+)
 
 
 class KnowledgeKind(StrEnum):
@@ -367,22 +372,58 @@ class QuoteSnapshot(StrictModel):
     expiration: date
     option_type: OptionType
     strike: float = Field(gt=0)
-    bid: float = Field(ge=0)
-    ask: float = Field(ge=0)
+    exercise_style: ExerciseStyle | None = None
+    bid: float | None = Field(default=None, ge=0)
+    ask: float | None = Field(default=None, ge=0)
+    bid_size: int | None = Field(default=None, ge=0)
+    ask_size: int | None = Field(default=None, ge=0)
     volume: int | None = Field(default=None, ge=0)
     open_interest: int | None = Field(default=None, ge=0)
     implied_volatility: float | None = Field(default=None, gt=0)
     delta: float | None = None
     quote_timestamp: datetime
-    multiplier: int = Field(default=100, gt=0)
+    multiplier: int | None = Field(gt=0)
+    multiplier_status: EvidenceLevel = EvidenceLevel.HEURISTIC
+    contract_adjustment_status: EvidenceLevel = EvidenceLevel.UNKNOWN
+    deliverable_description: str | None = None
+    exchange_timestamp: datetime | None = None
+    provider_timestamp: datetime | None = None
+    received_at: datetime | None = None
     price_quality: Literal["live_broker", "combo", "eod_bid_ask", "indicative", "modeled"]
     source_id: str
 
     @model_validator(mode="after")
     def validate_quote(self) -> QuoteSnapshot:
-        if self.ask < self.bid:
+        if self.ask is not None and self.bid is not None and self.ask < self.bid:
             raise ValueError("ask cannot be below bid")
+        if self.multiplier_status is EvidenceLevel.UNKNOWN and self.multiplier is not None:
+            raise ValueError("unknown multiplier status cannot carry a multiplier")
+        if self.multiplier_status in {EvidenceLevel.KNOWN, EvidenceLevel.ESTIMATED} and (
+            self.multiplier is None
+        ):
+            raise ValueError("known or estimated multiplier status requires a value")
+        if (
+            self.contract_adjustment_status is EvidenceLevel.KNOWN
+            and self.deliverable_description is None
+        ):
+            raise ValueError("known contract adjustment status requires a deliverable")
         return self
+
+
+class DividendCashFlowSnapshot(StrictModel):
+    ex_date: date
+    amount: float = Field(gt=0)
+    source_id: str = Field(min_length=1)
+
+
+class DatasetLineage(StrictModel):
+    dataset_id: str = Field(min_length=1)
+    source: str = Field(min_length=1)
+    range_start: datetime | None = None
+    range_end: datetime | None = None
+    ingested_at: datetime
+    schema_version: str = Field(min_length=1)
+    dataset_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
 
 
 class MarketSnapshot(StrictModel):
@@ -390,13 +431,51 @@ class MarketSnapshot(StrictModel):
     ticker: str
     as_of: datetime
     spot: float = Field(gt=0)
+    spot_bid: float | None = Field(default=None, ge=0)
+    spot_ask: float | None = Field(default=None, ge=0)
     spot_timestamp: datetime
+    exchange_timestamp: datetime | None = None
+    provider_timestamp: datetime | None = None
+    received_at: datetime | None = None
+    freshness_age_seconds: float | None = Field(default=None, ge=0)
+    freshness_status: EvidenceLevel = EvidenceLevel.UNKNOWN
+    risk_free_rate: float | None = None
+    risk_free_rate_status: EvidenceLevel = EvidenceLevel.UNKNOWN
+    risk_free_rate_source_id: str | None = None
+    continuous_dividend_yield: float | None = Field(default=None, ge=0)
+    discrete_dividends: list[DividendCashFlowSnapshot] = Field(default_factory=list)
+    dividend_status: EvidenceLevel = EvidenceLevel.UNKNOWN
     quote_quality: Literal["live_broker", "eod_bid_ask", "indicative", "mixed"]
     source_ids: list[str] = Field(min_length=1)
     quotes: list[QuoteSnapshot] = Field(min_length=1)
     available_expirations: list[date]
     data_warnings: list[str] = Field(default_factory=list)
     cache_path: str | None = None
+    lineage: DatasetLineage | None = None
+
+    @model_validator(mode="after")
+    def validate_economic_inputs(self) -> MarketSnapshot:
+        if self.risk_free_rate_status is EvidenceLevel.UNKNOWN and self.risk_free_rate is not None:
+            raise ValueError("unknown rate status cannot carry a rate")
+        if self.risk_free_rate_status in {EvidenceLevel.KNOWN, EvidenceLevel.ESTIMATED} and (
+            self.risk_free_rate is None or self.risk_free_rate_source_id is None
+        ):
+            raise ValueError("known or estimated rates require a value and source")
+        if self.dividend_status is EvidenceLevel.UNKNOWN and (
+            self.continuous_dividend_yield is not None or self.discrete_dividends
+        ):
+            raise ValueError("unknown dividend status cannot carry dividend inputs")
+        if (
+            self.dividend_status in {EvidenceLevel.KNOWN, EvidenceLevel.ESTIMATED}
+            and self.continuous_dividend_yield is None
+            and not self.discrete_dividends
+        ):
+            raise ValueError("known or estimated dividends require an explicit input")
+        if self.dividend_status is EvidenceLevel.NOT_APPLICABLE and (
+            self.continuous_dividend_yield is not None or self.discrete_dividends
+        ):
+            raise ValueError("not-applicable dividends cannot carry dividend inputs")
+        return self
 
 
 class CandidateLeg(StrictModel):
@@ -423,29 +502,69 @@ class MaintenancePolicy(StrictModel):
 
 
 class CandidateRisk(StrictModel):
+    theoretical_mid_entry: float | None = None
+    entry_bid_ask_cost: float | None = Field(default=None, ge=0)
     entry_debit: float
     fees: float = Field(ge=0)
     slippage: float = Field(ge=0)
     total_cost: float
-    maximum_loss: float = Field(ge=0)
+    maximum_loss: float | None = Field(default=None, ge=0)
+    maximum_loss_status: EvidenceLevel = EvidenceLevel.UNKNOWN
+    diagnostic_common_expiry_maximum_loss: float | None = Field(default=None, ge=0)
     maximum_gain: float | None = Field(default=None, ge=0)
     break_even_points: list[float] = Field(default_factory=list)
-    budget_remaining: float
+    budget_remaining: float | None = None
     bounded: bool
     executable_sides_used: bool
 
+    @model_validator(mode="before")
+    @classmethod
+    def label_legacy_maximum_loss(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "maximum_loss_status" not in data:
+            migrated = dict(data)
+            migrated["maximum_loss_status"] = (
+                EvidenceLevel.UNVALIDATED
+                if migrated.get("maximum_loss") is not None
+                else EvidenceLevel.UNKNOWN
+            )
+            return migrated
+        return data
+
+    @model_validator(mode="after")
+    def validate_maximum_loss_evidence(self) -> CandidateRisk:
+        unavailable = {
+            EvidenceLevel.UNKNOWN,
+            EvidenceLevel.INSUFFICIENT_DATA,
+            EvidenceLevel.BLOCKED,
+            EvidenceLevel.NOT_APPLICABLE,
+        }
+        if self.maximum_loss_status in unavailable and self.maximum_loss is not None:
+            raise ValueError("unavailable maximum loss must remain null")
+        if self.maximum_loss_status not in unavailable and self.maximum_loss is None:
+            raise ValueError("available maximum loss evidence requires a value")
+        return self
+
 
 class ModelMetrics(StrictModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        validate_assignment=True,
+        allow_inf_nan=False,
+    )
+
     model_id: str
+    measure: Measure
+    eligibility: ModelEligibility
+    eligibility_reasons: list[str] = Field(default_factory=list)
     paths: int = Field(gt=0)
     seed: int
     probability_profit: float = Field(ge=0, le=1)
-    probability_gain_50: float = Field(ge=0, le=1)
-    probability_gain_80: float = Field(ge=0, le=1)
-    probability_gain_100: float = Field(ge=0, le=1)
-    probability_loss_50: float = Field(ge=0, le=1)
-    probability_loss_70: float = Field(ge=0, le=1)
-    probability_near_total_loss: float = Field(ge=0, le=1)
+    probability_gain_50: float | None = Field(default=None, ge=0, le=1)
+    probability_gain_80: float | None = Field(default=None, ge=0, le=1)
+    probability_gain_100: float | None = Field(default=None, ge=0, le=1)
+    probability_loss_50: float | None = Field(default=None, ge=0, le=1)
+    probability_loss_70: float | None = Field(default=None, ge=0, le=1)
+    probability_near_total_loss: float | None = Field(default=None, ge=0, le=1)
     expected_pnl: float
     median_pnl: float
     quantiles: dict[str, float]
@@ -456,6 +575,15 @@ class ModelMetrics(StrictModel):
     take_profit_frequency: float = Field(ge=0, le=1)
     stop_frequency: float = Field(ge=0, le=1)
     exit_reasons: dict[str, int]
+
+    @model_validator(mode="after")
+    def prevent_q_measure_decisions(self) -> ModelMetrics:
+        if (
+            self.eligibility is ModelEligibility.DECISION_ELIGIBLE
+            and self.measure is not Measure.REAL_WORLD
+        ):
+            raise ValueError("decision-eligible probability metrics require measure P")
+        return self
 
 
 class SampleGate(StrictModel):
@@ -483,9 +611,18 @@ class ValidationMetrics(StrictModel):
 
 
 class CandidateEvaluation(StrictModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        validate_assignment=True,
+        allow_inf_nan=False,
+    )
+
     model_metrics: list[ModelMetrics] = Field(default_factory=list)
     conservative_expected_pnl: float | None = None
     model_dispersion: float | None = Field(default=None, ge=0)
+    decision_status: ModelEligibility = ModelEligibility.BLOCKED
+    decision_reasons: list[str] = Field(default_factory=list)
+    numerical_failures: list[str] = Field(default_factory=list)
     validation: ValidationMetrics | None = None
     complexity_penalty: float = Field(default=0, ge=0)
     local_stability: float | None = Field(default=None, ge=0, le=1)
@@ -556,6 +693,9 @@ class ResearchRun(StrictModel):
     request_id: str
     knowledge_hash: str = Field(min_length=64, max_length=64)
     data_snapshot_id: str | None = None
+    dataset_id: str | None = None
+    dataset_hash: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    model_versions: dict[str, str] = Field(default_factory=dict)
     total_trials: int = Field(default=0, ge=0)
     trials_by_stage: dict[str, int] = Field(default_factory=dict)
     status: Literal["running", "completed", "blocked", "failed"] = "running"

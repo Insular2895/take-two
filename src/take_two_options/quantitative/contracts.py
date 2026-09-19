@@ -30,6 +30,41 @@ class DataStatus(StrEnum):
     MISSING = "missing"
 
 
+class EvidenceLevel(StrEnum):
+    """Evidence attached to an economic input or calculation component."""
+
+    KNOWN = "KNOWN"
+    ESTIMATED = "ESTIMATED"
+    HEURISTIC = "HEURISTIC"
+    UNVALIDATED = "UNVALIDATED"
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
+    UNKNOWN = "UNKNOWN"
+    BLOCKED = "BLOCKED"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+
+
+class ModelEligibility(StrEnum):
+    """Whether a model result may participate in a decision statistic."""
+
+    AUTHORITATIVE = "AUTHORITATIVE"
+    DECISION_ELIGIBLE = "DECISION_ELIGIBLE"
+    DIAGNOSTIC_ONLY = "DIAGNOSTIC_ONLY"
+    UNVALIDATED = "UNVALIDATED"
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
+    BLOCKED = "BLOCKED"
+
+    @property
+    def may_drive_decision(self) -> bool:
+        return self is ModelEligibility.DECISION_ELIGIBLE
+
+
+class VolatilityPolicy(StrEnum):
+    """Supported PRE-OPRA volatility assumptions; neither implies calibration."""
+
+    FROZEN_SURFACE = "FROZEN_SURFACE"
+    CONFIGURED_STRESS = "CONFIGURED_STRESS"
+
+
 class DayCountConvention(StrEnum):
     ACTUAL_365_FIXED = "actual_365_fixed"
     TRADING_252 = "trading_252"

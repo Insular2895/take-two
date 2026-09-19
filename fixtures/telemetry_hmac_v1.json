@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "description": "Test-only cross-language telemetry HMAC conformance vector.",
+  "shared_secret": "telemetry-test-secret-that-is-longer-than-thirty-two-bytes",
+  "telemetry_id": "oci-a1-paper-telemetry-01",
+  "timestamp": "1777147200",
+  "nonce": "fixedtelemetrynonce1234567890",
+  "method": "POST",
+  "path": "/internal/broker/telemetry",
+  "body": "{\"mode\":\"PAPER_READ_ONLY\",\"positions\":[]}",
+  "payload_sha256": "a02aad2f7a86c1ba23aa1e95adc45751d5fbc0554132c43b163b70cc2b45b2ab",
+  "canonical": "1777147200\nfixedtelemetrynonce1234567890\nPOST\n/internal/broker/telemetry\na02aad2f7a86c1ba23aa1e95adc45751d5fbc0554132c43b163b70cc2b45b2ab",
+  "signature": "a22ed7ef1d82df8919d1e1ca91df3f85f4de2efa3c6e9833b500568805f44235"
+}

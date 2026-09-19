@@ -37,6 +37,18 @@ OPRA_GOVERNANCE_VARIABLES = (
 )
 IBKR_TWS_PROVIDERS = frozenset({"ibkr_tws", "ibkr_gateway"})
 
+TimestampSource = Literal["exchange", "provider", "client_received_at", "unknown"]
+FreshnessBasis = Literal["SOURCE_TIMESTAMP", "BOUNDED_CAPTURE_WINDOW", "UNVERIFIED"]
+LiveFreshnessStatus = Literal[
+    "LIVE_SOURCE_TIMESTAMP_FRESH",
+    "LIVE_CAPTURE_WINDOW_FRESH",
+    "STALE",
+    "DELAYED",
+    "FROZEN",
+    "INCOMPLETE",
+    "INVALID",
+]
+
 
 class OpraConfigurationError(ValueError):
     """Raised when the future provider configuration is incomplete."""
@@ -58,9 +70,7 @@ class OpraProviderConfig(StrictModel):
 
     @classmethod
     def from_environment(cls, environment: Mapping[str, str]) -> OpraProviderConfig:
-        missing = [
-            name for name in TOKEN_OPRA_ENVIRONMENT_VARIABLES if not environment.get(name)
-        ]
+        missing = [name for name in TOKEN_OPRA_ENVIRONMENT_VARIABLES if not environment.get(name)]
         if missing:
             raise OpraConfigurationError(
                 "Missing OPRA configuration variables: " + ", ".join(missing)
@@ -91,9 +101,7 @@ class IbkrTwsProviderConfig(StrictModel):
 
     @classmethod
     def from_environment(cls, environment: Mapping[str, str]) -> IbkrTwsProviderConfig:
-        missing = [
-            name for name in IBKR_TWS_ENVIRONMENT_VARIABLES if not environment.get(name)
-        ]
+        missing = [name for name in IBKR_TWS_ENVIRONMENT_VARIABLES if not environment.get(name)]
         if missing:
             raise OpraConfigurationError(
                 "Missing IBKR TWS configuration variables: " + ", ".join(missing)
@@ -101,16 +109,13 @@ class IbkrTwsProviderConfig(StrictModel):
         provider = environment["OPRA_PROVIDER"].strip().lower()
         if provider not in IBKR_TWS_PROVIDERS:
             raise OpraConfigurationError(
-                "IBKR TWS configuration requires OPRA_PROVIDER=ibkr_tws or "
-                "ibkr_gateway"
+                "IBKR TWS configuration requires OPRA_PROVIDER=ibkr_tws or ibkr_gateway"
             )
         try:
             port = int(environment["IBKR_PORT"])
             client_id = int(environment["IBKR_CLIENT_ID"])
         except ValueError as error:
-            raise OpraConfigurationError(
-                "IBKR_PORT and IBKR_CLIENT_ID must be integers"
-            ) from error
+            raise OpraConfigurationError("IBKR_PORT and IBKR_CLIENT_ID must be integers") from error
         return cls(
             provider=cast(Literal["ibkr_tws", "ibkr_gateway"], provider),
             host=environment["IBKR_HOST"],
@@ -134,6 +139,10 @@ class LiveChainRequest(StrictModel):
     expiration_end: date
     maximum_quote_age_seconds: int = Field(gt=0)
     include_greeks: bool = True
+    minimum_strike: float | None = Field(default=None, gt=0)
+    maximum_strike: float | None = Field(default=None, gt=0)
+    maximum_contracts: int = Field(default=1_500, gt=0, le=10_000)
+    maximum_expirations: int = Field(default=24, gt=0, le=60)
 
     @field_validator("as_of")
     @classmethod
@@ -146,6 +155,12 @@ class LiveChainRequest(StrictModel):
     def require_expiration_order(self) -> LiveChainRequest:
         if self.expiration_start > self.expiration_end:
             raise ValueError("expiration_start cannot follow expiration_end")
+        if (
+            self.minimum_strike is not None
+            and self.maximum_strike is not None
+            and self.minimum_strike > self.maximum_strike
+        ):
+            raise ValueError("minimum_strike cannot exceed maximum_strike")
         return self
 
 
@@ -181,6 +196,18 @@ class LiveOptionQuote(StrictModel):
     rho: float | None = None
     provider_greek_convention: str | None = None
     provider_stream: str | None = None
+    quote_timestamp_source: TimestampSource = "provider"
+    market_data_type: Literal[
+        "live",
+        "frozen",
+        "delayed",
+        "delayed_frozen",
+        "unknown",
+    ] = "unknown"
+    freshness_basis: FreshnessBasis = "UNVERIFIED"
+    freshness_status: LiveFreshnessStatus = "INVALID"
+    freshness_verified: bool = False
+    source_timestamp_verified: bool = False
 
     @field_validator("quote_timestamp", "received_at")
     @classmethod
@@ -193,8 +220,6 @@ class LiveOptionQuote(StrictModel):
     def validate_market(self) -> LiveOptionQuote:
         if self.ask < self.bid:
             raise ValueError("live ask cannot be below bid")
-        if self.received_at < self.quote_timestamp:
-            raise ValueError("received_at cannot precede the provider quote timestamp")
         return self
 
 
@@ -209,6 +234,31 @@ class LiveOptionChainSnapshot(StrictModel):
     provider_metadata_hash: str = Field(min_length=64, max_length=64)
     raw_snapshot_hash: str = Field(min_length=64, max_length=64)
     source_latency_milliseconds: float = Field(ge=0)
+    underlying_quote_timestamp: datetime | None = None
+    underlying_received_at: datetime | None = None
+    underlying_timestamp_source: TimestampSource = "unknown"
+    underlying_market_data_type: Literal[
+        "live",
+        "frozen",
+        "delayed",
+        "delayed_frozen",
+        "unknown",
+    ] = "unknown"
+    requested_contract_count: int | None = Field(default=None, ge=0)
+    returned_quote_count: int | None = Field(default=None, ge=0)
+    missing_quote_count: int = Field(default=0, ge=0)
+    contract_discovery_complete: bool = False
+    quote_collection_complete: bool = False
+    freshness_basis: FreshnessBasis = "UNVERIFIED"
+    freshness_status: LiveFreshnessStatus = "INVALID"
+    freshness_verified: bool = False
+    source_timestamp_verified: bool = False
+    underlying_freshness_basis: FreshnessBasis = "UNVERIFIED"
+    underlying_freshness_status: LiveFreshnessStatus = "INVALID"
+    underlying_source_timestamp_verified: bool = False
+    required_component_freshness: dict[str, LiveFreshnessStatus] = Field(default_factory=dict)
+    promotion_eligible: bool = False
+    warnings: list[str] = Field(default_factory=list)
     read_only: Literal[True] = True
     transmit: Literal[False] = False
     what_if: Literal[True] = True
@@ -221,12 +271,197 @@ class LiveOptionChainSnapshot(StrictModel):
             raise ValueError("snapshot timestamps must be timezone-aware")
         return value.astimezone(UTC)
 
+    @field_validator("underlying_quote_timestamp", "underlying_received_at")
+    @classmethod
+    def require_optional_snapshot_timezone(cls, value: datetime | None) -> datetime | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            raise ValueError("underlying timestamps must be timezone-aware")
+        return value.astimezone(UTC)
+
     @model_validator(mode="after")
     def validate_snapshot(self) -> LiveOptionChainSnapshot:
         if self.received_at < self.requested_at:
             raise ValueError("snapshot receipt cannot precede request")
         if any(quote.ticker.upper() != self.ticker.upper() for quote in self.quotes):
             raise ValueError("all live quotes must match the snapshot ticker")
+        if self.returned_quote_count is not None and self.returned_quote_count != len(self.quotes):
+            raise ValueError("returned_quote_count must match serialized quotes")
+        if self.promotion_eligible and (
+            not self.contract_discovery_complete
+            or not self.quote_collection_complete
+            or self.missing_quote_count
+            or not self.freshness_verified
+            or self.freshness_status
+            not in {"LIVE_SOURCE_TIMESTAMP_FRESH", "LIVE_CAPTURE_WINDOW_FRESH"}
+        ):
+            raise ValueError("promotion eligibility requires complete discovery and quotes")
+        return self
+
+
+class LiveComboLeg(StrictModel):
+    """One qualified, read-only BAG market-data leg."""
+
+    con_id: int = Field(gt=0)
+    ratio: int = Field(default=1, gt=0)
+    action: Literal["BUY", "SELL"]
+    exchange: str = Field(default="SMART", min_length=1)
+    bid: float | None = Field(default=None, ge=0)
+    ask: float | None = Field(default=None, ge=0)
+
+
+class LiveComboQuoteRequest(StrictModel):
+    candidate_id: str = Field(min_length=1)
+    ticker: str = Field(min_length=1)
+    legs: list[LiveComboLeg] = Field(min_length=2)
+    requested_at: datetime
+    maximum_quote_age_seconds: int = Field(gt=0)
+
+    @field_validator("requested_at")
+    @classmethod
+    def require_combo_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("combo request timestamp must be timezone-aware")
+        return value.astimezone(UTC)
+
+
+class LiveComboQuote(StrictModel):
+    """Signed net-debit convention: positive is a debit, negative is a credit."""
+
+    candidate_id: str
+    ticker: str
+    bid_net_debit: float | None = None
+    ask_net_debit: float | None = None
+    synthetic_bid_net_debit: float | None = None
+    synthetic_ask_net_debit: float | None = None
+    maximum_absolute_divergence: float | None = Field(default=None, ge=0)
+    quote_timestamp: datetime | None = None
+    received_at: datetime
+    timestamp_source: TimestampSource = "unknown"
+    freshness_basis: FreshnessBasis = "UNVERIFIED"
+    freshness_status: LiveFreshnessStatus = "INVALID"
+    freshness_verified: bool = False
+    source_timestamp_verified: bool = False
+    source_id: str
+    market_data_type: Literal[
+        "live",
+        "frozen",
+        "delayed",
+        "delayed_frozen",
+        "unknown",
+    ] = "unknown"
+    broker_quote_complete: bool = False
+    synthetic_quote_complete: bool = False
+    quote_freshness_verified: bool = False
+    price_convention_verified: bool = False
+    comparison_confirmed: bool = False
+    warnings: list[str] = Field(default_factory=list)
+    read_only: Literal[True] = True
+    transmit: Literal[False] = False
+    order_capability: Literal["forbidden"] = "forbidden"
+
+    @field_validator("quote_timestamp", "received_at")
+    @classmethod
+    def require_combo_quote_timezone(cls, value: datetime | None) -> datetime | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            raise ValueError("combo timestamps must be timezone-aware")
+        return value.astimezone(UTC)
+
+    @model_validator(mode="after")
+    def validate_combo_quote(self) -> LiveComboQuote:
+        if self.comparison_confirmed and (
+            not self.broker_quote_complete
+            or not self.synthetic_quote_complete
+            or not self.quote_freshness_verified
+            or not self.freshness_verified
+            or not self.price_convention_verified
+        ):
+            raise ValueError(
+                "confirmed comparison requires broker/synthetic quotes, freshness and convention"
+            )
+        return self
+
+
+class BrokerWhatIfEvidence(StrictModel):
+    """Strict ingestion contract for separately obtained broker preview evidence.
+
+    This model does not request a preview and grants no order capability.  It lets the
+    research engine consume a future broker observation without replacing missing values.
+    """
+
+    candidate_id: str = Field(min_length=1)
+    observed_at: datetime
+    currency: str = Field(min_length=3, max_length=3)
+    estimated_commission: float | None = Field(default=None, ge=0)
+    minimum_commission: float | None = Field(default=None, ge=0)
+    maximum_commission: float | None = Field(default=None, ge=0)
+    initial_margin_before: float | None = None
+    initial_margin_change: float | None = None
+    initial_margin_after: float | None = None
+    maintenance_margin_before: float | None = None
+    maintenance_margin_change: float | None = None
+    maintenance_margin_after: float | None = None
+    equity_with_loan_before: float | None = None
+    equity_with_loan_change: float | None = None
+    equity_with_loan_after: float | None = None
+    buying_power_change: float | None = None
+    broker_status: str | None = None
+    source_id: str = Field(min_length=1)
+    account_scope_redacted: Literal[True] = True
+    complete: bool = False
+    warnings: list[str] = Field(default_factory=list)
+    read_only: Literal[True] = True
+    transmit: Literal[False] = False
+    what_if: Literal[True] = True
+    order_capability: Literal["forbidden"] = "forbidden"
+
+    @field_validator("observed_at")
+    @classmethod
+    def require_what_if_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("what-if evidence timestamp must be timezone-aware")
+        return value.astimezone(UTC)
+
+    @field_validator("currency")
+    @classmethod
+    def require_iso_currency_shape(cls, value: str) -> str:
+        if not value.isalpha() or not value.isupper():
+            raise ValueError("what-if currency must be three uppercase letters")
+        return value
+
+    @model_validator(mode="after")
+    def require_complete_evidence_fields(self) -> BrokerWhatIfEvidence:
+        if self.complete and any(
+            value is None
+            for value in (
+                self.estimated_commission,
+                self.initial_margin_change,
+                self.maintenance_margin_change,
+            )
+        ):
+            raise ValueError(
+                "complete what-if evidence requires commission and both margin changes"
+            )
+        if (
+            self.minimum_commission is not None
+            and self.maximum_commission is not None
+            and self.minimum_commission > self.maximum_commission
+        ):
+            raise ValueError("minimum commission cannot exceed maximum commission")
+        if self.estimated_commission is not None:
+            if (
+                self.minimum_commission is not None
+                and self.estimated_commission < self.minimum_commission
+            ):
+                raise ValueError("estimated commission cannot be below its minimum")
+            if (
+                self.maximum_commission is not None
+                and self.estimated_commission > self.maximum_commission
+            ):
+                raise ValueError("estimated commission cannot exceed its maximum")
         return self
 
 
@@ -248,6 +483,13 @@ class LiveOptionMarketDataProvider(Protocol):
     def get_option_chain(self, request: LiveChainRequest) -> LiveOptionChainSnapshot: ...
 
 
+@runtime_checkable
+class LiveComboMarketDataProvider(Protocol):
+    """Optional BAG quote capability; still market data only."""
+
+    def get_combo_quote(self, request: LiveComboQuoteRequest) -> LiveComboQuote: ...
+
+
 class ProviderReadinessReport(StrictModel):
     schema_version: Literal["1.1"] = "1.1"
     status: Literal[
@@ -257,13 +499,9 @@ class ProviderReadinessReport(StrictModel):
     ]
     provider: str | None
     authentication_mode: Literal["tws_session", "api_credentials"] | None
-    provider_protocol: Literal["LiveOptionMarketDataProvider"] = (
-        "LiveOptionMarketDataProvider"
-    )
+    provider_protocol: Literal["LiveOptionMarketDataProvider"] = "LiveOptionMarketDataProvider"
     paper_decision_contract: Literal["PaperDecisionRecord"] = "PaperDecisionRecord"
-    paper_realization_contract: Literal["PaperRealizationRecord"] = (
-        "PaperRealizationRecord"
-    )
+    paper_realization_contract: Literal["PaperRealizationRecord"] = "PaperRealizationRecord"
     required_variables: list[str]
     missing_variables: list[str]
     configuration_errors: list[str]
@@ -281,6 +519,7 @@ class ProviderReadinessReport(StrictModel):
     transmit: Literal[False] = False
     what_if: Literal[True] = True
     order_capability: Literal["forbidden"] = "forbidden"
+    assessment_scope: Literal["offline_configuration_only"] = "offline_configuration_only"
 
 
 def _confirmed(environment: Mapping[str, str], name: str) -> bool:
@@ -355,8 +594,7 @@ def assess_provider_readiness(environment: Mapping[str, str]) -> ProviderReadine
         ]
         if ibkr
         else [
-            "API credentials are loaded only for the selected data vendor and are "
-            "never serialized."
+            "API credentials are loaded only for the selected data vendor and are never serialized."
         ]
     )
     return ProviderReadinessReport(

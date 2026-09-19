@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from take_two_options.candidate_generation.factory import build_candidate, terminal_payoff
-from take_two_options.domain import OptionType, PositionSide
+from take_two_options.domain import ExerciseStyle, OptionType, PositionSide
 from take_two_options.knowledge.compiler import compile_knowledge
 from take_two_options.knowledge.loader import load_knowledge
 from take_two_options.knowledge.schemas import (
@@ -14,6 +14,7 @@ from take_two_options.knowledge.schemas import (
     CompiledStrategyCandidate,
     QuoteSnapshot,
 )
+from take_two_options.quantitative.contracts import EvidenceLevel
 from take_two_options.thesis_scanner.data import load_thesis_chain
 from take_two_options.thesis_scanner.engine import (
     load_thesis_policy,
@@ -58,6 +59,7 @@ def _quote(strike: float, *, bid: float, ask: float) -> QuoteSnapshot:
         symbol=f"TTWO270319C{int(strike * 1000):08d}",
         expiration=date(2027, 3, 19),
         option_type=OptionType.CALL,
+        exercise_style=ExerciseStyle.AMERICAN,
         strike=strike,
         bid=bid,
         ask=ask,
@@ -66,6 +68,9 @@ def _quote(strike: float, *, bid: float, ask: float) -> QuoteSnapshot:
         implied_volatility=0.35,
         quote_timestamp=datetime(2026, 7, 24, 20, tzinfo=UTC),
         multiplier=100,
+        multiplier_status=EvidenceLevel.KNOWN,
+        contract_adjustment_status=EvidenceLevel.KNOWN,
+        deliverable_description="standard listed deliverable",
         price_quality="modeled",
         source_id="unit-test",
     )

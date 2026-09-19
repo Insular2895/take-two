@@ -3,6 +3,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "campaign_id": {
+      "minLength": 1,
+      "title": "Campaign Id",
+      "type": "string"
+    },
     "decision_id": {
       "title": "Decision Id",
       "type": "string"
@@ -12,6 +17,11 @@
       "minLength": 64,
       "title": "Decision Record Hash",
       "type": "string"
+    },
+    "example_only": {
+      "default": true,
+      "title": "Example Only",
+      "type": "boolean"
     },
     "fees_eur": {
       "minimum": 0,
@@ -57,6 +67,20 @@
       "title": "Postmortem",
       "type": "string"
     },
+    "previous_hash": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previous Hash"
+    },
     "realization_hash": {
       "maxLength": 64,
       "minLength": 64,
@@ -79,11 +103,21 @@
       "title": "Record Kind",
       "type": "string"
     },
+    "recorded_at": {
+      "format": "date-time",
+      "title": "Recorded At",
+      "type": "string"
+    },
     "schema_version": {
-      "const": "1.0",
-      "default": "1.0",
+      "const": "1.2",
+      "default": "1.2",
       "title": "Schema Version",
       "type": "string"
+    },
+    "sequence": {
+      "exclusiveMinimum": 0,
+      "title": "Sequence",
+      "type": "integer"
     },
     "simulated_only": {
       "const": true,
@@ -117,6 +151,9 @@
     "fees_eur",
     "pnl_eur",
     "postmortem",
+    "campaign_id",
+    "recorded_at",
+    "sequence",
     "realization_hash"
   ],
   "title": "PaperRealizationRecord",

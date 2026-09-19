@@ -14,8 +14,16 @@ n’est activée par défaut.
 6. Ajouter commissions et marge what-if à un preview expirant et non transmissible.
 7. Passer par une campagne paper avant toute revue commerciale.
 
-Point d'arrêt actuel : étape 1 paramétrée mais non confirmée, statut
-`CONFIGURED_NOT_ENTITLED`, aucune connexion tentée.
+Point d'arrêt au 16 septembre 2026 : les phases 2 et 4 existent désormais côté code et sont
+testées hors ligne. Le provider qualifie le sous-jacent et les options, borne la chaîne, collecte
+les champs de marché, applique cache/retry/pacing, construit une quote BAG read-only et convertit
+le résultat vers le snapshot canonique. Une commande explicite de capture est disponible.
+
+Cette implémentation n'a pas été connectée pendant ce checkpoint. La preuve réelle du 25 août
+reste limitée au handshake IBKR Paper sur Oracle, au compte `DU` et à un snapshot de télémétrie
+sans position TTWO. Elle ne valide pas le nouveau chemin chaîne/Greeks/OI/BAG. Entitlement et
+licence restent des gates humains non confirmés ; la surface, le what-if et la campagne paper
+restent à réaliser.
 
 Les fallbacks synthétiques sont interdits pour un résultat promu. Les détails
 spécifiques au broker sont dans [IBKR_OPRA_ROADMAP.md](IBKR_OPRA_ROADMAP.md).

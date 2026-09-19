@@ -13,13 +13,14 @@
     "action-password:set-local": "node scripts/set-action-password.mjs --local-only",
     "db:local": "wrangler d1 migrations apply take-two-control --local",
     "db:remote": "wrangler d1 migrations apply take-two-control --remote",
+    "audit:runtime": "npm audit --omit=dev --audit-level=high",
     "check": "npm run typecheck && npm run lint && npm test"
   },
   "devDependencies": {
-    "@cloudflare/vitest-plugin": "1.0.0",
-    "@cloudflare/workers-types": "5.20260823.1",
+    "@cloudflare/vitest-plugin": "1.1.12",
+    "@cloudflare/workers-types": "5.20260917.1",
     "typescript": "5.9.2",
     "vitest": "4.1.11",
-    "wrangler": "4.125.0"
+    "wrangler": "4.134.0"
   }
 }
